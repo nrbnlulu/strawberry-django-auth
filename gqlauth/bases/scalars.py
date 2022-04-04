@@ -1,4 +1,4 @@
-from tools.utils import camelize
+from gqlauth.utils import camelize
 import strawberry
 from gqlauth.bases.exceptions import WrongUsage
 

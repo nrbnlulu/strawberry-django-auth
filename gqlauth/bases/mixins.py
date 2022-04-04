@@ -9,7 +9,7 @@ import strawberry
 from strawberry.utils.str_converters import to_camel_case
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.utils import create_strawberry_argument
-from tools.utils import list_to_dict, hide_args_kwargs
+from gqlauth.utils import list_to_dict, hide_args_kwargs
 from gqlauth.bases.exceptions import (
     WrongUsage
 )

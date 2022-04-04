@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'strawberry_django',
     'strawberry_django_jwt.refresh_token',
-    'gqlauth',  # NOTE authantication with jwt
+    # 'gqlauth',  # NOTE authantication with jwt
 ]
 
 MIDDLEWARE = [

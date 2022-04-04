@@ -1,11 +1,34 @@
 import warnings
+import inspect
 from django.core import signing
 from django.conf import settings as django_settings
 from strawberry.annotation import StrawberryAnnotation
-
+from strawberry.utils.str_converters import to_camel_case
 from strawberry.arguments import StrawberryArgument, UNSET
 from .exceptions import TokenScopeError
 
+
+def hide_args_kwargs(field):
+    sig = inspect.signature(field)
+    cleared = tuple(
+        p for p in sig.parameters.values() if p.name not in ('kwargs', 'args')
+    )
+    field.__signature__ = inspect.signature(field).replace(parameters=(cleared))
+    return field
+
+def isiterable(value):
+    try:
+        iter(value)
+    except TypeError:
+        return False
+    return True
+
+def camelize(data):
+    if isinstance(data, dict):
+        return {to_camel_case(k): camelize(v) for k, v in data.items()}
+    if isiterable(data) and not isinstance(data, str):
+        return [camelize(d) for d in data]
+    return data
 
 def list_to_dict(lst: [str]):
     """takes list of string and creates a dict with str as their values"""
