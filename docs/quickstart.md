@@ -9,7 +9,7 @@
 - Setup with custom user model
 - 20 to 30 minutes
 
-[Final code on github](https://github.com/PedroBern/django-graphql-auth/tree/master/quickstart).
+[Final code on github](https://github.com/nrbnlulu/strawberry-django-authtree/master/quickstart).
 
 ---
 
@@ -109,7 +109,7 @@ pip install graphene-django django-graphql-jwt==0.3.0
 ```
 
 !!! info ""
-    This package uses the 0.3.0 version of the django-graphql-jwt. We are working on to support the new 0.3.1 version. You can check the progress [here](https://github.com/PedroBern/django-graphql-auth/issues/23).
+    This package uses the 0.3.0 version of the django-graphql-jwt. We are working on to support the new 0.3.1 version. You can check the progress [here](https://github.com/nrbnlulu/strawberry-django-authissues/23).
 
 ### Add the url
 
@@ -178,7 +178,7 @@ python manage.py migrate
 ## Install Django-GraphQL-Auth
 
 ```bash
-pip install django-graphql-auth
+pip install strawberry-django-auth
 ```
 
 ```python

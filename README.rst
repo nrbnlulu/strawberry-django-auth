@@ -18,12 +18,12 @@ your implementation.
 Documentation
 -------------
 
-Documentation is available at `read the docs <https://django-graphql-auth.readthedocs.io/en/latest/>`_.
+Documentation is available at `read the docs <https://strawberry-django-auth.readthedocs.io/en/latest/>`_.
 
 Features
 --------
 
-* `Awesome docs <https://django-graphql-auth.readthedocs.io/en/latest/>`_
+* `Awesome docs <https://strawberry-django-auth.readthedocs.io/en/latest/>`_
 * Fully compatible with `Relay <https://github.com/facebook/relay>`_
 * Works with default/custom user model
 * JWT authentication (with `Django GraphQL JWT <https://github.com/flavors/django-graphql-jwt>`_)
@@ -95,16 +95,16 @@ Now user is verified.
   # True
 
 
-Check the `installation guide <https://django-graphql-auth.readthedocs.io/en/latest/installation/>`_ or jump to the `quickstart <https://django-graphql-auth.readthedocs.io/en/latest/quickstart/>`_. Or if you prefer, browse the `api <https://django-graphql-auth.readthedocs.io/en/latest/api/>`_.
+Check the `installation guide <https://strawberry-django-auth.readthedocs.io/en/latest/installation/>`_ or jump to the `quickstart <https://strawberry-django-auth.readthedocs.io/en/latest/quickstart/>`_. Or if you prefer, browse the `api <https://strawberry-django-auth.readthedocs.io/en/latest/api/>`_.
 
-.. |Pypi| image:: https://img.shields.io/pypi/v/django-graphql-auth.svg
-   :target: https://pypi.org/project/django-graphql-auth/
+.. |Pypi| image:: https://img.shields.io/pypi/v/strawberry-django-auth.svg
+   :target: https://pypi.org/project/strawberry-django-auth/
    :alt: Pypi
 
-.. |Build Status| image:: https://travis-ci.com/pedrobern/django-graphql-auth.svg?branch=master
-   :target: https://travis-ci.com/pedrobern/django-graphql-auth
+.. |Build Status| image:: https://travis-ci.com/pedrobern/strawberry-django-auth.svg?branch=master
+   :target: https://travis-ci.com/pedrobern/strawberry-django-auth
    :alt: Build Status
 
-.. |Codecov| image:: https://img.shields.io/codecov/c/github/pedrobern/django-graphql-auth/master.svg?style=flat-square
-   :target: https://codecov.io/gh/pedrobern/django-graphql-auth/
+.. |Codecov| image:: https://img.shields.io/codecov/c/github/pedrobern/strawberry-django-auth/master.svg?style=flat-square
+   :target: https://codecov.io/gh/pedrobern/strawberry-django-auth/
    :alt: Codecov

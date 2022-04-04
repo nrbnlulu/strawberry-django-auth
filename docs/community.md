@@ -21,4 +21,4 @@
 
 ## Tutorials
 
-Have a tutorial or lesson to share? Open a [PR](https://github.com/PedroBern/django-graphql-auth) and link it here!
+Have a tutorial or lesson to share? Open a [PR](https://github.com/PedroBern/strawberry-django-auth) and link it here!

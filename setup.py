@@ -30,14 +30,14 @@ setup(
     description="Graphql and relay authentication with Graphene for Django.",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
-    author="pedrobern - nir benlulu",
+    author="nir-benlulu",
     author_email="nrbnlulu@gmail.com",
     maintainer="nir benlulu",
-    url="https://github.com/PedroBern/django-graphql-auth",
+    url="https://github.com/nrbnlulu/strawberry-django-auth",
     project_urls=OrderedDict(
         (
-            ("Documentation", "https://django-graphql-auth.readthedocs.io/en/latest/"),
-            ("Issues", "https://github.com/PedroBern/django-graphql-auth/issues"),
+            ("Documentation", "https://strawberry-django-auth.readthedocs.io/en/latest/"),
+            ("Issues", "https://github.com/nrbnlulu/strawberry-django-auth/issues"),
         )
     ),
     packages=find_packages(exclude=["tests*"]),

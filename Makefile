@@ -8,7 +8,7 @@ check-readme:
 install-local:
 	rm -rf dist build django_gqlauth.egg-info
 	python setup.py sdist bdist_wheel
-	python -m pip install dist/django-graphql-auth-${v}.tar.gz
+	python -m pip install dist/strawberry-django-auth-${v}.tar.gz
 
 p ?= 38
 d ?= 30

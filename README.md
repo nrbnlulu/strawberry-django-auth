@@ -2,16 +2,16 @@
 
 [Django](https://github.com/django/django) registration and authentication with GraphQL.
 
-[![downloads](https://img.shields.io/pypi/dm/django-graphql-auth)](https://pypistats.org/packages/django-graphql-auth)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/pedrobern/django-graphql-auth/master.svg?style=flat-square)](https://codecov.io/gh/pedrobern/django-graphql-auth/)
-[![Build Status](https://travis-ci.com/pedrobern/django-graphql-auth.svg?branch=master)](https://travis-ci.com/pedrobern/django-graphql-auth)
-[![Pypi](https://img.shields.io/pypi/v/django-graphql-auth.svg)](https://pypi.org/project/django-graphql-auth/)
-[![Documentation Status](https://readthedocs.org/projects/django-graphql-auth/badge/?version=latest)](https://django-graphql-auth.readthedocs.io/en/latest/?badge=latest)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/pedrobern/django-graphql-auth/blob/master/CONTRIBUTING.md)
+[![downloads](https://img.shields.io/pypi/dm/strawberry-django-auth)](https://pypistats.org/packages/strawberry-django-auth)
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/pedrobern/strawberry-django-auth/master.svg?style=flat-square)](https://codecov.io/gh/pedrobern/strawberry-django-auth/)
+[![Build Status](https://travis-ci.com/pedrobern/strawberry-django-auth.svg?branch=master)](https://travis-ci.com/pedrobern/strawberry-django-auth)
+[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
+[![Documentation Status](https://readthedocs.org/projects/strawberry-django-auth/badge/?version=latest)](https://strawberry-django-auth.readthedocs.io/en/latest/?badge=latest)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/pedrobern/strawberry-django-auth/blob/master/CONTRIBUTING.md)
 
 ## Demo
 
-![Demo Video](https://github.com/pedrobern/django-graphql-auth/blob/master/demo.gif)
+![Demo Video](https://github.com/pedrobern/strawberry-django-auth/blob/master/demo.gif)
 
 ## About
 
@@ -25,12 +25,12 @@ your implementation*.
 
 ## Documentation
 
-Documentation is available at [read the docs](https://django-graphql-auth.readthedocs.io/en/latest/).
+Documentation is available at [read the docs](https://strawberry-django-auth.readthedocs.io/en/latest/).
 
 
 ## Features
 
-* [x] [Awesome docs](https://django-graphql-auth.readthedocs.io/en/latest/) :tada:
+* [x] [Awesome docs](https://strawberry-django-auth.readthedocs.io/en/latest/) :tada:
 * [x] Fully compatible with [Relay](https://github.com/facebook/relay>)
 * [x] Works with **default or custom** user model
 * [x] JWT authentication *(with [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt))*
@@ -156,9 +156,9 @@ u.status.verified
 # True
 ```
 
-Check the [installation guide](https://django-graphql-auth.readthedocs.io/en/latest/installation/) or jump to the [quickstart](https://django-graphql-auth.readthedocs.io/en/latest/quickstart/). Or if you prefer, browse the [api](https://django-graphql-auth.readthedocs.io/en/latest/api/).
+Check the [installation guide](https://strawberry-django-auth.readthedocs.io/en/latest/installation/) or jump to the [quickstart](https://strawberry-django-auth.readthedocs.io/en/latest/quickstart/). Or if you prefer, browse the [api](https://strawberry-django-auth.readthedocs.io/en/latest/api/).
 
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/pedrobern/django-graphql-auth/blob/master/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/pedrobern/strawberry-django-auth/blob/master/CONTRIBUTING.md)

@@ -8,7 +8,7 @@
 * [ ] Did you check for similar issues?
 * [ ] Did you perform a cursory search?
 
-For more information, see the [CONTRIBUTING](https://github.com/PedroBern/django-graphql-auth/blob/master/CONTRIBUTING.md) guide.
+For more information, see the [CONTRIBUTING](https://github.com/nrbnlulu/strawberry-django-authblob/master/CONTRIBUTING.md) guide.
 
 # Description
 

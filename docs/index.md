@@ -3,18 +3,18 @@
 [Django](https://github.com/django/django) registration and authentication with GraphQL.
 
 
-[![downloads](https://img.shields.io/pypi/dm/django-graphql-auth)](https://pypistats.org/packages/django-graphql-auth)
-[![Codecov Coverage](https://img.shields.io/codecov/c/github/pedrobern/django-graphql-auth/master.svg?style=flat-square)](https://codecov.io/gh/pedrobern/django-graphql-auth/)
-[![Build Status](https://travis-ci.com/pedrobern/django-graphql-auth.svg?branch=master)](https://travis-ci.com/pedrobern/django-graphql-auth)
-[![Pypi](https://img.shields.io/pypi/v/django-graphql-auth.svg)](https://pypi.org/project/django-graphql-auth/)
-[![Documentation Status](https://readthedocs.org/projects/django-graphql-auth/badge/?version=latest)](https://django-graphql-auth.readthedocs.io/en/latest/?badge=latest)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/pedrobern/django-graphql-auth/blob/master/CONTRIBUTING.md)
+[![downloads](https://img.shields.io/pypi/dm/strawberry-django-auth)](https://pypistats.org/packages/strawberry-django-auth)
+[![Codecov Coverage](https://img.shields.io/codecov/c/github/pedrobern/strawberry-django-auth/master.svg?style=flat-square)](https://codecov.io/gh/pedrobern/strawberry-django-auth/)
+[![Build Status](https://travis-ci.com/pedrobern/strawberry-django-auth.svg?branch=master)](https://travis-ci.com/pedrobern/strawberry-django-auth)
+[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
+[![Documentation Status](https://readthedocs.org/projects/strawberry-django-auth/badge/?version=latest)](https://strawberry-django-auth.readthedocs.io/en/latest/?badge=latest)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/pedrobern/strawberry-django-auth/blob/master/CONTRIBUTING.md)
 
 ---
 
 ## Demo
 
-[![Demo Video](images/demo.jpg)](https://github.com/pedrobern/django-graphql-auth#demo)
+[![Demo Video](images/demo.jpg)](https://github.com/pedrobern/strawberry-django-auth#demo)
 
 ## About
 
