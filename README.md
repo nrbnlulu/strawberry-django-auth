@@ -94,18 +94,10 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 ```
 
 
-## Relay
+## User relay queries 
 
-Import mutations from the ``relay`` module:
-
-```python
-
-from gqlauth.user import relay
-
-class AuthMutation(graphene.ObjectType):
-   register = relay.Register.Field
-   # ...
-```
+### Currently not supported
+excpect to find it here when strawberry will nativly support relay
 
 
 ## Example
