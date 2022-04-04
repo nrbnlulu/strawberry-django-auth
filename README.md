@@ -31,10 +31,11 @@ Documentation is available at [read the docs](https://strawberry-django-auth.rea
 
 ## Features
 
-* [x] [Awesome docs](https://strawberry-django-auth.readthedocs.io/en/latest/) :tada:
-* [x] Fully compatible with [Relay](https://github.com/facebook/relay>)
-* [x] Works with **default or custom** user model
-* [x] JWT authentication *(with [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt))*
+* [] [Awesome docs](https://strawberry-django-auth.readthedocs.io/en/latest/) :tada:
+* [] Fully compatible with [Relay](https://github.com/facebook/relay>)
+* [] Works with **default or custom** user model
+* [x] JWT authentication *(with [ strawberry-django-jwt
+](https://github.com/KundaPanda/strawberry-django-jwt))*
 * [x] User query with filters *(with [Django Filter](https://github.com/carltongibson/django-filter) and [Graphene Django](https://github.com/graphql-python/graphene-django))*
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
