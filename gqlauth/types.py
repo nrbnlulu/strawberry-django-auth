@@ -1,43 +1,15 @@
-import graphene
-from graphene_django.utils import camelize
+from uuid import UUID
+import strawberry_django
+import strawberry
+from strawberry_django import auto
 
-from .exceptions import WrongUsage
+from gqlauth import models
+from gqlauth.scalars import image
 
 
-class ExpectedErrorType(graphene.Scalar):
-    class Meta:
-        description = """
-    Errors messages and codes mapped to
-    fields or non fields errors.
-    Example:
-    {
-        field_name: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ],
-        other_field: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ],
-        nonFieldErrors: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ]
-    }
-    """
-
-    @staticmethod
-    def serialize(errors):
-        if isinstance(errors, dict):
-            if errors.get("__all__", False):
-                errors["non_field_errors"] = errors.pop("__all__")
-            return camelize(errors)
-        elif isinstance(errors, list):
-            return {"nonFieldErrors": errors}
-        raise WrongUsage("`errors` must be list or dict!")
+@strawberry_django.type(model=models.Captcha)
+class CaptchaType:
+    uuid: UUID
+    @strawberry.field
+    def image(self) -> image:
+        return self.as_bytes()

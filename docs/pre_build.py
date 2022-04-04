@@ -10,7 +10,7 @@ import re
 
 # copy mixins file from .py to .yml
 current_dir = os.path.abspath(os.path.split(os.path.split(__file__)[0])[0])
-source = current_dir + "/graphql_auth/mixins.py"
+source = current_dir + "/gqlauth/mixins.py"
 destination = current_dir + "/docs/data/api.yml"
 dest = shutil.copyfile(source, destination)
 

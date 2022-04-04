@@ -38,9 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users",
-    "graphene_django",
-    "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
-    "graphql_auth",
+    "strawberry.django",
+    "strawberry_django_jwt.refresh_token.apps.RefreshTokenConfig",
+    "gqlauth",
     "django_filters",
 ]
 
@@ -121,11 +121,11 @@ STATIC_URL = "/static/"
 
 GRAPHENE = {
     "SCHEMA": "quickstart.schema.schema",
-    "MIDDLEWARE": ["graphql_jwt.middleware.JSONWebTokenMiddleware"],
+    "MIDDLEWARE": ["strawberry_django_jwt.middleware.JSONWebTokenMiddleware"],
 }
 
 AUTHENTICATION_BACKENDS = [
-    "graphql_auth.backends.GraphQLAuthBackend",
+    "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -133,16 +133,16 @@ GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
     "JWT_ALLOW_ANY_CLASSES": [
-        "graphql_auth.mutations.Register",
-        "graphql_auth.mutations.VerifyAccount",
-        "graphql_auth.mutations.ResendActivationEmail",
-        "graphql_auth.mutations.SendPasswordResetEmail",
-        "graphql_auth.mutations.PasswordReset",
-        "graphql_auth.mutations.ObtainJSONWebToken",
-        "graphql_auth.mutations.VerifyToken",
-        "graphql_auth.mutations.RefreshToken",
-        "graphql_auth.mutations.RevokeToken",
-        "graphql_auth.mutations.VerifySecondaryEmail",
+        "gqlauth.mutations.Register",
+        "gqlauth.mutations.VerifyAccount",
+        "gqlauth.mutations.ResendActivationEmail",
+        "gqlauth.mutations.SendPasswordResetEmail",
+        "gqlauth.mutations.PasswordReset",
+        "gqlauth.mutations.ObtainJSONWebToken",
+        "gqlauth.mutations.VerifyToken",
+        "gqlauth.mutations.RefreshToken",
+        "gqlauth.mutations.RevokeToken",
+        "gqlauth.mutations.VerifySecondaryEmail",
     ],
 }
 

@@ -5,7 +5,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
+from gqlauth.constants import Messages
 
 
 class SendPasswordResetEmailTestCaseMixin:
@@ -48,7 +48,7 @@ class SendPasswordResetEmailTestCaseMixin:
         self.assertEqual(executed["errors"], None)
 
     @mock.patch(
-        "graphql_auth.models.UserStatus.send_password_reset_email",
+        "gqlauth.models.UserStatus.send_password_reset_email",
         mock.MagicMock(side_effect=SMTPException),
     )
     def test_send_email_fail_to_send_email(self):
@@ -79,7 +79,7 @@ class SendPasswordResetEmailRelayTestCase(
     def get_query(self, email):
         return """
         mutation {
-        sendPasswordResetEmail(input:{ email: "%s"})
+        sendPasswordResetEmail(input_:{ email: "%s"})
             { success, errors  }
         }
         """ % (

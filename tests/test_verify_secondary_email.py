@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
-from graphql_auth.utils import get_token
-from graphql_auth.models import UserStatus
+from gqlauth.constants import Messages
+from gqlauth.utils import get_token
+from gqlauth.models import UserStatus
 
 
 class VerifySecondaryEmailCaseMixin:
@@ -55,7 +55,7 @@ class VerifySecondaryEmailRelayTestCase(VerifySecondaryEmailCaseMixin, RelayTest
     def verify_query(self, token):
         return """
         mutation {
-        verifySecondaryEmail(input:{ token: "%s"})
+        verifySecondaryEmail(input_:{ token: "%s"})
             { success, errors  }
         }
         """ % (

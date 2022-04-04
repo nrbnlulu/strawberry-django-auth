@@ -122,7 +122,7 @@ default: `#!python ["first_name", "last_name"]`
 
 Customize mutations error output by providing a Graphene type.
 
-default: `graphql_auth.types.ExpectedErrorType`
+default: `gqlauth.types.ExpectedErrorType`
 
 example:
 ```python
@@ -222,9 +222,9 @@ Basic usage with celery:
 from celery import task
 
 @task
-def graphql_auth_async_email(func, args):
+def gqlauth_async_email(func, args):
     """
-    Task to send an e-mail for the graphql_auth package
+    Task to send an e-mail for the gqlauth package
     """
     return func(*args)
 ```
@@ -233,7 +233,7 @@ For the example above, the setting would be:
 
 ```python
 GRAPHQL_AUTH = {
-    "EMAIL_ASYNC_TASK": "path/to/file.graphql_auth_async_email"
+    "EMAIL_ASYNC_TASK": "path/to/file.gqlauth_async_email"
 }
 ```
 

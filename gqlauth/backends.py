@@ -1,7 +1,7 @@
-from graphql_jwt.backends import JSONWebTokenBackend
-from graphql_jwt.shortcuts import get_user_by_token
-from graphql_jwt.utils import get_credentials
-from graphql_jwt.exceptions import JSONWebTokenError
+from strawberry_django_jwt.backends import JSONWebTokenBackend
+from strawberry_django_jwt.shortcuts import get_user_by_token
+from strawberry_django_jwt.utils import get_credentials
+from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
 
 class GraphQLAuthBackend(JSONWebTokenBackend):
@@ -18,15 +18,19 @@ class GraphQLAuthBackend(JSONWebTokenBackend):
     """
 
     def authenticate(self, request=None, **kwargs):
+        # if it isnt a request or settings dosnt require a _jwt_token
         if request is None or getattr(request, "_jwt_token_auth", False):
             return None
 
-        token = get_credentials(request, **kwargs)
+
 
         try:  # +++
+            token = get_credentials(request, **kwargs)
             if token is not None:
                 return get_user_by_token(token, request)
         except JSONWebTokenError:  # +++
             pass  # +++
 
+        except JSONWebTokenExpired:
+            ...
         return None

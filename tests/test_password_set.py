@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
-from graphql_auth.utils import get_token, get_token_payload
+from gqlauth.constants import Messages
+from gqlauth.utils import get_token, get_payload_from_token
 
 
 class PasswordSetTestCaseMixin:
@@ -50,19 +50,6 @@ class PasswordSetTestCaseMixin:
 
 
 class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                username: "foo_username",
-                password: "%s",
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def get_query(
         self, token, new_password1="new_password", new_password2="new_password"
     ):
@@ -83,28 +70,13 @@ class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
 
 
 class PasswordSetRelayTestCase(PasswordSetTestCaseMixin, RelayTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                input: {
-                    username: "foo_username",
-                    password: "%s",
-                }
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def get_query(
         self, token, new_password1="new_password", new_password2="new_password"
     ):
         return """
         mutation {
             passwordSet(
-                input: {
+                input_: {
                     token: "%s",
                     newPassword1: "%s",
                     newPassword2: "%s"

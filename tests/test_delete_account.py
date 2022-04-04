@@ -1,15 +1,13 @@
-import django
-from pytest import mark
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
+
+from gqlauth.settings import gqlauth_settings as app_settings
 
 from .testCases import RelayTestCase, DefaultTestCase
-from .decorators import skipif_django_21
 
-from graphql_auth.constants import Messages
-from graphql_auth.models import UserStatus
+from gqlauth.constants import Messages
+from .__init__ import *
 
 
 class DeleteAccountTestCaseMixin:
@@ -18,6 +16,7 @@ class DeleteAccountTestCaseMixin:
         self.user2 = self.register_user(
             email="bar@email.com", username="bar", verified=True
         )
+        app_settings.ALLOW_DELETE_ACCOUNT = True
 
     def test_not_authenticated(self):
         """
@@ -35,28 +34,6 @@ class DeleteAccountTestCaseMixin:
         self.assertEqual(executed["success"], False)
         self.assertEqual(executed["errors"]["password"], Messages.INVALID_PASSWORD)
 
-    def test_revoke_refresh_tokens_on_delete_account(self):
-
-        executed = self.make_request(self.get_login_query())
-        self.user2.refresh_from_db()
-        refresh_tokens = self.user2.refresh_tokens.all()
-        for token in refresh_tokens:
-            self.assertFalse(token.revoked)
-
-        query = self.make_query()
-        variables = {"user": self.user2}
-        self.assertEqual(self.user2.is_active, True)
-        executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user2.refresh_from_db()
-        self.assertEqual(self.user2.is_active, False)
-
-        self.user2.refresh_from_db()
-        refresh_tokens = self.user2.refresh_tokens.all()
-        for token in refresh_tokens:
-            self.assertTrue(token.revoked)
-
     def test_not_verified_user(self):
         query = self.make_query()
         variables = {"user": self.user1}
@@ -66,18 +43,7 @@ class DeleteAccountTestCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
         self.assertEqual(self.user1.is_active, True)
 
-    def test_valid_password(self):
-        query = self.make_query()
-        variables = {"user": self.user2}
-        self.assertEqual(self.user2.is_active, True)
-        executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user2.refresh_from_db()
-        self.assertEqual(self.user2.is_active, False)
-
-    @mark.settings_b
-    @skipif_django_21()
+    @override_settings(GQL_AUTH=SETTING_B)
     def test_valid_password_permanently_delete(self):
         query = self.make_query()
         variables = {"user": self.user2}
@@ -87,19 +53,6 @@ class DeleteAccountTestCaseMixin:
         self.assertEqual(executed["errors"], None)
         with self.assertRaises(ObjectDoesNotExist):
             self.user2.refresh_from_db()
-
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                email: "foo@email.com",
-                password: "%s",
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
 
     def make_query(self, password=None):
         return """
@@ -114,19 +67,6 @@ class DeleteAccountTestCaseMixin:
 
 
 class DeleteAccountTestCase(DeleteAccountTestCaseMixin, DefaultTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                email: "foo@email.com",
-                password: "%s",
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def make_query(self, password=None):
         return """
             mutation {
@@ -140,25 +80,10 @@ class DeleteAccountTestCase(DeleteAccountTestCaseMixin, DefaultTestCase):
 
 
 class DeleteAccountRelayTestCase(DeleteAccountTestCaseMixin, RelayTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                input: {
-                    email: "foo@email.com",
-                    password: "%s",
-                }
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def make_query(self, password=None):
         return """
             mutation {
-              deleteAccount(input: { password: "%s"}) {
+              deleteAccount(input_: { password: "%s"}) {
                 success, errors
               }
             }

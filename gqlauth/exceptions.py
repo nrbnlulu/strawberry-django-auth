@@ -1,12 +1,11 @@
 from django.utils.translation import gettext as _
+from gqlauth.bases.exceptions import ErrorBase
 
 
-class GraphQLAuthError(Exception):
-    default_message = None
-
+class GraphQLAuthError(ErrorBase):
     def __init__(self, message=None):
         if message is None:
-            message = self.default_message
+            message = " ".join([_("Authorization error:"), self.default_message])
 
         super().__init__(message)
 
@@ -39,5 +38,8 @@ class WrongUsage(GraphQLAuthError):
     """
     internal exception
     """
-
     default_message = _("Wrong usage, check your code!.")
+
+
+class NoSufficiantPermissions(GraphQLAuthError):
+    default_message = _("User is not allowed for this content")

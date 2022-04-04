@@ -1,28 +1,40 @@
+import inspect
 from functools import wraps
-
+from strawberry_django_jwt.decorators import login_required as login_req
+from strawberry_django_jwt.exceptions import PermissionDenied
+from gqlauth.utils import g_user
 from .constants import Messages
-from .exceptions import WrongUsage
+from .exceptions import WrongUsage, GraphQLAuthError
+
+
 
 
 def login_required(fn):
+    """
+    If the user is registered
+    """
+
     @wraps(fn)
-    def wrapper(cls, root, info, **kwargs):
-        user = info.context.user
-        if not user.is_authenticated:
-            return cls(success=False, errors=Messages.UNAUTHENTICATED)
-        return fn(cls, root, info, **kwargs)
+    def wrapper(src, info, **kwargs):
+        if g_user(info).is_authenticated:
+            return fn(src, info, **kwargs)
+        else:
+            return src.output(success=False, errors=Messages.UNAUTHENTICATED)
 
     return wrapper
 
 
 def verification_required(fn):
+    """
+    if the user was approved
+    """
+
     @wraps(fn)
     @login_required
-    def wrapper(cls, root, info, **kwargs):
-        user = info.context.user
-        if not user.status.verified:
-            return cls(success=False, errors=Messages.NOT_VERIFIED)
-        return fn(cls, root, info, **kwargs)
+    def wrapper(src, info, **kwargs):
+        if not g_user(info).status.verified:
+            return src.output(success=False, errors=Messages.NOT_VERIFIED)
+        return fn(src, info, **kwargs)
 
     return wrapper
 
@@ -30,34 +42,50 @@ def verification_required(fn):
 def secondary_email_required(fn):
     @wraps(fn)
     @verification_required
-    def wrapper(cls, root, info, **kwargs):
-        user = info.context.user
-        if not user.status.secondary_email:
-            return cls(success=False, errors=Messages.SECONDARY_EMAIL_REQUIRED)
-        return fn(cls, root, info, **kwargs)
+    def wrapper(src, info, **kwargs):
+        if not g_user(info).status.secondary_email:
+            return src.output(success=False, errors=Messages.SECONDARY_EMAIL_REQUIRED)
+        return fn(src, info, **kwargs)
 
     return wrapper
 
 
 def password_confirmation_required(fn):
     @wraps(fn)
-    def wrapper(cls, root, info, **kwargs):
+    def wrapper(src, info, **kwargs):
         try:
-            field_name = next(
-                i for i in kwargs.keys() if i in ["password", "old_password"]
+            password_arg = next(
+                i for i in kwargs.keys() if i in ["password", "oldPassword"]
             )
-            password = kwargs[field_name]
+            password = kwargs[password_arg]
         except Exception:
             raise WrongUsage(
                 """
                 @password_confirmation is supposed to be used on
-                mutations with 'password' or 'old_password' field required.
+                user with 'password' or 'old_password' field required.
                 """
             )
-        user = info.context.user
+        user = g_user(info)
         if user.check_password(password):
-            return fn(cls, root, info, **kwargs)
-        errors = {field_name: Messages.INVALID_PASSWORD}
-        return cls(success=False, errors=errors)
+            return fn(src, info, **kwargs)
+        errors = {password_arg: Messages.INVALID_PASSWORD}
+        return src.output(success=False, errors=errors)
 
     return wrapper
+
+
+def allowed_permissions(roles: list):
+    """
+    checks a list of roles if it applies to a user
+    verification required by default.
+    """
+
+    def decorator(fn):
+        @wraps(fn)
+        @verification_required
+        def wrapper(src, info, **kwargs):
+            user = g_user(info)
+
+        return wrapper
+
+    return decorator

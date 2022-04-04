@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
+from gqlauth.constants import Messages
 
 
 # GRAPHQL_JWT = {
@@ -15,16 +15,20 @@ from graphql_auth.constants import Messages
 class RevokeTokenTestCaseMixin:
     def setUp(self):
         self.user1 = self.register_user(email="foo@email.com", username="foo_username")
+        self.user1.status.verified = True
+        self.user1.status.save()
+        self.user1.refresh_from_db()
+        super().setUp()
 
     def test_revoke_token(self):
-        query = self.get_login_query()
+        query = self.login_query(username='foo_username')
         executed = self.make_request(query)
-        self.assertTrue(executed["refreshToken"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
 
-        query = self.get_revoke_query(executed["refreshToken"])
+        query = self.get_revoke_query(executed['obtainPayload']["refreshToken"])
         executed = self.make_request(query)
         self.assertTrue(executed["success"])
-        self.assertTrue(executed["revoked"])
+        self.assertTrue(executed['revokePayload']["revoked"])
         self.assertFalse(executed["errors"])
 
     def test_invalid_token(self):
@@ -32,48 +36,40 @@ class RevokeTokenTestCaseMixin:
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
-        self.assertFalse(executed["revoked"])
+        self.assertFalse(executed['revokePayload'])
 
 
 class RevokeTokenTestCase(RevokeTokenTestCaseMixin, DefaultTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-        tokenAuth(email: "foo@email.com", password: "%s" )
-            { refreshToken, success, errors  }
-        }
-        """ % (
-            self.default_password
-        )
-
     def get_revoke_query(self, token):
         return """
         mutation {
         revokeToken(refreshToken: "%s" )
-            { success, errors, revoked  }
+            {
+        success
+        errors
+        revokePayload{
+          revoked
         }
+      }
+    }
         """ % (
             token
         )
 
 
 class VerifyTokenRelayTestCase(RevokeTokenTestCaseMixin, RelayTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-        tokenAuth(input:{ email: "foo@email.com", password: "%s"  })
-            { refreshToken, success, errors  }
-        }
-        """ % (
-            self.default_password
-        )
-
     def get_revoke_query(self, token):
         return """
         mutation {
-        revokeToken(input: {refreshToken: "%s"} )
-            { success, errors, revoked  }
+        revokeToken(input_: {refreshToken: "%s"} )
+           {
+        success
+        errors
+        revokePayload{
+          revoked
         }
+      }
+    }
         """ % (
             token
         )

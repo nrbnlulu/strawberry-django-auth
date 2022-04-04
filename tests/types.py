@@ -1,19 +1,32 @@
-import graphene
+
+import strawberry
 from django.contrib.auth import get_user_model
-from graphene_django.types import DjangoObjectType
+from strawberry.django import auto, auth
+from gqlauth import models
 
 
-class UserType(DjangoObjectType):
-    class Meta:
-        model = get_user_model()
-        interfaces = (graphene.relay.Node,)
-        skip_registry = True
+@strawberry.django.type(model=models.UserStatus)
+class UserStatusType:
+    verified: auto
+    archived: auto
+    secondary_email: auto
 
-    pk = graphene.Int()
-    verified = graphene.Boolean()
 
-    def resolve_pk(self, info):
-        return self.pk
+@strawberry.django.filters.filter(get_user_model(), lookups=True)
+class UserFilter:
+    id: auto
+    username: auto
+    email: auto
+    name: auto
+    last_name: auto
+    status: UserStatusType
 
-    def resolve_verified(self, info):
-        return self.status.verified
+
+@strawberry.django.type(model=get_user_model(), filters=UserFilter)
+class UserType:
+    ...
+
+
+@strawberry.type
+class MeQuery:
+    me: UserType = auth.current_user()

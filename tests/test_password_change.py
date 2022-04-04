@@ -1,16 +1,17 @@
 from django.contrib.auth import get_user_model
 
-from graphql_jwt.refresh_token.models import RefreshToken
+from strawberry_django_jwt.refresh_token.models import RefreshToken
 
 from .testCases import RelayTestCase, DefaultTestCase
 
-from graphql_auth.utils import revoke_user_refresh_token
-from graphql_auth.constants import Messages
-from graphql_auth.utils import get_token, get_token_payload
+from gqlauth.utils import revoke_user_refresh_token
+from gqlauth.constants import Messages
+from gqlauth.utils import get_token, get_payload_from_token
 
 
 class PasswordChangeTestCaseMixin:
     def setUp(self):
+        super().setUp()
         self.user = self.register_user(
             email="gaa@email.com", username="gaa", verified=True
         )
@@ -24,8 +25,8 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(self.get_query(), variables)
         self.assertEqual(executed["success"], True)
         self.assertEqual(executed["errors"], None)
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
+        self.assertTrue(executed['obtainPayload']["token"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
         self.user.refresh_from_db()
         self.assertFalse(self.old_pass == self.user.password)
 
@@ -37,8 +38,7 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(self.get_query("wrong"), variables)
         self.assertEqual(executed["success"], False)
         self.assertTrue(executed["errors"]["newPassword2"])
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
         self.user.refresh_from_db()
         self.assertTrue(self.old_pass == self.user.password)
 
@@ -50,11 +50,10 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(self.get_query("123", "123"), variables)
         self.assertEqual(executed["success"], False)
         self.assertTrue(executed["errors"]["newPassword2"])
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
 
     def test_revoke_refresh_tokens_on_password_change(self):
-        executed = self.make_request(self.get_login_query())
+        executed = self.make_request(self.login_query())
         self.user.refresh_from_db()
         refresh_tokens = self.user.refresh_tokens.all()
         for token in refresh_tokens:
@@ -63,8 +62,8 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(self.get_query(), variables)
         self.assertEqual(executed["success"], True)
         self.assertEqual(executed["errors"], None)
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
+        self.assertTrue(executed['obtainPayload']["token"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
         self.user.refresh_from_db()
         self.assertFalse(self.old_pass == self.user.password)
         refresh_tokens = self.user.refresh_tokens.all()
@@ -76,19 +75,6 @@ class PasswordChangeTestCaseMixin:
 
 
 class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                username: "username",
-                password: "%s",
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def get_query(self, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {
@@ -97,8 +83,15 @@ class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
                 newPassword1: "%s",
                 newPassword2: "%s"
             )
-            { success, errors, token, refreshToken }
-        }
+            {
+    success
+    errors
+    obtainPayload{
+      token
+      refreshToken
+    }
+  }
+}
         """ % (
             self.default_password,
             new_password1,
@@ -107,32 +100,24 @@ class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
 
 
 class PasswordChangeRelayTestCase(PasswordChangeTestCaseMixin, RelayTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                input: {
-                    username: "username",
-                    password: "%s",
-                }
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def get_query(self, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {
             passwordChange(
-                input: {
+                input_: {
                     oldPassword: "%s",
                     newPassword1: "%s",
                     newPassword2: "%s"
                 })
-            { success, errors, token, refreshToken }
-        }
+           {
+    success
+    errors
+    obtainPayload{
+      token
+      refreshToken
+    }
+  }
+}
         """ % (
             self.default_password,
             new_password1,

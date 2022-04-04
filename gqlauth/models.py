@@ -1,4 +1,11 @@
+from datetime import timedelta
+from django.utils import timezone
+import io
+import logging
+import uuid
 import time
+from .factory.captcha_factorty import generate_city_captcha
+
 from django.db import models
 from django.conf import settings as django_settings
 from django.template.loader import render_to_string
@@ -8,10 +15,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-
-from .settings import graphql_auth_settings as app_settings
-from .constants import TokenAction
-from .utils import get_token, get_token_payload
+# gqlauth imports
+from gqlauth.settings import gqlauth_settings as app_settings
+from .constants import Messages, TokenAction
+from .utils import get_token, get_payload_from_token
 from .exceptions import (
     UserAlreadyVerified,
     UserNotVerified,
@@ -20,7 +27,83 @@ from .exceptions import (
 )
 from .signals import user_verified
 
-UserModel = get_user_model()
+logger = logging.getLogger(__name__)
+
+USER_MODEL = get_user_model()
+
+class Captcha(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    text = models.CharField(max_length=50, editable=False)
+    insert_time = models.DateTimeField(auto_now_add=True, editable=False)
+    tries = models.IntegerField(default=0)
+
+    @staticmethod
+    def _format(text: str):
+        return text.lower().replace(' ', '')
+
+    @classmethod
+    def create_captcha(cls):
+        cap = generate_city_captcha()
+        obj = cls(text=cap.text)
+        setattr(obj, 'image', cap.image)
+        obj.save()
+        if django_settings.DEBUG:
+            obj.show()
+        return obj
+
+    def save(self, *args, **kwargs):
+        self.text = self._format(self.text)
+        super().save(*args, **kwargs)
+
+    def validate(self, input_: str):
+        """
+        validates input_.
+        - if tried to validate more than 3 times obj will be deleted in the database 
+        - else increments by one
+        - if reaches expiery date deletes the obj
+        - returns bool for success state
+        """
+        if self.tries > app_settings.CAPTCHA_MAX_RETRIES:
+            try:
+                self.delete()
+            except ValueError:
+                logger.info("object already deleted")
+            return Messages.CAPTCHA_MAX_RETRIES
+
+        else:
+            self.tries += 1
+
+        # check expiery
+        if timezone.now() > self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA:
+            try:
+                self.delete()
+            except ValueError:
+                logger.info("object aleardy deleted")
+            return Messages.CAPTCHA_EXPIRED
+
+        # validate
+        if input_.replace(" ", "") == self.text.replace(" ", ""):
+            # delete captcha if valid
+            self.delete()
+            return Messages.CAPTCHA_VALID
+
+        return Messages.CAPTCHA_INVALID
+
+    def show(self):
+        self.image.show()
+
+    def as_bytes(self):
+        bytes_array = io.BytesIO()
+        self.image.save(bytes_array, format='PNG')
+        return bytes_array.getvalue()
+
+    def __str__(self):
+        interval = (self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA) - timezone.now()
+        interval = interval.total_seconds()
+        expiery_str = (f" expires in {interval} seconds"
+                       if interval > 0
+                       else "already expierd")
+        return "captcha " + expiery_str
 
 
 class UserStatus(models.Model):
@@ -49,7 +132,7 @@ class UserStatus(models.Model):
             message=message,
             html_message=html_message,
             recipient_list=(
-                recipient_list or [getattr(self.user, UserModel.EMAIL_FIELD)]
+                    recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]
             ),
             fail_silently=False,
         )
@@ -120,7 +203,7 @@ class UserStatus(models.Model):
     @classmethod
     def email_is_free(cls, email):
         try:
-            UserModel._default_manager.get(**{UserModel.EMAIL_FIELD: email})
+            USER_MODEL._default_manager.get(**{USER_MODEL.EMAIL_FIELD: email})
             return False
         except Exception:
             pass
@@ -139,10 +222,10 @@ class UserStatus(models.Model):
 
     @classmethod
     def verify(cls, token):
-        payload = get_token_payload(
+        payload = get_payload_from_token(
             token, TokenAction.ACTIVATION, app_settings.EXPIRATION_ACTIVATION_TOKEN
         )
-        user = UserModel._default_manager.get(**payload)
+        user = USER_MODEL._default_manager.get(**payload)
         user_status = cls.objects.get(user=user)
         if user_status.verified is False:
             user_status.verified = True
@@ -153,7 +236,7 @@ class UserStatus(models.Model):
 
     @classmethod
     def verify_secondary_email(cls, token):
-        payload = get_token_payload(
+        payload = get_payload_from_token(
             token,
             TokenAction.ACTIVATION_SECONDARY_EMAIL,
             app_settings.EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN,
@@ -161,7 +244,7 @@ class UserStatus(models.Model):
         secondary_email = payload.pop("secondary_email")
         if not cls.email_is_free(secondary_email):
             raise EmailAlreadyInUse
-        user = UserModel._default_manager.get(**payload)
+        user = USER_MODEL._default_manager.get(**payload)
         user_status = cls.objects.get(user=user)
         user_status.secondary_email = secondary_email
         user_status.save(update_fields=["secondary_email"])
@@ -184,7 +267,7 @@ class UserStatus(models.Model):
         if not self.secondary_email:
             raise WrongUsage
         with transaction.atomic():
-            EMAIL_FIELD = UserModel.EMAIL_FIELD
+            EMAIL_FIELD = USER_MODEL.EMAIL_FIELD
             primary = getattr(self.user, EMAIL_FIELD)
             setattr(self.user, EMAIL_FIELD, self.secondary_email)
             self.secondary_email = primary
@@ -197,3 +280,4 @@ class UserStatus(models.Model):
         with transaction.atomic():
             self.secondary_email = None
             self.save(update_fields=["secondary_email"])
+

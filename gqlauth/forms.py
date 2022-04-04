@@ -1,18 +1,23 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, UsernameField
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, UsernameField, PasswordChangeForm
 from django.contrib.auth import get_user_model
 from django import forms
 
 from .utils import flat_dict
-from .settings import graphql_auth_settings as app_settings
+from gqlauth.settings import gqlauth_settings as app_settings
 
 
 class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True if 'email' in app_settings.REGISTER_MUTATION_FIELDS else False)
+
     class Meta:
         model = get_user_model()
         fields = flat_dict(app_settings.REGISTER_MUTATION_FIELDS) + flat_dict(
             app_settings.REGISTER_MUTATION_FIELDS_OPTIONAL
         )
 
+
+class PasswordChangeFormGql(PasswordChangeForm):
+    field_order = ['oldPassword', 'newPassword1', 'newPassword2']
 
 class EmailForm(forms.Form):
     email = forms.EmailField(max_length=254)

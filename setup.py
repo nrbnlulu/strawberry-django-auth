@@ -24,8 +24,8 @@ tests_require = [
 dev_requires = ["black==19.3b0", "flake8==3.7.7"] + tests_require
 
 setup(
-    name="django-graphql-auth",
-    version=get_version("graphql_auth"),
+    name="strawberry-django-auth",
+    version=get_version("gqlauth"),
     license="MIT",
     description="Graphql and relay authentication with Graphene for Django.",
     long_description=open("README.rst").read(),
@@ -43,11 +43,10 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         "Django>=2.2.0",
-        "django-graphql-jwt==0.3.0",
-        "django-filter>=2.2.0",
-        "graphene_django>=2.1.8",
-        "graphene>=2.1.8",
-        "PyJWT<2.0.0",
+        "strawberry-django-jwt==0.2.0",
+        "strawberry-graphql-django==0.2.5",
+        "strawberry-graphql==0.104.3",
+        "PyJWT==2.3.0",
     ],
     tests_require=tests_require,
     classifiers=[
@@ -64,7 +63,7 @@ setup(
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
     ],
-    keywords="api graphql rest relay graphene auth",
+    keywords="api graphql rest relay strawberry auth",
     zip_safe=False,
     include_package_data=True,
     extras_require={"test": tests_require, "dev": dev_requires},

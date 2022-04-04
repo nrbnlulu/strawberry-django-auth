@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 
-from graphql_auth.constants import Messages
+from gqlauth.constants import Messages
 
 
 from .testCases import RelayTestCase, DefaultTestCase
@@ -50,7 +50,7 @@ class SwapEmailsRelayTestCase(SwapEmailsCaseMixin, RelayTestCase):
     def query(self, password=None):
         return """
         mutation {
-        swapEmails(input:{ password: "%s"})
+        swapEmails(input_:{ password: "%s"})
             { success, errors  }
         }
         """ % (

@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
                     "is_staff",
                     models.BooleanField(
                         default=False,
-                        help_text="Designates whether the user can log into this admin site.",
+                        help_text="Designates whether the user can log into this administrator site.",
                         verbose_name="staff status",
                     ),
                 ),

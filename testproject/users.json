@@ -30,7 +30,7 @@
       }
   },
   {
-      "model": "graphql_auth.userstatus",
+      "model": "gqlauth.userstatus",
       "pk": 2,
       "fields": {
           "user": 2,
@@ -55,7 +55,7 @@
       }
   },
   {
-      "model": "graphql_auth.userstatus",
+      "model": "gqlauth.userstatus",
       "pk": 3,
       "fields": {
           "user": 3,
@@ -80,7 +80,7 @@
       }
   },
   {
-      "model": "graphql_auth.userstatus",
+      "model": "gqlauth.userstatus",
       "pk": 4,
       "fields": {
           "user": 4,

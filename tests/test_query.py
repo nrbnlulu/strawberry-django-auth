@@ -14,6 +14,7 @@ class QueryTestCase(DefaultTestCase):
         self.user3 = self.register_user(
             email="gaa@email.com", username="gaa", verified=True, archived=True
         )
+        super().setUp()
 
     def test_query(self):
         query = """
@@ -39,8 +40,8 @@ class QueryTestCase(DefaultTestCase):
 
         1. SELECT COUNT(*) AS "__count" FROM "auth_user"
         2. SELECT ... FROM "auth_user"
-            LEFT OUTER JOIN "graphql_auth_userstatus" ON (
-                "auth_user"."id" = "graphql_auth_userstatus"."user_id"
+            LEFT OUTER JOIN "gqlauth_userstatus" ON (
+                "auth_user"."id" = "gqlauth_userstatus"."user_id"
             )
             LIMIT 3
         """
@@ -83,7 +84,7 @@ class QueryTestCase(DefaultTestCase):
         }
         """
         executed = self.make_request(query)
-        self.assertIsNone(executed)
+        self.assertFalse(executed['username'])
 
     def test_public_user_query(self):
         query = """

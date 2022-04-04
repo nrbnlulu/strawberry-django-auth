@@ -1,12 +1,12 @@
-from django.contrib.auth import get_user_model
-from pytest import mark
-from .decorators import skipif_django_21
+from .__init__ import *
+from gqlauth.models import Captcha
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
-
+from gqlauth.constants import Messages
+from gqlauth.settings import gqlauth_settings
 
 class LoginTestCaseMixin:
     def setUp(self):
+        gqlauth_settings.ALLOW_DELETE_ACCOUNT = True
         self.archived_user = self.register_user(
             email="gaa@email.com", username="gaa", verified=True, archived=True
         )
@@ -19,111 +19,114 @@ class LoginTestCaseMixin:
             verified=True,
             secondary_email="secondary@email.com",
         )
+    @staticmethod
+    def gen_captcha():
+        return Captcha.create_captcha()
 
     def test_archived_user_becomes_active_on_login(self):
         self.assertEqual(self.archived_user.status.archived, True)
-        query = self.get_query("email", self.archived_user.email)
+        query = self.get_query(self.archived_user.username)
         executed = self.make_request(query)
         self.archived_user.refresh_from_db()
         self.assertEqual(self.archived_user.status.archived, False)
         self.assertTrue(executed["success"])
         self.assertFalse(executed["errors"])
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
+        self.assertTrue(executed['obtainPayload']["token"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
 
     def test_login_username(self):
-        query = self.get_query("username", self.verified_user.username)
+        query = self.get_query(self.verified_user.username)
         executed = self.make_request(query)
         self.assertTrue(executed["success"])
         self.assertFalse(executed["errors"])
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
-
-        query = self.get_query("username", self.not_verified_user.username)
+        self.assertTrue(executed['obtainPayload']["token"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
+        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
+        query = self.get_query(self.not_verified_user.username)
         executed = self.make_request(query)
         self.assertTrue(executed["success"])
         self.assertFalse(executed["errors"])
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
-
-    def test_login_email(self):
-        query = self.get_query("email", self.verified_user.email)
-        executed = self.make_request(query)
-        self.assertTrue(executed["success"])
-        self.assertFalse(executed["errors"])
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
-
-    def test_login_secondary_email(self):
-        query = self.get_query("email", "secondary@email.com")
-        executed = self.make_request(query)
-        self.assertTrue(executed["success"])
-        self.assertFalse(executed["errors"])
-        self.assertTrue(executed["token"])
-        self.assertTrue(executed["refreshToken"])
+        self.assertTrue(executed['obtainPayload']["token"])
+        self.assertTrue(executed['obtainPayload']["refreshToken"])
 
     def test_login_wrong_credentials(self):
         query = self.get_query("username", "wrong")
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
 
     def test_login_wrong_credentials_2(self):
-        query = self.get_query("username", self.verified_user.username, "wrongpass")
+        query = self.get_query(self.verified_user.username, "wrongpass")
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
 
-    @mark.settings_b
-    @skipif_django_21()
-    def test_not_verified_login_on_different_settings(self):
-        query = self.get_query("username", self.not_verified_user.username)
+    @override_settings(GQL_AUTH=SETTING_B)
+    def test_not_verified_login_not_verified(self):
+        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = False
+        query = self.get_query(self.not_verified_user.username)
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
 
-    @mark.settings_b
-    @skipif_django_21()
-    def test_not_verified_login_on_different_settings_wrong_pass(self):
-        query = self.get_query("username", self.not_verified_user.username, "wrongpass")
+    @override_settings(GQL_AUTH=SETTING_B)
+    def test_setting_not_verified_allowed_but_with_wrong_pass(self):
+        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
+        query = self.get_query(self.not_verified_user.username, "wrongpass")
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertEqual(
             executed["errors"]["nonFieldErrors"], Messages.INVALID_CREDENTIALS
         )
-        self.assertFalse(executed["token"])
-        self.assertFalse(executed["refreshToken"])
+        self.assertFalse(executed['obtainPayload'])
+
 
 
 class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
-    def get_query(self, field, username, password=None):
+    def get_query(self, username, password=None):
+        cap = self.gen_captcha()
         return """
         mutation {
-        tokenAuth(%s: "%s", password: "%s" )
-            { token, refreshToken, success, errors  }
-        }
+        tokenAuth(username: "%s", password: "%s" ,identifier: "%s" ,userEntry: "%s")
+                          {
+                success
+                errors
+                obtainPayload{
+                  token
+                  refreshToken
+                }
+              }
+            }
+
         """ % (
-            field,
             username,
             password or self.default_password,
+            cap.id,
+            cap.text,
         )
 
 
 class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
-    def get_query(self, field, username, password=None):
+    def get_query(self, username, password=None):
+        cap = self.gen_captcha()
         return """
         mutation {
-        tokenAuth(input:{ %s: "%s", password: "%s" })
-            { token, refreshToken, success, errors  }
+        tokenAuth(input_:{username: "%s", password: "%s",identifier: "%s", userEntry: "%s"})  {
+            success
+            errors
+            obtainPayload{
+              token
+              refreshToken
+            }
+          }
         }
+
         """ % (
-            field,
             username,
             password or self.default_password,
+            cap.id,
+            cap.text,
         )

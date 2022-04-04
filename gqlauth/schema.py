@@ -1,51 +1,17 @@
-from django.contrib.auth import get_user_model
+import strawberry
+from gqlauth.models import Captcha
+from gqlauth.types import CaptchaType
+from gqlauth.user.mutations import UserMutations
+from gqlauth.user.queries import UserQueries
+from strawberry.tools import merge_types
 
-import graphene
-from graphene_django.filter.fields import DjangoFilterConnectionField
-from graphene_django.types import DjangoObjectType
-
-from .settings import graphql_auth_settings as app_settings
-
-class UserNode(DjangoObjectType):
-    class Meta:
-        model = get_user_model()
-        filter_fields = app_settings.USER_NODE_FILTER_FIELDS
-        exclude = app_settings.USER_NODE_EXCLUDE_FIELDS
-        interfaces = (graphene.relay.Node,)
-        skip_registry = True
-
-    pk = graphene.Int()
-    archived = graphene.Boolean()
-    verified = graphene.Boolean()
-    secondary_email = graphene.String()
-
-    def resolve_pk(self, info):
-        return self.pk
-
-    def resolve_archived(self, info):
-        return self.status.archived
-
-    def resolve_verified(self, info):
-        return self.status.verified
-
-    def resolve_secondary_email(self, info):
-        return self.status.secondary_email
-
-    @classmethod
-    def get_queryset(cls, queryset, info):
-        return queryset.select_related("status")
+@strawberry.type
+class CaptchaMutation:
+    @strawberry.mutation
+    def captcha(self, info) -> CaptchaType:
+        return Captcha.create_captcha()
 
 
-class UserQuery(graphene.ObjectType):
-    user = graphene.relay.Node.Field(UserNode)
-    users = DjangoFilterConnectionField(UserNode)
+AuthQueries = merge_types('Auth', (UserQueries,))
+AuthMutations = merge_types('AuthMutations', (CaptchaMutation, UserMutations))
 
-
-class MeQuery(graphene.ObjectType):
-    me = graphene.Field(UserNode)
-
-    def resolve_me(self, info):
-        user = info.context.user
-        if user.is_authenticated:
-            return user
-        return None

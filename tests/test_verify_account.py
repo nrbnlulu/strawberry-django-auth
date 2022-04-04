@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 
 from .testCases import RelayTestCase, DefaultTestCase
-from graphql_auth.constants import Messages
-from graphql_auth.utils import get_token, get_token_payload
-from graphql_auth.models import UserStatus
-from graphql_auth.signals import user_verified
+from gqlauth.constants import Messages
+from gqlauth.utils import get_token, get_payload_from_token
+from gqlauth.models import UserStatus
+from gqlauth.signals import user_verified
 
 
 class VerifyAccountCaseMixin:
@@ -67,7 +67,7 @@ class VerifyAccountRelayTestCase(VerifyAccountCaseMixin, RelayTestCase):
     def verify_query(self, token):
         return """
         mutation {
-        verifyAccount(input:{ token: "%s"})
+        verifyAccount(input_:{ token: "%s"})
             { success, errors  }
         }
         """ % (

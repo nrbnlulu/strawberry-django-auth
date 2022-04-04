@@ -6,6 +6,14 @@ class Messages:
     UNAUTHENTICATED = [{"message": _("Unauthenticated."), "code": "unauthenticated"}]
     INVALID_TOKEN = [{"message": _("Invalid token."), "code": "invalid_token"}]
     EXPIRED_TOKEN = [{"message": _("Expired token."), "code": "expired_token"}]
+    NO_SUFFICIENT_PERMISSIONS = [{"message": _("Expired token."), "code": "expired_token"}]
+    
+    # captcha messages
+    CAPTCHA_VALID = [{"message": _("Captcha successfully validated!"), "code": "valid_captcha"}]
+    CAPTCHA_INVALID = [{"message": _("Captcha wrong, try again."), "code": "invalid_captcha"}]
+    CAPTCHA_MAX_RETRIES = [{"message": _("Maximum tries exceeded, please refresh the captcha."), "code": "max_retries_exceeded"}]
+    CAPTCHA_EXPIRED = [{"message": _("Expired or not Existed captcha please refresh."), "code": "expired_captcha"}]
+
     ALREADY_VERIFIED = [
         {"message": _("Account already verified."), "code": "already_verified"}
     ]

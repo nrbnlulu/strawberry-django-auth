@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 
 from .testCases import RelayTestCase, DefaultTestCase
 
-from graphql_auth.constants import Messages
-from graphql_auth.models import UserStatus
+from gqlauth.constants import Messages
+from gqlauth.models import UserStatus
 
 
 class ArchiveAccountTestCaseMixin:
@@ -49,8 +49,7 @@ class ArchiveAccountTestCaseMixin:
         """
         when archive account, all refresh tokens should be revoked
         """
-
-        executed = self.make_request(self.get_login_query())
+        executed = self.make_request(self.login_query())
         self.user2.refresh_from_db()
         refresh_tokens = self.user2.refresh_tokens.all()
         for token in refresh_tokens:
@@ -84,19 +83,6 @@ class ArchiveAccountTestCaseMixin:
 
 
 class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                email: "foo@email.com",
-                password: "%s",
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def make_query(self, password=None):
         return """
             mutation {
@@ -110,25 +96,10 @@ class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
 
 
 class ArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
-    def get_login_query(self):
-        return """
-        mutation {
-            tokenAuth(
-                input: {
-                    email: "foo@email.com",
-                    password: "%s",
-                }
-            )
-            { success, errors, refreshToken }
-        }
-        """ % (
-            self.default_password,
-        )
-
     def make_query(self, password=None):
         return """
             mutation {
-              archiveAccount(input: { password: "%s"}) {
+              archiveAccount(input_: { password: "%s"}) {
                 success, errors
               }
             }

@@ -65,7 +65,7 @@ For live testing on a django project, you can use the testproject.
 
 ```bash
 cd testproject
-make install-local v=<CURRENT VERSION IN graphql_auth.__init__>
+make install-local v=<CURRENT VERSION IN gqlauth.__init__>
 ```
 
 ## Opening Pull Requests

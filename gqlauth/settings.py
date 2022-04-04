@@ -1,12 +1,12 @@
 """
-Settings for graphql_auth are all namespaced in the GRAPHQL_AUTH setting.
+Settings for gqlauth are all namespaced in the GQL_AUTH setting.
 For example your project's `settings.py` file might look like this:
-GRAPHQL_AUTH = {
-    "LOGIN_ALLOWED_FIELDS": ["email", "username"],
+GQL_AUTH = {
+    "LOGIN_OPTIONAL_FIELDS": ["email", "username"],
     "SEND_ACTIVATION_EMAIL": True,
 }
-This module provides the `graphql_auth_settings` object, that is used to access
-Graphene settings, checking for user settings first, then falling
+This module provides the `gqlauth_settings` object, that is used to access
+strawberry settings, checking for user settings first, then falling
 back to the defaults.
 """
 
@@ -18,18 +18,23 @@ from datetime import timedelta
 # Copied shamelessly from Graphene / Django REST Framework
 
 DEFAULTS = {
-    # if allow to login without verification,
+    # if allow logging in without verification,
     # the register mutation will return a token
-    "ALLOW_LOGIN_NOT_VERIFIED": True,
-    # mutations fields options
-    "LOGIN_ALLOWED_FIELDS": ["email", "username"],
-    "ALLOW_LOGIN_WITH_SECONDARY_EMAIL": True,
+    "ALLOW_LOGIN_NOT_VERIFIED": False,
+    # mutation fields options
+    "LOGIN_OPTIONAL_FIELDS": [],
+    "LOGIN_REQUIRE_CAPTCHA": True,
+    "LOGIN_REQUIRED_FIELDS": ['username', 'password'],
     # required fields on register, plus password1 and password2,
     # can be a dict like UPDATE_MUTATION_FIELDS setting
     "REGISTER_MUTATION_FIELDS": ["email", "username"],
     "REGISTER_MUTATION_FIELDS_OPTIONAL": [],
+    "REGISTER_REQUIRE_CAPTCHA": True,
+    # captcha stuff
+    "CAPTCHA_EXPIRATION_DELTA": timedelta(seconds=120),
+    "CAPTCHA_MAX_RETRIES": 5,
     # optional fields on update account, can be list of fields
-    "UPDATE_MUTATION_FIELDS": {"first_name": "String", "last_name": "String"},
+    "UPDATE_MUTATION_FIELDS": {"first_name": str, "last_name": str},
     # tokens
     "EXPIRATION_ACTIVATION_TOKEN": timedelta(days=7),
     "EXPIRATION_PASSWORD_RESET_TOKEN": timedelta(hours=1),
@@ -37,7 +42,7 @@ DEFAULTS = {
     "EXPIRATION_PASSWORD_SET_TOKEN": timedelta(hours=1),
     # email stuff
     "EMAIL_FROM": getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com"),
-    "SEND_ACTIVATION_EMAIL": True,
+    "SEND_ACTIVATION_EMAIL": False,
     # client: example.com/activate/token
     "ACTIVATION_PATH_ON_EMAIL": "activate",
     "ACTIVATION_SECONDARY_EMAIL_PATH_ON_EMAIL": "activate",
@@ -84,7 +89,7 @@ class GraphQLAuthSettings(object):
     """
     A settings object, that allows API settings to be accessed as properties.
     For example:
-        from graphql_auth.settings import settings
+        from gqlauth.settings import settings
         print(settings)
     """
 
@@ -96,12 +101,12 @@ class GraphQLAuthSettings(object):
     @property
     def user_settings(self):
         if not hasattr(self, "_user_settings"):
-            self._user_settings = getattr(django_settings, "GRAPHQL_AUTH", {})
+            self._user_settings = getattr(django_settings, "GQL_AUTH", {})
         return self._user_settings
 
     def __getattr__(self, attr):
         if attr not in self.defaults:
-            raise AttributeError("Invalid graphql_auth setting: '%s'" % attr)
+            raise AttributeError("Invalid gqlauth setting: '%s'" % attr)
 
         try:
             # Check if present in user settings
@@ -115,14 +120,14 @@ class GraphQLAuthSettings(object):
         return val
 
 
-graphql_auth_settings = GraphQLAuthSettings(None, DEFAULTS)
+gqlauth_settings = GraphQLAuthSettings(None, DEFAULTS)
 
 
-def reload_graphql_auth_settings(*args, **kwargs):
-    global graphql_auth_settings
+def reload_gqlauth_settings(*args, **kwargs):
+    global gqlauth_settings
     setting, value = kwargs["setting"], kwargs["value"]
-    if setting == "GRAPHQL_AUTH":
-        graphql_auth_settings = GraphQLAuthSettings(value, DEFAULTS)
+    if setting == "GQL_AUTH":
+        gqlauth_settings = GraphQLAuthSettings(value, DEFAULTS)
 
 
-setting_changed.connect(reload_graphql_auth_settings)
+setting_changed.connect(reload_gqlauth_settings)

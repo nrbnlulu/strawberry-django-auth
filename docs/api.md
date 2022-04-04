@@ -11,7 +11,7 @@ GraphQL Auth also provides the MeQuery to retrieve data for the currently authen
 ### UserQuery
 
 ```
-from graphql_auth.schema import UserQuery
+from gqlauth.schema import UserQuery
 ```
 
 The easiest way to explore it is by using [graphiQL](https://docs.graphene-python.org/projects/django/en/latest/tutorial-plain/#creating-graphql-and-graphiql-views).
@@ -144,7 +144,7 @@ query {
 ### MeQuery
 
 ```
-from graphql_auth.schema import MeQuery
+from gqlauth.schema import MeQuery
 ```
 
 Since this query requires an authenticated user it can be explored by using the [insomnia API client](https://insomnia.rest/). See the [quickstart](quickstart.md) for more on how to use Insomnia.
@@ -178,14 +178,14 @@ query {
 All mutations can be imported like this:
 
 ```python tab="mutations"
-from graphql_auth import mutations
+from gqlauth import mutations
 
 # on your mutations
 register = mutations.Register
 ```
 
 ```python tab="relay"
-from graphql_auth import relay
+from gqlauth.user import relay
 
 # on your mutations
 register = use relay.Register
@@ -1310,8 +1310,8 @@ Protected mutations require the http Authorization header.
 
 If you send a request **without** the http Authorization header, or a **bad token**:
 
-- If using `graphql_jwt.backends.JSONWebTokenBackend`, it will raise.
-- If using `graphql_auth.backends.GraphQLAuthBackend`, it will return a standard response, with `success=False` and `errors`.
+- If using `strawberry_django_jwt.backends.JSONWebTokenBackend`, it will raise.
+- If using `gqlauth.backends.GraphQLAuthBackend`, it will return a standard response, with `success=False` and `errors`.
 
 As explained on the [installation guide](installation.md)
 

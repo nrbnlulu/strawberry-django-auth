@@ -6,7 +6,7 @@ recursive-include polls/templates *
 include LICENSE
 include MANIFEST.in
 include README.rst
-recursive-include graphql_auth/templates *
+recursive-include gqlauth/templates *
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

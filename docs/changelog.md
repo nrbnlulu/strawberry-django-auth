@@ -54,7 +54,7 @@
 
 ### v0.3.4
 
-- Renamed from `ErrorType` to`ExpectedErrorType`, preventing clash with a `graphene_django` type with same name..
+- Renamed from `ErrorType` to`ExpectedErrorType`, preventing clash with a `strawberry.django` type with same name..
 
 ### v0.3.3
 

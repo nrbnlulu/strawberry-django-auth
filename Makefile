@@ -1,12 +1,12 @@
 .PHONY : test-local test-local-file serve build-docs check-readme install-local lint format dev-setup
 
 check-readme:
-	rm -rf dist build django_graphql_auth.egg-info
+	rm -rf dist build django_gqlauth.egg-info
 	python setup.py sdist bdist_wheel
 	python -m twine check dist/*
 
 install-local:
-	rm -rf dist build django_graphql_auth.egg-info
+	rm -rf dist build django_gqlauth.egg-info
 	python setup.py sdist bdist_wheel
 	python -m pip install dist/django-graphql-auth-${v}.tar.gz
 
@@ -28,10 +28,10 @@ build-docs:
 	mkdocs build
 
 format:
-	black --exclude "/migrations/" graphql_auth testproject setup.py quickstart tests
+	black --exclude "/migrations/" gqlauth testproject setup.py quickstart tests
 
 lint:
-	flake8 graphql_auth
+	flake8 gqlauth
 
 dev-setup:
 	pip install -e ".[dev]"

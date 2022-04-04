@@ -1,11 +1,27 @@
 import warnings
 from django.core import signing
-from django.contrib.auth import get_user_model
 from django.conf import settings as django_settings
-from django.core.signing import BadSignature
+from strawberry.annotation import StrawberryAnnotation
 
+from strawberry.arguments import StrawberryArgument, UNSET
 from .exceptions import TokenScopeError
+
+
+def list_to_dict(lst: [str]):
+    """takes list of string and creates a dict with str as their values"""
+    new_dict = {}
+    for item in lst:
+        new_dict[item] = str
+    return new_dict
+
 warnings.simplefilter("once")
+
+
+def g_user(info):
+    # returns a user from info obj
+    user = getattr(info.context, 'user', False)
+    if user: return user
+    return info.context.request.user
 
 
 def get_token(user, action, **kwargs):
@@ -19,7 +35,7 @@ def get_token(user, action, **kwargs):
     return token
 
 
-def get_token_payload(token, action, exp=None):
+def get_payload_from_token(token, action, exp=None):
     payload = signing.loads(token, max_age=exp)
     _action = payload.pop("action")
     if _action != action:
@@ -27,17 +43,13 @@ def get_token_payload(token, action, exp=None):
     return payload
 
 
-def get_token_paylod(token, action, exp=None):
-    warnings.warn("get_token_paylod is deprecated, use get_token_payload instead", DeprecationWarning, stacklevel=2)
-    return get_token_payload(token, action, exp)
-    
 
 def using_refresh_tokens():
     if (
-        hasattr(django_settings, "GRAPHQL_JWT")
-        and django_settings.GRAPHQL_JWT.get("JWT_LONG_RUNNING_REFRESH_TOKEN", False)
-        and "graphql_jwt.refresh_token.apps.RefreshTokenConfig"
-        in django_settings.INSTALLED_APPS
+            hasattr(django_settings, "GRAPHQL_JWT")
+            and django_settings.GRAPHQL_JWT.get("JWT_LONG_RUNNING_REFRESH_TOKEN", False)
+            and "strawberry_django_jwt.refresh_token"
+            in django_settings.INSTALLED_APPS
     ):
         return True
     return False
@@ -61,14 +73,30 @@ def flat_dict(dict_or_list):
     return list(dict_or_list.keys()) if isinstance(dict_or_list, dict) else dict_or_list
 
 
-def normalize_fields(dict_or_list, extra_list):
+def normalize_fields(dict_or_list, extra_list_or_dict):
     """
-    helper merge settings defined fileds and
-    other fields on mutations
+    helper merge settings defined fileds
+    with default str type
     """
-    if isinstance(dict_or_list, dict):
-        for i in extra_list:
-            dict_or_list[i] = "String"
-        return dict_or_list
-    else:
-        return dict_or_list + extra_list
+    if not isinstance(extra_list_or_dict, dict):
+        extra_list_or_dict = list_to_dict(extra_list_or_dict)
+    if not isinstance(dict_or_list, dict):
+        dict_or_list = list_to_dict(dict_or_list)
+    dict_or_list.update(extra_list_or_dict)
+
+    return dict_or_list
+
+
+
+
+
+
+def create_strawberry_argument(
+        python_name: str, graphql_name: str, type_, default=None
+):
+    return StrawberryArgument(
+        python_name=python_name,
+        graphql_name=graphql_name,
+        type_annotation=StrawberryAnnotation(type_),
+        default=default or UNSET
+    )

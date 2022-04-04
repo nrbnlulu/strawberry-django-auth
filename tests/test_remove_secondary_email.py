@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 
-from graphql_auth.constants import Messages
+from gqlauth.constants import Messages
 
 
 from .testCases import RelayTestCase, DefaultTestCase
@@ -39,7 +39,7 @@ class RemoveSecondaryEmailRelayTestCase(RemoveSecondaryEmailCaseMixin, RelayTest
     def query(self, password=None):
         return """
         mutation {
-        removeSecondaryEmail(input:{ password: "%s"})
+        removeSecondaryEmail(input_:{ password: "%s"})
             { success, errors  }
         }
         """ % (
