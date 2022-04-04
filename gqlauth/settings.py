@@ -30,6 +30,7 @@ DEFAULTS = {
     "REGISTER_MUTATION_FIELDS": ["email", "username"],
     "REGISTER_MUTATION_FIELDS_OPTIONAL": [],
     "REGISTER_REQUIRE_CAPTCHA": True,
+    "CAPTCHA_TEXT_FACTORY": None,
     # captcha stuff
     "CAPTCHA_EXPIRATION_DELTA": timedelta(seconds=120),
     "CAPTCHA_MAX_RETRIES": 5,

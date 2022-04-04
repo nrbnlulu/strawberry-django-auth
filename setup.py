@@ -30,9 +30,9 @@ setup(
     description="Graphql and relay authentication with Graphene for Django.",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
-    author="pedrobern",
-    author_email="pedrobermoreira@gmail.com",
-    maintainer="pedrobern",
+    author="pedrobern - nir benlulu",
+    author_email="nrbnlulu@gmail.com",
+    maintainer="nir benlulu",
     url="https://github.com/PedroBern/django-graphql-auth",
     project_urls=OrderedDict(
         (

@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',  # NOTE Required for GraphQL
-    'django_extensions',
-    'phonenumber_field',
     'strawberry.django',
     'strawberry_django_jwt.refresh_token',
     'gqlauth',  # NOTE authantication with jwt

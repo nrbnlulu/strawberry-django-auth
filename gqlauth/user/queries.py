@@ -7,7 +7,7 @@ from gqlauth.utils import g_user
 # project
 from .types import UserType, UserFilter
 from typing import List
-from strawberry_django_plus import gql
+
 
 
 @strawberry.type
