@@ -1,6 +1,6 @@
 # Strawberry-django Auth
 
-[Django](https://github.com/django/django) registration and authentication with Strawberry.
+[Django](https://github.com/django/django) registration and authentication with [Strawberry](https://strawberry.rocks/).
 
 [![downloads](https://img.shields.io/pypi/dm/strawberry-django-auth)](https://pypistats.org/packages/strawberry-django-auth)
 [![Codecov Coverage](https://img.shields.io/codecov/c/github/pedrobern/strawberry-django-auth/master.svg?style=flat-square)](https://codecov.io/gh/pedrobern/strawberry-django-auth/)
