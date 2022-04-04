@@ -6,7 +6,6 @@ from graphene_django.types import DjangoObjectType
 
 from .settings import graphql_auth_settings as app_settings
 
-
 class UserNode(DjangoObjectType):
     class Meta:
         model = get_user_model()
