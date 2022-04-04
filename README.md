@@ -1,4 +1,4 @@
-# Django GraphQL Auth
+# Strawberry-django Auth
 
 [Django](https://github.com/django/django) registration and authentication with GraphQL.
 
