@@ -4,7 +4,7 @@ import io
 import logging
 import uuid
 import time
-from .factory.captcha_factorty import generate_city_captcha
+from gqlauth.factory.captcha_factorty import generate_city_captcha
 
 from django.db import models
 from django.conf import settings as django_settings
