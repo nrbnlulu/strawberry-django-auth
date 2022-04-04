@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "strawberry.django",
     "strawberry_django_jwt.refresh_token.apps.RefreshTokenConfig",
     "gqlauth",
-    "django_filters",
 ]
 
 MIDDLEWARE = [

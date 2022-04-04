@@ -244,18 +244,6 @@ schema = graphene.Schema(query=Query)
 
 Note: you can choose not to include ``UserQuery`` or ``MeQuery`` depending on your use case.
 
-And add [Django-Filter](https://django-filter.readthedocs.io/en/master/index.html)
-to the installed apps.
-
-!!! info ""
-    ``django-filter`` was automatically installed when you installed ``django-graphql-auth``.
-
-```python
-INSTALLED_APPS = [
-    # ...
-    'django_filters'
-]
-```
 
 ### Load fixtures
 

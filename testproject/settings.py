@@ -115,9 +115,10 @@ GRAPHQL_JWT = {
         "gqlauth.mutations.VerifySecondaryEmail",
     ],
 }
+import gqlauth
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-GRAPHQL_AUTH = {
+GQL_AUTH = {
     "EMAIL_ASYNC_TASK": "pseudo_async_email_support.pseudo_async_email_support"
 }

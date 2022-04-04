@@ -39,15 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',  # NOTE Required for GraphQL
     'django_extensions',
-    # * project apps
-    'eventsprovider.apps.EventsproviderConfig',
-    'status.apps.StatusConfig',
-    'users.apps.UsersConfig',
-    # * extrernal apps
     'phonenumber_field',
     'strawberry.django',
     'strawberry_django_jwt.refresh_token',
-    'gqlauth.apps.GqlAuthConfig',  # NOTE authantication with jwt
+    'gqlauth',  # NOTE authantication with jwt
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

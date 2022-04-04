@@ -47,7 +47,10 @@ setup(
         "strawberry-graphql-django==0.2.5",
         "strawberry-graphql==0.104.3",
         "PyJWT==2.3.0",
+        "Faker==13.3.4",
+        "Pillow==9.1.0",
     ],
+
     tests_require=tests_require,
     classifiers=[
         "Development Status :: 4 - Beta",
