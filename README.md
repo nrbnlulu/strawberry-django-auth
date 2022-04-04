@@ -11,7 +11,7 @@
 
 ## Demo
 
-![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/master/demo.gif)
+![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif)
 
 ## About
 
