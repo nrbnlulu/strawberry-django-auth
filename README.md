@@ -61,7 +61,7 @@ import strawberry
 from gqlauth import mutations
 
 @strawberrry.type
-class AuthMutation(graphene.ObjectType):
+class AuthMutation:
     register = mutations.Register.Field
     verify_account = mutations.VerifyAccount.Field
     resend_activation_email = mutations.ResendActivationEmail.Field
