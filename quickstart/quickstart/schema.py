@@ -3,7 +3,7 @@
 import graphene
 
 from gqlauth.schema import UserQuery, MeQuery
-from gqlauth import arg_mutations
+from gqlauth import arg_mutations as mutations
 
 
 class AuthMutation(graphene.ObjectType):
