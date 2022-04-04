@@ -56,11 +56,11 @@ Documentation is available at [read the docs](https://strawberry-django-auth.rea
 
 ```python
 
-import graphene
+import strawberry
 
-from gqlauth.schema import UserQuery, MeQuery
 from gqlauth import mutations
 
+@strawberrry.type
 class AuthMutation(graphene.ObjectType):
     register = mutations.Register.Field
     verify_account = mutations.VerifyAccount.Field
@@ -84,15 +84,8 @@ class AuthMutation(graphene.ObjectType):
     revoke_token = mutations.RevokeToken.Field
 
 
-class Query(UserQuery, MeQuery, graphene.ObjectType):
-    pass
 
-
-class Mutation(AuthMutation, graphene.ObjectType):
-    pass
-
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = graphene.Schem(mutation=AuthMutation)
 ```
 
 
