@@ -1,17 +1,16 @@
 from django.contrib.auth import get_user_model
 from uuid import UUID
 
-
-
 # strawberry
 import strawberry
 from strawberry.django import auth, auto
-
 
 # project
 from gqlauth import models
 
 USER_MODEL = get_user_model()
+user_pk_field = USER_MODEL._meta.pk.name
+
 
 @strawberry.django.filters.filter(models.UserStatus)
 class UserStatusFilter:
@@ -27,9 +26,16 @@ class UserStatusType:
     secondary_email: auto
 
 
+def inject_field(field: dict[str, type]):
+
+    def wrapped(cls):
+        cls.__annotations__.update(field)
+        return cls
+
+    return wrapped
 @strawberry.django.filters.filter(USER_MODEL)
+@inject_field({user_pk_field: auto})
 class UserFilter:
-    uuid: auto
     username: auto
     email: auto
     first_name: auto
@@ -47,8 +53,8 @@ class UserFilter:
 
 
 @strawberry.django.type(model=USER_MODEL, filters=UserFilter)
+@inject_field({user_pk_field: auto})
 class UserType:
-    uuid: auto
     username: auto
     email: auto
     first_name: auto
@@ -59,6 +65,7 @@ class UserType:
     is_staff: auto
     is_active: auto
     date_joined: auto
+
     # status: UserStatusType
 
     @strawberry.django.field

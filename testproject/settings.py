@@ -18,7 +18,9 @@ SECRET_KEY = "2qxe8hr#pz3t#0gd$0)rh)3fxr3+j3(k3a!ao)6d&y71mmdxk2"
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
+
+ROOT_URLCONF = 'testproject.urls'
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -30,7 +32,7 @@ INSTALLED_APPS = [
     'strawberry_django',
     'strawberry_django_jwt.refresh_token',
     'users',
-    'gqlauth',  # NOTE authantication with jwt
+    'gqlauth',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -46,7 +48,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
-ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
@@ -118,10 +119,9 @@ GRAPHQL_JWT = {
         "gqlauth.mutations.VerifySecondaryEmail",
     ],
 }
-import gqlauth
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 GQL_AUTH = {
-    "EMAIL_ASYNC_TASK": "pseudo_async_email_support.pseudo_async_email_support"
+    "EMAIL_ASYNC_TASK": "testproject.pseudo_async_email_support.pseudo_async_email_support"
 }

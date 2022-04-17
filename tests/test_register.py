@@ -1,7 +1,6 @@
 from smtplib import SMTPException
 from unittest import mock
 
-from pytest import mark
 
 from django.contrib.auth import get_user_model
 

@@ -19,6 +19,8 @@ tests_require = [
     "pytest-cov>=2.4.0",
     "pytest-django>=3.1.2",
     "coveralls",
+    "black",
+    "flake8"
 ]
 
 dev_requires = ["black==19.3b0", "flake8==3.7.7"] + tests_require
@@ -43,12 +45,12 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         "Django>=2.2.0",
-        "strawberry-django-jwt==0.2.0",
-        "strawberry-graphql-django==0.2.5",
-        "strawberry-graphql==0.104.3",
-        "PyJWT==2.3.0",
-        "Faker==13.3.4",
-        "Pillow==9.1.0",
+        "strawberry-django-jwt>=0.2.0",
+        "strawberry-graphql-django>=0.2.5",
+        "strawberry-graphql>=0.104.3",
+        "PyJWT>=2.3.0",
+        "Faker>=13.3.4",
+        "Pillow>=9.1.0",
     ],
 
     tests_require=tests_require,
