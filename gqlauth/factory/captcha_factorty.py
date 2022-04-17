@@ -7,8 +7,9 @@ import sys
 from PIL.Image import Image
 from faker import Faker
 from .create import ImageCaptcha
+
 sys.path.append(str(Path(__file__).parent.parent.parent))
-FONTS_PATH = str(Path(__file__).parent.joinpath('fonts'))
+FONTS_PATH = str(Path(__file__).parent.joinpath("fonts"))
 fake = Faker()
 
 
@@ -19,7 +20,7 @@ class CaptchaType:
 
     def as_base64(self):
         bytes_array = io.BytesIO()
-        self.image.save(bytes_array,format='PNG')
+        self.image.save(bytes_array, format="PNG")
         return b64encode(bytes_array.getvalue())
 
     def show(self):
@@ -27,10 +28,11 @@ class CaptchaType:
 
 
 def get_image(text):
-    image = ImageCaptcha(width=300,
-    height=150,
-    heb_fonts=[FONTS_PATH+'/stam.ttf'],
-    fonts=[FONTS_PATH+'/OpenSans-Semibold.ttf'],
+    image = ImageCaptcha(
+        width=300,
+        height=150,
+        heb_fonts=[FONTS_PATH + "/stam.ttf"],
+        fonts=[FONTS_PATH + "/OpenSans-Semibold.ttf"],
     )
     image = image.generate_image(text)
     return image
@@ -47,4 +49,3 @@ def generate_city_captcha():
     text = generate_text()
     image = get_image(text)
     return CaptchaType(image=image, text=text)
-

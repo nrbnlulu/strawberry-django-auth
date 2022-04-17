@@ -7,6 +7,7 @@ from gqlauth.settings import gqlauth_settings as app_settings
 from .testCases import RelayTestCase, DefaultTestCase
 
 from gqlauth.constants import Messages
+from pytest import mark
 from .__init__ import *
 
 
@@ -43,7 +44,7 @@ class DeleteAccountTestCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
         self.assertEqual(self.user1.is_active, True)
 
-    @override_settings(GQL_AUTH=SETTING_B)
+    @mark.settings_b
     def test_valid_password_permanently_delete(self):
         query = self.make_query()
         variables = {"user": self.user2}

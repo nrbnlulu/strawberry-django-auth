@@ -5,6 +5,5 @@ from gqlauth.administrator.mixins import VerifyUserMixin
 logging.getLogger(name=__name__)
 
 
-
 class VerifyUser(DynamicRelayMutationMixin, DynamicInputMixin, VerifyUserMixin):
     ...

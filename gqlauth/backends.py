@@ -22,8 +22,6 @@ class GraphQLAuthBackend(JSONWebTokenBackend):
         if request is None or getattr(request, "_jwt_token_auth", False):
             return None
 
-
-
         try:  # +++
             token = get_credentials(request, **kwargs)
             if token is not None:

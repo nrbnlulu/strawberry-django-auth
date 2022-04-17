@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+import sys
+sys.path.append('/home/nir/Desktop/git clones/django/strawberry-django-auth/testproject')
 BASE_DIR = os.path.dirname(__file__)
 
-SECRET_KEY = "2qxe8hr#pz3t#0gd$0)rh)3fxr3+j3(k3a!ao)6d&y71mmdxk2"
+SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
 
@@ -31,11 +32,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'strawberry_django',
     'strawberry_django_jwt.refresh_token',
-    'users',
     'gqlauth',
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

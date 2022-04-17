@@ -7,13 +7,13 @@ from PIL.ImageFont import truetype
 from io import BytesIO
 
 
-table  =  []
-for  i  in  range( 256 ):
-    table.append( int(i * 1.97 ))
+table = []
+for i in range(256):
+    table.append(int(i * 1.97))
 
 
 class _Captcha(object):
-    def generate(self, chars, format='png'):
+    def generate(self, chars, format="png"):
         """Generate an Image Captcha of the given characters.
 
         :param chars: text to be generated.
@@ -25,7 +25,7 @@ class _Captcha(object):
         out.seek(0)
         return out
 
-    def write(self, chars, output, format='png'):
+    def write(self, chars, output, format="png"):
         """Generate and write an image CAPTCHA data to the output.
 
         :param chars: text to be generated.
@@ -34,9 +34,6 @@ class _Captcha(object):
         """
         im = self.generate_image(chars)
         return im.save(output, format=format)
-
-
-
 
 
 class ImageCaptcha(_Captcha):
@@ -59,10 +56,13 @@ class ImageCaptcha(_Captcha):
     :param fonts: Fonts to be used to generate CAPTCHA images.
     :param font_sizes: Random choose a font size from this parameters.
     """
-    def __init__(self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None):
+
+    def __init__(
+        self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None
+    ):
         self._width = width
         self._height = height
-        self._fonts = fonts or DEFAULT_FONTS
+        self._fonts = fonts
         self.heb_fonts = heb_fonts
         self._font_sizes = font_sizes or (42, 50, 56)
         self._truefonts = []
@@ -71,11 +71,9 @@ class ImageCaptcha(_Captcha):
     def truefonts(self):
         if self._truefonts:
             return self._truefonts
-        self._truefonts = tuple([
-            truetype(n, s)
-            for n in self._fonts
-            for s in self._font_sizes
-        ])
+        self._truefonts = tuple(
+            [truetype(n, s) for n in self._fonts for s in self._font_sizes]
+        )
         return self._truefonts
 
     @staticmethod
@@ -111,25 +109,29 @@ class ImageCaptcha(_Captcha):
 
         The color should be a tuple of 3 numbers, such as (0, 255, 255).
         """
-        image = Image.new('RGB', (self._width, self._height), background)
+        image = Image.new("RGB", (self._width, self._height), background)
         draw = Draw(image)
 
         def _draw_character(c):
             # if hebrew
-            
+
             if "\u0590" <= c <= "\u05EA" and self.heb_fonts:
-                font=random.choice (tuple([
-                truetype(n, s)
-                for n in self.heb_fonts
-                for s in self._font_sizes
-                ]))
+                font = random.choice(
+                    tuple(
+                        [
+                            truetype(n, s)
+                            for n in self.heb_fonts
+                            for s in self._font_sizes
+                        ]
+                    )
+                )
             else:
                 font = random.choice(self.truefonts)
             w, h = draw.textsize(c, font=font)
-            
+
             dx = random.randint(0, 4)
             dy = random.randint(0, 6)
-            im = Image.new('RGBA', (w + dx, h + dy))
+            im = Image.new("RGBA", (w + dx, h + dy))
             Draw(im).text((dx, dy), c, font=font, fill=color)
 
             # rotate
@@ -146,10 +148,14 @@ class ImageCaptcha(_Captcha):
             w2 = w + abs(x1) + abs(x2)
             h2 = h + abs(y1) + abs(y2)
             data = (
-                x1, y1,
-                -x1, h2 - y2,
-                w2 + x2, h2 + y2,
-                w2 - x2, -y1,
+                x1,
+                y1,
+                -x1,
+                h2 - y2,
+                w2 + x2,
+                h2 + y2,
+                w2 - x2,
+                -y1,
             )
             im = im.resize((w2, h2))
             im = im.transform((w, h), Image.QUAD, data)
@@ -172,7 +178,7 @@ class ImageCaptcha(_Captcha):
 
         for im in images:
             w, h = im.size
-            mask = im.convert('L').point(table)
+            mask = im.convert("L").point(table)
             image.paste(im, (offset, int((self._height - h) / 2)), mask)
             offset = offset + w + random.randint(-rand, 0)
 

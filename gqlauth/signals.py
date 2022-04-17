@@ -10,7 +10,7 @@ def create_user_status(sender, instance, created, **kwargs):
         from .models import UserStatus
 
         UserStatus._default_manager.get_or_create(user=instance)
-        
+
 
 user_registered = Signal()
 user_verified = Signal()

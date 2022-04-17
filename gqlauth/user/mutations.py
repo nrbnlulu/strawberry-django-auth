@@ -13,4 +13,3 @@ class UserMutations:
     refresh_token = relay.RefreshToken.Field
     revoke_token = relay.RevokeToken.Field
     update_account = arg_mutations.UpdateAccount.Field
-

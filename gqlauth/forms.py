@@ -1,4 +1,9 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, UsernameField, PasswordChangeForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    UserChangeForm,
+    UsernameField,
+    PasswordChangeForm,
+)
 from django.contrib.auth import get_user_model
 from django import forms
 
@@ -7,7 +12,9 @@ from gqlauth.settings import gqlauth_settings as app_settings
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True if 'email' in app_settings.REGISTER_MUTATION_FIELDS else False)
+    email = forms.EmailField(
+        required=True if "email" in app_settings.REGISTER_MUTATION_FIELDS else False
+    )
 
     class Meta:
         model = get_user_model()
@@ -17,7 +24,8 @@ class RegisterForm(UserCreationForm):
 
 
 class PasswordChangeFormGql(PasswordChangeForm):
-    field_order = ['oldPassword', 'newPassword1', 'newPassword2']
+    field_order = ["oldPassword", "newPassword1", "newPassword2"]
+
 
 class EmailForm(forms.Form):
     email = forms.EmailField(max_length=254)

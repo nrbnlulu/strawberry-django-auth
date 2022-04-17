@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 USER_MODEL = get_user_model()
 
+
 class Captcha(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=50, editable=False)
@@ -39,13 +40,13 @@ class Captcha(models.Model):
 
     @staticmethod
     def _format(text: str):
-        return text.lower().replace(' ', '')
+        return text.lower().replace(" ", "")
 
     @classmethod
     def create_captcha(cls):
         cap = generate_city_captcha()
         obj = cls(text=cap.text)
-        setattr(obj, 'image', cap.image)
+        setattr(obj, "image", cap.image)
         obj.save()
         if django_settings.DEBUG:
             obj.show()
@@ -58,7 +59,7 @@ class Captcha(models.Model):
     def validate(self, input_: str):
         """
         validates input_.
-        - if tried to validate more than 3 times obj will be deleted in the database 
+        - if tried to validate more than 3 times obj will be deleted in the database
         - else increments by one
         - if reaches expiery date deletes the obj
         - returns bool for success state
@@ -94,15 +95,17 @@ class Captcha(models.Model):
 
     def as_bytes(self):
         bytes_array = io.BytesIO()
-        self.image.save(bytes_array, format='PNG')
+        self.image.save(bytes_array, format="PNG")
         return bytes_array.getvalue()
 
     def __str__(self):
-        interval = (self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA) - timezone.now()
+        interval = (
+            self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA
+        ) - timezone.now()
         interval = interval.total_seconds()
-        expiery_str = (f" expires in {interval} seconds"
-                       if interval > 0
-                       else "already expierd")
+        expiery_str = (
+            f" expires in {interval} seconds" if interval > 0 else "already expierd"
+        )
         return "captcha " + expiery_str
 
 
@@ -132,7 +135,7 @@ class UserStatus(models.Model):
             message=message,
             html_message=html_message,
             recipient_list=(
-                    recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]
+                recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]
             ),
             fail_silently=False,
         )
@@ -280,4 +283,3 @@ class UserStatus(models.Model):
         with transaction.atomic():
             self.secondary_email = None
             self.save(update_fields=["secondary_email"])
-

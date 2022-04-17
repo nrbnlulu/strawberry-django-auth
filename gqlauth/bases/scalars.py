@@ -3,8 +3,6 @@ import strawberry
 from gqlauth.bases.exceptions import WrongUsage
 
 
-
-
 def serialize_excpected_error(errors):
     if isinstance(errors, dict):
         if errors.get("__all__", False):
@@ -15,10 +13,11 @@ def serialize_excpected_error(errors):
     raise WrongUsage("`errors` must be list or dict!")
 
 
-@strawberry.scalar(name='ExpectedError',
-                   serialize=lambda value: serialize_excpected_error(value),
-                   parse_value=lambda value: ExpectedErrorType(value)
-                   )
+@strawberry.scalar(
+    name="ExpectedError",
+    serialize=lambda value: serialize_excpected_error(value),
+    parse_value=lambda value: ExpectedErrorType(value),
+)
 class ExpectedErrorType:
     """
     Errors messages and codes mapped to
@@ -45,5 +44,5 @@ class ExpectedErrorType:
         ]
     }
     """
-    pass
 
+    pass

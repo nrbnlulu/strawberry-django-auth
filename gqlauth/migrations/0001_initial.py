@@ -8,27 +8,45 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Captcha',
+            name="Captcha",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
-                ('text', models.CharField(editable=False, max_length=50)),
-                ('insert_time', models.DateTimeField(auto_now_add=True)),
-                ('tries', models.IntegerField(default=0)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("uuid", models.UUIDField(default=uuid.uuid4, editable=False)),
+                ("text", models.CharField(editable=False, max_length=50)),
+                ("insert_time", models.DateTimeField(auto_now_add=True)),
+                ("tries", models.IntegerField(default=0)),
             ],
         ),
         migrations.CreateModel(
-            name='UserStatus',
+            name="UserStatus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('verified', models.BooleanField(default=False)),
-                ('archived', models.BooleanField(default=False)),
-                ('secondary_email', models.EmailField(blank=True, max_length=254, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("verified", models.BooleanField(default=False)),
+                ("archived", models.BooleanField(default=False)),
+                (
+                    "secondary_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
             ],
         ),
     ]

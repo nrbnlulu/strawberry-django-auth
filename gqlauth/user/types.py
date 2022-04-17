@@ -27,12 +27,13 @@ class UserStatusType:
 
 
 def inject_field(field: dict[str, type]):
-
     def wrapped(cls):
         cls.__annotations__.update(field)
         return cls
 
     return wrapped
+
+
 @strawberry.django.filters.filter(USER_MODEL)
 @inject_field({user_pk_field: auto})
 class UserFilter:

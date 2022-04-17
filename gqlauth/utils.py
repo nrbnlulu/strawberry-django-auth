@@ -11,10 +11,11 @@ from .exceptions import TokenScopeError
 def hide_args_kwargs(field):
     sig = inspect.signature(field)
     cleared = tuple(
-        p for p in sig.parameters.values() if p.name not in ('kwargs', 'args')
+        p for p in sig.parameters.values() if p.name not in ("kwargs", "args")
     )
     field.__signature__ = inspect.signature(field).replace(parameters=(cleared))
     return field
+
 
 def isiterable(value):
     try:
@@ -23,12 +24,14 @@ def isiterable(value):
         return False
     return True
 
+
 def camelize(data):
     if isinstance(data, dict):
         return {to_camel_case(k): camelize(v) for k, v in data.items()}
     if isiterable(data) and not isinstance(data, str):
         return [camelize(d) for d in data]
     return data
+
 
 def list_to_dict(lst: [str]):
     """takes list of string and creates a dict with str as their values"""
@@ -37,13 +40,15 @@ def list_to_dict(lst: [str]):
         new_dict[item] = str
     return new_dict
 
+
 warnings.simplefilter("once")
 
 
 def g_user(info):
     # returns a user from info obj
-    user = getattr(info.context, 'user', False)
-    if user: return user
+    user = getattr(info.context, "user", False)
+    if user:
+        return user
     return info.context.request.user
 
 
@@ -66,13 +71,11 @@ def get_payload_from_token(token, action, exp=None):
     return payload
 
 
-
 def using_refresh_tokens():
     if (
-            hasattr(django_settings, "GRAPHQL_JWT")
-            and django_settings.GRAPHQL_JWT.get("JWT_LONG_RUNNING_REFRESH_TOKEN", False)
-            and "strawberry_django_jwt.refresh_token"
-            in django_settings.INSTALLED_APPS
+        hasattr(django_settings, "GRAPHQL_JWT")
+        and django_settings.GRAPHQL_JWT.get("JWT_LONG_RUNNING_REFRESH_TOKEN", False)
+        and "strawberry_django_jwt.refresh_token" in django_settings.INSTALLED_APPS
     ):
         return True
     return False
@@ -110,16 +113,12 @@ def normalize_fields(dict_or_list, extra_list_or_dict):
     return dict_or_list
 
 
-
-
-
-
 def create_strawberry_argument(
-        python_name: str, graphql_name: str, type_, default=None
+    python_name: str, graphql_name: str, type_, default=None
 ):
     return StrawberryArgument(
         python_name=python_name,
         graphql_name=graphql_name,
         type_annotation=StrawberryAnnotation(type_),
-        default=default or UNSET
+        default=default or UNSET,
     )

@@ -10,7 +10,12 @@ from django.utils.module_loading import import_string
 
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
-from gqlauth.forms import RegisterForm, EmailForm, UpdateAccountForm, PasswordLessRegisterForm
+from gqlauth.forms import (
+    RegisterForm,
+    EmailForm,
+    UpdateAccountForm,
+    PasswordLessRegisterForm,
+)
 from gqlauth.utils import normalize_fields, g_user
 from gqlauth.models import Captcha, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -23,14 +28,18 @@ from gqlauth.exceptions import (
     PasswordAlreadySetError,
 )
 from gqlauth.constants import Messages, TokenAction
-from gqlauth.utils import revoke_user_refresh_token, get_payload_from_token, using_refresh_tokens
+from gqlauth.utils import (
+    revoke_user_refresh_token,
+    get_payload_from_token,
+    using_refresh_tokens,
+)
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
 from gqlauth.decorators import (
     password_confirmation_required,
     verification_required,
     secondary_email_required,
-    login_required
+    login_required,
 )
 
 UserModel = get_user_model()
@@ -71,7 +80,7 @@ class RegisterMixin:
         )
         extra_fields = password_fields
         if app_settings.REGISTER_REQUIRE_CAPTCHA:
-            captcha_fields = {'identifier': UUID, "userEntry": str}
+            captcha_fields = {"identifier": UUID, "userEntry": str}
             extra_fields = normalize_fields(captcha_fields, password_fields)
 
         _required_inputs = normalize_fields(
@@ -87,34 +96,34 @@ class RegisterMixin:
 
     @classmethod
     def check_captcha(cls, input_):
-        uuid = input_.get('identifier')
+        uuid = input_.get("identifier")
         try:
             obj = Captcha.objects.get(uuid=uuid)
         except Captcha.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
-        return obj.validate(input_.get('userEntry'))
+        return obj.validate(input_.get("userEntry"))
 
     @classmethod
     def resolve_mutation(cls, info, **input_):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(input_)
             if not check_res == Messages.CAPTCHA_VALID:
-                return cls.output(success=False, errors={'captcha': check_res})
+                return cls.output(success=False, errors={"captcha": check_res})
 
         try:
             with transaction.atomic():
                 f = cls.form(input_)
                 if f.is_valid():
-                    email = input_.get('email')
+                    email = input_.get("email")
                     UserStatus.clean_email(email)
                     user = f.save()
                     send_activation = (
-                            app_settings.SEND_ACTIVATION_EMAIL is True and email
+                        app_settings.SEND_ACTIVATION_EMAIL is True and email
                     )
                     send_password_set = (
-                            app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
-                            and app_settings.SEND_PASSWORD_SET_EMAIL is True
-                            and email
+                        app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
+                        and app_settings.SEND_PASSWORD_SET_EMAIL is True
+                        and email
                     )
                     if send_activation:
                         # TODO CHECK FOR EMAIL ASYNC SETTING
@@ -243,7 +252,9 @@ class ResendActivationEmailMixin:
         except SMTPException:
             return cls.output(success=False, errors=Messages.EMAIL_FAIL)
         except UserAlreadyVerified:
-            return cls.output(success=False, errors={"email": Messages.ALREADY_VERIFIED})
+            return cls.output(
+                success=False, errors={"email": Messages.ALREADY_VERIFIED}
+            )
 
 
 class SendPasswordResetEmailMixin:
@@ -325,8 +336,8 @@ class PasswordResetMixin:
             )
             user = UserModel._default_manager.get(**payload)
             form_dict = {
-                'new_password1': input_['newPassword1'],
-                'new_password2': input_['newPassword2']
+                "new_password1": input_["newPassword1"],
+                "new_password2": input_["newPassword2"],
             }
             f = cls.form(user, form_dict)
             if f.is_valid():
@@ -374,8 +385,8 @@ class PasswordSetMixin:
             )
             user = UserModel._default_manager.get(**payload)
             form_dict = {
-                'new_password1': input_['newPassword1'],
-                'new_password2': input_['newPassword2']
+                "new_password1": input_["newPassword1"],
+                "new_password2": input_["newPassword2"],
             }
             f = cls.form(user, form_dict)
             if f.is_valid():
@@ -417,11 +428,13 @@ class ObtainJSONWebTokenMixin:
     class _meta:
         additional_req = {}
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            additional_req.update({'identifier': UUID, 'userEntry': str})
-        _required_inputs = normalize_fields(app_settings.LOGIN_REQUIRED_FIELDS, additional_req)
+            additional_req.update({"identifier": UUID, "userEntry": str})
+        _required_inputs = normalize_fields(
+            app_settings.LOGIN_REQUIRED_FIELDS, additional_req
+        )
 
         _inputs = app_settings.LOGIN_OPTIONAL_FIELDS
-        _parent_resolver_name = 'obtain'
+        _parent_resolver_name = "obtain"
 
     @classmethod
     def check_captcha(cls, **input_):
@@ -431,14 +444,14 @@ class ObtainJSONWebTokenMixin:
         except Captcha.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
 
-        return obj.validate(input_.get('userEntry'))
+        return obj.validate(input_.get("userEntry"))
 
     @classmethod
     def resolve_mutation(cls, info, **input_):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(**input_)
             if not check_res == Messages.CAPTCHA_VALID:
-                return cls.output(success=False, errors={'captcha': check_res})
+                return cls.output(success=False, errors={"captcha": check_res})
 
         try:
             USERNAME_FIELD = UserModel.USERNAME_FIELD
@@ -449,7 +462,7 @@ class ObtainJSONWebTokenMixin:
             password = input_.get("password")
             query_input_ = {USERNAME_FIELD: username}
             user = get_user_to_login(**query_input_)
-            query_input_['password'] = password
+            query_input_["password"] = password
 
             if user.status.archived is True:  # unarchive on login
                 UserStatus.unarchive(user)
@@ -526,8 +539,8 @@ class PasswordChangeMixin:
         _required_inputs = ["old_password", "new_password1", "new_password2"]
         _outputs = []
         if using_refresh_tokens():
-            _outputs = ["refresh_token", 'token']
-        _parent_resolver_name = 'obtain'
+            _outputs = ["refresh_token", "token"]
+        _parent_resolver_name = "obtain"
 
     form = PasswordChangeForm
 
@@ -537,9 +550,9 @@ class PasswordChangeMixin:
     def resolve_mutation(cls, info, **input_):
         user = g_user(info)
         form_dict = {
-            'old_password': input_['oldPassword'],
-            'new_password1': input_['newPassword1'],
-            'new_password2': input_['newPassword2']
+            "old_password": input_["oldPassword"],
+            "new_password1": input_["newPassword1"],
+            "new_password2": input_["newPassword2"],
         }
         f = cls.form(user, form_dict)
         if f.is_valid():
@@ -547,11 +560,9 @@ class PasswordChangeMixin:
             user = f.save()
             parent_input = {
                 user.USERNAME_FIELD: getattr(user, user.USERNAME_FIELD),
-                'password': input_.get("newPassword1")
+                "password": input_.get("newPassword1"),
             }
-            parent_res = cls.obtain.get_result(
-                None, None, [cls, info], parent_input
-            )
+            parent_res = cls.obtain.get_result(None, None, [cls, info], parent_input)
             return cls.output(success=True, obtainPayload=parent_res)
         else:
             return cls.output(success=False, errors=f.errors.get_json_data())
@@ -574,11 +585,12 @@ class UpdateAccountMixin:
     def resolve_mutation(cls, info, **input_):
         user = g_user(info)
         f = cls.form(
-        {
-            'first_name': input_.get('firstName'),
-            'last_name': input_.get('lastName')
-        },
-        instance=user)
+            {
+                "first_name": input_.get("firstName"),
+                "last_name": input_.get("lastName"),
+            },
+            instance=user,
+        )
         if f.is_valid():
             f.save()
             return cls.output(success=True)
@@ -592,7 +604,7 @@ class VerifyTokenMixin:
     """
 
     class _meta:
-        _parent_resolver_name = 'verify'
+        _parent_resolver_name = "verify"
 
     @classmethod
     def resolve_mutation(cls, info, **input_):
@@ -615,14 +627,12 @@ class RefreshTokenMixin:
     """
 
     class _meta:
-        _parent_resolver_name = 'refresh'
+        _parent_resolver_name = "refresh"
 
     @classmethod
     def resolve_mutation(cls, info, **input_):
         try:
-            parent_input = {
-                'refresh_token': input_.get('refreshToken')
-            }
+            parent_input = {"refresh_token": input_.get("refreshToken")}
 
             res = cls.refresh.get_result(None, None, [cls, info], parent_input)
             return cls.output(success=True, refreshPayload=res)
@@ -639,14 +649,12 @@ class RevokeTokenMixin:
     """
 
     class _meta:
-        _parent_resolver_name = 'revoke'
+        _parent_resolver_name = "revoke"
 
     @classmethod
     def resolve_mutation(cls, info, **input_):
         try:
-            parent_input = {
-                'refresh_token': input_.get('refreshToken')
-            }
+            parent_input = {"refresh_token": input_.get("refreshToken")}
 
             res = cls.revoke.get_result(None, None, [cls, info], parent_input)
             return cls.output(success=True, revokePayload=res)

@@ -7,8 +7,6 @@ from .constants import Messages
 from .exceptions import WrongUsage, GraphQLAuthError
 
 
-
-
 def login_required(fn):
     """
     If the user is registered

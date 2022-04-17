@@ -1,3 +1,5 @@
+from pytest import mark
+
 from .__init__ import *
 from gqlauth.models import Captcha
 from .testCases import RelayTestCase, DefaultTestCase
@@ -63,7 +65,7 @@ class LoginTestCaseMixin:
         self.assertTrue(executed["errors"])
         self.assertFalse(executed['obtainPayload'])
 
-    @override_settings(GQL_AUTH=SETTING_B)
+    @mark.settings_b
     def test_not_verified_login_not_verified(self):
         gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = False
         query = self.get_query(self.not_verified_user.username)
@@ -72,7 +74,7 @@ class LoginTestCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
         self.assertFalse(executed['obtainPayload'])
 
-    @override_settings(GQL_AUTH=SETTING_B)
+    @mark.settings_b
     def test_setting_not_verified_allowed_but_with_wrong_pass(self):
         gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
         query = self.get_query(self.not_verified_user.username, "wrongpass")

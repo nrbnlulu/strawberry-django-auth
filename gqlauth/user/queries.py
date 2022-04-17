@@ -1,13 +1,14 @@
 from typing import Optional
 from django.contrib.auth import get_user_model
+
 # strawberry
 import strawberry
 from strawberry.django import auth
 from gqlauth.utils import g_user
+
 # project
 from .types import UserType, UserFilter
 from typing import List
-
 
 
 @strawberry.type

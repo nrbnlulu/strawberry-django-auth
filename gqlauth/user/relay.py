@@ -23,6 +23,8 @@ from gqlauth.user.resolvers import (
     SwapEmailsMixin,
     RemoveSecondaryEmailMixin,
 )
+
+
 class Register(
     RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin
 ):
@@ -30,30 +32,30 @@ class Register(
 
 
 class VerifyAccount(
-    VerifyAccountMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin
+    VerifyAccountMixin,
+    DynamicInputMixin,
+    DynamicPayloadMixin,
+    DynamicRelayMutationMixin,
 ):
     __doc__ = VerifyAccountMixin.__doc__
-
 
 
 class ResendActivationEmail(
     ResendActivationEmailMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
-    DynamicRelayMutationMixin
+    DynamicRelayMutationMixin,
 ):
     __doc__ = ResendActivationEmailMixin.__doc__
-
 
 
 class SendPasswordResetEmail(
     SendPasswordResetEmailMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
-    DynamicRelayMutationMixin
+    DynamicRelayMutationMixin,
 ):
     __doc__ = SendPasswordResetEmailMixin.__doc__
-
 
 
 class SendSecondaryEmailActivation(
@@ -65,7 +67,6 @@ class SendSecondaryEmailActivation(
     __doc__ = SendSecondaryEmailActivationMixin.__doc__
 
 
-
 class VerifySecondaryEmail(
     VerifySecondaryEmailMixin,
     DynamicInputMixin,
@@ -73,7 +74,6 @@ class VerifySecondaryEmail(
     DynamicRelayMutationMixin,
 ):
     __doc__ = VerifySecondaryEmailMixin.__doc__
-
 
 
 class SwapEmails(
@@ -85,7 +85,6 @@ class SwapEmails(
     __doc__ = SwapEmailsMixin.__doc__
 
 
-
 class RemoveSecondaryEmail(
     RemoveSecondaryEmailMixin,
     DynamicInputMixin,
@@ -93,7 +92,6 @@ class RemoveSecondaryEmail(
     DynamicRelayMutationMixin,
 ):
     __doc__ = RemoveSecondaryEmailMixin.__doc__
-
 
 
 class PasswordSet(
@@ -105,7 +103,6 @@ class PasswordSet(
     __doc__ = PasswordSetMixin.__doc__
 
 
-
 class PasswordReset(
     PasswordResetMixin,
     DynamicInputMixin,
@@ -114,7 +111,10 @@ class PasswordReset(
 ):
     __doc__ = PasswordResetMixin.__doc__
 
+
 from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
+
+
 class ObtainJSONWebToken(
     ObtainJSONWebTokenMixin,
     DynamicInputMixin,
@@ -123,8 +123,6 @@ class ObtainJSONWebToken(
     JwtObtainParent,
 ):
     __doc__ = ObtainJSONWebTokenMixin.__doc__
-
-
 
 
 class ArchiveAccount(
@@ -136,7 +134,6 @@ class ArchiveAccount(
     __doc__ = ArchiveAccountMixin.__doc__
 
 
-
 class DeleteAccount(
     DeleteAccountMixin,
     DynamicInputMixin,
@@ -146,16 +143,14 @@ class DeleteAccount(
     __doc__ = DeleteAccountMixin.__doc__
 
 
-
 class PasswordChange(
     PasswordChangeMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
     DynamicRelayMutationMixin,
-    JwtObtainParent
+    JwtObtainParent,
 ):
     __doc__ = PasswordChangeMixin.__doc__
-
 
 
 class UpdateAccount(
@@ -168,36 +163,39 @@ class UpdateAccount(
 
 
 from strawberry_django_jwt.mutations import Verify as VerifyParent
+
+
 class VerifyToken(
     VerifyTokenMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
     DynamicRelayMutationMixin,
-    VerifyParent
+    VerifyParent,
 ):
     __doc__ = VerifyTokenMixin.__doc__
 
 
-
 from strawberry_django_jwt.mutations import Refresh
+
+
 class RefreshToken(
     RefreshTokenMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
     DynamicRelayMutationMixin,
-    Refresh
+    Refresh,
 ):
     __doc__ = RefreshTokenMixin.__doc__
 
 
 from strawberry_django_jwt.mutations import Revoke as RevokeParent
 
+
 class RevokeToken(
     RevokeTokenMixin,
     DynamicInputMixin,
     DynamicPayloadMixin,
     DynamicRelayMutationMixin,
-    RevokeParent
+    RevokeParent,
 ):
     __doc__ = RevokeTokenMixin.__doc__
-

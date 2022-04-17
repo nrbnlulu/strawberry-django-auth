@@ -1,3 +1,4 @@
+from pytest import mark
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from .testCases import RelayTestCase, DefaultTestCase
@@ -38,97 +39,97 @@ class UpdateAccountTestCaseMixin:
 
     def test_invalid_form(self):
         super_long_string = \
-        "longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
-        ")@#$_)1- "
+            "longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1-longstringwithmorethan30characters{}FSDA@@#$()@#$_)1-longstringwithmorethan30characters{}FSDA@@#$(" \
+            ")@#$_)1- "
         variables = {"user": self.user2}
         executed = self.make_request(
             self.get_query(first_name=super_long_string), variables
@@ -138,7 +139,7 @@ class UpdateAccountTestCaseMixin:
         self.user2.refresh_from_db()
         self.assertEqual(self.user2.first_name, "bar")
 
-    @override_settings(GQL_AUTH=SETTING_B)
+    @mark.settings_b
     def test_update_account_list_on_settings(self):
         variables = {"user": self.user2}
         executed = self.make_request(self.get_query(), variables)
@@ -147,8 +148,7 @@ class UpdateAccountTestCaseMixin:
         self.user2.refresh_from_db()
         self.assertEqual(self.user2.first_name, "firstname")
 
-
-    @override_settings(GQL_AUTH=SETTING_B)
+    @mark.settings_b
     def test_update_account_non_field_errors(self):
         """
         on settings b: first and last name are unique together,

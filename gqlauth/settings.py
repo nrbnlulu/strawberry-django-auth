@@ -24,7 +24,7 @@ DEFAULTS = {
     # mutation fields options
     "LOGIN_OPTIONAL_FIELDS": [],
     "LOGIN_REQUIRE_CAPTCHA": True,
-    "LOGIN_REQUIRED_FIELDS": ['username', 'password'],
+    "LOGIN_REQUIRED_FIELDS": ["username", "password"],
     # required fields on register, plus password1 and password2,
     # can be a dict like UPDATE_MUTATION_FIELDS setting
     "REGISTER_MUTATION_FIELDS": ["email", "username"],

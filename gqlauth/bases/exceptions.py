@@ -15,8 +15,9 @@ class WrongUsage(ErrorBase):
     """
     internal exception
     """
+
     default_message = _("Wrong usage, check your code!.")
+
 
 class WrongInput(ErrorBase):
     default_message = _("Wrong Input received")
-
