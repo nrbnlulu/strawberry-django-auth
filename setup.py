@@ -23,7 +23,7 @@ tests_require = [
     "flake8"
 ]
 
-dev_requires = ["black==19.3b0", "flake8==3.7.7"] + tests_require
+dev_requires = ["black>=19.3b0", "flake8>=3.7.7"] + tests_require
 
 setup(
     name="strawberry-django-auth",
@@ -45,7 +45,7 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         "Django>=3.2.13",
-        "strawberry-django-jwt>=0.2.0",
+        "strawberry-django-jwt",
         "strawberry-graphql-django>=0.2.5",
         "strawberry-graphql>=0.104.3",
         "PyJWT>=2.3.0",
