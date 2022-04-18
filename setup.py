@@ -19,17 +19,15 @@ tests_require = [
     "pytest-cov>=2.4.0",
     "pytest-django>=3.1.2",
     "coveralls",
-    "black",
-    "flake8"
 ]
 
-dev_requires = ["black>=19.3b0", "flake8>=3.7.7"] + tests_require
+dev_requires = ["black>=22.3", "flake8>=4.0.1"] + tests_require
 
 setup(
     name="strawberry-django-auth",
     version=get_version("gqlauth"),
     license="MIT",
-    description="Graphql and relay authentication with Graphene for Django.",
+    description="Graphql and relay authentication with Strawberry for Django.",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
     author="nir-benlulu",
@@ -66,7 +64,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.10",
         "Framework :: Django",
-        "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
         "Framework :: Django :: 4.0",
     ],

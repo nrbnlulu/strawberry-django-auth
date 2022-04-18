@@ -1,10 +1,8 @@
 import inspect
 from functools import wraps
-from strawberry_django_jwt.decorators import login_required as login_req
-from strawberry_django_jwt.exceptions import PermissionDenied
 from gqlauth.utils import g_user
 from .constants import Messages
-from .exceptions import WrongUsage, GraphQLAuthError
+from .exceptions import WrongUsage, GraphQLAuthError, PermissionDenied
 
 
 def login_required(fn):
@@ -83,6 +81,12 @@ def allowed_permissions(roles: list):
         @verification_required
         def wrapper(src, info, **kwargs):
             user = g_user(info)
+            if roles in user.user_permissions.all():
+                return user
+            raise PermissionDenied(
+                f"required permissions are {roles} user {user} is missing "
+                f"{[role for role in roles if role not in user.user_permissions.all()]}"
+            )
 
         return wrapper
 

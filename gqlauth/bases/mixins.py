@@ -116,7 +116,8 @@ class DynamicInputMixin:
                 )
             if not isinstance(_required_inputs, dict | list) and _required_inputs:
                 raise WrongUsage(
-                    f"dynamic required inputs can be list or dict not{type(_required_inputs)}"
+                    f"dynamic required inputs can be list or dict"
+                    f" not{type(_required_inputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)
@@ -179,7 +180,8 @@ class DynamicArgsMixin:
                 )
             if not isinstance(_required_inputs, dict | list) and _required_inputs:
                 raise WrongUsage(
-                    f"dynamic required inputs can be list or dict not{type(_required_inputs)}"
+                    f"dynamic required inputs"
+                    f" can be list or dict not{type(_required_inputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)
@@ -243,7 +245,8 @@ class DynamicPayloadMixin:
                 and _required_outputs
             ):
                 raise WrongUsage(
-                    f"dynamic required outputs can be list or dict not{type(_required_outputs)}"
+                    f"dynamic required"
+                    f" outputs can be list or dict not{type(_required_outputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)

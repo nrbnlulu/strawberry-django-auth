@@ -42,5 +42,5 @@ class WrongUsage(GraphQLAuthError):
     default_message = _("Wrong usage, check your code!.")
 
 
-class NoSufficiantPermissions(GraphQLAuthError):
+class PermissionDenied(GraphQLAuthError):
     default_message = _("User is not allowed for this content")

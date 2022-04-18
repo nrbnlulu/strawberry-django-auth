@@ -455,7 +455,6 @@ class ObtainJSONWebTokenMixin:
 
         try:
             USERNAME_FIELD = UserModel.USERNAME_FIELD
-            unarchiving = False
 
             # extract USERNAME_FIELD to use in query
             username = input_.get("username")
@@ -466,7 +465,6 @@ class ObtainJSONWebTokenMixin:
 
             if user.status.archived is True:  # unarchive on login
                 UserStatus.unarchive(user)
-                unarchiving = True
 
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # this will raise if not successful

@@ -23,15 +23,16 @@ from gqlauth.user.resolvers import (
     SwapEmailsMixin,
     RemoveSecondaryEmailMixin,
 )
+from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
+from strawberry_django_jwt.mutations import Verify as VerifyParent
+from strawberry_django_jwt.mutations import Revoke as RevokeParent
+from strawberry_django_jwt.mutations import Refresh as RefreshParent
 
 
 class Register(
     RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin
 ):
     __doc__ = RegisterMixin.__doc__
-
-
-from strawberry_django_jwt.mutations import Verify as VerifyParent
 
 
 class VerifyAccount(
@@ -116,9 +117,6 @@ class PasswordReset(
     __doc__ = PasswordResetMixin.__doc__
 
 
-from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
-
-
 class ObtainJSONWebToken(
     ObtainJSONWebTokenMixin,
     DynamicArgsMixin,
@@ -166,9 +164,6 @@ class UpdateAccount(
     __doc__ = UpdateAccountMixin.__doc__
 
 
-from strawberry_django_jwt.mutations import Verify as VerifyParent
-
-
 class VerifyToken(
     VerifyTokenMixin,
     DynamicArgsMixin,
@@ -179,20 +174,14 @@ class VerifyToken(
     __doc__ = VerifyTokenMixin.__doc__
 
 
-from strawberry_django_jwt.mutations import Refresh
-
-
 class RefreshToken(
     RefreshTokenMixin,
     DynamicArgsMixin,
     DynamicPayloadMixin,
     DynamicArgsMutationMixin,
-    Refresh,
+    RefreshParent,
 ):
     __doc__ = RefreshTokenMixin.__doc__
-
-
-from strawberry_django_jwt.mutations import Revoke as RevokeParent
 
 
 class RevokeToken(

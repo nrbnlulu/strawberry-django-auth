@@ -2,6 +2,7 @@ import warnings
 import inspect
 from django.core import signing
 from django.conf import settings as django_settings
+from django.contrib.auth.models import User
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.utils.str_converters import to_camel_case
 from strawberry.arguments import StrawberryArgument, UNSET
@@ -44,7 +45,7 @@ def list_to_dict(lst: [str]):
 warnings.simplefilter("once")
 
 
-def g_user(info):
+def g_user(info) -> User:
     # returns a user from info obj
     user = getattr(info.context, "user", False)
     if user:
