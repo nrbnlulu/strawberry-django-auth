@@ -25,8 +25,5 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
-    - name: Make migrations
-      run: |
-        python -m migrate
     - name: Test with tox
       run: tox
