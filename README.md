@@ -1,7 +1,7 @@
 # Strawberry-django Auth
 
 [Django](https://github.com/django/django) registration and authentication with [Strawberry](https://strawberry.rocks/).
-![tests](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/.github/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/.github/workflows/tests.yml/badge.svg)
 [![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
 
