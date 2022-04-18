@@ -1,6 +1,6 @@
 from smtplib import SMTPException
 from unittest import mock
-
+from pytest import mark
 
 from django.contrib.auth import get_user_model
 
@@ -73,6 +73,7 @@ class RegisterTestCaseMixin:
         "gqlauth.models.UserStatus.send_activation_email",
         mock.MagicMock(side_effect=SMTPException),
     )
+    @mark.settings_b
     def test_register_email_send_fail(self):
         from gqlauth.settings import gqlauth_settings as app_settings
         app_settings.SEND_ACTIVATION_EMAIL = True

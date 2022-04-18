@@ -16,53 +16,6 @@ class QueryTestCase(DefaultTestCase):
         )
         super().setUp()
 
-    def test_query(self):
-        query = """
-        query {
-            users {
-                edges {
-                    node {
-                        archived,
-                        verified,
-                        secondaryEmail,
-                        pk
-                    }
-                }
-            }
-        }
-        """
-        executed = self.make_request(query)
-        self.assertTrue(executed["edges"])
-
-    def test_db_queries(self):
-        """
-        Querying users should only use 2 db queries.
-
-        1. SELECT COUNT(*) AS "__count" FROM "auth_user"
-        2. SELECT ... FROM "auth_user"
-            LEFT OUTER JOIN "gqlauth_userstatus" ON (
-                "auth_user"."id" = "gqlauth_userstatus"."user_id"
-            )
-            LIMIT 3
-        """
-
-        query = """
-        query {
-            users {
-                edges {
-                    node {
-                        archived,
-                        verified,
-                        secondaryEmail,
-                        pk
-                    }
-                }
-            }
-        }
-        """
-        with self.assertNumQueries(2):
-            executed = self.make_request(query)
-        self.assertTrue(executed["edges"])
 
     def test_me_authenticated(self):
         query = """
