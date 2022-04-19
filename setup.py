@@ -28,7 +28,7 @@ setup(
     version=get_version("gqlauth"),
     license="MIT",
     description="Graphql authentication system with Strawberry for Django.",
-    long_description=(this_directory / "README.md").read_text(),
+    long_description=(this_directory / "README.rst").read_text(),
     long_description_content_type="text/x-rst",
     author="nir-benlulu",
     author_email="nrbnlulu@gmail.com",

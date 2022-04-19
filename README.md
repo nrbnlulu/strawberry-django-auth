@@ -30,8 +30,7 @@ Documentation is available at [read the docs](https://strawberry-django-auth.rea
 * [ ] [Awesome docs](https://strawberry-django-auth.readthedocs.io/en/latest/):tada:
 * [ ] Fully compatible with [Relay](https://github.com/facebook/relay>)
 * [x] Works with **default or custom** user model 
-* [x] JWT authentication *(with [ strawberry-django-jwt
-](https://github.com/KundaPanda/strawberry-django-jwt))*
+* [x] JWT authentication *(with [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt))*
 * [x] User query with filters *(with [Django Filter](https://github.com/carltongibson/django-filter) and [Graphene Django](https://github.com/graphql-python/graphene-django))*
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
@@ -46,15 +45,15 @@ Documentation is available at [read the docs](https://strawberry-django-auth.rea
 * [x] Revoke user refresh tokens on account archive/delete/password change/reset
 * [x] All mutations return `success` and `errors`
 * [x] Default email templates *(you will customize though)*
-* [x] Customizable, no lock-in
+* [x] Customizable, no lock-in.
 
-## Full Schema
+
+### Full schema features
 
 ```python
-
 import strawberry
-
 from gqlauth import mutations
+
 
 @strawberrry.type
 class AuthMutation:
@@ -80,8 +79,7 @@ class AuthMutation:
     revoke_token = mutations.RevokeToken.Field
 
 
-
-schema = graphene.Schem(mutation=AuthMutation)
+schema = strawberry.schema(mutation=AuthMutation)
 ```
 
 
