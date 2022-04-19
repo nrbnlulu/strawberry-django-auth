@@ -6,7 +6,7 @@ import re
 from collections import OrderedDict
 
 from setuptools import find_packages, setup
-
+from pathlib import Path
 
 def get_version(package):
     with io.open(os.path.join(package, "__init__.py")) as f:
@@ -22,13 +22,13 @@ tests_require = [
 ]
 
 dev_requires = ["black>=22.3", "flake8>=4.0.1"] + tests_require
-
+this_directory = Path(__file__).parent
 setup(
     name="strawberry-django-auth",
     version=get_version("gqlauth"),
     license="MIT",
     description="Graphql authentication system with Strawberry for Django.",
-    long_description=open("README.rst").read(),
+    long_description=(this_directory / "README.md").read_text(),
     long_description_content_type="text/x-rst",
     author="nir-benlulu",
     author_email="nrbnlulu@gmail.com",
