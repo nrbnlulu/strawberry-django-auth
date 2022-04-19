@@ -6,14 +6,9 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Upload Python Package
+name: Publish Python 🐍 distributions 📦 to PyPI and TestPyPI
 
-on:
-  release:
-    types: [published]
-
-permissions:
-  contents: read
+on: push
 
 jobs:
   build-n-publish:
