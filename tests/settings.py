@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import sys
-sys.path.append('/home/nir/Desktop/git clones/django/strawberry-django-auth/testproject')
+from pathlib import Path
+sys.path.append(str((Path(__file__).parent / 'testproject')))
 BASE_DIR = os.path.dirname(__file__)
 
 SECRET_KEY = "FAKE_KEY"
