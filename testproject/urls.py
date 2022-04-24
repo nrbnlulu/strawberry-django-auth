@@ -21,5 +21,5 @@ from .schema import schema
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api', csrf_exempt(GraphQLView.as_view(schema=schema))),
+    path("api", csrf_exempt(GraphQLView.as_view(schema=schema))),
 ]

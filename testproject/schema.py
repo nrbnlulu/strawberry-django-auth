@@ -10,11 +10,11 @@ from gqlauth.user import arg_mutations, relay
 from gqlauth.user.types import UserType, UserFilter
 
 
-
 @strawberry.type
 class UserQueries:
     user: UserType = strawberry.django.field()
     users: List[UserType] = strawberry.django.field(filters=UserFilter)
+
 
 @strawberry.type
 class AuthMutation:
@@ -37,14 +37,14 @@ class AuthMutation:
     swap_emails = relay.SwapEmails.Field
     remove_secondary_email = relay.RemoveSecondaryEmail.Field
     send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
+
     @strawberry.mutation
     def captcha(self, info) -> CaptchaType:
         return Captcha.create_captcha()
 
-Query = merge_types('RootQuery', (UserQueries,))
 
-Mutation = merge_types('RootMutation', (AuthMutation,))
+Query = merge_types("RootQuery", (UserQueries,))
+
+Mutation = merge_types("RootMutation", (AuthMutation,))
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-
-

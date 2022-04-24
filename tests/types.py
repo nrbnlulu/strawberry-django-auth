@@ -1,4 +1,3 @@
-
 import strawberry
 from django.contrib.auth import get_user_model
 from strawberry.django import auto, auth

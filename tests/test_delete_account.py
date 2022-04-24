@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -21,7 +20,7 @@ class DeleteAccountTestCaseMixin:
 
     def test_not_authenticated(self):
         """
-            try to archive not authenticated
+        try to archive not authenticated
         """
         query = self.make_query()
         executed = self.make_request(query)

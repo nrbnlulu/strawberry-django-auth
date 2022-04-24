@@ -15,7 +15,7 @@ class ArchiveAccountTestCaseMixin:
 
     def test_not_authenticated(self):
         """
-            try to archive not authenticated
+        try to archive not authenticated
         """
         query = self.make_query()
         executed = self.make_request(query)
@@ -24,7 +24,7 @@ class ArchiveAccountTestCaseMixin:
 
     def test_invalid_password(self):
         """
-            try to archive account with invalid password
+        try to archive account with invalid password
         """
         query = self.make_query(password="123")
         variables = {"user": self.user2}
@@ -34,7 +34,7 @@ class ArchiveAccountTestCaseMixin:
 
     def test_valid_password(self):
         """
-            try to archive account
+        try to archive account
         """
         query = self.make_query()
         variables = {"user": self.user2}
@@ -71,7 +71,7 @@ class ArchiveAccountTestCaseMixin:
 
     def test_not_verified_user(self):
         """
-            try to archive account
+        try to archive account
         """
         query = self.make_query()
         variables = {"user": self.user1}

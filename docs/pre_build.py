@@ -41,6 +41,4 @@ with open(destination, "w") as file:
 files = ["CONTRIBUTORS.md", "CHANGES.md", "CONTRIBUTING.md"]
 dest = ["contributors.md", "changelog.md", "contributing.md"]
 for index, file in enumerate(files):
-    shutil.copyfile(
-        current_dir + "/" + file, current_dir + "/docs/" + dest[index]
-    )
+    shutil.copyfile(current_dir + "/" + file, current_dir + "/docs/" + dest[index])

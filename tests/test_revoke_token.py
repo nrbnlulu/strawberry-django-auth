@@ -21,14 +21,14 @@ class RevokeTokenTestCaseMixin:
         super().setUp()
 
     def test_revoke_token(self):
-        query = self.login_query(username='foo_username')
+        query = self.login_query(username="foo_username")
         executed = self.make_request(query)
-        self.assertTrue(executed['obtainPayload']["refreshToken"])
+        self.assertTrue(executed["obtainPayload"]["refreshToken"])
 
-        query = self.get_revoke_query(executed['obtainPayload']["refreshToken"])
+        query = self.get_revoke_query(executed["obtainPayload"]["refreshToken"])
         executed = self.make_request(query)
         self.assertTrue(executed["success"])
-        self.assertTrue(executed['revokePayload']["revoked"])
+        self.assertTrue(executed["revokePayload"]["revoked"])
         self.assertFalse(executed["errors"])
 
     def test_invalid_token(self):
@@ -36,7 +36,7 @@ class RevokeTokenTestCaseMixin:
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
-        self.assertFalse(executed['revokePayload'])
+        self.assertFalse(executed["revokePayload"])
 
 
 class RevokeTokenTestCase(RevokeTokenTestCaseMixin, DefaultTestCase):

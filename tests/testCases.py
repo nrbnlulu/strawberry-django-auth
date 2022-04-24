@@ -27,23 +27,20 @@ class TestBase(TestCase):
         return client.execute["data"]["register"]
     """
 
-
-
     default_password = "23kegbsi7g2k"
-
 
     @staticmethod
     def gen_captcha():
         return Captcha.create_captcha()
 
     def register_user(
-            self,
-            password=None,
-            verified=False,
-            archived=False,
-            secondary_email="",
-            *args,
-            **kwargs
+        self,
+        password=None,
+        verified=False,
+        archived=False,
+        secondary_email="",
+        *args,
+        **kwargs
     ):
         if kwargs.get("username"):
             kwargs.update({"first_name": kwargs.get("username")})
@@ -60,13 +57,13 @@ class TestBase(TestCase):
         return user
 
     def make_request(
-            self, query, variables={"user": AnonymousUser()}, raw=False, schema: str=None
+        self, query, variables={"user": AnonymousUser()}, raw=False, schema: str = None
     ):
         from .schema import default_schema, relay_schema
 
         request_factory = RequestFactory()
         context = request_factory.post("/api/")
-        if schema == 'relay':
+        if schema == "relay":
             schema = relay_schema
         else:
             schema = default_schema
@@ -88,11 +85,10 @@ class TestBase(TestCase):
 
 
 class RelayTestCase(TestBase):
-
     def make_request(self, *args, **kwargs):
-        return super().make_request(schema='relay', *args, **kwargs)
+        return super().make_request(schema="relay", *args, **kwargs)
 
-    def login_query(self, username='foo', password=None):
+    def login_query(self, username="foo", password=None):
         cap = self.gen_captcha()
         return """
           mutation {
@@ -117,9 +113,9 @@ class RelayTestCase(TestBase):
 
 class DefaultTestCase(TestBase):
     def make_request(self, *args, **kwargs):
-        return super().make_request(schema='default', *args, **kwargs)
+        return super().make_request(schema="default", *args, **kwargs)
 
-    def login_query(self, username='foo', password=None):
+    def login_query(self, username="foo", password=None):
         cap = self.gen_captcha()
         return """
            mutation {

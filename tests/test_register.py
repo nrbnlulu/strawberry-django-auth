@@ -76,11 +76,13 @@ class RegisterTestCaseMixin:
     @mark.settings_b
     def test_register_email_send_fail(self):
         from gqlauth.settings import gqlauth_settings as app_settings
+
         app_settings.SEND_ACTIVATION_EMAIL = True
         executed = self.make_request(self.register_query())
         self.assertEqual(executed["success"], False)
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
         self.assertEqual(len(get_user_model().objects.all()), 0)
+
 
 class RegisterTestCase(RegisterTestCaseMixin, DefaultTestCase):
     def register_query(self, password="akssdgfbwkc", username="username"):

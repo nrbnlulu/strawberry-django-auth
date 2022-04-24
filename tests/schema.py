@@ -26,6 +26,7 @@ class AuthMutation:
     remove_secondary_email = arg_mutations.RemoveSecondaryEmail.Field
     send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.Field
 
+
 @strawberry.type
 class AuthRelayMutation:
     token_auth = relay.ObtainJSONWebToken.Field
@@ -48,11 +49,13 @@ class AuthRelayMutation:
     send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
 
 
-Query = merge_types('RootQuery', (UserQueries,))
+Query = merge_types("RootQuery", (UserQueries,))
 
-Mutation = merge_types('RootMutation', (AuthMutation,))
+Mutation = merge_types("RootMutation", (AuthMutation,))
 
-RelayMutation = merge_types('RootRelay', (AuthRelayMutation,))
+RelayMutation = merge_types("RootRelay", (AuthRelayMutation,))
 
-relay_schema = strawberry.Schema(query=Query, mutation=RelayMutation, config=StrawberryConfig(auto_camel_case=True))
+relay_schema = strawberry.Schema(
+    query=Query, mutation=RelayMutation, config=StrawberryConfig(auto_camel_case=True)
+)
 default_schema = strawberry.Schema(query=Query, mutation=Mutation)

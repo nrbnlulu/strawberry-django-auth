@@ -13,16 +13,17 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import sys
 from pathlib import Path
-sys.path.append(str((Path(__file__).parent / 'testproject')))
+
+sys.path.append(str((Path(__file__).parent / "testproject")))
 BASE_DIR = os.path.dirname(__file__)
 
 SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ["127.0.0.1"]
 
-ROOT_URLCONF = 'testproject.urls'
+ROOT_URLCONF = "testproject.urls"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,9 +32,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'strawberry_django',
-    'strawberry_django_jwt.refresh_token',
-    'gqlauth',
+    "strawberry_django",
+    "strawberry_django_jwt.refresh_token",
+    "gqlauth",
 ]
 
 

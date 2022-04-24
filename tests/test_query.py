@@ -16,7 +16,6 @@ class QueryTestCase(DefaultTestCase):
         )
         super().setUp()
 
-
     def test_me_authenticated(self):
         query = """
         query {
@@ -37,7 +36,7 @@ class QueryTestCase(DefaultTestCase):
         }
         """
         executed = self.make_request(query)
-        self.assertFalse(executed['username'])
+        self.assertFalse(executed["username"])
 
     def test_public_user_query(self):
         query = """

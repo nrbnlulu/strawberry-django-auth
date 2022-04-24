@@ -15,20 +15,20 @@ class RefreshTokenTestCaseMixin:
     def test_refresh_token(self):
         query = self.login_query()
         executed = self.make_request(query)
-        self.assertTrue(executed['obtainPayload']["refreshToken"])
+        self.assertTrue(executed["obtainPayload"]["refreshToken"])
 
-        query = self.get_verify_query(executed['obtainPayload']["refreshToken"])
+        query = self.get_verify_query(executed["obtainPayload"]["refreshToken"])
         executed = self.make_request(query)
         self.assertTrue(executed["success"])
-        self.assertTrue(executed['refreshPayload']["refreshToken"])
-        self.assertTrue(executed['refreshPayload']["payload"])
+        self.assertTrue(executed["refreshPayload"]["refreshToken"])
+        self.assertTrue(executed["refreshPayload"]["payload"])
         self.assertFalse(executed["errors"])
 
     def test_invalid_token(self):
         query = self.get_verify_query("invalid_token")
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
-        self.assertFalse(executed['refreshPayload'])
+        self.assertFalse(executed["refreshPayload"])
         self.assertTrue(executed["errors"])
 
 
@@ -58,7 +58,6 @@ class RefreshTokenTestCase(RefreshTokenTestCaseMixin, DefaultTestCase):
 
 
 class RefreshTokenRelayTestCase(RefreshTokenTestCaseMixin, RelayTestCase):
-
     def get_verify_query(self, token):
         return """
         mutation {

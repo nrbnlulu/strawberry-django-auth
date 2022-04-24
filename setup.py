@@ -8,6 +8,7 @@ from collections import OrderedDict
 from setuptools import find_packages, setup
 from pathlib import Path
 
+
 def get_version(package):
     with io.open(os.path.join(package, "__init__.py")) as f:
         pattern = r'^__version__ = [\'"]([^\'"]*)[\'"]'
@@ -36,7 +37,10 @@ setup(
     url="https://github.com/nrbnlulu/strawberry-django-auth",
     project_urls=OrderedDict(
         (
-            ("Documentation", "https://strawberry-django-auth.readthedocs.io/en/latest/"),
+            (
+                "Documentation",
+                "https://strawberry-django-auth.readthedocs.io/en/latest/",
+            ),
             ("Issues", "https://github.com/nrbnlulu/strawberry-django-auth/issues"),
         )
     ),
@@ -50,7 +54,6 @@ setup(
         "Faker>=13.3.4",
         "Pillow>=9.1.0",
     ],
-
     tests_require=tests_require,
     classifiers=[
         "Development Status :: 4 - Beta",
