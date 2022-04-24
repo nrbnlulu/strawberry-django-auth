@@ -62,7 +62,7 @@ class RefreshTokenRelayTestCase(RefreshTokenTestCaseMixin, RelayTestCase):
     def get_verify_query(self, token):
         return """
         mutation {
-        refreshToken(input_: {refreshToken: "%s"} )
+        refreshToken(input: {refreshToken: "%s"} )
             {
             refreshPayload{
               payload{

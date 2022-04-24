@@ -104,7 +104,7 @@ class PasswordChangeRelayTestCase(PasswordChangeTestCaseMixin, RelayTestCase):
         return """
         mutation {
             passwordChange(
-                input_: {
+                input: {
                     oldPassword: "%s",
                     newPassword1: "%s",
                     newPassword2: "%s"

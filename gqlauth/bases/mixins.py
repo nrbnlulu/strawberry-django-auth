@@ -21,9 +21,7 @@ else:
     async_email_func = None
 
 
-def make_dataclass_helper(
-    required: dict | list, non_required: dict | list, camelize=True
-):
+def make_dataclass_helper(required: dict | list, non_required: dict | list, camelize=True):
     res_req = []
     res_non_req = []
 
@@ -100,7 +98,7 @@ class DynamicInputMixin:
                     _inputs = [some, non, required, fields]
                     _required_inputs = {some:str, required:int, fields:list}
 
-                def resolve_mutation(self, input_):
+                def resolve_mutation(self, input):
                     logic...
 
     """
@@ -164,7 +162,7 @@ class DynamicArgsMixin:
                     _inputs = [some, non, required, fields]
                     _required_inputs = {some:str, required:int, fields:list}
 
-                def resolve_mutation(self, input_):
+                def resolve_mutation(self, input):
                     logic...
 
     """
@@ -221,14 +219,14 @@ class DynamicPayloadMixin:
     and to merge parent payload to the given payload
 
     as dict { payload_name: payload_type }
-    as list [input_name,] -> defaults to String
+    as list [inputname,] -> defaults to String
 
     #usage:
         class SomeMutation(DynamicInputMixin, OutputMixin, MutationMixin):
                 _outputs = [some, non, required, fields]
                 _required_outputs = {some:str, required:int, fields:list}
 
-                def resolve_mutation(self, input_):
+                def resolve_mutation(self, input):
                     logic...
     """
 
@@ -293,9 +291,9 @@ class DynamicPayloadMixin:
 class DynamicRelayMutationMixin:
     def __init_subclass__(cls, **kwargs):
         @strawberry.mutation(description=cls.__doc__)
-        def Field(info, input_: cls._meta.inputs) -> cls.output:
+        def Field(info, input: cls._meta.inputs) -> cls.output:
             arguments = {
-                f.name: getattr(input_, f.name) for f in dataclasses.fields(input_)
+                f.name: getattr(input, f.name) for f in dataclasses.fields(input)
             }
             return cls.resolve_mutation(info, **arguments)
 

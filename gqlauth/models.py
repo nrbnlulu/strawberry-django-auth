@@ -56,7 +56,7 @@ class Captcha(models.Model):
         self.text = self._format(self.text)
         super().save(*args, **kwargs)
 
-    def validate(self, input_: str):
+    def validate(self, user_entry: str):
         """
         validates input_.
         - if tried to validate more than 3 times obj will be deleted in the database
@@ -83,7 +83,7 @@ class Captcha(models.Model):
             return Messages.CAPTCHA_EXPIRED
 
         # validate
-        if input_.replace(" ", "") == self.text.replace(" ", ""):
+        if user_entry.replace(" ", "") == self.text.replace(" ", ""):
             # delete captcha if valid
             self.delete()
             return Messages.CAPTCHA_VALID

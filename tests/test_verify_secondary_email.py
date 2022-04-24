@@ -55,7 +55,7 @@ class VerifySecondaryEmailRelayTestCase(VerifySecondaryEmailCaseMixin, RelayTest
     def verify_query(self, token):
         return """
         mutation {
-        verifySecondaryEmail(input_:{ token: "%s"})
+        verifySecondaryEmail(input:{ token: "%s"})
             { success, errors  }
         }
         """ % (

@@ -50,7 +50,7 @@ class SwapEmailsRelayTestCase(SwapEmailsCaseMixin, RelayTestCase):
     def query(self, password=None):
         return """
         mutation {
-        swapEmails(input_:{ password: "%s"})
+        swapEmails(input:{ password: "%s"})
             { success, errors  }
         }
         """ % (

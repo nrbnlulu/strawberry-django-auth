@@ -28,7 +28,7 @@ class CaptchaTestCaseMixin:
         cap = self.gen_captcha()
         text = cap.text
         obj = Captcha.objects.get(id=cap.id)
-        self.assertTrue(obj.validate(input_=text))
+        self.assertTrue(obj.validate(user_entry=text))
 
     def test_register_user_require_captcha_validation(self):
         try:
@@ -99,7 +99,7 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
         return """
             mutation {
                 tokenAuth(
-                input_:{
+                input:{
                  username: "%s", password: "%s"
                 }
                 )
@@ -115,7 +115,7 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
         return """
             mutation {
                 tokenAuth(
-                input_:{
+                input:{
                 username: "%s", password: "%s",identifier: "%s", userEntry:"%s"
                 }
                 )
@@ -132,7 +132,7 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
         return """
           mutation{
             register(
-                input_: {
+                input: {
                     email: "tesfdfdt@email.com", username: "%s", password1: "%s", password2: "%s" 
                        }
                )
@@ -152,7 +152,7 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
         return """
           mutation {
               register(
-              input_: {
+              input: {
                email: "tesfdfdt@email.com", username: "%s", password1: "%s", password2: "%s" , identifier: "%s", userEntry:"%s"
               }
               )

@@ -61,7 +61,7 @@ class VerifyTokenRelayTestCase(RevokeTokenTestCaseMixin, RelayTestCase):
     def get_revoke_query(self, token):
         return """
         mutation {
-        revokeToken(input_: {refreshToken: "%s"} )
+        revokeToken(input: {refreshToken: "%s"} )
            {
         success
         errors

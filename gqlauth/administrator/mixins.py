@@ -1,5 +1,5 @@
-from gqlauth.bases.interfaces import OutputMixin
+from gqlauth.bases.interfaces import OutputInterface
 
 
-class VerifyUserMixin(OutputMixin):
+class VerifyUserMixin(OutputInterface):
     pass

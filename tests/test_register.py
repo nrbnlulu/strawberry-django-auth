@@ -122,7 +122,7 @@ class RegisterRelayTestCase(RegisterTestCaseMixin, RelayTestCase):
         return """
             mutation {
             register(
-            input_:{
+            input:{
              email: "foo@email.com",
               username: "%s", password1: "%s", password2: "%s" , identifier: "%s", userEntry:"%s"
             }
@@ -140,7 +140,7 @@ class RegisterRelayTestCase(RegisterTestCaseMixin, RelayTestCase):
     def verify_query(self, token):
         return """
         mutation {
-        verifyAccount(input_:{ token: "%s"})
+        verifyAccount(input:{ token: "%s"})
             { success, errors  }
         }
         """ % (

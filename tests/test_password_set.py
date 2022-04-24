@@ -76,7 +76,7 @@ class PasswordSetRelayTestCase(PasswordSetTestCaseMixin, RelayTestCase):
         return """
         mutation {
             passwordSet(
-                input_: {
+                input: {
                     token: "%s",
                     newPassword1: "%s",
                     newPassword2: "%s"

@@ -39,7 +39,7 @@ class RemoveSecondaryEmailRelayTestCase(RemoveSecondaryEmailCaseMixin, RelayTest
     def query(self, password=None):
         return """
         mutation {
-        removeSecondaryEmail(input_:{ password: "%s"})
+        removeSecondaryEmail(input:{ password: "%s"})
             { success, errors  }
         }
         """ % (

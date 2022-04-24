@@ -79,7 +79,7 @@ class SendPasswordResetEmailRelayTestCase(
     def get_query(self, email):
         return """
         mutation {
-        sendPasswordResetEmail(input_:{ email: "%s"})
+        sendPasswordResetEmail(input:{ email: "%s"})
             { success, errors  }
         }
         """ % (

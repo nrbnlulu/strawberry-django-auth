@@ -67,7 +67,7 @@ class VerifyAccountRelayTestCase(VerifyAccountCaseMixin, RelayTestCase):
     def verify_query(self, token):
         return """
         mutation {
-        verifyAccount(input_:{ token: "%s"})
+        verifyAccount(input:{ token: "%s"})
             { success, errors  }
         }
         """ % (

@@ -84,7 +84,7 @@ class DeleteAccountRelayTestCase(DeleteAccountTestCaseMixin, RelayTestCase):
     def make_query(self, password=None):
         return """
             mutation {
-              deleteAccount(input_: { password: "%s"}) {
+              deleteAccount(input: { password: "%s"}) {
                 success, errors
               }
             }

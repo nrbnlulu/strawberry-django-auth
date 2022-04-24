@@ -183,7 +183,7 @@ class UpdateAccountRelayTestCase(UpdateAccountTestCaseMixin, RelayTestCase):
     def get_query(self, first_name="firstname"):
         return """
         mutation {
-            updateAccount(input_:{ firstName: "%s" })
+            updateAccount(input:{ firstName: "%s" })
                 { success, errors }
         }
         """ % (
@@ -193,7 +193,7 @@ class UpdateAccountRelayTestCase(UpdateAccountTestCaseMixin, RelayTestCase):
     def get_unique_together_test_query(self):
         return """
         mutation {
-            updateAccount(input_: {firstName: "first", lastName: "last"})
+            updateAccount(input: {firstName: "first", lastName: "last"})
                 { success, errors  }
         }
         """

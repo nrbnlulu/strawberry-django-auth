@@ -116,7 +116,7 @@ class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
         cap = self.gen_captcha()
         return """
         mutation {
-        tokenAuth(input_:{username: "%s", password: "%s",identifier: "%s", userEntry: "%s"})  {
+        tokenAuth(input:{username: "%s", password: "%s",identifier: "%s", userEntry: "%s"})  {
             success
             errors
             obtainPayload{

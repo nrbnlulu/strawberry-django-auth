@@ -99,7 +99,7 @@ class ArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
     def make_query(self, password=None):
         return """
             mutation {
-              archiveAccount(input_: { password: "%s"}) {
+              archiveAccount(input: { password: "%s"}) {
                 success, errors
               }
             }
