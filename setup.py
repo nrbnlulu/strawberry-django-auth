@@ -69,6 +69,7 @@ setup(
     ],
     keywords="api graphql rest relay strawberry auth",
     zip_safe=False,
+    setup_requires=['setuptools_scm'],
     include_package_data=True,
     extras_require={"test": tests_require, "dev": dev_requires},
 )
