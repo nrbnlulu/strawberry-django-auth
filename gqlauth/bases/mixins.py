@@ -21,7 +21,9 @@ else:
     async_email_func = None
 
 
-def make_dataclass_helper(required: dict | list, non_required: dict | list, camelize=True):
+def make_dataclass_helper(
+    required: dict | list, non_required: dict | list, camelize=True
+):
     res_req = []
     res_non_req = []
 
