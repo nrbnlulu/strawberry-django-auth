@@ -84,8 +84,7 @@ class Captcha(models.Model):
 
         # validate
         if app_settings.CAPTCHA_TEXT_VALIDATOR(
-                self.text.replace(" ", ""),
-                user_entry.replace(" ", "")
+            self.text.replace(" ", ""), user_entry.replace(" ", "")
         ):
             # delete captcha if valid
             self.delete()

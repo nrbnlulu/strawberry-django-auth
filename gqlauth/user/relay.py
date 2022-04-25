@@ -28,7 +28,7 @@ from gqlauth.user.resolvers import (
     VerifySecondaryEmailMixin,
     SwapEmailsMixin,
     RemoveSecondaryEmailMixin,
-    Cap
+    Cap,
 )
 
 

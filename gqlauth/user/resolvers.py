@@ -50,7 +50,6 @@ else:
 
 
 class Cap:
-
     @strawberry.mutation
     def Field(self, info) -> CaptchaType:
         return Captcha.create_captcha()
@@ -125,12 +124,12 @@ class RegisterMixin:
                     UserStatus.clean_email(email)
                     user = f.save()
                     send_activation = (
-                            app_settings.SEND_ACTIVATION_EMAIL is True and email
+                        app_settings.SEND_ACTIVATION_EMAIL is True and email
                     )
                     send_password_set = (
-                            app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
-                            and app_settings.SEND_PASSWORD_SET_EMAIL is True
-                            and email
+                        app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
+                        and app_settings.SEND_PASSWORD_SET_EMAIL is True
+                        and email
                     )
                     if send_activation:
                         # TODO CHECK FOR EMAIL ASYNC SETTING
