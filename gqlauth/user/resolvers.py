@@ -1,13 +1,12 @@
 from smtplib import SMTPException
 from uuid import UUID
-
+import strawberry
 from django.core.signing import BadSignature, SignatureExpired
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
 from django.db import transaction
 from django.utils.module_loading import import_string
-
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
 from gqlauth.forms import (
@@ -16,6 +15,7 @@ from gqlauth.forms import (
     UpdateAccountForm,
     PasswordLessRegisterForm,
 )
+from gqlauth.types import CaptchaType
 from gqlauth.utils import normalize_fields, g_user
 from gqlauth.models import Captcha, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -47,6 +47,13 @@ if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, s
     async_email_func = import_string(app_settings.EMAIL_ASYNC_TASK)
 else:
     async_email_func = None
+
+
+class Cap:
+
+    @strawberry.mutation
+    def Field(self, info) -> CaptchaType:
+        return Captcha.create_captcha()
 
 
 class RegisterMixin:
@@ -98,8 +105,8 @@ class RegisterMixin:
     def check_captcha(cls, input_):
         uuid = input_.get("identifier")
         try:
-            obj = Captcha.objects.get(uuid=uuid)
-        except Captcha.DoesNotExist:
+            obj = Cap.objects.get(uuid=uuid)
+        except Cap.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
         return obj.validate(input_.get("userEntry"))
 
@@ -118,12 +125,12 @@ class RegisterMixin:
                     UserStatus.clean_email(email)
                     user = f.save()
                     send_activation = (
-                        app_settings.SEND_ACTIVATION_EMAIL is True and email
+                            app_settings.SEND_ACTIVATION_EMAIL is True and email
                     )
                     send_password_set = (
-                        app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
-                        and app_settings.SEND_PASSWORD_SET_EMAIL is True
-                        and email
+                            app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
+                            and app_settings.SEND_PASSWORD_SET_EMAIL is True
+                            and email
                     )
                     if send_activation:
                         # TODO CHECK FOR EMAIL ASYNC SETTING
@@ -440,8 +447,8 @@ class ObtainJSONWebTokenMixin:
     def check_captcha(cls, **input_):
         uuid = input_.get("identifier")
         try:
-            obj = Captcha.objects.get(id=uuid)
-        except Captcha.DoesNotExist:
+            obj = Cap.objects.get(id=uuid)
+        except Cap.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
 
         return obj.validate(input_.get("userEntry"))

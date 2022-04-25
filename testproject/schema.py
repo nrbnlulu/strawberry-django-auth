@@ -3,9 +3,6 @@ from strawberry.tools import merge_types
 
 from typing import List
 
-from gqlauth.models import Captcha
-from gqlauth.types import CaptchaType
-
 from gqlauth.user import arg_mutations, relay
 from gqlauth.user.types import UserType, UserFilter
 
@@ -37,10 +34,7 @@ class AuthMutation:
     swap_emails = relay.SwapEmails.Field
     remove_secondary_email = relay.RemoveSecondaryEmail.Field
     send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
-
-    @strawberry.mutation
-    def captcha(self, info) -> CaptchaType:
-        return Captcha.create_captcha()
+    captcha = relay.Cap.Field
 
 
 Query = merge_types("RootQuery", (UserQueries,))

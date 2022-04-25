@@ -1,5 +1,3 @@
-from abc import ABC
-
 from gqlauth.bases.mixins import (
     DynamicRelayMutationMixin,
     DynamicInputMixin,
@@ -30,6 +28,7 @@ from gqlauth.user.resolvers import (
     VerifySecondaryEmailMixin,
     SwapEmailsMixin,
     RemoveSecondaryEmailMixin,
+    Cap
 )
 
 

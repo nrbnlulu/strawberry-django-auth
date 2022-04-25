@@ -22,6 +22,7 @@ from gqlauth.user.resolvers import (
     VerifySecondaryEmailMixin,
     SwapEmailsMixin,
     RemoveSecondaryEmailMixin,
+    Cap
 )
 from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
 from strawberry_django_jwt.mutations import Verify as VerifyParent

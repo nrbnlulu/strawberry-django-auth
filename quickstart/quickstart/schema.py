@@ -1,12 +1,10 @@
 # quickstart.schema.py
+import strawberry
+from gqlauth.user import arg_mutations as mutations
+from gqlauth.user.queries import UserQueries
 
-import graphene
-
-from gqlauth.schema import UserQuery, MeQuery
-from gqlauth import arg_mutations as mutations
-
-
-class AuthMutation(graphene.ObjectType):
+@strawberry.type
+class AuthMutation:
     register = mutations.Register.Field
     verify_account = mutations.VerifyAccount.Field
     resend_activation_email = mutations.ResendActivationEmail.Field
@@ -20,6 +18,7 @@ class AuthMutation(graphene.ObjectType):
     send_secondary_email_activation = mutations.SendSecondaryEmailActivation.Field
     verify_secondary_email = mutations.VerifySecondaryEmail.Field
     swap_emails = mutations.SwapEmails.Field
+    captcha = mutations.Cap.Field
 
     # django-graphql-jwt authentication
     # with some extra features
@@ -28,13 +27,4 @@ class AuthMutation(graphene.ObjectType):
     refresh_token = mutations.RefreshToken.Field
     revoke_token = mutations.RevokeToken.Field
 
-
-class Query(UserQuery, MeQuery, graphene.ObjectType):
-    pass
-
-
-class Mutation(AuthMutation, graphene.ObjectType):
-    pass
-
-
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(query=UserQueries, mutation=AuthMutation)
