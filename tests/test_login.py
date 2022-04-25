@@ -107,7 +107,7 @@ class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
         """ % (
             username,
             password or self.default_password,
-            cap.id,
+            cap.uuid,
             cap.text,
         )
 
@@ -130,6 +130,6 @@ class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
         """ % (
             username,
             password or self.default_password,
-            cap.id,
+            cap.uuid,
             cap.text,
         )

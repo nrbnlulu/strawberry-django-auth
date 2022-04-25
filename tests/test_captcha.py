@@ -19,12 +19,12 @@ class CaptchaTestCaseMixin:
 
     def test_get_captcha_saves_and_returns_cap_obj(self):
         cap = self.gen_captcha()
-        obj = Captcha.objects.get(id=cap.id)
+        obj = Captcha.objects.get(pk=cap.uuid)
 
     def test_captcha_text_validation(self):
         cap = self.gen_captcha()
         text = cap.text
-        obj = Captcha.objects.get(id=cap.id)
+        obj = Captcha.objects.get(pk=cap.uuid)
         self.assertTrue(obj.validate(user_entry=text))
 
     def test_register_user_require_captcha_validation(self):
@@ -92,7 +92,7 @@ class CaptchaTestCaseMixin:
         for i in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
             cap.validate("wrong")
 
-        self.assertRaises(Captcha.DoesNotExist, lambda: Captcha.objects.get(id=cap.id))
+        self.assertRaises(Captcha.DoesNotExist, lambda: Captcha.objects.get(pk=cap.uuid))
 
 
 req_captcha = {

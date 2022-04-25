@@ -106,7 +106,7 @@ class RelayTestCase(TestBase):
         """ % (
             username,
             password or self.default_password,
-            cap.id,
+            cap.uuid,
             cap.text,
         )
 
@@ -133,6 +133,6 @@ class DefaultTestCase(TestBase):
            """ % (
             username,
             password or self.default_password,
-            cap.id,
+            cap.uuid,
             cap.text,
         )
