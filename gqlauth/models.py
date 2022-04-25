@@ -83,7 +83,10 @@ class Captcha(models.Model):
             return Messages.CAPTCHA_EXPIRED
 
         # validate
-        if user_entry.replace(" ", "") == self.text.replace(" ", ""):
+        if app_settings.CAPTCHA_TEXT_VALIDATOR(
+                self.text.replace(" ", ""),
+                user_entry.replace(" ", "")
+        ):
             # delete captcha if valid
             self.delete()
             return Messages.CAPTCHA_VALID

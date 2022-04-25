@@ -30,10 +30,11 @@ DEFAULTS = {
     "REGISTER_MUTATION_FIELDS": ["email", "username"],
     "REGISTER_MUTATION_FIELDS_OPTIONAL": [],
     "REGISTER_REQUIRE_CAPTCHA": True,
-    "CAPTCHA_TEXT_FACTORY": None,
     # captcha stuff
     "CAPTCHA_EXPIRATION_DELTA": timedelta(seconds=120),
     "CAPTCHA_MAX_RETRIES": 5,
+    "CAPTCHA_TEXT_FACTORY": None,
+    "CAPTCHA_TEXT_VALIDATOR": lambda original, received: bool(original == received),
     # optional fields on update account, can be list of fields
     "UPDATE_MUTATION_FIELDS": {"first_name": str, "last_name": str},
     # tokens
