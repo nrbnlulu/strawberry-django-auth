@@ -446,7 +446,7 @@ class ObtainJSONWebTokenMixin:
     def check_captcha(cls, **input_):
         uuid = input_.get("identifier")
         try:
-            obj = Captcha.objects.get(id=uuid)
+            obj = Captcha.objects.get(uuid=uuid)
         except Captcha.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
 
