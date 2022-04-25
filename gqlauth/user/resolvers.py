@@ -105,8 +105,8 @@ class RegisterMixin:
     def check_captcha(cls, input_):
         uuid = input_.get("identifier")
         try:
-            obj = Cap.objects.get(uuid=uuid)
-        except Cap.DoesNotExist:
+            obj = Captcha.objects.get(uuid=uuid)
+        except Captcha.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
         return obj.validate(input_.get("userEntry"))
 
@@ -447,8 +447,8 @@ class ObtainJSONWebTokenMixin:
     def check_captcha(cls, **input_):
         uuid = input_.get("identifier")
         try:
-            obj = Cap.objects.get(id=uuid)
-        except Cap.DoesNotExist:
+            obj = Captcha.objects.get(id=uuid)
+        except Captcha.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
 
         return obj.validate(input_.get("userEntry"))
