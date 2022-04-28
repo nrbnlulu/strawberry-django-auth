@@ -52,34 +52,33 @@ Documentation is available at [read the docs](https://strawberry-django-auth.rea
 
 ```python
 import strawberry
-from gqlauth import mutations
+from gqlauth.user import arg_mutations as mutations
 
-
-@strawberrry.type
+@strawberry.type
 class AuthMutation:
     register = mutations.Register.Field
     verify_account = mutations.VerifyAccount.Field
     resend_activation_email = mutations.ResendActivationEmail.Field
     send_password_reset_email = mutations.SendPasswordResetEmail.Field
     password_reset = mutations.PasswordReset.Field
-    password_set = mutations.PasswordSet.Field # For passwordless registration
+    password_set = mutations.PasswordSet.Field
     password_change = mutations.PasswordChange.Field
-    update_account = mutations.UpdateAccount.Field
     archive_account = mutations.ArchiveAccount.Field
     delete_account = mutations.DeleteAccount.Field
-    send_secondary_email_activation =  mutations.SendSecondaryEmailActivation.Field
+    update_account = mutations.UpdateAccount.Field
+    send_secondary_email_activation = mutations.SendSecondaryEmailActivation.Field
     verify_secondary_email = mutations.VerifySecondaryEmail.Field
     swap_emails = mutations.SwapEmails.Field
-    remove_secondary_email = mutations.RemoveSecondaryEmail.Field
+    captcha = mutations.Cap.Field
 
-    # django-graphql-jwt inheritances
+    # django-graphql-jwt authentication
+    # with some extra features
     token_auth = mutations.ObtainJSONWebToken.Field
     verify_token = mutations.VerifyToken.Field
     refresh_token = mutations.RefreshToken.Field
     revoke_token = mutations.RevokeToken.Field
 
-
-schema = strawberry.schema(mutation=AuthMutation)
+schema = strawberry.Schema(mutation=AuthMutation)
 ```
 
 
