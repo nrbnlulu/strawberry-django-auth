@@ -15,7 +15,7 @@ All kinds of contributions are welcome:
 
 ## Getting started
 
-If you have a specific contribution in mind, be sure to check the [issues](https://github.com/nrbnlulu/strawberry-django-authissues) and [projects](https://github.com/nrbnlulu/strawberry-django-authprojects) in progress - someone could already be working on something similar and you can help out.
+If you have a specific contribution in mind, be sure to check the [issues](https://github.com/nrbnlulu/strawberry-django-auth/issues) and [projects](https://github.com/nrbnlulu/strawberry-django-auth/projects) in progress - someone could already be working on something similar and you can help out.
 
 ## Project setup
 

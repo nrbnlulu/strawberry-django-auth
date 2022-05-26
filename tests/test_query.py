@@ -36,7 +36,7 @@ class QueryTestCase(DefaultTestCase):
         }
         """
         executed = self.make_request(query)
-        self.assertFalse(executed["username"])
+        self.assertIsNone(executed)
 
     def test_public_user_query(self):
         query = """

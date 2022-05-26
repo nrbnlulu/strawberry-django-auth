@@ -3,7 +3,7 @@ from uuid import UUID
 
 # strawberry
 import strawberry
-from strawberry.django import auth, auto
+from strawberry import auto
 
 # project
 from gqlauth import models
@@ -30,7 +30,6 @@ def inject_field(field: dict[str, type]):
     def wrapped(cls):
         cls.__annotations__.update(field)
         return cls
-
     return wrapped
 
 

@@ -4,14 +4,15 @@
 """
 
 import os
+from pathlib import Path
 import shutil
 import re
 
 
 # copy mixins file from .py to .yml
-current_dir = os.path.abspath(os.path.split(os.path.split(__file__)[0])[0])
-source = current_dir + "/gqlauth/mixins.py"
-destination = current_dir + "/docs/data/api.yml"
+current_dir = Path(__file__).parent.parent
+source = current_dir / "gqlauth/bases/mixins.py"
+destination = current_dir / "docs/data/api.yml"
 dest = shutil.copyfile(source, destination)
 
 # get the text content
@@ -41,4 +42,4 @@ with open(destination, "w") as file:
 files = ["CONTRIBUTORS.md", "CHANGES.md", "CONTRIBUTING.md"]
 dest = ["contributors.md", "changelog.md", "contributing.md"]
 for index, file in enumerate(files):
-    shutil.copyfile(current_dir + "/" + file, current_dir + "/docs/" + dest[index])
+    shutil.copyfile(current_dir / file, current_dir / "docs" / dest[index])

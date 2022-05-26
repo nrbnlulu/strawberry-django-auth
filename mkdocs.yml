@@ -1,12 +1,12 @@
-site_name: Django GraphQL Auth
+site_name: Strawberry Django Auth
 site_description: GraphQL authentication for Django
 site_url: https://strawberry-django-auth.readthedocs.io/en/latest
-site_author: pedrobern
-repo_name: pedrobern/strawberry-django-auth
-repo_url: https://github.com/pedrobern/strawberry-django-auth
+site_author: nirbenlulu
+repo_name: nrbnlulu/strawberry-django-auth
+repo_url: https://github.com/nrbnlulu/strawberry-django-auth
 
 theme:
-  name: "material"
+  name: material
   language: en
   palette:
     primary: 'black'
@@ -15,17 +15,21 @@ theme:
   favicon: 'images/favicon.ico'
 
 extra:
-  social:
-    - type: github-alt
-      link: https://github.com/pedrobern
-
-google_analytics:
-  - 'UA-152567868-2'
-  - 'auto'
+#  social:
+#    - type: github-alt
+#      link: https://github.com/nrbnlulu
+  analytics:
+    provider: google
+    property: UA-XXXXXXXX-X
 
 markdown_extensions:
   - admonition
   - codehilite
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
   - toc:
       permalink: true
   - pymdownx.caret

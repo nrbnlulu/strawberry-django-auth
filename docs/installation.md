@@ -213,7 +213,7 @@ AUTHENTICATION_BACKENDS = [
     You should handle this situation doing one of the following:
 
     - Simply use the strawberry_django_jwt decorator [@login_required](https://django-graphql-jwt.domake.io/en/latest/decorators.html#login-required).
-    - Use [our login_required decorator](https://github.com/nrbnlulu/strawberry-django-authblob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/decorators.py#L7), note that this expect your output to contain [this output](https://github.com/nrbnlulu/strawberry-django-authblob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/bases.py#L6).
+    - Use [our login_required decorator](https://github.com/nrbnlulu/strawberry-django-auth/blob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/decorators.py#L7), note that this expect your output to contain [this output](https://github.com/nrbnlulu/strawberry-django-auth/blob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/bases.py#L6).
     - Create your own login_required decorator!
 
 ---

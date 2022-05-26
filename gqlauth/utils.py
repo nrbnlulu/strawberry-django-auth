@@ -5,7 +5,8 @@ from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.utils.str_converters import to_camel_case
-from strawberry.arguments import StrawberryArgument, UNSET
+from strawberry.arguments import StrawberryArgument
+from strawberry.unset import UNSET
 from .exceptions import TokenScopeError
 
 

@@ -1,22 +1,28 @@
 from typing import Optional
 import strawberry
+import strawberry_django
 from strawberry.django import auth
 from gqlauth.utils import g_user
+from django.contrib.auth import get_user_model
 
 # project
 from .types import UserType, UserFilter
-from typing import List
 
 
-@strawberry.type
+
+@strawberry.django.type(model=get_user_model())
 class UserQueries:
     user: Optional[UserType] = strawberry.django.field()
     users: UserType = strawberry.django.field(filters=UserFilter)
-    me: UserType = strawberry.django.field(resolver=lambda info: g_user(info))
 
-    @strawberry.field
+    @strawberry.django.field
     def public_user(self, info) -> Optional[UserType]:
         user = g_user(info)
         if user.is_authenticated:
             return user
-        return None
+
+    @strawberry.django.field
+    def me(self, info) -> Optional[UserType]:
+        user = g_user(info)
+        if not user.is_anonymous():
+            return user

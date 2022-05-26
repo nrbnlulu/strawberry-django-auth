@@ -10,8 +10,8 @@ install-local:
 	python setup.py sdist bdist_wheel
 	python -m pip install dist/strawberry-django-auth-${v}.tar.gz
 
-p ?= 38
-d ?= 30
+p ?= 310
+d ?= 40
 
 test:
 	tox -e py${p}-django${d} -- --cov-report term-missing --cov-report html

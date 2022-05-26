@@ -92,7 +92,9 @@ class CaptchaTestCaseMixin:
         for i in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
             cap.validate("wrong")
 
-        self.assertRaises(Captcha.DoesNotExist, lambda: Captcha.objects.get(pk=cap.uuid))
+        self.assertRaises(
+            Captcha.DoesNotExist, lambda: Captcha.objects.get(pk=cap.uuid)
+        )
 
 
 req_captcha = {

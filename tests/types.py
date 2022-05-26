@@ -1,6 +1,6 @@
 import strawberry
 from django.contrib.auth import get_user_model
-from strawberry.django import auto, auth
+from strawberry.django import auto
 from gqlauth import models
 
 
@@ -24,8 +24,3 @@ class UserFilter:
 @strawberry.django.type(model=get_user_model(), filters=UserFilter)
 class UserType:
     ...
-
-
-@strawberry.type
-class MeQuery:
-    me: UserType = auth.current_user()

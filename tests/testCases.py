@@ -121,14 +121,14 @@ class DefaultTestCase(TestBase):
            mutation {
            tokenAuth(username: "%s", password: "%s" ,identifier: "%s" ,userEntry: "%s")
                   {
-    success
-    errors
-    obtainPayload{
-      token
-      refreshToken
-    }
-  }
-}
+                success
+                errors
+                obtainPayload{
+                  token
+                  refreshToken
+                }
+              }
+            }
 
            """ % (
             username,

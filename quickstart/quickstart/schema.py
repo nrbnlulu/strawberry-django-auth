@@ -3,6 +3,7 @@ import strawberry
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 
+
 @strawberry.type
 class AuthMutation:
     register = mutations.Register.Field
@@ -26,5 +27,6 @@ class AuthMutation:
     verify_token = mutations.VerifyToken.Field
     refresh_token = mutations.RefreshToken.Field
     revoke_token = mutations.RevokeToken.Field
+
 
 schema = strawberry.Schema(query=UserQueries, mutation=AuthMutation)
