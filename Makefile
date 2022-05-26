@@ -24,6 +24,7 @@ serve:
 	mkdocs serve
 
 build-docs:
+	pip install -r docs/requirements.txt
 	python docs/pre_build.py
 	mkdocs build
 
