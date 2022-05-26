@@ -22,8 +22,8 @@ your implementation*.
 
 ## Documentation
 
-Documentation is available at [read the docs](https://strawberry-django-auth.readthedocs.io/en/latest/).
-
+### Docs are currentlly outdated.
+#### you can check for now the original: [installation guide](https://django-graphql-auth.readthedocs.io/en/latest/installation/) or jump to the [quickstart](https://django-graphql-auth.readthedocs.io/en/latest/quickstart/). Or if you prefer, browse the [api](https://django-graphql-auth.readthedocs.io/en/latest/api/).
 
 ## Features
 
@@ -136,8 +136,6 @@ u.status.verified
 # True
 ```
 
-### Docs are currentlly outdated.
-#### you can check for now the original: [installation guide](https://django-graphql-auth.readthedocs.io/en/latest/installation/) or jump to the [quickstart](https://django-graphql-auth.readthedocs.io/en/latest/quickstart/). Or if you prefer, browse the [api](https://django-graphql-auth.readthedocs.io/en/latest/api/).
 
 
 ## Contributing
