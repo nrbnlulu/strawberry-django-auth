@@ -14,7 +14,8 @@ theme:
     background: 'green'
   logo: 'images/graphql_logo.svg'
   favicon: 'images/favicon.ico'
-
+  features:
+    - content.code.annotate
 extra:
 #  social:
 #    - type: github-alt
@@ -65,10 +66,11 @@ nav:
   - Quickstart: quickstart.md
   - Overriding email templates: overriding-email-templates.md
   - Relay: relay.md
+  - Captcha: captcha.md
+  - Decorators: decorators.md
   - Settings: settings.md
   - API: api.md
   - Contributing: contributing.md
   - Community: community.md
   - Changelog: changelog.md
   - Contributors: contributors.md
-  - Captcha: captcha.md

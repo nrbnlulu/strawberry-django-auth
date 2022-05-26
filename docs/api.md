@@ -178,7 +178,7 @@ query {
 All mutations can be imported like this:
 
 ```python tab="mutations"
-from gqlauth import mutations
+from gqlauth.user import arg_mutations
 
 # on your mutations
 register = mutations.Register

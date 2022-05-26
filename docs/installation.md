@@ -2,16 +2,16 @@
 
 !!! attention
     If you are not familiarized with
-    [Graphene](https://github.com/graphql-python/graphene)
-    or [GraphQL JWT](https://github.com/flavors/django-graphql-jwt), skip this
+    [Strawberry](https://strawberry.rocks/)
+    or [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt), skip this
     installation section and go to the [quickstart](quickstart.md) guide.
 
 ---
 
 ## Requirements
 
-- Python: 3.6 - 3.7 - 3.8
-- Django: 2.2 - 3.0
+- Python: 3.10
+- Django:  4.0
 
 ---
 
@@ -22,8 +22,8 @@ pip install strawberry-django-auth
 ```
 
 !!! Note ""
-    For those that are not installed, this will automatically install `graphene`, `graphene-django`,
-    `django-graphql-jwt`, `django-filter` and `django`.
+    For those that are not installed, this will automatically install `strawberry`, `strawberry-django`,
+    `strawberry-django-jwt`, `django`.
 
 Add `gqlauth` to installed apps.
 
@@ -54,89 +54,78 @@ The following are the minimum steps required to get it running. It should not ta
 
 !!! Schema
 
+    ```py
+    # yourapp/users/schema.py
+
+    import strawberry
+    from gqlauth.user.queries import UserQueries
+    ```
     === "GraphQl"
         ```py
-        
-        import graphene
-        
-        from gqlauth.schema import UserQuery, MeQuery
-        from gqlauth import mutations
-        
-        class AuthMutation(graphene.ObjectType):
-            register = mutations.Register.Field
-            verify_account = mutations.VerifyAccount.Field
-            resend_activation_email = mutations.ResendActivationEmail.Field
-            send_password_reset_email = mutations.SendPasswordResetEmail.Field
-            password_reset = mutations.PasswordReset.Field
-            password_set = mutations.PasswordSet.Field # For passwordless registration
-            password_change = mutations.PasswordChange.Field
-            update_account = mutations.UpdateAccount.Field
-            archive_account = mutations.ArchiveAccount.Field
-            delete_account = mutations.DeleteAccount.Field
-            send_secondary_email_activation =  mutations.SendSecondaryEmailActivation.Field
-            verify_secondary_email = mutations.VerifySecondaryEmail.Field
-            swap_emails = mutations.SwapEmails.Field
-            remove_secondary_email = mutations.RemoveSecondaryEmail.Field
-        
-            # django-graphql-jwt inheritances
-            token_auth = mutations.ObtainJSONWebToken.Field
-            verify_token = mutations.VerifyToken.Field
-            refresh_token = mutations.RefreshToken.Field
-            revoke_token = mutations.RevokeToken.Field
-        
-        
-        class Query(UserQuery, MeQuery, graphene.ObjectType):
-            pass
-        
-        
-        class Mutation(AuthMutation, graphene.ObjectType):
-            pass
-        
-        
-        schema = graphene.Schema(query=Query, mutation=Mutation)
+
+        from gqlauth.user import arg_mutations
+
+        @strawberry.type
+        class UserMutations:
+            token_auth = arg_mutations.ObtainJSONWebToken.Field # login mutation
+            verify_token = arg_mutations.VerifyToken.Field
+            refresh_token = arg_mutations.RefreshToken.Field
+            revoke_token = arg_mutations.RevokeToken.Field
+            register = arg_mutations.Register.Field
+            verify_account = arg_mutations.VerifyAccount.Field
+            update_account = arg_mutations.UpdateAccount.Field
+            resend_activation_email = arg_mutations.ResendActivationEmail.Field
+            archive_account = arg_mutations.ArchiveAccount.Field
+            delete_account = arg_mutations.DeleteAccount.Field
+            password_change = arg_mutations.PasswordChange.Field
+            send_password_reset_email = arg_mutations.SendPasswordResetEmail.Field
+            password_reset = arg_mutations.PasswordReset.Field
+            password_set = arg_mutations.PasswordSet.Field
+            verify_secondary_email = arg_mutations.VerifySecondaryEmail.Field
+            swap_emails = arg_mutations.SwapEmails.Field
+            remove_secondary_email = arg_mutations.RemoveSecondaryEmail.Field
+            send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.Field
         ```
+
     === "Relay"
     
         ```py
-        
-        import graphene
-        
-        from gqlauth.schema import UserQuery, MeQuery
         from gqlauth.user import relay
         
-        class AuthRelayMutation(graphene.ObjectType):
-            register = relay.Register.Field
-            verify_account = relay.VerifyAccount.Field
-            resend_activation_email = relay.ResendActivationEmail.Field
-            send_password_reset_email = relay.SendPasswordResetEmail.Field
-            password_reset = relay.PasswordReset.Field
-            password_set = relay.PasswordSet.Field # For passwordless registration
-            password_change = relay.PasswordChange.Field
-            update_account = relay.UpdateAccount.Field
-            archive_account = relay.ArchiveAccount.Field
-            delete_account = relay.DeleteAccount.Field
-            send_secondary_email_activation =  relay.SendSecondaryEmailActivation.Field
-            verify_secondary_email = relay.VerifySecondaryEmail.Field
-            swap_emails = relay.SwapEmails.Field
-            remove_secondary_email = mutations.RemoveSecondaryEmail.Field
-        
-            # django-graphql-jwt inheritances
-            token_auth = relay.ObtainJSONWebToken.Field
+        @strawberry.type
+        class UserMutations:
+            token_auth = relay.ObtainJSONWebToken.Field  # login mutation
             verify_token = relay.VerifyToken.Field
             refresh_token = relay.RefreshToken.Field
             revoke_token = relay.RevokeToken.Field
-        
-        
-        class Query(UserQuery, MeQuery, graphene.ObjectType):
-            pass
-        
-        
-        class Mutation(AuthRelayMutation, graphene.ObjectType):
-            pass
-        
-        
-        schema = graphene.Schema(query=Query, mutation=Mutation)
+            register = relay.Register.Field
+            verify_account = relay.VerifyAccount.Field
+            update_account = relay.UpdateAccount.Field
+            resend_activation_email = relay.ResendActivationEmail.Field
+            archive_account = relay.ArchiveAccount.Field
+            delete_account = relay.DeleteAccount.Field
+            password_change = relay.PasswordChange.Field
+            send_password_reset_email = relay.SendPasswordResetEmail.Field
+            password_reset = relay.PasswordReset.Field
+            password_set = relay.PasswordSet.Field
+            verify_secondary_email = relay.VerifySecondaryEmail.Field
+            swap_emails = relay.SwapEmails.Field
+            remove_secondary_email = relay.RemoveSecondaryEmail.Field
+            send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
         ```
+    ```py
+    # yourapp/schema.py
+
+    import strawberry
+    from strawberry.tools import merge_types
+    from users.schema import UserMutations, UserQueries
+    
+    Query = merge_types("RootQuery", (UserQueries,))
+
+    Mutation = merge_types("RootMutation", (UserMutations,))
+    
+    schema = strawberry.Schema(query=Query, mutation=Mutation)
+    ```
 
 ---
 
@@ -181,36 +170,52 @@ AUTHENTICATION_BACKENDS = [
     You should handle this situation doing one of the following:
 
     - Simply use the strawberry_django_jwt decorator [@login_required](https://django-graphql-jwt.domake.io/en/latest/decorators.html#login-required).
-    - Use [our login_required decorator](https://github.com/nrbnlulu/strawberry-django-auth/blob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/decorators.py#L7), note that this expect your output to contain [this output](https://github.com/nrbnlulu/strawberry-django-auth/blob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/bases.py#L6).
+    - Use [our login_required decorator](https://github.com/nrbnlulu/strawberry-django-auth/blob/fce93a3f6103d7194d3e3fbd28b7466602b8bf31/gqlauth/decorators.py#L7), note that this expect your output to contain [this output](https://github.com/nrbnlulu/strawberry-django-auth/blob/9287d7e4c774e585de8852c14e18c3a9f8c70d97/gqlauth/bases/interfaces.py#L8).
     - Create your own login_required decorator!
 
 ---
 
 ### 4. Refresh Token <small>- optional</small>
+!!! explanation 
+    Refresh tokens are consept of jwt-web-tokens 
+    what they mean is that every x time a so called *logged user* will need to request for a new token from the server
+    and generally there are two types of them:  
 
-Refresh tokens are optional and this package *(also a fork from graphene R.I.P)* will work with the default token
-from [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt).
-you should probably follow their docs.
+    1. [Single token refresh](https://django-graphql-jwt.domake.io/refresh_token.html#single-token-refresh) *(and thats the default)*  
 
-if you can't try this, but i dont grantee a thing :wink:
+    2. [Long running refresh tokens](https://django-graphql-jwt.domake.io/refresh_token.html#long-running-refresh-tokens)  
 
-```python
+
+    === "Single token refresh" 
+        they will require the user to ask for refresh token every 5 minutes
+        !!! warning
+            most importantly won't use the database therefore ==it is not state-less==
+
+    === "Long running refresh tokens"
+        they will require the database (threfore migration) are state-less
+        
+    you should probably follow [strawberry-django-jwt](https://django-graphql-jwt.domake.io/refresh_token.html) docs for more information docs :wink: 
+    but here is a TL;DR: to set this up
+
+```py
 INSTALLED_APPS = [
     # ...
-    'strawberry_django_jwt.refresh_token.apps.RefreshTokenConfig'
+    "strawberry_django_jwt.refresh_token",
 ]
 
 GRAPHQL_JWT = {
     # ...
-    'JWT_VERIFY_EXPIRATION': True,
-    'JWT_LONG_RUNNING_REFRESH_TOKEN': True,
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+    "JWT_EXPIRATION_DELTA": timedelta(minutes=5),
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
 }
 ```
 
 And remember to migrate:
 
 ```bash
-python manage.py migrate
+python -m manage migrate
 ```
 
 ---
@@ -240,7 +245,7 @@ you can set it to ``False`` on your [settings](settings.md),
 but you still need an Email Backend
 to password reset.
 
-The quickest way for development is to setup a [Console Email Backend](https://docs.djangoproject.com/en/3.0/topics/email/#console-backend), simply add the following to your ```settings.py```.
+The quickest way for development is to setup a [Console Email Backend](https://docs.djangoproject.com/en/4.0/topics/email/#console-backend), simply add the following to your ```settings.py```.
 
 ```python
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

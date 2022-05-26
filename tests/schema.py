@@ -1,5 +1,4 @@
 import strawberry
-from strawberry.schema.config import StrawberryConfig
 from strawberry.tools import merge_types
 from gqlauth.user.queries import UserQueries
 from gqlauth.user import relay, arg_mutations
@@ -55,7 +54,6 @@ Mutation = merge_types("RootMutation", (AuthMutation,))
 
 RelayMutation = merge_types("RootRelay", (AuthRelayMutation,))
 
-relay_schema = strawberry.Schema(
-    query=Query, mutation=RelayMutation, config=StrawberryConfig(auto_camel_case=True)
-)
+relay_schema = strawberry.Schema(query=Query, mutation=RelayMutation)
+
 default_schema = strawberry.Schema(query=Query, mutation=Mutation)

@@ -27,10 +27,9 @@ your implementation^^.
 ## Features
 
 * [x] Awesome docs!
-* [ ] Currently, not compatible with [Relay](https://github.com/facebook/relay>)
+* [x] Captcha validation
 * [x] Works with ==default or custom== user model
-* [x] JWT authentication <small>(with [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt))</small>
-* [x] User query with filters <small>(with [Django Filter](https://github.com/carltongibson/django-filter) and [Graphene Django](https://github.com/graphql-python/graphene-django))</small>
+* [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
 * [x] Resend activation email
@@ -46,6 +45,8 @@ your implementation^^.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
+* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay>)
+* [ ] Async is not supported yet, but you expect this in the close future
 
 ---
 

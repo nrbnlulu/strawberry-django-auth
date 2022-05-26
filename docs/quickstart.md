@@ -232,7 +232,7 @@ Create a file called ``schema.py`` next to your ``settings.py`` with the followi
 ```python
 # quickstart.schema.py
 
-import graphene
+import strawberry
 
 from gqlauth.schema import UserQuery, MeQuery
 
@@ -546,10 +546,10 @@ Now let's add some mutations to our schema, starting with the registration. On t
 ```python tab="mutations" hl_lines="6 8 9 14 15 17"
 # quickstart.schema.py
 
-import graphene
+import strawberry
 
 from gqlauth.schema import UserQuery, MeQuery
-from gqlauth import mutations
+from gqlauth.user import arg_mutations
 
 class AuthMutation(graphene.ObjectType):
    register = mutations.Register.Field
@@ -566,7 +566,7 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 ```python tab="relay" hl_lines="6 8 9 14 15 17"
 # quickstart.schema.py
 
-import graphene
+import strawberry
 
 from gqlauth.schema import UserQuery, MeQuery
 from gqlauth.user import relay

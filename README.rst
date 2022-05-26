@@ -65,7 +65,7 @@ Full schema features
 .. code:: python
 
    import strawberry
-   from gqlauth import mutations
+   from gqlauth.user import arg_mutations
 
 
    @strawberrry.type

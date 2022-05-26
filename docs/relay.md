@@ -5,7 +5,7 @@
 Import mutations from the ``relay`` module:
 
 ```python
-
+import strawberry
 from gqlauth.user import relay
 
 @strawberry.type
