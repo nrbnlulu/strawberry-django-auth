@@ -27,7 +27,7 @@ your implementation^^.
 ## Features
 
 * [x] Awesome docs!
-* [x] Fully compatible with [Relay](https://github.com/facebook/relay>)
+* [ ] Currently, not compatible with [Relay](https://github.com/facebook/relay>)
 * [x] Works with ==default or custom== user model
 * [x] JWT authentication <small>(with [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt))</small>
 * [x] User query with filters <small>(with [Django Filter](https://github.com/carltongibson/django-filter) and [Graphene Django](https://github.com/graphql-python/graphene-django))</small>
