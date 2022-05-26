@@ -1,0 +1,6 @@
+- name: Deploy MkDocs
+  uses: mhausenblas/mkdocs-deploy-gh-pages@1.24
+
+on:
+  - push
+  - pull_request
