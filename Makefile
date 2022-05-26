@@ -37,3 +37,8 @@ lint:
 dev-setup:
 	pip install -e ".[dev]"
 
+# gh only
+deploy-docs:
+	pip install -r docs/requirements.txt
+	python docs/pre_build.py
+	mkdocs gh-deploy --force
