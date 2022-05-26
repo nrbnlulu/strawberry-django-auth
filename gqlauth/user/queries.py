@@ -9,7 +9,6 @@ from django.contrib.auth import get_user_model
 from .types import UserType, UserFilter
 
 
-
 @strawberry.django.type(model=get_user_model())
 class UserQueries:
     user: Optional[UserType] = strawberry.django.field()
@@ -24,5 +23,5 @@ class UserQueries:
     @strawberry.django.field
     def me(self, info) -> Optional[UserType]:
         user = g_user(info)
-        if not user.is_anonymous():
+        if not user.is_anonymous:
             return user

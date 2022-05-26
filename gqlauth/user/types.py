@@ -30,6 +30,7 @@ def inject_field(field: dict[str, type]):
     def wrapped(cls):
         cls.__annotations__.update(field)
         return cls
+
     return wrapped
 
 
