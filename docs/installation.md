@@ -190,33 +190,30 @@ AUTHENTICATION_BACKENDS = [
         they will require the user to ask for refresh token every 5 minutes
         !!! warning
             most importantly won't use the database therefore ==it is not state-less==
-
+        for more information head to [Django GraphQL JWT](https://django-graphql-jwt.domake.io/refresh_token.html)
     === "Long running refresh tokens"
         they will require the database (threfore migration) are state-less
         
-    you should probably follow [strawberry-django-jwt](https://django-graphql-jwt.domake.io/refresh_token.html) docs for more information docs :wink: 
-    but here is a TL;DR: to set this up
-
-```py
-INSTALLED_APPS = [
-    # ...
-    "strawberry_django_jwt.refresh_token",
-]
-
-GRAPHQL_JWT = {
-    # ...
-    "JWT_VERIFY_EXPIRATION": True,
-    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-    "JWT_EXPIRATION_DELTA": timedelta(minutes=5),
-    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
-}
-```
-
-And remember to migrate:
-
-```bash
-python -m manage migrate
-```
+        you should probably follow [Django GraphQL JWT](https://django-graphql-jwt.domake.io/refresh_token.html) docs for more information docs :wink: 
+        but here is a TL;DR: to set this up:
+        ```py
+        INSTALLED_APPS = [
+            # ...
+            "strawberry_django_jwt.refresh_token",
+        ]
+        
+        GRAPHQL_JWT = {
+            # ...
+            "JWT_VERIFY_EXPIRATION": True,
+            "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+            "JWT_EXPIRATION_DELTA": timedelta(minutes=5),
+            "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
+        }
+        ```
+        And remember to migrate:
+        ```bash
+        python -m manage migrate
+        ```
 
 ---
 

@@ -52,7 +52,9 @@ if __name__ == "__main__":
 
     context = Context(directory=root_dir)
     loader = PythonLoader(search_path=['gqlauth'], modules=['decorators'])
-    renderer = MarkdownRenderer(render_module_header=False,)
+    renderer = MarkdownRenderer(render_module_header=False,
+                                render_typehint_in_data_header=True
+                                )
 
     loader.init(context)
     renderer.init(context)
