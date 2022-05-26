@@ -1,7 +1,7 @@
 site_name: Strawberry Django Auth
 site_description: GraphQL authentication for Django
 site_url: https://nrbnlulu.github.io/strawberry-django-auth/
-site_author: nirbenlulu
+site_author: nir benlulu
 repo_name: nrbnlulu/strawberry-django-auth
 repo_url: https://github.com/nrbnlulu/strawberry-django-auth
 
@@ -11,6 +11,7 @@ theme:
   palette:
     primary: 'black'
     accent: 'purple'
+    background: 'green'
   logo: 'images/graphql_logo.svg'
   favicon: 'images/favicon.ico'
 

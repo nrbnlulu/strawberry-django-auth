@@ -30,7 +30,7 @@
 
 ### v0.3.10
 
-- Pseudo async email support (thanks to [bzhr](https://github.com/bzhr) and [me](https://github.com/pedrobern))
+- Pseudo async email support (thanks to [bzhr](https://github.com/bzhr) and [me](https://github.com/nrbnlulu))
 
 ### v0.3.9
 

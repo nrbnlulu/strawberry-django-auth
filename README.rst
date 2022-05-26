@@ -162,11 +162,11 @@ Contributing
 ------------
 
 See
-`CONTRIBUTING.md <https://github.com/pedrobern/strawberry-django-auth/blob/master/CONTRIBUTING.md>`__
+`CONTRIBUTING.md <https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md>`__
 
 .. |Tests| image:: https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml/badge.svg
 .. |Pypi| image:: https://img.shields.io/pypi/v/strawberry-django-auth.svg
    :target: https://pypi.org/project/strawberry-django-auth/
 .. |contributions welcome| image:: https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
    :target: https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md
-.. |Django-graphql-auth| image:: https://github.com/pedrobern/django-graphql-auth/
+.. |Django-graphql-auth| image:: https://github.com/nrbnlulu/django-graphql-auth/

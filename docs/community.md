@@ -21,4 +21,4 @@
 
 ## Tutorials
 
-Have a tutorial or lesson to share? Open a [PR](https://github.com/PedroBern/strawberry-django-auth) and link it here!
+Have a tutorial or lesson to share? Open a [PR](https://github.com/nrbnlulu/strawberry-django-auth) and link it here!
