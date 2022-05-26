@@ -17,9 +17,6 @@ theme:
   features:
     - content.code.annotate
 extra:
-#  social:
-#    - type: github-alt
-#      link: https://github.com/nrbnlulu
   analytics:
     provider: google
     property: UA-XXXXXXXX-X

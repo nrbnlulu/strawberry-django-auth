@@ -1,8 +1,7 @@
-import inspect
 from functools import wraps
 from gqlauth.utils import g_user
 from .constants import Messages
-from .exceptions import WrongUsage, GraphQLAuthError, PermissionDenied
+from .exceptions import WrongUsage, PermissionDenied
 
 
 def login_required(fn):
