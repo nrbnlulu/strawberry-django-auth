@@ -1,10 +1,8 @@
 import pprint
 import re
-from importlib import reload
-import sys
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase
 
 from gqlauth.models import UserStatus, Captcha
 from gqlauth.signals import user_registered

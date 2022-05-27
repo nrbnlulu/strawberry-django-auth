@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "strawberry_django",
-    'users.apps.UsersConfig',
+    "users.apps.UsersConfig",
     "strawberry_django_jwt.refresh_token",
     "gqlauth",
 ]
@@ -128,7 +128,10 @@ GRAPHQL_JWT = {
     # optional
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
 }
+from gqlauth.settings_type import GqlAuthSettings
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+GQL_AUTH = GqlAuthSettings(LOGIN_REQUIRE_CAPTCHA=True, REGISTER_REQUIRE_CAPTCHA=True)
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 AUTH_USER_MODEL = "users.CustomUser"

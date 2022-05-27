@@ -18,7 +18,7 @@ from django.db import transaction
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
 from .constants import Messages, TokenAction
-from .utils import get_token, get_payload_from_token
+from .utils import get_token, get_payload_from_token, get_request
 from .exceptions import (
     UserAlreadyVerified,
     UserNotVerified,
@@ -48,7 +48,7 @@ class Captcha(models.Model):
         obj = cls(text=cap.text)
         setattr(obj, "image", cap.image)
         obj.save()
-        if django_settings.DEBUG:
+        if app_settings.FORCE_SHOW_CAPTCHA:
             obj.show()
         return obj
 
@@ -144,7 +144,7 @@ class UserStatus(models.Model):
 
     def get_email_context(self, info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
-        request = info.context.request
+        request = get_request(info)
         site = get_current_site(request)
         return {
             "user": self.user,

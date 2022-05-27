@@ -14,9 +14,8 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.append(str((Path(__file__).parent / "testproject")))
-BASE_DIR = os.path.dirname(__file__)
-
+cwd = Path(__file__).parent
+sys.path.append(str(cwd / 'testproject'))
 SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
@@ -37,7 +36,6 @@ INSTALLED_APPS = [
     "gqlauth",
 ]
 
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -49,11 +47,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [cwd / 'testproject' / "templates", ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -66,11 +63,10 @@ TEMPLATES = [
     }
 ]
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "NAME": str(cwd / "db.sqlite3"),
     }
 }
 
@@ -95,7 +91,6 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-
 # custom settings start here
 
 
@@ -107,22 +102,15 @@ AUTHENTICATION_BACKENDS = [
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-    "JWT_ALLOW_ANY_CLASSES": [
-        "gqlauth.mutations.Register",
-        "gqlauth.mutations.VerifyAccount",
-        "gqlauth.mutations.ResendActivationEmail",
-        "gqlauth.mutations.SendPasswordResetEmail",
-        "gqlauth.mutations.PasswordReset",
-        "gqlauth.mutations.ObtainJSONWebToken",
-        "gqlauth.mutations.VerifyToken",
-        "gqlauth.mutations.RefreshToken",
-        "gqlauth.mutations.RevokeToken",
-        "gqlauth.mutations.VerifySecondaryEmail",
-    ],
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-GQL_AUTH = {
-    "EMAIL_ASYNC_TASK": "testproject.pseudo_async_email_support.pseudo_async_email_support"
-}
+from gqlauth.settings_type import GqlAuthSettings
+
+GQL_AUTH = GqlAuthSettings(
+    EMAIL_ASYNC_TASK="testproject.pseudo_async_email_support.pseudo_async_email_support",
+    LOGIN_REQUIRE_CAPTCHA=True,
+    REGISTER_REQUIRE_CAPTCHA=True,
+    SEND_ACTIVATION_EMAIL=False
+)

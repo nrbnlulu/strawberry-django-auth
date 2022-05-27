@@ -22,16 +22,15 @@ your implementation*.
 
 ## Documentation
 
-### Docs are currentlly outdated.
-#### you can check for now the original: [installation guide](https://django-graphql-auth.readthedocs.io/en/latest/installation/) or jump to the [quickstart](https://django-graphql-auth.readthedocs.io/en/latest/quickstart/). Or if you prefer, browse the [api](https://django-graphql-auth.readthedocs.io/en/latest/api/).
+### Docs can be found [here](https://nrbnlulu.github.io/strawberry-django-auth/)  
 
 ## Features
 
-* [ ] [Awesome docs](https://strawberry-django-auth.readthedocs.io/en/latest/):tada:
+* [x] [Awesome docs](https://nrbnlulu.github.io/strawberry-django-auth/):tada:
 * [ ] Fully compatible with [Relay](https://github.com/facebook/relay>)
 * [x] Works with **default or custom** user model 
 * [x] JWT authentication *(with [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt))*
-* [x] User query with filters *(with [Django Filter](https://github.com/carltongibson/django-filter) and [Graphene Django](https://github.com/graphql-python/graphene-django))*
+* [x] User query with filters
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
 * [x] Resend activation email

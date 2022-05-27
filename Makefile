@@ -1,17 +1,22 @@
 .PHONY : test-local test-local-file serve build-docs check-readme install-local lint format dev-setup
-
-check-readme:
-	rm -rf dist build django_gqlauth.egg-info
-	python setup.py sdist bdist_wheel
-	python -m twine check dist/*
-
-install-local:
-	rm -rf dist build django_gqlauth.egg-info
-	python setup.py sdist bdist_wheel
-	python -m pip install dist/strawberry-django-auth-${v}.tar.gz
-
+SRC-DIR = src
+v =0.2.3
 p ?= 310
 d ?= 40
+
+check-readme:
+	cd src; rm -rf dist build django_gqlauth.egg-info;\
+	python setup.py sdist bdist_wheel; \
+	python -m twine check dist/*; \
+
+
+install-local:
+	cd src; \
+	rm -rf dist build strawberry-django-auth.egg-info; \
+	python setup.py sdist bdist_wheel; \
+	python 	-m pip install dist/strawberry-django-auth-${v}.tar.gz; \
+
+
 
 test:
 	tox -e py${p}-django${d} -- --cov-report term-missing --cov-report html
@@ -29,13 +34,13 @@ build-docs:
 	mkdocs build
 
 format:
-	black --exclude "/migrations/" gqlauth testproject setup.py quickstart tests
+	black --exclude "/migrations/" src testproject quickstart tests
 
 lint:
-	flake8 gqlauth
+	flake8 src
 
 dev-setup:
-	pip install -e ".[dev]"
+	cd src; pip install -e ".[dev]"
 
 # gh only
 deploy-docs:

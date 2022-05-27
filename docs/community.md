@@ -3,11 +3,17 @@
 ---
 
 ## Useful links
+!!! links
+    === "strawberry"
 
-- [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt/)
-- [Graphene](https://github.com/graphql-python/graphene)
-- [Graphene Django](https://github.com/graphql-python/graphene-django/)
-- [Django Filter](https://github.com/carltongibson/django-filter)
+       - [strawberry docs](https://strawberry.rocks/docs)
+       - [strawberry-django-jwt (forked from graphene)](https://github.com/KundaPanda/strawberry-django-jwt)
+
+    === "graphene"
+
+       - [django-gql-auth(where this project forked from)](https://django-graphql-auth.readthedocs.io/en/latest/quickstart/)
+       - [Django GraphQL JWT](https://github.com/flavors/django-graphql-jwt/)
+       - [Graphene Django](https://github.com/graphql-python/graphene-django/)
 
 ---
 

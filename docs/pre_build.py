@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # copy mixins file from .py to .yml
     root_dir = Path(__file__).parent.parent
-    source = root_dir / "gqlauth/user/resolvers.py"
+    source = root_dir / "src/gqlauth/user/resolvers.py"
     destination = root_dir / "docs/data/api.yml"
     dest = shutil.copyfile(source, destination)
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
 
 
-    context = Context(directory=root_dir)
+    context = Context(directory=root_dir / 'src')
     loader = PythonLoader(search_path=['gqlauth'], modules=['decorators'])
     renderer = MarkdownRenderer(render_module_header=False,
                                 render_typehint_in_data_header=True

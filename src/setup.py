@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-
-import io
-import os
 import re
 from collections import OrderedDict
 
 from setuptools import find_packages, setup
 from pathlib import Path
 
+cwd = Path(__file__).parent
 
-def get_version(package):
-    with io.open(os.path.join(package, "__init__.py")) as f:
+
+def get_version():
+    init = Path(cwd, "gqlauth", "__init__.py")
+    assert init.exists()
+    with open(Path(cwd, "gqlauth", "__init__.py")) as f:
         pattern = r'^__version__ = [\'"]([^\'"]*)[\'"]'
         return re.search(pattern, f.read(), re.MULTILINE).group(1)
 
@@ -22,14 +23,14 @@ tests_require = [
     "coveralls",
 ]
 
-dev_requires = ["black>=22.3", "flake8>=4.0.1"] + tests_require
+dev_requires = ["black>=22.3", "flake8>=4.0.1", "tox>=3.25.0 "] + tests_require
 this_directory = Path(__file__).parent
 setup(
     name="strawberry-django-auth",
-    version=get_version("gqlauth"),
+    version=get_version(),
     license="MIT",
     description="Graphql authentication system with Strawberry for Django.",
-    long_description=open(Path(this_directory, "README.rst")).read(),
+    long_description=open(cwd / "README.rst").read(),
     long_description_content_type="text/x-rst",
     author="nir-benlulu",
     author_email="nrbnlulu@gmail.com",
@@ -39,7 +40,7 @@ setup(
         (
             (
                 "Documentation",
-                "https://strawberry-django-auth.readthedocs.io/en/latest/",
+                "https://nrbnlulu.github.io/strawberry-django-auth/",
             ),
             ("Issues", "https://github.com/nrbnlulu/strawberry-django-auth/issues"),
         )

@@ -45,6 +45,10 @@ def list_to_dict(lst: [str]):
 
 warnings.simplefilter("once")
 
+def get_request(info):
+    if hasattr(info.context, 'user'):
+        return info.context
+    return info.context.request
 
 def g_user(info) -> User:
     # returns a user from info obj

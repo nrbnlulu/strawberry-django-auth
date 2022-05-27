@@ -5,13 +5,10 @@ from gqlauth.settings import gqlauth_settings as app_settings
 from pathlib import Path
 import sys
 from PIL.Image import Image
-from faker import Faker
 from .create import ImageCaptcha
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 FONTS_PATH = str(Path(__file__).parent.joinpath("fonts"))
-fake = Faker()
-
 
 @dataclass
 class CaptchaType:
@@ -39,10 +36,10 @@ def get_image(text):
 
 
 def generate_text() -> str:
-    factory = app_settings.CAPTCHA_TEXT_FACTORY
-    if factory:
-        return factory()
-    return " ".join([fake.city(), str(fake.pyint())])
+    return app_settings.CAPTCHA_TEXT_FACTORY()
+
+
+
 
 
 def generate_city_captcha():
