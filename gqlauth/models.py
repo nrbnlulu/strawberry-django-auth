@@ -144,15 +144,16 @@ class UserStatus(models.Model):
 
     def get_email_context(self, info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
-        site = get_current_site(info.context)
+        request = info.context.request
+        site = get_current_site(request)
         return {
             "user": self.user,
-            "request": info.context,
+            "request": request,
             "token": token,
-            "port": info.context.get_port(),
+            "port": request.get_port(),
             "site_name": site.name,
             "domain": site.domain,
-            "protocol": "https" if info.context.is_secure() else "http",
+            "protocol": "https" if request.is_secure() else "http",
             "path": path,
             "timestamp": time.time(),
             **app_settings.EMAIL_TEMPLATE_VARIABLES,

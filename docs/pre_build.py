@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # copy mixins file from .py to .yml
     root_dir = Path(__file__).parent.parent
-    source = root_dir / "gqlauth/bases/mixins.py"
+    source = root_dir / "gqlauth/user/resolvers.py"
     destination = root_dir / "docs/data/api.yml"
     dest = shutil.copyfile(source, destination)
 

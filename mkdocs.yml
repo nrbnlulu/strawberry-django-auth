@@ -9,11 +9,24 @@ theme:
   name: material
   language: en
   palette:
-    primary: 'black'
-    accent: 'purple'
-    background: 'green'
-  logo: 'images/graphql_logo.svg'
-  favicon: 'images/favicon.ico'
+  - scheme: default
+    primary: purple
+    accent: indigo
+    toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+
+  - scheme: slate
+    primary: black
+    accent: purple
+    toggle:
+      icon: material/toggle-switch
+      name: Switch to dark mode
+
+
+
+  logo: images/graphql_logo.svg
+  favicon: images/favicon.ico
   features:
     - content.code.annotate
 extra:

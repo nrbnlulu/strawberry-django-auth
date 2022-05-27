@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from uuid import UUID
+from typing import Optional
 
 # strawberry
 import strawberry
@@ -82,7 +82,7 @@ class UserType:
         return self.status.verified
 
     @strawberry.django.field
-    def secondary_email(self, info) -> str:
+    def secondary_email(self, info) -> Optional[str]:
         return self.status.secondary_email
 
     def get_queryset(self, queryset, info, **kwargs):

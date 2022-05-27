@@ -23,13 +23,13 @@ DEFAULTS = {
     "ALLOW_LOGIN_NOT_VERIFIED": False,
     # mutation fields options
     "LOGIN_OPTIONAL_FIELDS": [],
-    "LOGIN_REQUIRE_CAPTCHA": True,
+    "LOGIN_REQUIRE_CAPTCHA": False,
     "LOGIN_REQUIRED_FIELDS": ["username", "password"],
     # required fields on register, plus password1 and password2,
     # can be a dict like UPDATE_MUTATION_FIELDS setting
     "REGISTER_MUTATION_FIELDS": ["email", "username"],
     "REGISTER_MUTATION_FIELDS_OPTIONAL": [],
-    "REGISTER_REQUIRE_CAPTCHA": True,
+    "REGISTER_REQUIRE_CAPTCHA": False,
     # captcha stuff
     "CAPTCHA_EXPIRATION_DELTA": timedelta(seconds=120),
     "CAPTCHA_MAX_RETRIES": 5,
@@ -44,7 +44,7 @@ DEFAULTS = {
     "EXPIRATION_PASSWORD_SET_TOKEN": timedelta(hours=1),
     # email stuff
     "EMAIL_FROM": getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com"),
-    "SEND_ACTIVATION_EMAIL": False,
+    "SEND_ACTIVATION_EMAIL": True,
     # client: example.com/activate/token
     "ACTIVATION_PATH_ON_EMAIL": "activate",
     "ACTIVATION_SECONDARY_EMAIL_PATH_ON_EMAIL": "activate",

@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "users",
-    "strawberry.django",
-    "strawberry_django_jwt.refresh_token.apps.RefreshTokenConfig",
+    "strawberry_django",
+    'users.apps.UsersConfig',
+    "strawberry_django_jwt.refresh_token",
     "gqlauth",
 ]
 
@@ -118,11 +118,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 
-GRAPHENE = {
-    "SCHEMA": "quickstart.schema.schema",
-    "MIDDLEWARE": ["strawberry_django_jwt.middleware.JSONWebTokenMiddleware"],
-}
-
 AUTHENTICATION_BACKENDS = [
     "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
@@ -130,21 +125,10 @@ AUTHENTICATION_BACKENDS = [
 
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
+    # optional
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-    "JWT_ALLOW_ANY_CLASSES": [
-        "gqlauth.mutations.Register",
-        "gqlauth.mutations.VerifyAccount",
-        "gqlauth.mutations.ResendActivationEmail",
-        "gqlauth.mutations.SendPasswordResetEmail",
-        "gqlauth.mutations.PasswordReset",
-        "gqlauth.mutations.ObtainJSONWebToken",
-        "gqlauth.mutations.VerifyToken",
-        "gqlauth.mutations.RefreshToken",
-        "gqlauth.mutations.RevokeToken",
-        "gqlauth.mutations.VerifySecondaryEmail",
-    ],
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 AUTH_USER_MODEL = "users.CustomUser"

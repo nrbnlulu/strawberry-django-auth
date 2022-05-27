@@ -9,10 +9,10 @@ from django.contrib.auth import get_user_model
 from .types import UserType, UserFilter
 
 
-@strawberry.django.type(model=get_user_model())
+@strawberry.django.type(model=get_user_model(), filters=UserFilter)
 class UserQueries:
     user: Optional[UserType] = strawberry.django.field()
-    users: UserType = strawberry.django.field(filters=UserFilter)
+    users: list[UserType] = strawberry.django.field(filters=UserFilter)
 
     @strawberry.django.field
     def public_user(self, info) -> Optional[UserType]:

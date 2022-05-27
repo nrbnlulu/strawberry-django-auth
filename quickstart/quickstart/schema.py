@@ -1,6 +1,6 @@
 # quickstart.schema.py
 import strawberry
-from gqlauth.user import arg_mutations as mutations
+from gqlauth.user import relay as mutations
 from gqlauth.user.queries import UserQueries
 
 
