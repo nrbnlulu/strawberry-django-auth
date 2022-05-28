@@ -6,12 +6,12 @@ from setuptools import find_packages, setup
 from pathlib import Path
 
 cwd = Path(__file__).parent
-
+src = Path.cwd() / 'src'
 
 def get_version():
-    init = Path(cwd, "gqlauth", "__init__.py")
-    assert init.exists()
-    with open(Path(cwd, "gqlauth", "__init__.py")) as f:
+    init = src / "gqlauth" / "__init__.py"
+    assert init.resolve().exists()
+    with open(init) as f:
         pattern = r'^__version__ = [\'"]([^\'"]*)[\'"]'
         return re.search(pattern, f.read(), re.MULTILINE).group(1)
 
@@ -24,7 +24,7 @@ tests_require = [
 ]
 
 dev_requires = ["black>=22.3", "flake8>=4.0.1", "tox>=3.25.0 "] + tests_require
-this_directory = Path(__file__).parent
+
 setup(
     name="strawberry-django-auth",
     version=get_version(),
@@ -46,6 +46,7 @@ setup(
         )
     ),
     packages=find_packages(exclude=["tests*"]),
+    package_dir={'': 'src'},
     install_requires=[
         "Django>=4.0",
         "strawberry-django-jwt",

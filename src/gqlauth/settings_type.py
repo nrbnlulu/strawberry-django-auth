@@ -4,7 +4,9 @@ from attrs import define
 import strawberry
 from django.conf import settings as django_settings
 from faker import Faker
+
 fake = Faker()
+
 
 def default_text_factory():
     return " ".join([fake.city(), str(fake.pyint())])
@@ -27,29 +29,31 @@ class GqlAuthSettings:
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     # mutation fields options
     LOGIN_OPTIONAL_FIELDS: list = []
-    LOGIN_REQUIRE_CAPTCHA: bool = False
+    LOGIN_REQUIRE_CAPTCHA: bool = True
     LOGIN_REQUIRED_FIELDS: dict | list = ["username", "password"]
     # required fields on register, plus password1 and password2,
     # can be a dict like UPDATE_MUTATION_FIELDS setting
     REGISTER_MUTATION_FIELDS: dict | list = ["email", "username"]
     REGISTER_MUTATION_FIELDS_OPTIONAL: list = []
-    REGISTER_REQUIRE_CAPTCHA: bool = False
+    REGISTER_REQUIRE_CAPTCHA: bool = True
     # captcha stuff
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
     CAPTCHA_MAX_RETRIES: int = 5
     ## any function that returns a string
     CAPTCHA_TEXT_FACTORY: Callable = default_text_factory
     ## a function that recives the original string vs user input
-    CAPTCHA_TEXT_VALIDATOR: Callable[[str, str], bool] = lambda original, received: bool(original == received)
+    CAPTCHA_TEXT_VALIDATOR: Callable[
+        [str, str], bool
+    ] = lambda original, received: bool(original == received)
     ## will show captcha every time you create one
     FORCE_SHOW_CAPTCHA: bool = False
     # optional fields on update account, can be list of fields
     UPDATE_MUTATION_FIELDS: dict | list = {"first_name": str, "last_name": str}
     # tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
-    EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1),
-    EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN: timedelta = timedelta(hours=1),
-    EXPIRATION_PASSWORD_SET_TOKEN: timedelta = timedelta(hours=1),
+    EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1)
+    EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN: timedelta = timedelta(hours=1)
+    EXPIRATION_PASSWORD_SET_TOKEN: timedelta = timedelta(hours=1)
     # email stuff
     EMAIL_FROM: str = getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com")
     SEND_ACTIVATION_EMAIL: bool = True
@@ -84,6 +88,5 @@ class GqlAuthSettings:
     ## mutation error type
     CUSTOM_ERROR_TYPE: strawberry.scalar = "gqlauth.bases.scalars.ExpectedErrorType"
     ## registration with no password
-    ALLOW_PASSWORDLESS_REGISTRATION: bool = False,
+    ALLOW_PASSWORDLESS_REGISTRATION: bool = False
     SEND_PASSWORD_SET_EMAIL: bool = False
-

@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 cwd = Path(__file__).parent
-sys.path.append(str(cwd / 'testproject'))
+sys.path.append(str(cwd / "testproject"))
 SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
@@ -50,7 +50,9 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [cwd / 'testproject' / "templates", ],
+        "DIRS": [
+            cwd / "testproject" / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -112,5 +114,5 @@ GQL_AUTH = GqlAuthSettings(
     EMAIL_ASYNC_TASK="testproject.pseudo_async_email_support.pseudo_async_email_support",
     LOGIN_REQUIRE_CAPTCHA=True,
     REGISTER_REQUIRE_CAPTCHA=True,
-    SEND_ACTIVATION_EMAIL=False
+    SEND_ACTIVATION_EMAIL=False,
 )
