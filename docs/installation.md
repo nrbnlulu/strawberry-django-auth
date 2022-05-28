@@ -251,3 +251,21 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 Now all emails are sent to the standard output, instead of an actual email.
 
 ---
+
+### 7. Overriding settings
+
+let's disable captcha validation.
+in your settings.py add the following:
+```py
+# settings.py
+from gqlauth.settings_type import GqlAuthSettings
+
+GQL_AUTH = GqlAuthSettings(
+    LOGIN_REQUIRE_CAPTHA=False,
+    REGISTER_REQUIRE_CAPTCHA=False,
+)
+
+```
+!!! Warning
+    #### these (captcha) settings can not be changed at runtime!
+    #### since the schema can not be changed at runtime.

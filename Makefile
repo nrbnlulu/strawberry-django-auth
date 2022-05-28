@@ -3,14 +3,11 @@ v =0.2.3
 p ?= 310
 d ?= 40
 
-check-readme:
-	rm -rf dist build django_gqlauth.egg-info
-	python setup.py sdist bdist_wheel
-	python -m twine check dist/*
-
-
 install-local:
 	python -m pip install -e .
+
+run-quickstart:
+	cd quickstart; python -m manage runserver;
 
 test:
 	tox -e py${p}-django${d} -- --cov-report term-missing --cov-report html
@@ -38,6 +35,6 @@ dev-setup:
 
 # gh only
 deploy-docs:
-	pip install -r docs/requirements.txt
+	python -m pip install -r docs/requirements.txt
 	python docs/pre_build.py
 	mkdocs gh-deploy --force

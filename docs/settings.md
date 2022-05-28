@@ -4,17 +4,19 @@
 
 ## Example
 
-Configuration is made from a single Django setting named `#!python GRAPHQL_AUTH`.
+Configuration is made from a single Django setting named `GQL_AUTH`.
 
-```python
+```py
 # settings.py
+from gqlauth.settings_type import GqlAuthSettings
 
-GRAPHQL_AUTH = {
-    'LOGIN_ALLOWED_FIELDS': ['email', 'username'],
-    # ...
-}
+GQL_AUTH = GqlAuthSettings(
+    LOGIN_ALLOWED_FIELDS = ['email', 'username'],
+)
 ```
-
+!!! Warning
+    #### these settings can not be changed at runtime!
+    #### since the schema can not be changed at runtime.
 ---
 
 ## Boolean Flags

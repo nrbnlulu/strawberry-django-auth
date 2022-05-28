@@ -89,7 +89,7 @@ python manage.py migrate
 
 ---
 
-## Setup Graphene and GraphQL JWT
+## Setup strawberry and strawberry-jwt
 
 ??? Question "What is strawberry-django?"
     [strawberry-django](https://github.com/strawberry-graphql/strawberry-graphql-django)
@@ -102,7 +102,7 @@ python manage.py migrate
     and is the easiest way to add JSON Web token authentication for Django with strawberry.
 
 
-??? Note "strawberry-django quick start"
+??? Note "strawberry-django quick start - copied"
 
     ### Installation
     
@@ -349,7 +349,6 @@ TEMPLATES = [
     },
 ]
 ```
-
 Run:
 
 ```bash
@@ -357,6 +356,21 @@ python -m manage migrate
 ```
 
 
+Now let's disable captcha validation for setup ease.
+in your settings.py add the following:
+```py
+# settings.py
+from gqlauth.settings_type import GqlAuthSettings
+
+GQL_AUTH = GqlAuthSettings(
+    LOGIN_REQUIRE_CAPTHA=False,
+    REGISTER_REQUIRE_CAPTCHA=False,
+)
+```
+
+!!! Warning
+    #### these (captcha) settings can not be changed at runtime!
+    #### since the schema can not be changed at runtime.
 
 
 ## Query

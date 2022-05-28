@@ -130,7 +130,10 @@ GRAPHQL_JWT = {
 }
 from gqlauth.settings_type import GqlAuthSettings
 
-GQL_AUTH = GqlAuthSettings(LOGIN_REQUIRE_CAPTCHA=True, REGISTER_REQUIRE_CAPTCHA=True)
+GQL_AUTH = GqlAuthSettings(
+    LOGIN_REQUIRE_CAPTCHA=False,
+    REGISTER_REQUIRE_CAPTCHA=False,
+)
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

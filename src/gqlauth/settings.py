@@ -8,13 +8,13 @@ logger = logging.getLogger(__name__)
 
 gqlauth_settings: GqlAuthSettings = None
 
-if check_settings := getattr(django_settings, "GQL_AUTH", False):
-    if isinstance(check_settings, GqlAuthSettings):
-        gqlauth_settings = check_settings
+if user_settings := getattr(django_settings, "GQL_AUTH", False):
+    if isinstance(user_settings, GqlAuthSettings):
+        gqlauth_settings = user_settings
     else:
         raise Exception(
             f"GQL_AUTH settings should be of type "
-            f"{GqlAuthSettings}, but you provided {type(check_settings)}"
+            f"{GqlAuthSettings}, but you provided {type(user_settings)}"
         )
 
 else:

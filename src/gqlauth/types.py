@@ -1,7 +1,6 @@
 from uuid import UUID
 import strawberry_django
 import strawberry
-from strawberry_django import auto
 
 from gqlauth import models
 from gqlauth.scalars import image
