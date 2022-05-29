@@ -1,5 +1,4 @@
 from django.utils.translation import gettext as _
-from enum import Enum, auto
 
 
 class Messages:
@@ -67,7 +66,7 @@ class Messages:
     ]
 
 
-class TokenAction(Enum):
+class TokenAction:
     ACTIVATION = "activation"
     PASSWORD_RESET = "password_reset"
     ACTIVATION_SECONDARY_EMAIL = "activation_secondary_email"
