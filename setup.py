@@ -19,8 +19,9 @@ def get_version():
 tests_require = [
     "pytest>=3.6.3",
     "pytest-cov>=2.4.0",
-    "pytest-django>=3.1.2",
+    "pytest-django>=4.5.2",
     "coveralls",
+    "tox"
 ]
 
 dev_requires = ["black>=22.3", "flake8>=4.0.1", "tox>=3.25.0 "] + tests_require

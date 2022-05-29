@@ -6,6 +6,9 @@ d ?= 40
 install-local:
 	python -m pip install -e .
 
+dev-setup:
+	pip install -e ".[dev]"
+
 run-quickstart:
 	cd quickstart; python -m manage runserver;
 
@@ -30,8 +33,6 @@ format:
 lint:
 	flake8 gqlauth
 
-dev-setup:
-	pip install -e ".[dev]"
 
 # gh only!
 deploy-docs:
