@@ -1,6 +1,7 @@
 from django.utils.translation import gettext as _
 from enum import Enum, auto
 
+
 class Messages:
     INVALID_PASSWORD = [{"message": _("Invalid password."), "code": "invalid_password"}]
     UNAUTHENTICATED = [{"message": _("Unauthenticated."), "code": "unauthenticated"}]
