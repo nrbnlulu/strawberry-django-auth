@@ -33,7 +33,7 @@ lint:
 dev-setup:
 	pip install -e ".[dev]"
 
-# gh only
+# gh only!
 deploy-docs:
 	python -m pip install -r docs/requirements.txt
 	python docs/pre_build.py

@@ -55,7 +55,6 @@ setup(
         "PyJWT>=2.3.0",
         "Faker>=13.3.4",
         "Pillow>=9.1.0",
-        "attrs>=21.4.0",
     ],
     tests_require=tests_require,
     classifiers=[
