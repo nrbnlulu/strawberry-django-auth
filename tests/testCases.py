@@ -25,7 +25,7 @@ class TestBase(TestCase):
         return client.execute["data"]["register"]
     """
 
-    default_password = "23kegbsi7g2k"
+    default_password = "FAKE@gfagfdfa132"
 
     @staticmethod
     def gen_captcha():

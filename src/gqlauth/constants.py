@@ -1,5 +1,5 @@
 from django.utils.translation import gettext as _
-
+from enum import Enum, auto
 
 class Messages:
     INVALID_PASSWORD = [{"message": _("Invalid password."), "code": "invalid_password"}]
@@ -66,7 +66,7 @@ class Messages:
     ]
 
 
-class TokenAction(object):
+class TokenAction(Enum):
     ACTIVATION = "activation"
     PASSWORD_RESET = "password_reset"
     ACTIVATION_SECONDARY_EMAIL = "activation_secondary_email"
