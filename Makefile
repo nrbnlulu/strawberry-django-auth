@@ -25,10 +25,10 @@ build-docs:
 	mkdocs build
 
 format:
-	black --exclude "/migrations/" src quickstart tests
+	black --exclude "/migrations/" quickstart tests
 
 lint:
-	flake8 src
+	flake8 gqlauth
 
 dev-setup:
 	pip install -e ".[dev]"

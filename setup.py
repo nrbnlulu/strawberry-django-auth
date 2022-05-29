@@ -6,10 +6,10 @@ from setuptools import find_packages, setup
 from pathlib import Path
 
 cwd = Path(__file__).parent
-src = Path.cwd() / 'src'
+src = Path.cwd() / 'gqlauth'
 
 def get_version():
-    init = src / "gqlauth" / "__init__.py"
+    init = src / "__init__.py"
     assert init.resolve().exists()
     with open(init) as f:
         pattern = r'^__version__ = [\'"]([^\'"]*)[\'"]'
@@ -46,7 +46,6 @@ setup(
         )
     ),
     packages=find_packages(exclude=["tests*"]),
-    package_dir={'': 'src'},
     install_requires=[
         "Django>=4.0",
         "strawberry-django-jwt>=0.2.0",
