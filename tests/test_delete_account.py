@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -7,7 +6,6 @@ from .testCases import RelayTestCase, DefaultTestCase
 
 from gqlauth.constants import Messages
 from pytest import mark
-from .__init__ import *
 
 
 class DeleteAccountTestCaseMixin:

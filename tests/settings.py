@@ -94,6 +94,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 # custom settings start here
+EMAIL_HOST = "mail.privateemail.com"
+EMAIL_HOST_USER = "some_testsEmail@cccc.com"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 AUTHENTICATION_BACKENDS = [

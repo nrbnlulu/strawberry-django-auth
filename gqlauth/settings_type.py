@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Callable
+from typing import Callable, TypeVar, Any
 from dataclasses import dataclass, field
 import strawberry
 from django.conf import settings as django_settings
@@ -20,6 +20,8 @@ _USER_NODE_FILTER_fieldS = {
     "status__verified": ["exact"],
     "status__secondary_email": ["exact"],
 }
+
+DjangoSetting = TypeVar('DjangoSetting')
 
 
 @dataclass(slots=True)
@@ -61,7 +63,8 @@ class GqlAuthSettings:
     EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN: timedelta = timedelta(hours=1)
     EXPIRATION_PASSWORD_SET_TOKEN: timedelta = timedelta(hours=1)
     # email stuff
-    EMAIL_FROM: str = getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com")
+    EMAIL_FROM: DjangoSetting = \
+        lambda: getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com")
     SEND_ACTIVATION_EMAIL: bool = True
     ## client: example.com/activate/token
     ACTIVATION_PATH_ON_EMAIL: str = "activate"

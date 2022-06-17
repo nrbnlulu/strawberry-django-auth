@@ -8,6 +8,7 @@ GQL_AUTH = GqlAuthSettings(
     ALLOW_LOGIN_NOT_VERIFIED=False,
     REGISTER_MUTATION_FIELDS={"email": str, "username": str},
     UPDATE_MUTATION_FIELDS=["first_name", "last_name"],
+    EMAIL_FROM="SomeDiffrentEmail@thanInDjango.settings",
 )
 
 INSTALLED_APPS += ["tests"]
