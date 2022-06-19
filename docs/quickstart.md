@@ -268,7 +268,7 @@ python manage.py migrate
     #   { name: "raspberry", color: { name: "red" } }
     # ]
     ```
----
+
 ??? Note "strawberry-django-jwt setup - copied"
     	## Installation
 
@@ -392,7 +392,9 @@ python manage.py migrate
 
 	  - It might be possible to create a workaround by using either a class decorator or by creating a custom graphql
 	    scheme that somehow preserves class hierarchy of types
-    
+
+---
+
 #### After you are done with strawberry-django initialization your settings should look like this:
 
 ```python
