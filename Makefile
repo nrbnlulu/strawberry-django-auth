@@ -1,5 +1,5 @@
 .PHONY : test-local test-local-file serve build-docs check-readme install-local lint format dev-setup
-v =0.2.3
+v =0.3.2.1
 p ?= 310
 d ?= 40
 

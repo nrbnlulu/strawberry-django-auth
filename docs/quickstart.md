@@ -269,7 +269,130 @@ python manage.py migrate
     # ]
     ```
 ---
+??? Note "strawberry-django-jwt setup - copied"
+    	## Installation
 
+	1. Install last stable version from Pypi:
+
+	   ```shell
+	   pip install strawberry-django-jwt
+	   ```
+
+	2. Add `AuthenticationMiddleware` middleware to your **MIDDLEWARE** settings:
+
+	   ```python
+	   MIDDLEWARE = [
+	       ...,
+	       'django.contrib.auth.middleware.AuthenticationMiddleware',
+	       ...,
+	   ]
+	   ```
+
+	3. Add following django apps to **INSTALLED_APPS**:
+
+	   ```python
+	   INSTALLED_APPS = [
+	       'django.contrib.auth',
+	       'django.contrib.contenttypes',
+	       'django.contrib.sessions',
+	       ...,
+	   ]
+	   ```
+
+	   If using refresh tokens, also add `strawberry_django_jwt.refresh_token`
+
+	   ```python
+	   INSTALLED_APPS = [
+	       'django.contrib.auth',
+	       'django.contrib.contenttypes',
+	       'django.contrib.sessions',
+	       ...,
+	       'strawberry_django_jwt.refresh_token',
+	       ...,
+	   ]
+	   ```
+
+	4. Add `JSONWebTokenMiddleware` or `AsyncJSONWebTokenMiddleware` middleware to your **STRAWBERRY** schema definition:
+
+	   ```python
+	   from strawberry_django_jwt.middleware import JSONWebTokenMiddleware, AsyncJSONWebTokenMiddleware
+	   from strawberry import Schema
+
+	   # !! IMPORTANT !!
+	   # Pick only one, async middleware is needed when using AsyncGraphQLSchema
+	   schema = Schema(..., extensions=[
+	      JSONWebTokenMiddleware,
+	      AsyncJSONWebTokenMiddleware,
+	   ])
+	   ```
+
+	5. Add `JSONWebTokenBackend` backend to your **AUTHENTICATION_BACKENDS**:
+
+	   ```python
+	   AUTHENTICATION_BACKENDS = [
+	       'strawberry_django_jwt.backends.JSONWebTokenBackend',
+	       'django.contrib.auth.backends.ModelBackend',
+	   ]
+	   ```
+
+	6. Add _strawberry-django-jwt_ mutations to the root schema:
+
+	   ```python
+	   import strawberry
+	   import strawberry_django_jwt.mutations as jwt_mutations
+
+	   @strawberry.type
+	   class Mutation:
+	       token_auth = jwt_mutations.ObtainJSONWebToken.obtain
+	       verify_token = jwt_mutations.Verify.verify
+	       refresh_token = jwt_mutations.Refresh.refresh
+	       delete_token_cookie = jwt_mutations.DeleteJSONWebTokenCookie.delete_cookie
+	   ```
+
+	   schema = strawberry.Schema(mutation=Mutation, query=...)
+
+	7. \[OPTIONAL\] Set up the custom Strawberry views
+
+	   These views set the status code of failed authentication attempts to 401 instead of the default 200.
+
+	   ```python
+	   from django.urls import re_path
+	   from strawberry_django_jwt.decorators import jwt_cookie
+	   from strawberry_django_jwt.views import StatusHandlingGraphQLView as GQLView
+	   from ... import schema
+
+	   urlpatterns += \
+	   [
+	       re_path(r'^graphql/?$', jwt_cookie(GQLView.as_view(schema=schema))),
+	   ]
+	   ```
+
+	   or, for async views:
+
+	   ```python
+	   from django.urls import re_path
+	   from strawberry_django_jwt.decorators import jwt_cookie
+	   from strawberry_django_jwt.views import AsyncStatusHandlingGraphQLView as AGQLView
+	   from ... import schema
+
+	   urlpatterns += \
+	   [
+	       re_path(r'^graphql/?$', jwt_cookie(AGQLView.as_view(schema=schema))),
+	   ]
+	   ```
+
+	---
+
+	## Known Issues
+
+	- `JWT_ALLOW_ANY_CLASSES`
+
+	  - Only supports return-type based filtering at the moment, because strawberry does not use class-based field
+	    definitions (so all superclasses are dropped)
+
+	  - It might be possible to create a workaround by using either a class decorator or by creating a custom graphql
+	    scheme that somehow preserves class hierarchy of types
+    
 #### After you are done with strawberry-django initialization your settings should look like this:
 
 ```python
@@ -385,8 +508,16 @@ Create a file called ``schema.py`` next to your ``settings.py`` with the followi
 
 import strawberry
 from gqlauth.user.queries import UserQueries
+from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
 
-schema = strawberry.Schema(query=UserQueries)
+
+schema = strawberry.Schema(
+    query=UserQueries,
+    extensions=[
+        JSONWebTokenMiddleware,
+    ],
+)
+
 ```
 
 ??? Note "you can choose what fields to include like this"
@@ -697,6 +828,8 @@ Now let's add some mutations to our schema, starting with the registration. On t
         import strawberry
         from gqlauth.schema import UserQueries
         from gqlauth.user import arg_mutations 
+        from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
+
 
         @strawberry.type
         class UserMutations:
@@ -722,7 +855,13 @@ Now let's add some mutations to our schema, starting with the registration. On t
             refresh_token = arg_mutations.RefreshToken.Field
             revoke_token = arg_mutations.RevokeToken.Field
         
-        schema = graphene.Schema(query=UserQueries, mutation=UserMutations)
+        schema = strawberry.Schema(
+                    query=UserQueries,
+                    mutation=UserMutations,
+                    extensions=[
+                        JSONWebTokenMiddleware,
+                    ],
+                )
         ```
     === "relay"
         ```python hl_lines="5"
@@ -732,6 +871,7 @@ Now let's add some mutations to our schema, starting with the registration. On t
         import strawberry
         from gqlauth.schema import UserQueries
         from gqlauth.user import relay 
+        from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
 
         @strawberry.type
         class UserMutations:
@@ -757,7 +897,13 @@ Now let's add some mutations to our schema, starting with the registration. On t
             refresh_token = relay.RefreshToken.Field
             revoke_token = relay.RevokeToken.Field
         
-        schema = graphene.Schema(query=UserQueries, mutation=UserMutations)
+        schema = strawberry.Schema(
+                    query=UserQueries,
+                    mutation=UserMutations,
+                    extensions=[
+                        JSONWebTokenMiddleware,
+                    ],
+                )
         ```
 
 Take a minute to explore the schema on the documentation tab again.  

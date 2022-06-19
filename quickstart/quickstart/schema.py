@@ -1,7 +1,8 @@
 # quickstart.schema.py
 import strawberry
-from gqlauth.user import relay as mutations
+from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
+from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
 
 
 @strawberry.type
@@ -29,4 +30,10 @@ class AuthMutation:
     revoke_token = mutations.RevokeToken.Field
 
 
-schema = strawberry.Schema(query=UserQueries, mutation=AuthMutation)
+schema = strawberry.Schema(
+    query=UserQueries,
+    mutation=AuthMutation,
+    extensions=[
+        JSONWebTokenMiddleware,
+    ],
+)
