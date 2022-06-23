@@ -8,7 +8,7 @@ The default email templates are just examples, you probably want to customize it
 
 ```python
 # settings.py
-
+import os
 TEMPLATES = [
     {
         #...
@@ -36,7 +36,7 @@ Create the following folder and files structure:
       manage.py
 ```
 
-This is the minimum. Check the [email templates settings](settings.md), you can create custom templates for:
+This is the minimum. Check the [email templates settings](settings.md#email-templates), you can create custom templates for:
 
 - account activation
 - resend account activation email
@@ -50,13 +50,13 @@ Both subject and email templates receive the following variables:
 - user
 - token --> account activation / password reset / secondary-email activation
 - port
-- site_name --> from [django sites framework](https://docs.djangoproject.com/en/3.0/ref/contrib/sites/) <small>(optional)</small>
-- domain --> from [django sites framework](https://docs.djangoproject.com/en/3.0/ref/contrib/sites/) <small>(optional)</small>
+- site_name --> from [django sites framework](https://docs.djangoproject.com/en/4.0/ref/contrib/sites/) <small>(optional)</small>
+- domain --> from [django sites framework](https://docs.djangoproject.com/en/4.0/ref/contrib/sites/) <small>(optional)</small>
 - protocol
 - path --> defined in [settings](settings.md) <small>(some frontend path)</small>
 - request
 - timestamp
-- custom variables defined using EMAIL_TEMPLATE_VARIABLES setting --> defined in [settings](settings.md)
+- custom variables defined using EMAIL_TEMPLATE_VARIABLES setting --> defined in [settings](settings.md#email-templates)
 
 
 ## Writing the templates
