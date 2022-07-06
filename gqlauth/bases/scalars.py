@@ -1,7 +1,6 @@
 from gqlauth.utils import camelize
 import strawberry
 from gqlauth.bases.exceptions import WrongUsage
-from gqlauth.settings import gqlauth_settings
 
 
 def serialize_excpected_error(errors):
