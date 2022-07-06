@@ -14,7 +14,6 @@ from gqlauth.bases.exceptions import WrongUsage
 from gqlauth.bases.interfaces import OutputInterface
 from gqlauth.bases.scalars import ExpectedErrorType
 
-# ExpectedErrorType = app_settings.CUSTOM_ERROR_TYPE or ExpectedErrorType
 
 UserModel = get_user_model()
 if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, str):
