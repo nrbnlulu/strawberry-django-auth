@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from django.contrib.auth import get_user_model
 import strawberry
@@ -13,7 +13,7 @@ from .types import UserFilter, UserType
 @strawberry.django.type(model=get_user_model(), filters=UserFilter)
 class UserQueries:
     user: Optional[UserType] = strawberry.django.field()
-    users: list[UserType] = strawberry.django.field(filters=UserFilter)
+    users: List[UserType] = strawberry.django.field(filters=UserFilter)
 
     @strawberry.django.field
     def public_user(self, info: Info) -> Optional[UserType]:
