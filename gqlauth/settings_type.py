@@ -30,7 +30,7 @@ _USER_NODE_FILTER_fieldS = {
 DjangoSetting = TypeVar("DjangoSetting")
 
 
-@dataclass(slots=True)
+@dataclass
 class GqlAuthSettings:
     # if allow logging in without verification,
     # the register mutation will return a token
