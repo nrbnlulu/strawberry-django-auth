@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from django.contrib.auth import get_user_model
 
@@ -29,7 +29,7 @@ class UserStatusType:
     secondary_email: auto
 
 
-def inject_field(field: dict[str, type]):
+def inject_field(field: Dict[str, type]):
     def wrapped(cls):
         cls.__annotations__.update(field)
         return cls
