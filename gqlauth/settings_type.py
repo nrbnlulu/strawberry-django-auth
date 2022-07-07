@@ -38,12 +38,12 @@ class GqlAuthSettings:
     # mutation fields options
     LOGIN_OPTIONAL_FIELDS: list = field(default_factory=lambda: [])
     LOGIN_REQUIRE_CAPTCHA: bool = True
-    LOGIN_REQUIRED_FIELDS: Union[dict | list] = field(
+    LOGIN_REQUIRED_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["username", "password"]
     )
     # required fields on register, plus password1 and password2,
     # can be a dict like UPDATE_MUTATION_fieldS setting
-    REGISTER_MUTATION_FIELDS: Union[dict | list] = field(
+    REGISTER_MUTATION_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["email", "username"]
     )
     REGISTER_MUTATION_FIELDS_OPTIONAL: list = field(default_factory=lambda: [])
@@ -60,7 +60,7 @@ class GqlAuthSettings:
     # will show captcha every time you create one
     FORCE_SHOW_CAPTCHA: bool = False
     # optional fields on update account, can be list of fields
-    UPDATE_MUTATION_FIELDS: Union[dict | list] = field(
+    UPDATE_MUTATION_FIELDS: Union[dict, list] = field(
         default_factory=lambda: {"first_name": str, "last_name": str}
     )
     # tokens
@@ -94,7 +94,7 @@ class GqlAuthSettings:
     EMAIL_TEMPLATE_PASSWORD_RESET: str = "email/password_reset_email.html"
     EMAIL_TEMPLATE_VARIABLES: dict = field(default_factory=lambda: {})
     # query stuff
-    USER_NODE_EXCLUDE_FIELDS: Union[dict | list] = field(
+    USER_NODE_EXCLUDE_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["password", "is_superuser"]
     )
     USER_NODE_FILTER_FIELDS: dict = field(default_factory=lambda: _USER_NODE_FILTER_fieldS)
