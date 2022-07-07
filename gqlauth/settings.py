@@ -1,4 +1,5 @@
 import logging
+import warnings
 
 from django.conf import settings as django_settings
 from django.test.signals import setting_changed
@@ -34,12 +35,16 @@ for name, setting in gqlauth_settings.__dataclass_fields__.items():
 del defaults
 
 
-# should be decorated probably
+# should be deprecated probably
 def reload_gqlauth_settings(*args, **kwargs):
     global gqlauth_settings
     setting, value = kwargs["setting"], kwargs["value"]
-    if setting == "GQL_AUTH":
+    if setting == "GQL_AUTH" and isinstance(value, dict):
         gqlauth_settings = GqlAuthSettings(**value)
+    else:
+        warnings.warn(
+            f"reload_gqlauth_settings" f"should be called with a dict, not {str(type(value))}"
+        )
 
 
 setting_changed.connect(reload_gqlauth_settings)
