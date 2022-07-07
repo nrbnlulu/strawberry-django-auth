@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
-from typing import Callable, TypeVar, Union
+from typing import Any, Callable, NewType, Union
 
 from django.conf import settings as django_settings
 import strawberry
@@ -27,7 +27,7 @@ _USER_NODE_FILTER_fieldS = {
     "status__secondary_email": ["exact"],
 }
 
-DjangoSetting = TypeVar("DjangoSetting")
+DjangoSetting = NewType("DjangoSetting", Union[dict, list, str, Any])
 
 
 @dataclass
