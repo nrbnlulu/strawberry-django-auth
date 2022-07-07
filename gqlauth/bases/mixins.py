@@ -21,7 +21,9 @@ else:
     async_email_func = None
 
 
-def make_dataclass_helper(required: dict | list, non_required: dict | list, camelize=True):
+def make_dataclass_helper(
+    required: Union[dict, list], non_required: Union[dict, list], camelize=True
+):
     res_req = []
     res_non_req = []
 
@@ -106,9 +108,9 @@ class DynamicInputMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, dict | list) and _inputs:
+            if not isinstance(_inputs, Union[dict, list]) and _inputs:
                 raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
-            if not isinstance(_required_inputs, dict | list) and _required_inputs:
+            if not isinstance(_required_inputs, Union[dict, list]) and _required_inputs:
                 raise WrongUsage(
                     f"dynamic required inputs can be list or dict" f" not{type(_required_inputs)}"
                 )
@@ -167,9 +169,9 @@ class DynamicArgsMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, dict | list) and _inputs:
+            if not isinstance(_inputs, Union[dict, list]) and _inputs:
                 raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
-            if not isinstance(_required_inputs, dict | list) and _required_inputs:
+            if not isinstance(_required_inputs, Union[dict, list]) and _required_inputs:
                 raise WrongUsage(
                     f"dynamic required inputs" f" can be list or dict not{type(_required_inputs)}"
                 )
@@ -226,9 +228,9 @@ class DynamicPayloadMixin:
         _outputs = getattr(cls._meta, "_outputs", [])
         _required_outputs = getattr(cls._meta, "_required_outputs", [])
         if _outputs or _required_outputs:
-            if not isinstance(_outputs, dict | list | None) and _outputs:
+            if not isinstance(_outputs, Union[dict, list, None]) and _outputs:
                 raise WrongUsage(f"dynamic outputs can be list or dict not{type(_outputs)}")
-            if not isinstance(_required_outputs, dict | list | None) and _required_outputs:
+            if not isinstance(_required_outputs, Union[dict, list, None]) and _required_outputs:
                 raise WrongUsage(
                     f"dynamic required" f" outputs can be list or dict not{type(_required_outputs)}"
                 )
