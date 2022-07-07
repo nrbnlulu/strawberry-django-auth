@@ -59,7 +59,6 @@ class Cap:
 class RegisterMixin:
     """
     Register user with fields defined in the settings.
-
     If the email field of the user model is part of the
     registration fields (default), check if there is
     no user with that email or as a secondary email.

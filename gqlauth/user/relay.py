@@ -10,6 +10,7 @@ from gqlauth.bases.mixins import (
 )
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
+    Cap,
     DeleteAccountMixin,
     ObtainJSONWebTokenMixin,
     PasswordChangeMixin,
@@ -28,6 +29,9 @@ from gqlauth.user.resolvers import (
     VerifySecondaryEmailMixin,
     VerifyTokenMixin,
 )
+
+# fooling isort
+_var_ = Cap
 
 
 class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):

@@ -31,7 +31,7 @@ if __name__ == "__main__":
     for m in matches:
         class_name, docstring = m
         yaml_strings.append(class_name + ": |" + docstring)
-    yaml_string = "\n".join(yaml_strings)
+    yaml_string = "\n".join(yaml_strings) + "\n"
 
     # write the file
     with open(destination, "w") as file:
