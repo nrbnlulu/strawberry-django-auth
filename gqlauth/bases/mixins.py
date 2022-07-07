@@ -108,7 +108,7 @@ class DynamicInputMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, Union[dict, list]) and _inputs:
+            if not isinstance(_inputs, (dict, list)) and _inputs:
                 raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
             if not isinstance(_required_inputs, Union[dict, list]) and _required_inputs:
                 raise WrongUsage(
@@ -169,7 +169,7 @@ class DynamicArgsMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, Union[dict, list]) and _inputs:
+            if not isinstance(_inputs, (dict, list)) and _inputs:
                 raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
             if not isinstance(_required_inputs, Union[dict, list]) and _required_inputs:
                 raise WrongUsage(

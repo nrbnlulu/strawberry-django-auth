@@ -17,7 +17,7 @@ from gqlauth.settings_type import GqlAuthSettings
 
 cwd = Path(__file__).parent
 sys.path.append(str(cwd / "testproject"))
-SECRET_KEY = "FAKE_KEY"
+SECRET_KEY = "z!-!#$g646y3^29wy$55o8b(5o5_-m$l!%t@ureo^^upcmi)#l"
 
 DEBUG = True
 
