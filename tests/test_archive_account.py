@@ -1,17 +1,12 @@
-from django.contrib.auth import get_user_model
-
-from .testCases import RelayTestCase, DefaultTestCase
-
 from gqlauth.constants import Messages
-from gqlauth.models import UserStatus
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class ArchiveAccountTestCaseMixin:
     def setUp(self):
         self.user1 = self.register_user(email="foo@email.com", username="foo")
-        self.user2 = self.register_user(
-            email="bar@email.com", username="bar", verified=True
-        )
+        self.user2 = self.register_user(email="bar@email.com", username="bar", verified=True)
 
     def test_not_authenticated(self):
         """
@@ -85,12 +80,12 @@ class ArchiveAccountTestCaseMixin:
 class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
     def make_query(self, password=None):
         return """
-            mutation {
-              archiveAccount(password: "%s") {
+            mutation {{
+              archiveAccount(password: "{}") {{
                 success, errors
-              }
-            }
-        """ % (
+              }}
+            }}
+        """.format(
             password or self.default_password,
         )
 
@@ -98,11 +93,11 @@ class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
 class ArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
     def make_query(self, password=None):
         return """
-            mutation {
-              archiveAccount(input: { password: "%s"}) {
+            mutation {{
+              archiveAccount(input: {{ password: "{}"}}) {{
                 success, errors
-              }
-            }
-        """ % (
+              }}
+            }}
+        """.format(
             password or self.default_password,
         )

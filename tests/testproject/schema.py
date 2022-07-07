@@ -1,10 +1,10 @@
+from typing import List
+
 import strawberry
 from strawberry.tools import merge_types
 
-from typing import List
-
-from gqlauth.user import arg_mutations, relay
-from gqlauth.user.types import UserType, UserFilter
+from gqlauth.user import relay
+from gqlauth.user.types import UserFilter, UserType
 
 
 @strawberry.type
@@ -15,7 +15,6 @@ class UserQueries:
 
 @strawberry.type
 class AuthMutation:
-
     token_auth = relay.ObtainJSONWebToken.Field
     verify_token = relay.VerifyToken.Field
     refresh_token = relay.RefreshToken.Field
@@ -34,7 +33,7 @@ class AuthMutation:
     swap_emails = relay.SwapEmails.Field
     remove_secondary_email = relay.RemoveSecondaryEmail.Field
     send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
-    captcha = relay.Cap.Field
+    captcha = relay.Cap
 
 
 Query = merge_types("RootQuery", (UserQueries,))

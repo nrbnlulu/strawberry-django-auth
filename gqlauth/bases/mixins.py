@@ -1,19 +1,18 @@
+import dataclasses
 import typing
 from typing import Union
-import inspect
-import dataclasses
+
 from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
-
 import strawberry
+from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
-from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.utils import create_strawberry_argument
-from gqlauth.utils import list_to_dict, hide_args_kwargs
+
 from gqlauth.bases.exceptions import WrongUsage
 from gqlauth.bases.interfaces import OutputInterface
 from gqlauth.bases.scalars import ExpectedErrorType
-
+from gqlauth.settings import gqlauth_settings as app_settings
+from gqlauth.utils import create_strawberry_argument, hide_args_kwargs, list_to_dict
 
 UserModel = get_user_model()
 if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, str):
@@ -23,7 +22,7 @@ else:
 
 
 def make_dataclass_helper(
-    required: dict | list, non_required: dict | list, camelize=True
+    required: Union[dict, list], non_required: Union[dict, list], camelize=True
 ):
     res_req = []
     res_non_req = []
@@ -77,9 +76,7 @@ def make_dataclass_helper(
                 )
         else:
             for key in non_required:
-                res_non_req.append(
-                    (key, typing.Optional[str], dataclasses.field(default=None))
-                )
+                res_non_req.append((key, typing.Optional[str], dataclasses.field(default=None)))
 
     return res_req + res_non_req
 
@@ -111,14 +108,11 @@ class DynamicInputMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, dict | list) and _inputs:
+            if not isinstance(_inputs, (dict, list)) and _inputs:
+                raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
+            if not isinstance(_required_inputs, (dict, list)) and _required_inputs:
                 raise WrongUsage(
-                    f"dynamic inputs can be list or dict not{type(_inputs)}"
-                )
-            if not isinstance(_required_inputs, dict | list) and _required_inputs:
-                raise WrongUsage(
-                    f"dynamic required inputs can be list or dict"
-                    f" not{type(_required_inputs)}"
+                    f"dynamic required inputs can be list or dict" f" not{type(_required_inputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)
@@ -143,9 +137,9 @@ class DynamicInputMixin:
             )
 
             inputs = strawberry.input(dc)
-            setattr(cls._meta, "inputs", inputs)
+            cls._meta.inputs = inputs
         else:
-            setattr(cls._meta, "inputs", None)
+            cls._meta.inputs = None
         super().__init_subclass__()
 
     def Field(self):
@@ -175,14 +169,11 @@ class DynamicArgsMixin:
         _required_inputs = getattr(cls._meta, "_required_inputs", [])
 
         if _inputs or _required_inputs:
-            if not isinstance(_inputs, dict | list) and _inputs:
+            if not isinstance(_inputs, (dict, list)) and _inputs:
+                raise WrongUsage(f"dynamic inputs can be list or dict not{type(_inputs)}")
+            if not isinstance(_required_inputs, (dict, list)) and _required_inputs:
                 raise WrongUsage(
-                    f"dynamic inputs can be list or dict not{type(_inputs)}"
-                )
-            if not isinstance(_required_inputs, dict | list) and _required_inputs:
-                raise WrongUsage(
-                    f"dynamic required inputs"
-                    f" can be list or dict not{type(_required_inputs)}"
+                    f"dynamic required inputs" f" can be list or dict not{type(_required_inputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)
@@ -202,14 +193,14 @@ class DynamicArgsMixin:
 
             args = make_dataclass_helper(_required_inputs, _inputs)
 
-            setattr(cls._meta, "args", args)
+            cls._meta.args = args
         else:
-            setattr(cls._meta, "args", [])
+            cls._meta.args = []
         super().__init_subclass__()
 
     @property
     def Field(self):
-        raise NotImplementedError()(
+        raise NotImplementedError(
             "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
         )
@@ -237,17 +228,11 @@ class DynamicPayloadMixin:
         _outputs = getattr(cls._meta, "_outputs", [])
         _required_outputs = getattr(cls._meta, "_required_outputs", [])
         if _outputs or _required_outputs:
-            if not isinstance(_outputs, dict | list | None) and _outputs:
+            if not isinstance(_outputs, (dict, list, None)) and _outputs:
+                raise WrongUsage(f"dynamic outputs can be list or dict not{type(_outputs)}")
+            if not isinstance(_required_outputs, (dict, list, None)) and _required_outputs:
                 raise WrongUsage(
-                    f"dynamic outputs can be list or dict not{type(_outputs)}"
-                )
-            if (
-                not isinstance(_required_outputs, dict | list | None)
-                and _required_outputs
-            ):
-                raise WrongUsage(
-                    f"dynamic required"
-                    f" outputs can be list or dict not{type(_required_outputs)}"
+                    f"dynamic required" f" outputs can be list or dict not{type(_required_outputs)}"
                 )
 
         parent_resolver_name = getattr(cls._meta, "_parent_resolver_name", None)
@@ -280,7 +265,7 @@ class DynamicPayloadMixin:
         else:
             outputs = strawberry.type(OutputInterface)
 
-        setattr(cls, "output", outputs)
+        cls.output = outputs
         super().__init_subclass__()
 
     @property
@@ -294,15 +279,13 @@ class DynamicPayloadMixin:
 class DynamicRelayMutationMixin:
     def __init_subclass__(cls, **kwargs):
         @strawberry.mutation(description=cls.__doc__)
-        def Field(info, input: cls._meta.inputs) -> cls.output:
-            arguments = {
-                f.name: getattr(input, f.name) for f in dataclasses.fields(input)
-            }
+        def Field(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
+            arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
             return cls.resolve_mutation(info, **arguments)
 
         if Field.arguments[0].type is None:
             Field.arguments.pop(0)  # if no input
-        setattr(cls, "Field", Field)
+        cls.Field = Field
 
     def resolve_mutation(self, info, **kwargs):
         raise NotImplementedError()(
@@ -312,7 +295,7 @@ class DynamicRelayMutationMixin:
 
 class DynamicArgsMutationMixin:
     def __init_subclass__(cls, **kwargs):
-        def Field(info, **kwargs) -> cls.output:
+        def Field(info: Info, **kwargs) -> cls.output:
             return cls.resolve_mutation(info, **kwargs)
 
         Field = hide_args_kwargs(Field)
@@ -321,7 +304,7 @@ class DynamicArgsMutationMixin:
         for arg_tuple in cls._meta.args:
             arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
             Field.arguments.append(arg)
-        setattr(cls, "Field", Field)
+        cls.Field = Field
 
     def resolve_mutation(self, info, *args, **kwargs):
         raise NotImplementedError()(

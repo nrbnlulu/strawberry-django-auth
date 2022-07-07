@@ -1,9 +1,4 @@
-from django.contrib.auth import get_user_model
-
-from gqlauth.constants import Messages
-
-
-from .testCases import RelayTestCase, DefaultTestCase
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class RemoveSecondaryEmailCaseMixin:

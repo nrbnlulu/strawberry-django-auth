@@ -1,20 +1,19 @@
-from django.contrib.auth.forms import (
-    UserCreationForm,
-    UserChangeForm,
-    UsernameField,
-    PasswordChangeForm,
-)
-from django.contrib.auth import get_user_model
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import (
+    PasswordChangeForm,
+    UserChangeForm,
+    UserCreationForm,
+    UsernameField,
+)
+
+from gqlauth.settings import gqlauth_settings as app_settings
 
 from .utils import flat_dict
-from gqlauth.settings import gqlauth_settings as app_settings
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True if "email" in app_settings.REGISTER_MUTATION_FIELDS else False
-    )
+    email = forms.EmailField(required="email" in app_settings.REGISTER_MUTATION_FIELDS)
 
     class Meta:
         model = get_user_model()
@@ -54,7 +53,7 @@ class PasswordLessRegisterForm(UserCreationForm):
         )
 
     def __init__(self, *args, **kwargs):
-        super(PasswordLessRegisterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["password1"].required = False
         self.fields["password2"].required = False
 

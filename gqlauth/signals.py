@@ -1,6 +1,5 @@
-from django.db.models.signals import post_save
 from django.conf import settings as django_settings
-
+from django.db.models.signals import post_save
 from django.dispatch import Signal, receiver
 
 

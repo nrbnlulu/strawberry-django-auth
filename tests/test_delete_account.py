@@ -1,19 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
-
-from gqlauth.settings import gqlauth_settings as app_settings
-
-from .testCases import RelayTestCase, DefaultTestCase
+from pytest import mark
 
 from gqlauth.constants import Messages
-from pytest import mark
+from gqlauth.settings import gqlauth_settings as app_settings
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class DeleteAccountTestCaseMixin:
     def setUp(self):
         self.user1 = self.register_user(email="foo@email.com", username="foo")
-        self.user2 = self.register_user(
-            email="bar@email.com", username="bar", verified=True
-        )
+        self.user2 = self.register_user(email="bar@email.com", username="bar", verified=True)
         app_settings.ALLOW_DELETE_ACCOUNT = True
 
     def test_not_authenticated(self):
@@ -54,12 +51,12 @@ class DeleteAccountTestCaseMixin:
 
     def make_query(self, password=None):
         return """
-            mutation {
-              deleteAccount(password: "%s") {
+            mutation {{
+              deleteAccount(password: "{}") {{
                 success, errors
-              }
-            }
-        """ % (
+              }}
+            }}
+        """.format(
             password or self.default_password,
         )
 
@@ -67,12 +64,12 @@ class DeleteAccountTestCaseMixin:
 class DeleteAccountTestCase(DeleteAccountTestCaseMixin, DefaultTestCase):
     def make_query(self, password=None):
         return """
-            mutation {
-              deleteAccount(password: "%s") {
+            mutation {{
+              deleteAccount(password: "{}") {{
                 success, errors
-              }
-            }
-        """ % (
+              }}
+            }}
+        """.format(
             password or self.default_password,
         )
 
@@ -80,11 +77,11 @@ class DeleteAccountTestCase(DeleteAccountTestCaseMixin, DefaultTestCase):
 class DeleteAccountRelayTestCase(DeleteAccountTestCaseMixin, RelayTestCase):
     def make_query(self, password=None):
         return """
-            mutation {
-              deleteAccount(input: { password: "%s"}) {
+            mutation {{
+              deleteAccount(input: {{ password: "{}"}}) {{
                 success, errors
-              }
-            }
-        """ % (
+              }}
+            }}
+        """.format(
             password or self.default_password,
         )

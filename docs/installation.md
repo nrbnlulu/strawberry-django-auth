@@ -88,10 +88,10 @@ The following are the minimum steps required to get it running. It should not ta
         ```
 
     === "Relay"
-    
+
         ```py
         from gqlauth.user import relay
-        
+
         @strawberry.type
         class UserMutations:
             token_auth = relay.ObtainJSONWebToken.Field  # login mutation
@@ -119,18 +119,18 @@ The following are the minimum steps required to get it running. It should not ta
     import strawberry
     from strawberry.tools import merge_types
     from users.schema import UserMutations, UserQueries
-    
+
     Query = merge_types("RootQuery", (UserQueries,))
 
     Mutation = merge_types("RootMutation", (UserMutations,))
-    
+
     schema = strawberry.Schema(query=Query, mutation=Mutation)
     ```
 
 ---
 
 ### 2. Allow Any Classes
-Please refer to [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt#known-issues). 
+Please refer to [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt#known-issues).
 as it is not trivially possible with strawberry.
 
 ---
@@ -160,7 +160,7 @@ AUTHENTICATION_BACKENDS = [
 
     Why should I want this behaivor?
 
-    Intead of raising an actual error, we can handle it and return whatever make sense, e.g.:
+    Instead of raising an actual error, we can handle it and return whatever make sense, e.g.:
     ```python
       cls(success=False errors="Unauthenticated.")
     ```
@@ -176,32 +176,32 @@ AUTHENTICATION_BACKENDS = [
 ---
 
 ### 4. Refresh Token <small>- optional</small>
-!!! explanation 
-    Refresh tokens are consept of jwt-web-tokens 
+!!! explanation
+    Refresh tokens are concept of jwt-web-tokens
     what they mean is that every x time a so called *logged user* will need to request for a new token from the server
-    and generally there are two types of them:  
+    and generally there are two types of them:
 
-    1. [Single token refresh](https://django-graphql-jwt.domake.io/refresh_token.html#single-token-refresh) *(and thats the default)*  
+    1. [Single token refresh](https://django-graphql-jwt.domake.io/refresh_token.html#single-token-refresh) *(and that's the default)*
 
-    2. [Long running refresh tokens](https://django-graphql-jwt.domake.io/refresh_token.html#long-running-refresh-tokens)  
+    2. [Long running refresh tokens](https://django-graphql-jwt.domake.io/refresh_token.html#long-running-refresh-tokens)
 
 
-    === "Single token refresh" 
+    === "Single token refresh"
         they will require the user to ask for refresh token every 5 minutes
         !!! warning
             most importantly won't use the database therefore ==it is not state-less==
         for more information head to [Django GraphQL JWT](https://django-graphql-jwt.domake.io/refresh_token.html)
     === "Long running refresh tokens"
         they will require the database (threfore migration) are state-less
-        
-        you should probably follow [Django GraphQL JWT](https://django-graphql-jwt.domake.io/refresh_token.html) docs for more information docs :wink: 
+
+        you should probably follow [Django GraphQL JWT](https://django-graphql-jwt.domake.io/refresh_token.html) docs for more information docs :wink:
         but here is a TL;DR: to set this up:
         ```py
         INSTALLED_APPS = [
             # ...
             "strawberry_django_jwt.refresh_token",
         ]
-        
+
         GRAPHQL_JWT = {
             # ...
             "JWT_VERIFY_EXPIRATION": True,

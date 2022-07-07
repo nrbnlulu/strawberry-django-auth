@@ -10,9 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
-import os
-import sys
 from pathlib import Path
+import sys
+
+from gqlauth.settings_type import GqlAuthSettings
 
 cwd = Path(__file__).parent
 sys.path.append(str(cwd / "testproject"))
@@ -73,9 +74,7 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -86,8 +85,6 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = True
 
@@ -110,8 +107,6 @@ GRAPHQL_JWT = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-from gqlauth.settings_type import GqlAuthSettings
 
 GQL_AUTH = GqlAuthSettings(
     EMAIL_ASYNC_TASK="testproject.pseudo_async_email_support.pseudo_async_email_support",

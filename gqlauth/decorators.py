@@ -1,7 +1,9 @@
 from functools import wraps
+
 from gqlauth.utils import g_user
+
 from .constants import Messages
-from .exceptions import WrongUsage, PermissionDenied
+from .exceptions import PermissionDenied, WrongUsage
 
 
 def login_required(fn):
@@ -49,9 +51,7 @@ def password_confirmation_required(fn):
     @wraps(fn)
     def wrapper(src, info, **kwargs):
         try:
-            password_arg = next(
-                i for i in kwargs.keys() if i in ["password", "oldPassword"]
-            )
+            password_arg = next(i for i in kwargs.keys() if i in ["password", "oldPassword"])
             password = kwargs[password_arg]
         except Exception:
             raise WrongUsage(

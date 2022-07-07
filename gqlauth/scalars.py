@@ -1,7 +1,8 @@
-from base64 import b64encode, b64decode
+from base64 import b64decode, b64encode
 import typing
-import strawberry
+
 from PIL.Image import Image
+import strawberry
 
 image = strawberry.scalar(
     typing.NewType("image", Image),

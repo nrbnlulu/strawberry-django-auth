@@ -1,31 +1,26 @@
-from datetime import timedelta
-from django.utils import timezone
 import io
 import logging
-import uuid
 import time
-from gqlauth.factory.captcha_factorty import generate_city_captcha
+import uuid
 
-from django.db import models
 from django.conf import settings as django_settings
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.core.mail import send_mail
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+from django.db import models, transaction
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.html import strip_tags
+
+from gqlauth.factory.captcha_factorty import generate_city_captcha
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
+
 from .constants import Messages, TokenAction
-from .utils import get_token, get_payload_from_token, get_request
-from .exceptions import (
-    UserAlreadyVerified,
-    UserNotVerified,
-    EmailAlreadyInUse,
-    WrongUsage,
-)
+from .exceptions import EmailAlreadyInUse, UserAlreadyVerified, WrongUsage
 from .signals import user_verified
+from .utils import get_payload_from_token, get_request, get_token
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +41,9 @@ class Captcha(models.Model):
     def create_captcha(cls):
         cap = generate_city_captcha()
         obj = cls(text=cap.text)
-        setattr(obj, "image", cap.image)
         obj.save()
         if app_settings.FORCE_SHOW_CAPTCHA:
-            obj.show()
+            cap.image.show()
         return obj
 
     def save(self, *args, **kwargs):
@@ -92,22 +86,15 @@ class Captcha(models.Model):
 
         return Messages.CAPTCHA_INVALID
 
-    def show(self):
-        self.image.show()
-
     def as_bytes(self):
         bytes_array = io.BytesIO()
         self.image.save(bytes_array, format="PNG")
         return bytes_array.getvalue()
 
     def __str__(self):
-        interval = (
-            self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA
-        ) - timezone.now()
+        interval = (self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA) - timezone.now()
         interval = interval.total_seconds()
-        expiery_str = (
-            f" expires in {interval} seconds" if interval > 0 else "already expierd"
-        )
+        expiery_str = f" expires in {interval} seconds" if interval > 0 else "already expierd"
         return "captcha " + expiery_str
 
 
@@ -136,9 +123,7 @@ class UserStatus(models.Model):
             from_email=app_settings.EMAIL_FROM,
             message=message,
             html_message=html_message,
-            recipient_list=(
-                recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]
-            ),
+            recipient_list=(recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]),
             fail_silently=False,
         )
 
@@ -222,9 +207,8 @@ class UserStatus(models.Model):
 
     @classmethod
     def clean_email(cls, email=False):
-        if email:
-            if cls.email_is_free(email) is False:
-                raise EmailAlreadyInUse
+        if email and cls.email_is_free(email) is False:
+            raise EmailAlreadyInUse
 
     @classmethod
     def verify(cls, token):

@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-from gqlauth.settings import gqlauth_settings
 
 
 class GqlAuthConfig(AppConfig):
@@ -8,4 +7,4 @@ class GqlAuthConfig(AppConfig):
     verbose_name = "GraphQL Auth"
 
     def ready(self):
-        from . import signals
+        pass

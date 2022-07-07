@@ -1,6 +1,7 @@
-from pytest import mark
-from django.test import TestCase
 from django.conf import settings as django_settings
+from django.test import TestCase
+from pytest import mark
+
 from gqlauth import settings as app_settings
 
 
@@ -12,14 +13,8 @@ class AppSettingsTestCase(TestCase):
         self.assertTrue(app_settings.gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED)
 
     def test_load_user_settings_from_django_settings(self):
-        assert (
-            django_settings.DEFAULT_FROM_EMAIL
-            == app_settings.gqlauth_settings.EMAIL_FROM
-        )
+        assert django_settings.DEFAULT_FROM_EMAIL == app_settings.gqlauth_settings.EMAIL_FROM
 
     @mark.settings_b
     def test_user_can_override_DjangoSetting_TypeVar(self):
-        assert (
-            django_settings.DEFAULT_FROM_EMAIL
-            != app_settings.gqlauth_settings.EMAIL_FROM
-        )
+        assert django_settings.DEFAULT_FROM_EMAIL != app_settings.gqlauth_settings.EMAIL_FROM

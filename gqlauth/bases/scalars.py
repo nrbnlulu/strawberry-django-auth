@@ -1,6 +1,7 @@
-from gqlauth.utils import camelize
 import strawberry
+
 from gqlauth.bases.exceptions import WrongUsage
+from gqlauth.utils import camelize
 
 
 def serialize_excpected_error(errors):
@@ -44,5 +45,3 @@ class ExpectedErrorType:
         ]
     }
     """
-
-    pass

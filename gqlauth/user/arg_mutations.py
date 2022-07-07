@@ -1,38 +1,40 @@
+from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
+from strawberry_django_jwt.mutations import Refresh as RefreshParent
+from strawberry_django_jwt.mutations import Revoke as RevokeParent
+from strawberry_django_jwt.mutations import Verify as VerifyParent
+
 from gqlauth.bases.mixins import (
-    DynamicArgsMutationMixin,
     DynamicArgsMixin,
+    DynamicArgsMutationMixin,
     DynamicPayloadMixin,
 )
 from gqlauth.user.resolvers import (
-    RegisterMixin,
-    VerifyAccountMixin,
-    ResendActivationEmailMixin,
-    SendPasswordResetEmailMixin,
-    PasswordSetMixin,
-    PasswordResetMixin,
-    ObtainJSONWebTokenMixin,
     ArchiveAccountMixin,
-    DeleteAccountMixin,
-    PasswordChangeMixin,
-    UpdateAccountMixin,
-    RefreshTokenMixin,
-    VerifyTokenMixin,
-    RevokeTokenMixin,
-    SendSecondaryEmailActivationMixin,
-    VerifySecondaryEmailMixin,
-    SwapEmailsMixin,
-    RemoveSecondaryEmailMixin,
     Cap,
+    DeleteAccountMixin,
+    ObtainJSONWebTokenMixin,
+    PasswordChangeMixin,
+    PasswordResetMixin,
+    PasswordSetMixin,
+    RefreshTokenMixin,
+    RegisterMixin,
+    RemoveSecondaryEmailMixin,
+    ResendActivationEmailMixin,
+    RevokeTokenMixin,
+    SendPasswordResetEmailMixin,
+    SendSecondaryEmailActivationMixin,
+    SwapEmailsMixin,
+    UpdateAccountMixin,
+    VerifyAccountMixin,
+    VerifySecondaryEmailMixin,
+    VerifyTokenMixin,
 )
-from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
-from strawberry_django_jwt.mutations import Verify as VerifyParent
-from strawberry_django_jwt.mutations import Revoke as RevokeParent
-from strawberry_django_jwt.mutations import Refresh as RefreshParent
+
+# fooling isort
+_var_ = Cap
 
 
-class Register(
-    RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin
-):
+class Register(RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin):
     __doc__ = RegisterMixin.__doc__
 
 

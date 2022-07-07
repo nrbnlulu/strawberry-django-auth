@@ -1,14 +1,11 @@
 import pprint
 import re
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 
-from gqlauth.models import UserStatus, Captcha
-from gqlauth.signals import user_registered
-from gqlauth.settings import gqlauth_settings
-
-from .__init__ import *
+from gqlauth.models import Captcha, UserStatus
 
 
 class TestBase(TestCase):
@@ -32,13 +29,7 @@ class TestBase(TestCase):
         return Captcha.create_captcha()
 
     def register_user(
-        self,
-        password=None,
-        verified=False,
-        archived=False,
-        secondary_email="",
-        *args,
-        **kwargs
+        self, password=None, verified=False, archived=False, secondary_email="", *args, **kwargs
     ):
         if kwargs.get("username"):
             kwargs.update({"first_name": kwargs.get("username")})
@@ -54,9 +45,9 @@ class TestBase(TestCase):
         user.refresh_from_db()
         return user
 
-    def make_request(
-        self, query, variables={"user": AnonymousUser()}, raw=False, schema: str = None
-    ):
+    def make_request(self, query, variables=None, raw=False, schema: str = None):
+        if variables is None:
+            variables = {"user": AnonymousUser()}
         from .schema import default_schema, relay_schema
 
         request_factory = RequestFactory()
@@ -75,7 +66,7 @@ class TestBase(TestCase):
         m = m.groupdict()
         try:
             return executed.data[m["target"]]
-        except:
+        except Exception:
             print("\nInvalid query!")
             raise Exception(*[error.message for error in executed.errors])
         finally:
@@ -89,19 +80,19 @@ class RelayTestCase(TestBase):
     def login_query(self, username="foo", password=None):
         cap = self.gen_captcha()
         return """
-          mutation {
-        tokenAuth(input:{username: "%s", password: "%s",identifier: "%s", userEntry: "%s"})
-                      {
+          mutation {{
+        tokenAuth(input:{{username: "{}", password: "{}",identifier: "{}", userEntry: "{}"}})
+                      {{
     success
     errors
-    obtainPayload{
+    obtainPayload{{
       token
       refreshToken
-    }
-  }
-}
+    }}
+  }}
+}}
 
-        """ % (
+        """.format(
             username,
             password or self.default_password,
             cap.uuid,
@@ -116,19 +107,19 @@ class DefaultTestCase(TestBase):
     def login_query(self, username="foo", password=None):
         cap = self.gen_captcha()
         return """
-           mutation {
-           tokenAuth(username: "%s", password: "%s" ,identifier: "%s" ,userEntry: "%s")
-                  {
+           mutation {{
+           tokenAuth(username: "{}", password: "{}" ,identifier: "{}" ,userEntry: "{}")
+                  {{
                 success
                 errors
-                obtainPayload{
+                obtainPayload{{
                   token
                   refreshToken
-                }
-              }
-            }
+                }}
+              }}
+            }}
 
-           """ % (
+           """.format(
             username,
             password or self.default_password,
             cap.uuid,

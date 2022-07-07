@@ -1,19 +1,12 @@
-from django.contrib.auth import get_user_model
-
-from .testCases import RelayTestCase, DefaultTestCase
-from gqlauth.constants import Messages
 from gqlauth.utils import get_token
-from gqlauth.models import UserStatus
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class VerifySecondaryEmailCaseMixin:
     def setUp(self):
-        self.user = self.register_user(
-            email="bar@email.com", username="bar", verified=True
-        )
-        self.user2 = self.register_user(
-            email="foo@email.com", username="foo", verified=True
-        )
+        self.user = self.register_user(email="bar@email.com", username="bar", verified=True)
+        self.user2 = self.register_user(email="foo@email.com", username="foo", verified=True)
 
     def test_verify_secondary_email(self):
         token = get_token(
@@ -31,9 +24,7 @@ class VerifySecondaryEmailCaseMixin:
         self.assertTrue(executed["errors"])
 
     def test_email_in_use(self):
-        token = get_token(
-            self.user, "activation_secondary_email", secondary_email="foo@email.com"
-        )
+        token = get_token(self.user, "activation_secondary_email", secondary_email="foo@email.com")
         executed = self.make_request(self.verify_query(token))
         self.assertEqual(executed["success"], False)
         self.assertTrue(executed["errors"])

@@ -3,13 +3,9 @@
 - copy [CONTRIBUTORS, CHANGES, CONTRIBUTING] files to the docs dir
 """
 
-import os
 from pathlib import Path
-import shutil
 import re
-from pydoc_markdown.interfaces import Context
-from pydoc_markdown.contrib.loaders.python import PythonLoader
-from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
+import shutil
 
 if __name__ == "__main__":
 
@@ -20,12 +16,12 @@ if __name__ == "__main__":
     dest = shutil.copyfile(source, destination)
 
     # get the text content
-    with open(destination, "r") as file:
+    with open(destination) as file:
         text = file.read()
 
     # extract each class and docstring
     pattern = re.compile(
-        'class\s(?P<class>\w*)Mixin[\w|\(|\)]+:\n\s*"""(?P<doc>[^*]*)"""',
+        'class\\s(?P<class>\\w*)Mixin[\\w|\\(|\\)]+:\n\\s*"""(?P<doc>[^*]*)"""',
         re.S | re.M,
     )
     matches = re.findall(pattern, text)
@@ -35,35 +31,14 @@ if __name__ == "__main__":
     for m in matches:
         class_name, docstring = m
         yaml_strings.append(class_name + ": |" + docstring)
-    yaml_string = "\n".join(yaml_strings)
+    yaml_string = "\n".join(yaml_strings) + "\n"
 
     # write the file
     with open(destination, "w") as file:
         file.write(yaml_string)
-
 
     # copy files from project root to docs dir
     files = ["CONTRIBUTORS.md", "CHANGES.md", "CONTRIBUTING.md"]
     dest = ["contributors.md", "changelog.md", "contributing.md"]
     for index, file in enumerate(files):
         shutil.copyfile(root_dir / file, root_dir / "docs" / dest[index])
-
-
-
-    context = Context(directory=root_dir)
-    loader = PythonLoader(search_path=['gqlauth'], modules=['decorators'])
-    renderer = MarkdownRenderer(render_module_header=False,
-                                render_typehint_in_data_header=True
-                                )
-
-    loader.init(context)
-    renderer.init(context)
-    header = """
-# Decorators
-
----
-
-    """
-    modules = loader.load()
-    with open(root_dir / 'docs' / 'decorators.md', 'w+') as f:
-        f.write(header + renderer.render_to_string(modules))

@@ -1,8 +1,6 @@
-from django.contrib.auth import get_user_model
+from gqlauth.utils import get_token
 
-from .testCases import RelayTestCase, DefaultTestCase
-from gqlauth.constants import Messages
-from gqlauth.utils import get_token, get_payload_from_token
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class PasswordResetTestCaseMixin:
@@ -71,19 +69,17 @@ class PasswordResetTestCaseMixin:
 
 
 class PasswordResetTestCase(PasswordResetTestCaseMixin, DefaultTestCase):
-    def get_query(
-        self, token, new_password1="new_password", new_password2="new_password"
-    ):
+    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
-        mutation {
+        mutation {{
             passwordReset(
-                token: "%s",
-                newPassword1: "%s",
-                newPassword2: "%s"
+                token: "{}",
+                newPassword1: "{}",
+                newPassword2: "{}"
             )
-            { success, errors }
-        }
-        """ % (
+            {{ success, errors }}
+        }}
+        """.format(
             token,
             new_password1,
             new_password2,
@@ -91,20 +87,18 @@ class PasswordResetTestCase(PasswordResetTestCaseMixin, DefaultTestCase):
 
 
 class PasswordResetRelayTestCase(PasswordResetTestCaseMixin, RelayTestCase):
-    def get_query(
-        self, token, new_password1="new_password", new_password2="new_password"
-    ):
+    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
-        mutation {
+        mutation {{
             passwordReset(
-                input: {
-                    token: "%s",
-                    newPassword1: "%s",
-                    newPassword2: "%s"
-                })
-            { success, errors }
-        }
-        """ % (
+                input: {{
+                    token: "{}",
+                    newPassword1: "{}",
+                    newPassword2: "{}"
+                }})
+            {{ success, errors }}
+        }}
+        """.format(
             token,
             new_password1,
             new_password2,

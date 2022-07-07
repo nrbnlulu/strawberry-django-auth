@@ -1,18 +1,14 @@
 from smtplib import SMTPException
 from unittest import mock
 
-
-from django.contrib.auth import get_user_model
-
-from .testCases import RelayTestCase, DefaultTestCase
 from gqlauth.constants import Messages
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class SendPasswordResetEmailTestCaseMixin:
     def setUp(self):
-        self.user1 = self.register_user(
-            email="foo@email.com", username="foo", verified=False
-        )
+        self.user1 = self.register_user(email="foo@email.com", username="foo", verified=False)
         self.user2 = self.register_user(
             email="bar@email.com",
             username="bar",
@@ -59,9 +55,7 @@ class SendPasswordResetEmailTestCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
 
 
-class SendPasswordResetEmailTestCase(
-    SendPasswordResetEmailTestCaseMixin, DefaultTestCase
-):
+class SendPasswordResetEmailTestCase(SendPasswordResetEmailTestCaseMixin, DefaultTestCase):
     def get_query(self, email):
         return """
         mutation {
@@ -73,9 +67,7 @@ class SendPasswordResetEmailTestCase(
         )
 
 
-class SendPasswordResetEmailRelayTestCase(
-    SendPasswordResetEmailTestCaseMixin, RelayTestCase
-):
+class SendPasswordResetEmailRelayTestCase(SendPasswordResetEmailTestCaseMixin, RelayTestCase):
     def get_query(self, email):
         return """
         mutation {

@@ -1,20 +1,12 @@
-from django.contrib.auth import get_user_model
-
-from strawberry_django_jwt.refresh_token.models import RefreshToken
-
-from .testCases import RelayTestCase, DefaultTestCase
-
 from gqlauth.utils import revoke_user_refresh_token
-from gqlauth.constants import Messages
-from gqlauth.utils import get_token, get_payload_from_token
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class PasswordChangeTestCaseMixin:
     def setUp(self):
         super().setUp()
-        self.user = self.register_user(
-            email="gaa@email.com", username="gaa", verified=True
-        )
+        self.user = self.register_user(email="gaa@email.com", username="gaa", verified=True)
         self.old_pass = self.user.password
 
     def test_password_change(self):
@@ -77,22 +69,22 @@ class PasswordChangeTestCaseMixin:
 class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
     def get_query(self, new_password1="new_password", new_password2="new_password"):
         return """
-        mutation {
+        mutation {{
             passwordChange(
-                oldPassword: "%s",
-                newPassword1: "%s",
-                newPassword2: "%s"
+                oldPassword: "{}",
+                newPassword1: "{}",
+                newPassword2: "{}"
             )
-            {
+            {{
     success
     errors
-    obtainPayload{
+    obtainPayload{{
       token
       refreshToken
-    }
-  }
-}
-        """ % (
+    }}
+  }}
+}}
+        """.format(
             self.default_password,
             new_password1,
             new_password2,
@@ -102,23 +94,23 @@ class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
 class PasswordChangeRelayTestCase(PasswordChangeTestCaseMixin, RelayTestCase):
     def get_query(self, new_password1="new_password", new_password2="new_password"):
         return """
-        mutation {
+        mutation {{
             passwordChange(
-                input: {
-                    oldPassword: "%s",
-                    newPassword1: "%s",
-                    newPassword2: "%s"
-                })
-           {
+                input: {{
+                    oldPassword: "{}",
+                    newPassword1: "{}",
+                    newPassword2: "{}"
+                }})
+           {{
     success
     errors
-    obtainPayload{
+    obtainPayload{{
       token
       refreshToken
-    }
-  }
-}
-        """ % (
+    }}
+  }}
+}}
+        """.format(
             self.default_password,
             new_password1,
             new_password2,

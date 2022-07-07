@@ -1,4 +1,5 @@
 from django.utils.translation import gettext as _
+
 from gqlauth.bases.exceptions import ErrorBase
 
 

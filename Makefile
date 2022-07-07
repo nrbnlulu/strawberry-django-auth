@@ -1,29 +1,23 @@
-.PHONY : test-local test-local-file serve build-docs check-readme install-local lint format dev-setup
-v =0.3.2.1
-p ?= 310
-d ?= 40
-
-install-local:
-	python -m pip install -e .
-
-dev-setup:
-	pip install -e ".[dev]"
+.PHONY : test-local test-local-file serve build-docs check-readme lint format dev-setup test_setting_b
 
 run-quickstart:
 	cd quickstart; python -m manage runserver;
 
 test:
-	tox -e py${p}-django${d} -- --cov-report term-missing --cov-report html
+	poetry run python -m migrate
+	poetry run pytest --ds=tests.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
 
-test-file:
-	tox -e py${p}-django${d} -- tests/test_${f}.py --cov-report html --cov-append
+test_setting_b:
+	poetry run python -m migrate
+	poetry run pytest --ds=tests.settings_b -m 'settings_b' --cov=gqlauth --cov-report=xml --cov-append
+
 
 serve:
 	python docs/pre_build.py
 	mkdocs serve
 
 build-docs:
-	pip install -r docs/requirements.txt
+	poetry install
 	python docs/pre_build.py
 	mkdocs build
 
