@@ -69,4 +69,3 @@ def allowed_permissions(roles: list)
 
 checks a list of roles if it applies to a user
 verification required by default.
-

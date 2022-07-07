@@ -22,13 +22,13 @@ your implementation*.
 
 ## Documentation
 
-### Docs can be found [here](https://nrbnlulu.github.io/strawberry-django-auth/)  
+### Docs can be found [here](https://nrbnlulu.github.io/strawberry-django-auth/)
 
 ## Features
 
 * [x] [Awesome docs](https://nrbnlulu.github.io/strawberry-django-auth/):tada:
 * [ ] Fully compatible with [Relay](https://github.com/facebook/relay>)
-* [x] Works with **default or custom** user model 
+* [x] Works with **default or custom** user model
 * [x] JWT authentication *(with [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt))*
 * [x] User query with filters
 * [x] User registration with email verification
@@ -81,10 +81,10 @@ schema = strawberry.Schema(mutation=AuthMutation)
 ```
 
 
-## User relay queries 
+## User relay queries
 
 ### Currently not supported
-excpect to find it here when strawberry will nativly support relay
+expect to find it here when strawberry will natively support relay
 
 
 ## Example

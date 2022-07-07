@@ -1,9 +1,6 @@
-from django.contrib.auth import get_user_model
-
 from gqlauth.constants import Messages
 
-
-from .testCases import RelayTestCase, DefaultTestCase
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class SwapEmailsCaseMixin:
@@ -14,9 +11,7 @@ class SwapEmailsCaseMixin:
             verified=True,
             secondary_email="secondary@email.com",
         )
-        self.user2 = self.register_user(
-            email="baa@email.com", username="baa", verified=True
-        )
+        self.user2 = self.register_user(email="baa@email.com", username="baa", verified=True)
 
     def test_swap_emails(self):
         executed = self.make_request(self.query(), {"user": self.user})
@@ -29,9 +24,7 @@ class SwapEmailsCaseMixin:
     def test_swap_emails_without_secondary_email(self):
         executed = self.make_request(self.query(), {"user": self.user2})
         self.assertEqual(executed["success"], False)
-        self.assertEqual(
-            executed["errors"]["nonFieldErrors"], Messages.SECONDARY_EMAIL_REQUIRED
-        )
+        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.SECONDARY_EMAIL_REQUIRED)
 
 
 class SwapEmailsCase(SwapEmailsCaseMixin, DefaultTestCase):

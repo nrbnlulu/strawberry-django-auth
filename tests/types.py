@@ -1,6 +1,7 @@
-import strawberry
 from django.contrib.auth import get_user_model
+import strawberry
 from strawberry.django import auto
+
 from gqlauth import models
 
 
@@ -13,7 +14,7 @@ class UserStatusType:
 
 @strawberry.django.filters.filter(get_user_model(), lookups=True)
 class UserFilter:
-    id: auto
+    id: auto  # noqa: A003
     username: auto
     email: auto
     name: auto

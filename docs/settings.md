@@ -24,7 +24,7 @@ GQL_AUTH = GqlAuthSettings(
 
 ### ALLOW_LOGIN_NOT_VERIFIED
 
-Determines whether the user can log in without being verified. If it is true, the registring returns `token` and `refresh token` on the output.
+Determines whether the user can log in without being verified. If it is true, the registering returns `token` and `refresh token` on the output.
 
 default: `#!python True`
 

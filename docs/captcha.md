@@ -8,4 +8,4 @@ the default setting are:
     "LOGIN_REQUIRE_CAPTCHA": True,
     "REGISTER_REQUIRE_CAPTCHA": True,
 ```
-if you don't like this set them to False 
+if you don't like this set them to False

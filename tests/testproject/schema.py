@@ -1,10 +1,10 @@
+from typing import List
+
 import strawberry
 from strawberry.tools import merge_types
 
-from typing import List
-
-from gqlauth.user import arg_mutations, relay
-from gqlauth.user.types import UserType, UserFilter
+from gqlauth.user import relay
+from gqlauth.user.types import UserFilter, UserType
 
 
 @strawberry.type

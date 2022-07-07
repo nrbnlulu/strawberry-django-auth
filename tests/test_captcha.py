@@ -1,15 +1,15 @@
-from django.test import TestCase, override_settings
 from unittest.mock import MagicMock
 from uuid import uuid4
-from django.contrib.auth import get_user_model
 
+from django.contrib.auth import get_user_model
+from django.test import override_settings
 
 from gqlauth.constants import Messages
-from .__init__ import *
-from gqlauth.models import Captcha, UserStatus
-from gqlauth.signals import user_registered
-from .testCases import DefaultTestCase, RelayTestCase
+from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
+from gqlauth.signals import user_registered
+
+from .testCases import RelayTestCase
 
 
 class CaptchaTestCaseMixin:
@@ -19,7 +19,7 @@ class CaptchaTestCaseMixin:
 
     def test_get_captcha_saves_and_returns_cap_obj(self):
         cap = self.gen_captcha()
-        obj = Captcha.objects.get(pk=cap.uuid)
+        Captcha.objects.get(pk=cap.uuid)
 
     def test_captcha_text_validation(self):
         cap = self.gen_captcha()
@@ -29,22 +29,16 @@ class CaptchaTestCaseMixin:
 
     def test_register_user_require_captcha_validation(self):
         try:
-            res = self.make_request(
-                self.register_query_without_cap_fields(username="fdsafsdfgv")
-            )
+            self.make_request(self.register_query_without_cap_fields(username="fdsafsdfgv"))
         except Exception as e:
             assert "identifier' of required type 'UUID!' was not provided." in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_login_require_captcha_validation(self):
         try:
-            res = self.make_request(
-                self.login_query_without_cap_fields(username="fake")
-            )
+            self.make_request(self.login_query_without_cap_fields(username="fake"))
         except Exception as e:
-            assert (
-                "identifier' of required type 'String!' was not provided" in e.args[0]
-            )
+            assert "identifier' of required type 'String!' was not provided" in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_register_wrong_captcha_validation(self):
@@ -62,7 +56,7 @@ class CaptchaTestCaseMixin:
         user_registered.connect(handler)
 
         cap = self.gen_captcha()
-        res = self.make_request(
+        self.make_request(
             self.register_query(
                 username=username,
                 password="SuperSecureP@ssw0rd",
@@ -76,25 +70,17 @@ class CaptchaTestCaseMixin:
 
     def test_login_user_require_captcha_validation(self):
         try:
-            res = self.make_request(
-                self.register_query_without_cap_fields(username="fdsafsdfgv")
-            )
+            self.make_request(self.register_query_without_cap_fields(username="fdsafsdfgv"))
         except Exception as e:
-            self.assertIn(
-                "identifier' of required type 'UUID!' was not provided", e.args[0]
-            )
-            self.assertIn(
-                "userEntry' of required type 'String!' was not provided", e.args[1]
-            )
+            self.assertIn("identifier' of required type 'UUID!' was not provided", e.args[0])
+            self.assertIn("userEntry' of required type 'String!' was not provided", e.args[1])
 
     def test_max_tries_deletes_captcha(self):
         cap = self.gen_captcha()
-        for i in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
+        for _ in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
             cap.validate("wrong")
 
-        self.assertRaises(
-            Captcha.DoesNotExist, lambda: Captcha.objects.get(pk=cap.uuid)
-        )
+        self.assertRaises(Captcha.DoesNotExist, lambda: Captcha.objects.get(pk=cap.uuid))
 
 
 req_captcha = {
@@ -108,15 +94,15 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
     @staticmethod
     def login_query_without_cap_fields(password="fake", username="username"):
         return """
-            mutation {
+            mutation {{
                 tokenAuth(
-                input:{
-                 username: "%s", password: "%s"
-                }
+                input:{{
+                 username: "{}", password: "{}"
+                }}
                 )
-                { success, errors }
-            }
-            """ % (
+                {{ success, errors }}
+            }}
+            """.format(
             username,
             password,
         )
@@ -124,15 +110,15 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
     @staticmethod
     def login_query(password="fake", username="username", uuid="fake", input_="wrong"):
         return """
-            mutation {
+            mutation {{
                 tokenAuth(
-                input:{
-                username: "%s", password: "%s",identifier: "%s", userEntry:"%s"
-                }
+                input:{{
+                username: "{}", password: "{}",identifier: "{}", userEntry:"{}"
+                }}
                 )
-                { success, errors }
-            }
-            """ % (
+                {{ success, errors }}
+            }}
+            """.format(
             username,
             password,
             uuid,
@@ -142,37 +128,35 @@ class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
     @staticmethod
     def register_query_without_cap_fields(password="akssdgfbwkc", username="username"):
         return """
-          mutation{
+          mutation{{
             register(
-                input: {
-                    email: "tesfdfdt@email.com", username: "%s", password1: "%s", password2: "%s" 
-                       }
+                input: {{
+                    email: "tesfdfdt@email.com", username: "{}", password1: "{}", password2: "{}"
+                       }}
                )
-              {
+              {{
                 success
                 errors
-              }
-            }
-          """ % (
+              }}
+            }}
+          """.format(
             username,
             password,
             password,
         )
 
     @staticmethod
-    def register_query(
-        password="fake", username="username", uuid="fake", input_="wrong"
-    ):
+    def register_query(password="fake", username="username", uuid="fake", input_="wrong"):
         return """
-          mutation {
+          mutation {{
               register(
-              input: {
-               email: "tesfdfdt@email.com", username: "%s", password1: "%s", password2: "%s" , identifier: "%s", userEntry:"%s"
-              }
+              input: {{
+               email: "tesfdfdt@email.com", username: "{}", password1: "{}", password2: "{}" , identifier: "{}", userEntry:"{}"
+              }}
               )
-              { success, errors }
-          }
-          """ % (
+              {{ success, errors }}
+          }}
+          """.format(
             username,
             password,
             password,

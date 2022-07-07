@@ -1,8 +1,9 @@
 # quickstart.schema.py
 import strawberry
+from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
+
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
-from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
 
 
 @strawberry.type

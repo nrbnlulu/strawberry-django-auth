@@ -1,14 +1,13 @@
 from smtplib import SMTPException
 from unittest import mock
-from pytest import mark
 
 from django.contrib.auth import get_user_model
-
-from .testCases import RelayTestCase, DefaultTestCase
+from pytest import mark
 
 from gqlauth.constants import Messages
 from gqlauth.signals import user_registered
-from gqlauth.utils import get_token, get_payload_from_token
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class RegisterTestCaseMixin:
@@ -52,7 +51,7 @@ class RegisterTestCaseMixin:
         self.assertTrue(executed["errors"]["email"])
 
     def test_register_duplicate_unique_email(self):
-        user = self.register_user(
+        self.register_user(
             email="foo@email.com",
             username="foo",
             verified=True,
@@ -64,7 +63,7 @@ class RegisterTestCaseMixin:
         self.assertTrue(executed["errors"]["email"])
 
     def test_register_duplicate_unique_email_2(self):
-        user = self.register_user(email="foo@email.com", username="foo")
+        self.register_user(email="foo@email.com", username="foo")
         executed = self.make_request(self.register_query())
         self.assertEqual(executed["success"], False)
         self.assertTrue(executed["errors"]["email"])
@@ -88,18 +87,18 @@ class RegisterTestCase(RegisterTestCaseMixin, DefaultTestCase):
     def register_query(self, password="akssdgfbwkc", username="username"):
         cap = self.gen_captcha()
         return """
-        mutation {
+        mutation {{
             register(
                 email: "foo@email.com",
-                username: "%s",
-                password1: "%s",
-                password2: "%s",
-                identifier: "%s",
-                userEntry:"%s"
+                username: "{}",
+                password1: "{}",
+                password2: "{}",
+                identifier: "{}",
+                userEntry:"{}"
             )
-            { success, errors  }
-        }
-        """ % (
+            {{ success, errors  }}
+        }}
+        """.format(
             username,
             password,
             password,
@@ -122,16 +121,16 @@ class RegisterRelayTestCase(RegisterTestCaseMixin, RelayTestCase):
     def register_query(self, password="akssdgfbwkc", username="username"):
         cap = self.gen_captcha()
         return """
-            mutation {
+            mutation {{
             register(
-            input:{
+            input:{{
              email: "foo@email.com",
-              username: "%s", password1: "%s", password2: "%s" , identifier: "%s", userEntry:"%s"
-            }
+              username: "{}", password1: "{}", password2: "{}" , identifier: "{}", userEntry:"{}"
+            }}
             )
-            { success, errors }
-        }
-        """ % (
+            {{ success, errors }}
+        }}
+        """.format(
             username,
             password,
             password,

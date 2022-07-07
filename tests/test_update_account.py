@@ -1,9 +1,8 @@
 from pytest import mark
-from django.contrib.auth import get_user_model
-from django.test import override_settings
-from .testCases import RelayTestCase, DefaultTestCase
-from .__init__ import *
+
 from gqlauth.constants import Messages
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class UpdateAccountTestCaseMixin:
@@ -132,9 +131,7 @@ class UpdateAccountTestCaseMixin:
             ")@#$_)1- "
         )
         variables = {"user": self.user2}
-        executed = self.make_request(
-            self.get_query(first_name=super_long_string), variables
-        )
+        executed = self.make_request(self.get_query(first_name=super_long_string), variables)
         self.assertEqual(executed["success"], False)
         self.assertTrue(executed["errors"]["firstName"])
         self.user2.refresh_from_db()

@@ -1,8 +1,9 @@
 import strawberry
 from strawberry.tools import merge_types
 from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
+
+from gqlauth.user import arg_mutations, relay
 from gqlauth.user.queries import UserQueries
-from gqlauth.user import relay, arg_mutations
 
 
 @strawberry.type

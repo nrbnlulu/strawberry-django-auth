@@ -1,20 +1,14 @@
-from django.contrib.auth import get_user_model
-
-from .testCases import RelayTestCase, DefaultTestCase
 from gqlauth.constants import Messages
-from gqlauth.utils import get_token, get_payload_from_token
-from gqlauth.models import UserStatus
 from gqlauth.signals import user_verified
+from gqlauth.utils import get_token
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class VerifyAccountCaseMixin:
     def setUp(self):
-        self.user1 = self.register_user(
-            email="foo@email.com", username="foo", verified=False
-        )
-        self.user2 = self.register_user(
-            email="bar@email.com", username="bar", verified=True
-        )
+        self.user1 = self.register_user(email="foo@email.com", username="foo", verified=False)
+        self.user2 = self.register_user(email="bar@email.com", username="bar", verified=True)
 
     def test_verify_user(self):
         signal_received = False
@@ -35,9 +29,7 @@ class VerifyAccountCaseMixin:
         token = get_token(self.user2, "activation")
         executed = self.make_request(self.verify_query(token))
         self.assertEqual(executed["success"], False)
-        self.assertEqual(
-            executed["errors"]["nonFieldErrors"], Messages.ALREADY_VERIFIED
-        )
+        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.ALREADY_VERIFIED)
 
     def test_invalid_token(self):
         executed = self.make_request(self.verify_query("faketoken"))

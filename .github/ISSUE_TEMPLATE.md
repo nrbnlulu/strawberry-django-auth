@@ -1,8 +1,9 @@
 # Prerequisites
+*Feel free to just say what you want and remove this template.*
 
 * [ ] Is it a bug?
 * [ ] Is it a new feature?
-* [ ] Is it a a question?
+* [ ] Is it a question?
 * [ ] Can you reproduce the problem?
 * [ ] Are you running the latest version?
 * [ ] Did you check for similar issues?

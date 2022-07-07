@@ -1,7 +1,7 @@
 from strawberry_django_jwt.backends import JSONWebTokenBackend
+from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 from strawberry_django_jwt.shortcuts import get_user_by_token
 from strawberry_django_jwt.utils import get_credentials
-from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
 
 class GraphQLAuthBackend(JSONWebTokenBackend):
@@ -13,12 +13,12 @@ class GraphQLAuthBackend(JSONWebTokenBackend):
     allow any settings.
 
     Main advantage is to let the mutation handle the
-    unauthentication error. Intead of an actual error,
+    unauthenticated error. Instead of an actual error,
     we can return e.g. success=False errors=Unauthenticated
     """
 
     def authenticate(self, request=None, **kwargs):
-        # if it isnt a request or settings dosnt require a _jwt_token
+        # if it isn't a request or settings dost require a _jwt_token
         if request is None or getattr(request, "_jwt_token_auth", False):
             return None
 

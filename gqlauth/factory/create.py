@@ -1,39 +1,37 @@
-import os
+from io import BytesIO
 import random
-from PIL import Image
-from PIL import ImageFilter
+
+from PIL import Image, ImageFilter
 from PIL.ImageDraw import Draw
 from PIL.ImageFont import truetype
-from io import BytesIO
-
 
 table = []
 for i in range(256):
     table.append(int(i * 1.97))
 
 
-class _Captcha(object):
-    def generate(self, chars, format="png"):
+class _Captcha:
+    def generate(self, chars, file_format="png"):
         """Generate an Image Captcha of the given characters.
 
         :param chars: text to be generated.
-        :param format: image file format
+        :param file_format: image file format
         """
         im = self.generate_image(chars)
         out = BytesIO()
-        im.save(out, format=format)
+        im.save(out, format=file_format)
         out.seek(0)
         return out
 
-    def write(self, chars, output, format="png"):
+    def write(self, chars, output, file_format="png"):
         """Generate and write an image CAPTCHA data to the output.
 
         :param chars: text to be generated.
         :param output: output destination.
-        :param format: image file format
+        :param file_format: image file format
         """
         im = self.generate_image(chars)
-        return im.save(output, format=format)
+        return im.save(output, format=file_format)
 
 
 class ImageCaptcha(_Captcha):
@@ -57,9 +55,7 @@ class ImageCaptcha(_Captcha):
     :param font_sizes: Random choose a font size from this parameters.
     """
 
-    def __init__(
-        self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None
-    ):
+    def __init__(self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None):
         self._width = width
         self._height = height
         self._fonts = fonts
@@ -71,9 +67,7 @@ class ImageCaptcha(_Captcha):
     def truefonts(self):
         if self._truefonts:
             return self._truefonts
-        self._truefonts = tuple(
-            [truetype(n, s) for n in self._fonts for s in self._font_sizes]
-        )
+        self._truefonts = tuple(truetype(n, s) for n in self._fonts for s in self._font_sizes)
         return self._truefonts
 
     @staticmethod
@@ -101,12 +95,11 @@ class ImageCaptcha(_Captcha):
         return image
 
     def create_captcha_image(self, chars, color, background):
-        """Create the CAPTCHA image itself.
-
+        """
+        Create the CAPTCHA image itself.
         :param chars: text to be generated.
         :param color: color of the text.
         :param background: color of the background.
-
         The color should be a tuple of 3 numbers, such as (0, 255, 255).
         """
         image = Image.new("RGB", (self._width, self._height), background)
@@ -114,20 +107,15 @@ class ImageCaptcha(_Captcha):
 
         def _draw_character(c):
             # if hebrew
-
+            direction = "ltr"
             if "\u0590" <= c <= "\u05EA" and self.heb_fonts:
+                direction = "rtl"
                 font = random.choice(
-                    tuple(
-                        [
-                            truetype(n, s)
-                            for n in self.heb_fonts
-                            for s in self._font_sizes
-                        ]
-                    )
+                    tuple(truetype(n, s) for n in self.heb_fonts for s in self._font_sizes)
                 )
             else:
                 font = random.choice(self.truefonts)
-            w, h = draw.textsize(c, font=font)
+            _, _, w, h = draw.textbbox((0, 0), text=c, font=font, direction=direction)
 
             dx = random.randint(0, 4)
             dy = random.randint(0, 6)
@@ -167,7 +155,7 @@ class ImageCaptcha(_Captcha):
                 images.append(_draw_character(" "))
             images.append(_draw_character(c))
 
-        text_width = sum([im.size[0] for im in images])
+        text_width = sum(im.size[0] for im in images)
 
         width = max(text_width, self._width)
         image = image.resize((width, self._height))

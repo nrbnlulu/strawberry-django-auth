@@ -1,2 +1,14 @@
 [run]
-omit = */tests/*
+source = gqlauth
+omit = .venv/**,tests/migrations/**,manage.py
+
+[report]
+precision = 2
+exclude_lines =
+    pragma: nocover
+    pragma:nocover
+    if TYPE_CHECKING:
+    @overload
+    @abstractmethod
+    @abc.abstractmethod
+    assert_never

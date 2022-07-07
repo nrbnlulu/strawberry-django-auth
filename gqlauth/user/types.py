@@ -1,11 +1,14 @@
-from django.contrib.auth import get_user_model
 from typing import Optional
+
+from django.contrib.auth import get_user_model
 
 # strawberry
 import strawberry
 from strawberry import auto
 
 # project
+from strawberry.types import Info
+
 from gqlauth import models
 
 USER_MODEL = get_user_model()
@@ -67,23 +70,17 @@ class UserType:
     is_active: auto
     date_joined: auto
 
-    # status: UserStatusType
-
     @strawberry.django.field
-    def pk(self, info) -> int:
-        return self.pk
-
-    @strawberry.django.field
-    def archived(self, info) -> bool:
+    def archived(self, info: Info) -> bool:
         return self.status.archived
 
     @strawberry.django.field
-    def verified(self, info) -> bool:
+    def verified(self, info: Info) -> bool:
         return self.status.verified
 
     @strawberry.django.field
-    def secondary_email(self, info) -> Optional[str]:
+    def secondary_email(self, info: Info) -> Optional[str]:
         return self.status.secondary_email
 
-    def get_queryset(self, queryset, info, **kwargs):
+    def get_queryset(self, queryset, info: Info, **kwargs):
         return queryset.select_related("status")

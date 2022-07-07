@@ -1,20 +1,22 @@
-import warnings
+import contextlib
 import inspect
-from django.core import signing
+import warnings
+
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
+from django.core import signing
 from strawberry.annotation import StrawberryAnnotation
-from strawberry.utils.str_converters import to_camel_case
 from strawberry.arguments import StrawberryArgument
 from strawberry.unset import UNSET
+from strawberry.utils.str_converters import to_camel_case
+from strawberry_django_jwt.exceptions import JSONWebTokenError
+
 from .exceptions import TokenScopeError
 
 
 def hide_args_kwargs(field):
     sig = inspect.signature(field)
-    cleared = tuple(
-        p for p in sig.parameters.values() if p.name not in ("kwargs", "args")
-    )
+    cleared = tuple(p for p in sig.parameters.values() if p.name not in ("kwargs", "args"))
     field.__signature__ = inspect.signature(field).replace(parameters=(cleared))
     return field
 
@@ -93,10 +95,8 @@ def revoke_user_refresh_token(user):
     if using_refresh_tokens():
         refresh_tokens = user.refresh_tokens.all()
         for refresh_token in refresh_tokens:
-            try:
+            with contextlib.suppress(JSONWebTokenError):
                 refresh_token.revoke()
-            except Exception:  # JSONWebTokenError
-                pass
 
 
 def flat_dict(dict_or_list):
@@ -109,7 +109,7 @@ def flat_dict(dict_or_list):
 
 def normalize_fields(dict_or_list, extra_list_or_dict):
     """
-    helper merge settings defined fileds
+    helper merge settings defined filed
     with default str type
     """
     if not isinstance(extra_list_or_dict, dict):
@@ -121,9 +121,7 @@ def normalize_fields(dict_or_list, extra_list_or_dict):
     return dict_or_list
 
 
-def create_strawberry_argument(
-    python_name: str, graphql_name: str, type_, default=None
-):
+def create_strawberry_argument(python_name: str, graphql_name: str, type_, default=None):
     return StrawberryArgument(
         python_name=python_name,
         graphql_name=graphql_name,

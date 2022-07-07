@@ -1,45 +1,46 @@
 from smtplib import SMTPException
 from uuid import UUID
-import strawberry
-from django.core.signing import BadSignature, SignatureExpired
-from django.core.exceptions import ObjectDoesNotExist
+
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import SetPasswordForm, PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 from django.utils.module_loading import import_string
+import strawberry
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
-from gqlauth.forms import (
-    RegisterForm,
-    EmailForm,
-    UpdateAccountForm,
-    PasswordLessRegisterForm,
+from gqlauth.constants import Messages, TokenAction
+from gqlauth.decorators import (
+    password_confirmation_required,
+    secondary_email_required,
+    verification_required,
 )
-from gqlauth.types import CaptchaType
-from gqlauth.utils import normalize_fields, g_user
-from gqlauth.models import Captcha, UserStatus
-from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.exceptions import (
-    UserAlreadyVerified,
-    UserNotVerified,
-    TokenScopeError,
     EmailAlreadyInUse,
     InvalidCredentials,
     PasswordAlreadySetError,
+    TokenScopeError,
+    UserAlreadyVerified,
+    UserNotVerified,
 )
-from gqlauth.constants import Messages, TokenAction
-from gqlauth.utils import (
-    revoke_user_refresh_token,
-    get_payload_from_token,
-    using_refresh_tokens,
+from gqlauth.forms import (
+    EmailForm,
+    PasswordLessRegisterForm,
+    RegisterForm,
+    UpdateAccountForm,
 )
+from gqlauth.models import Captcha, UserStatus
+from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
-from gqlauth.decorators import (
-    password_confirmation_required,
-    verification_required,
-    secondary_email_required,
-    login_required,
+from gqlauth.types import CaptchaType
+from gqlauth.utils import (
+    g_user,
+    get_payload_from_token,
+    normalize_fields,
+    revoke_user_refresh_token,
+    using_refresh_tokens,
 )
 
 UserModel = get_user_model()
@@ -51,7 +52,7 @@ else:
 
 class Cap:
     @strawberry.mutation
-    def Field(self, info) -> CaptchaType:
+    def Field(self) -> CaptchaType:
         return Captcha.create_captcha()
 
 
@@ -80,24 +81,18 @@ class RegisterMixin:
     class _meta:
 
         password_fields = (
-            []
-            if app_settings.ALLOW_PASSWORDLESS_REGISTRATION
-            else ["password1", "password2"]
+            [] if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else ["password1", "password2"]
         )
         extra_fields = password_fields
         if app_settings.REGISTER_REQUIRE_CAPTCHA:
             captcha_fields = {"identifier": UUID, "userEntry": str}
             extra_fields = normalize_fields(captcha_fields, password_fields)
 
-        _required_inputs = normalize_fields(
-            app_settings.REGISTER_MUTATION_FIELDS, extra_fields
-        )
+        _required_inputs = normalize_fields(app_settings.REGISTER_MUTATION_FIELDS, extra_fields)
         _inputs = app_settings.REGISTER_MUTATION_FIELDS_OPTIONAL
 
     form = (
-        PasswordLessRegisterForm
-        if app_settings.ALLOW_PASSWORDLESS_REGISTRATION
-        else RegisterForm
+        PasswordLessRegisterForm if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else RegisterForm
     )
 
     @classmethod
@@ -113,7 +108,7 @@ class RegisterMixin:
     def resolve_mutation(cls, info, **input_):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(input_)
-            if not check_res == Messages.CAPTCHA_VALID:
+            if check_res != Messages.CAPTCHA_VALID:
                 return cls.output(success=False, errors={"captcha": check_res})
 
         try:
@@ -123,9 +118,7 @@ class RegisterMixin:
                     email = input_.get("email")
                     UserStatus.clean_email(email)
                     user = f.save()
-                    send_activation = (
-                        app_settings.SEND_ACTIVATION_EMAIL is True and email
-                    )
+                    send_activation = app_settings.SEND_ACTIVATION_EMAIL is True and email
                     send_password_set = (
                         app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
                         and app_settings.SEND_PASSWORD_SET_EMAIL is True
@@ -141,9 +134,7 @@ class RegisterMixin:
                     if send_password_set:
                         # TODO CHECK FOR EMAIL ASYNC SETTING
                         if async_email_func:
-                            async_email_func(
-                                user.status.send_password_set_email, (info,)
-                            )
+                            async_email_func(user.status.send_password_set_email, (info,))
                         else:
                             user.status.send_password_set_email(info)
 
@@ -254,13 +245,11 @@ class ResendActivationEmailMixin:
                 return cls.output(success=True)
             return cls.output(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
-            return cls.output(success=True)  # even if user is not registred
+            return cls.output(success=True)  # even if user is not registered
         except SMTPException:
             return cls.output(success=False, errors=Messages.EMAIL_FAIL)
         except UserAlreadyVerified:
-            return cls.output(
-                success=False, errors={"email": Messages.ALREADY_VERIFIED}
-            )
+            return cls.output(success=False, errors={"email": Messages.ALREADY_VERIFIED})
 
 
 class SendPasswordResetEmailMixin:
@@ -287,15 +276,13 @@ class SendPasswordResetEmailMixin:
             if f.is_valid():
                 user = get_user_by_email(email)
                 if async_email_func:
-                    async_email_func(
-                        user.status.send_password_reset_email, (info, [email])
-                    )
+                    async_email_func(user.status.send_password_reset_email, (info, [email]))
                 else:
                     user.status.send_password_reset_email(info, [email])
                 return cls.output(success=True)
             return cls.output(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
-            return cls.output(success=True)  # even if user is not registred
+            return cls.output(success=True)  # even if user is not registered
         except SMTPException:
             return cls.output(success=False, errors=Messages.EMAIL_FAIL)
         except UserNotVerified:
@@ -435,9 +422,7 @@ class ObtainJSONWebTokenMixin:
         additional_req = {}
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             additional_req.update({"identifier": UUID, "userEntry": str})
-        _required_inputs = normalize_fields(
-            app_settings.LOGIN_REQUIRED_FIELDS, additional_req
-        )
+        _required_inputs = normalize_fields(app_settings.LOGIN_REQUIRED_FIELDS, additional_req)
 
         _inputs = app_settings.LOGIN_OPTIONAL_FIELDS
         _parent_resolver_name = "obtain"
@@ -456,7 +441,7 @@ class ObtainJSONWebTokenMixin:
     def resolve_mutation(cls, info, **input_):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(**input_)
-            if not check_res == Messages.CAPTCHA_VALID:
+            if check_res != Messages.CAPTCHA_VALID:
                 return cls.output(success=False, errors={"captcha": check_res})
 
         try:
@@ -689,9 +674,7 @@ class SendSecondaryEmailActivationMixin:
             if f.is_valid():
                 user = g_user(info)
                 if async_email_func:
-                    async_email_func(
-                        user.status.send_secondary_email_activation, (info, email)
-                    )
+                    async_email_func(user.status.send_secondary_email_activation, (info, email))
                 else:
                     user.status.send_secondary_email_activation(info, email)
                 return cls.output(success=True)

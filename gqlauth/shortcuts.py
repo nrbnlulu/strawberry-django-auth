@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import UserStatus
-from gqlauth.settings import gqlauth_settings as app_settings
-
 
 UserModel = get_user_model()
 

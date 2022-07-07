@@ -1,40 +1,36 @@
-from gqlauth.bases.mixins import (
-    DynamicRelayMutationMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-)
 from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
-from strawberry_django_jwt.mutations import Verify as VerifyParent
 from strawberry_django_jwt.mutations import Refresh as RefreshParent
 from strawberry_django_jwt.mutations import Revoke as RevokeParent
+from strawberry_django_jwt.mutations import Verify as VerifyParent
 
-
+from gqlauth.bases.mixins import (
+    DynamicInputMixin,
+    DynamicPayloadMixin,
+    DynamicRelayMutationMixin,
+)
 from gqlauth.user.resolvers import (
-    RegisterMixin,
-    VerifyAccountMixin,
-    ResendActivationEmailMixin,
-    SendPasswordResetEmailMixin,
-    PasswordSetMixin,
-    PasswordResetMixin,
-    ObtainJSONWebTokenMixin,
     ArchiveAccountMixin,
     DeleteAccountMixin,
+    ObtainJSONWebTokenMixin,
     PasswordChangeMixin,
-    UpdateAccountMixin,
+    PasswordResetMixin,
+    PasswordSetMixin,
     RefreshTokenMixin,
-    VerifyTokenMixin,
-    RevokeTokenMixin,
-    SendSecondaryEmailActivationMixin,
-    VerifySecondaryEmailMixin,
-    SwapEmailsMixin,
+    RegisterMixin,
     RemoveSecondaryEmailMixin,
-    Cap,
+    ResendActivationEmailMixin,
+    RevokeTokenMixin,
+    SendPasswordResetEmailMixin,
+    SendSecondaryEmailActivationMixin,
+    SwapEmailsMixin,
+    UpdateAccountMixin,
+    VerifyAccountMixin,
+    VerifySecondaryEmailMixin,
+    VerifyTokenMixin,
 )
 
 
-class Register(
-    RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin
-):
+class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):
     __doc__ = RegisterMixin.__doc__
 
 

@@ -1,10 +1,10 @@
 from pytest import mark
 
-from .__init__ import *
-from gqlauth.models import Captcha
-from .testCases import RelayTestCase, DefaultTestCase
 from gqlauth.constants import Messages
+from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
+
+from .testCases import DefaultTestCase, RelayTestCase
 
 
 class LoginTestCaseMixin:
@@ -82,9 +82,7 @@ class LoginTestCaseMixin:
         query = self.get_query(self.not_verified_user.username, "wrongpass")
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
-        self.assertEqual(
-            executed["errors"]["nonFieldErrors"], Messages.INVALID_CREDENTIALS
-        )
+        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.INVALID_CREDENTIALS)
         self.assertFalse(executed["obtainPayload"])
 
 
@@ -92,19 +90,19 @@ class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
     def get_query(self, username, password=None):
         cap = self.gen_captcha()
         return """
-        mutation {
-        tokenAuth(username: "%s", password: "%s" ,identifier: "%s" ,userEntry: "%s")
-                          {
+        mutation {{
+        tokenAuth(username: "{}", password: "{}" ,identifier: "{}" ,userEntry: "{}")
+                          {{
                 success
                 errors
-                obtainPayload{
+                obtainPayload{{
                   token
                   refreshToken
-                }
-              }
-            }
+                }}
+              }}
+            }}
 
-        """ % (
+        """.format(
             username,
             password or self.default_password,
             cap.uuid,
@@ -116,18 +114,18 @@ class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
     def get_query(self, username, password=None):
         cap = self.gen_captcha()
         return """
-        mutation {
-        tokenAuth(input:{username: "%s", password: "%s",identifier: "%s", userEntry: "%s"})  {
+        mutation {{
+        tokenAuth(input:{{username: "{}", password: "{}",identifier: "{}", userEntry: "{}"}})  {{
             success
             errors
-            obtainPayload{
+            obtainPayload{{
               token
               refreshToken
-            }
-          }
-        }
+            }}
+          }}
+        }}
 
-        """ % (
+        """.format(
             username,
             password or self.default_password,
             cap.uuid,

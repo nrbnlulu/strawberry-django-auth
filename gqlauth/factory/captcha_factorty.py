@@ -1,10 +1,13 @@
+from base64 import b64encode
 from dataclasses import dataclass
-from base64 import b64decode, b64encode
 import io
-from gqlauth.settings import gqlauth_settings as app_settings
 from pathlib import Path
 import sys
+
 from PIL.Image import Image
+
+from gqlauth.settings import gqlauth_settings as app_settings
+
 from .create import ImageCaptcha
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
