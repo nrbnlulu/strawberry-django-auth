@@ -304,23 +304,6 @@ python-dateutil = ">=2.8.1"
 dev = ["twine", "markdown", "flake8", "wheel"]
 
 [[package]]
-name = "gqlauth-jwt"
-version = "0.2.1"
-description = "Strawberry-graphql port of the graphene-django-jwt package"
-category = "main"
-optional = false
-python-versions = ">=3.8,<4.0"
-
-[package.dependencies]
-Django = {version = ">=3.2,<5", markers = "python_version >= \"3.8\""}
-django-admin-display = ">=1.3.0,<2.0.0"
-packaging = ">=20.0,<30.0"
-PyJWT = ">=1.7.1,<3.0"
-strawberry-django-plus = ">=1.17.0,<2.0.0"
-strawberry-graphql = ">=0.69.0,<1.0.0"
-strawberry-graphql-django = ">=0.2.5,<4.0"
-
-[[package]]
 name = "graphql-core"
 version = "3.2.1"
 description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
@@ -816,22 +799,23 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "strawberry-django-plus"
-version = "1.17.0"
-description = "Enhanced Strawberry GraphQL integration with Django"
+name = "strawberry-django-jwt"
+version = "0.2.1"
+description = "Strawberry-graphql port of the graphene-django-jwt package"
 category = "main"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-django = ">=3.2"
-strawberry-graphql = ">=0.115.0"
+Django = {version = ">=3.2,<5", markers = "python_version >= \"3.8\""}
+django-admin-display = ">=1.3.0,<2.0.0"
+packaging = ">=20.0,<30.0"
+PyJWT = ">=1.7.1,<3.0"
+strawberry-graphql = ">=0.109.0,<1.0.0"
 strawberry-graphql-django = ">=0.3"
-typing-extensions = ">=4.1.0"
 
 [package.extras]
-debug-toolbar = ["django-debug-toolbar (>=3.4)"]
-enum = ["django-choices-field (>=2.0)"]
+dev = ["uvicorn[standard] (>=0.18.2,<0.19.0)"]
 
 [[package]]
 name = "strawberry-graphql"
@@ -1001,7 +985,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1646c70a5f0e3930eafd60c2d7238086b0c695f5d9f449227bd84515793671c2"
+content-hash = "067fafbbe22a393d83eb9eab4a865744567e28d6759ca984f72309f6dca246ba"
 
 [metadata.files]
 asgiref = [
@@ -1251,10 +1235,6 @@ filelock = [
 ghp-import = [
     {file = "ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343"},
     {file = "ghp_import-2.1.0-py3-none-any.whl", hash = "sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619"},
-]
-gqlauth-jwt = [
-    {file = "gqlauth-jwt-0.2.1.tar.gz", hash = "sha256:8c6b970f54fa4591b90b5f5bb8172f1aea0ceb5c2774b1923a296bfb86957081"},
-    {file = "gqlauth_jwt-0.2.1-py3-none-any.whl", hash = "sha256:903a4864a9a0d0495fc546c3aa0bcdba3d62e91c123f67204648c126e5584a95"},
 ]
 graphql-core = [
     {file = "graphql-core-3.2.1.tar.gz", hash = "sha256:9d1bf141427b7d54be944587c8349df791ce60ade2e3cccaf9c56368c133c201"},
@@ -1570,10 +1550,7 @@ sqlparse = [
     {file = "sqlparse-0.4.2-py3-none-any.whl", hash = "sha256:48719e356bb8b42991bdbb1e8b83223757b93789c00910a616a071910ca4a64d"},
     {file = "sqlparse-0.4.2.tar.gz", hash = "sha256:0c00730c74263a94e5a9919ade150dfc3b19c574389985446148402998287dae"},
 ]
-strawberry-django-plus = [
-    {file = "strawberry-django-plus-1.17.0.tar.gz", hash = "sha256:87df70e4b3f9956faca7f6dd29064c278a9a1bfe756f16bee9131caf2e9ad31a"},
-    {file = "strawberry_django_plus-1.17.0-py3-none-any.whl", hash = "sha256:8f0d6cb7d07a204539079462b79325d8464735cfaa3c3987365826a5009b5a3f"},
-]
+strawberry-django-jwt = []
 strawberry-graphql = [
     {file = "strawberry-graphql-0.117.0.tar.gz", hash = "sha256:dc31d2684adb1a00c341da3c56c4147f77e2e015bbf06b230af53d58f7c4d585"},
     {file = "strawberry_graphql-0.117.0-py3-none-any.whl", hash = "sha256:3da03c9d06c41e6d019cbab097076abf34d2829fff2d70853c4e6b5c46afb0de"},
