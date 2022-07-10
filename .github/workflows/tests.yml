@@ -7,8 +7,7 @@ on:
   pull_request:
     branches: [master, main]
   release:
-    types:
-      - released
+    types: [released]
 
 jobs:
   lint:
