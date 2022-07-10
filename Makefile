@@ -6,9 +6,6 @@ run-quickstart:
 test:
 	poetry run python -m migrate
 	poetry run pytest --ds=tests.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
-
-test_setting_b:
-	poetry run python -m migrate
 	poetry run pytest --ds=tests.settings_b -m 'settings_b' --cov=gqlauth --cov-report=xml --cov-append
 
 

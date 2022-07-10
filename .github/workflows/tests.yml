@@ -54,7 +54,6 @@ jobs:
           poetry install
           poetry run pip install "Django~=${{ matrix.django-version }}"
           make test
-          make test_setting_b
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
