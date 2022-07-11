@@ -64,6 +64,7 @@ pre-commit = "^2.19.0"
 
 
 [tool.pytest.ini_options]
+django_find_project = false
 minversion = "6.0"
 addopts = "-ra -q"
 testpaths = [

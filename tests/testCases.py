@@ -3,12 +3,14 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
+import pytest
 
 from gqlauth.models import Captcha, UserStatus
 
 
-class TestBase(TestCase):
+@pytest.mark.django_db
+class TestBase:
     """
     provide make_request helper to easily make
     requests with context variables.

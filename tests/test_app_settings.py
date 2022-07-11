@@ -1,20 +1,21 @@
-from django.conf import settings as django_settings
-from django.test import TestCase
-from pytest import mark
+import pytest
 
 from gqlauth import settings as app_settings
 
+pytestmark = pytest.mark.django_db
 
-class AppSettingsTestCase(TestCase):
-    def test_reload_settings(self):
-        self.assertFalse(app_settings.gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED)
-        user_settings = {"ALLOW_LOGIN_NOT_VERIFIED": True}
-        app_settings.reload_gqlauth_settings(setting="GQL_AUTH", value=user_settings)
-        self.assertTrue(app_settings.gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED)
 
-    def test_load_user_settings_from_django_settings(self):
-        assert django_settings.DEFAULT_FROM_EMAIL == app_settings.gqlauth_settings.EMAIL_FROM
+def test_load_user_settings_from_django_settings(settings):
+    assert app_settings.gqlauth_settings.EMAIL_FROM == settings.DEFAULT_FROM_EMAIL
 
-    @mark.settings_b
-    def test_user_can_override_DjangoSetting_TypeVar(self):
-        assert django_settings.DEFAULT_FROM_EMAIL != app_settings.gqlauth_settings.EMAIL_FROM
+
+@pytest.mark.settings_b
+def test_user_can_override_django_settings(settings):
+    assert app_settings.gqlauth_settings.EMAIL_FROM != settings.DEFAULT_FROM_EMAIL
+
+
+def test_reload_settings(settings):
+    assert not app_settings.gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED
+    user_settings = {"ALLOW_LOGIN_NOT_VERIFIED": True}
+    app_settings.reload_gqlauth_settings(setting="GQL_AUTH", value=user_settings)
+    assert app_settings.gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED

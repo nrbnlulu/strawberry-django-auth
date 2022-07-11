@@ -1,12 +1,9 @@
-import logging
 import warnings
 
 from django.conf import settings as django_settings
 from django.test.signals import setting_changed
 
 from gqlauth.settings_type import DjangoSetting, GqlAuthSettings
-
-logger = logging.getLogger(__name__)
 
 gqlauth_settings: GqlAuthSettings = None
 
@@ -21,9 +18,7 @@ if user_settings := getattr(django_settings, "GQL_AUTH", False):
         )
 
 else:
-    logger.warning(
-        "GQL AUTH: You have not provided" "any custom gql auth settings falling back to defaults"
-    )
+    warnings.warn("You have not provided any custom gql auth settings falling back to defaults")
     gqlauth_settings = GqlAuthSettings()
 
 defaults = GqlAuthSettings()

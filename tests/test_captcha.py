@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 from uuid import uuid4
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 
 from gqlauth.constants import Messages
 from gqlauth.models import Captcha
@@ -89,7 +88,6 @@ req_captcha = {
 }
 
 
-@override_settings(GQL_AUTH=req_captcha)
 class CaptchaRelayTestCase(CaptchaTestCaseMixin, RelayTestCase):
     @staticmethod
     def login_query_without_cap_fields(password="fake", username="username"):

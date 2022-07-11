@@ -17,6 +17,7 @@ from gqlauth.settings_type import GqlAuthSettings
 
 cwd = Path(__file__).parent
 sys.path.append(str(cwd / "testproject"))
+
 SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
@@ -97,6 +98,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 AUTHENTICATION_BACKENDS = [
+    "gqlauth.backends.GraphQLAuthBackend",
     "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
