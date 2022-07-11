@@ -802,7 +802,7 @@ dev = ["uvicorn[standard] (>=0.18.2,<0.19.0)"]
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.117.0"
+version = "0.117.1"
 description = "A library for creating GraphQL APIs"
 category = "main"
 optional = false
