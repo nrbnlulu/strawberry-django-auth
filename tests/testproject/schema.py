@@ -15,24 +15,24 @@ class UserQueries:
 
 @strawberry.type
 class AuthMutation:
-    token_auth = relay.ObtainJSONWebToken.Field
-    verify_token = relay.VerifyToken.Field
-    refresh_token = relay.RefreshToken.Field
-    revoke_token = relay.RevokeToken.Field
-    register = relay.Register.Field
-    verify_account = relay.VerifyAccount.Field
-    update_account = relay.UpdateAccount.Field
-    resend_activation_email = relay.ResendActivationEmail.Field
-    archive_account = relay.ArchiveAccount.Field
-    delete_account = relay.DeleteAccount.Field
-    password_change = relay.PasswordChange.Field
-    send_password_reset_email = relay.SendPasswordResetEmail.Field
-    password_reset = relay.PasswordReset.Field
-    password_set = relay.PasswordSet.Field
-    verify_secondary_email = relay.VerifySecondaryEmail.Field
-    swap_emails = relay.SwapEmails.Field
-    remove_secondary_email = relay.RemoveSecondaryEmail.Field
-    send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
+    token_auth = relay.ObtainJSONWebToken.field
+    verify_token = relay.VerifyToken.field
+    refresh_token = relay.RefreshToken.field
+    revoke_token = relay.RevokeToken.field
+    register = relay.Register.field
+    verify_account = relay.VerifyAccount.field
+    update_account = relay.UpdateAccount.field
+    resend_activation_email = relay.ResendActivationEmail.field
+    archive_account = relay.ArchiveAccount.field
+    delete_account = relay.DeleteAccount.field
+    password_change = relay.PasswordChange.field
+    send_password_reset_email = relay.SendPasswordResetEmail.field
+    password_reset = relay.PasswordReset.field
+    password_set = relay.PasswordSet.field
+    verify_secondary_email = relay.VerifySecondaryEmail.field
+    swap_emails = relay.SwapEmails.field
+    remove_secondary_email = relay.RemoveSecondaryEmail.field
+    send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
     captcha = relay.Cap
 
 

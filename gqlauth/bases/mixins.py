@@ -142,7 +142,7 @@ class DynamicInputMixin:
             cls._meta.inputs = None
         super().__init_subclass__()
 
-    def Field(self):
+    def field(self):
         raise NotImplementedError()
 
 
@@ -199,7 +199,7 @@ class DynamicArgsMixin:
         super().__init_subclass__()
 
     @property
-    def Field(self):
+    def field(self):
         raise NotImplementedError(
             "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
@@ -269,7 +269,7 @@ class DynamicPayloadMixin:
         super().__init_subclass__()
 
     @property
-    def Field(self):
+    def field(self):
         raise NotImplementedError()(
             "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
@@ -279,13 +279,13 @@ class DynamicPayloadMixin:
 class DynamicRelayMutationMixin:
     def __init_subclass__(cls, **kwargs):
         @strawberry.mutation(description=cls.__doc__)
-        def Field(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
+        def field(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
             arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
             return cls.resolve_mutation(info, **arguments)
 
-        if Field.arguments[0].type is None:
-            Field.arguments.pop(0)  # if no input
-        cls.Field = Field
+        if field.arguments[0].type is None:
+            field.arguments.pop(0)  # if no input
+        cls.field = field
 
     def resolve_mutation(self, info, **kwargs):
         raise NotImplementedError()(
@@ -295,16 +295,16 @@ class DynamicRelayMutationMixin:
 
 class DynamicArgsMutationMixin:
     def __init_subclass__(cls, **kwargs):
-        def Field(info: Info, **kwargs) -> cls.output:
+        def field(info: Info, **kwargs) -> cls.output:
             return cls.resolve_mutation(info, **kwargs)
 
-        Field = hide_args_kwargs(Field)
-        Field = strawberry.mutation(Field, description=cls.__doc__)
+        field = hide_args_kwargs(field)
+        field = strawberry.mutation(field, description=cls.__doc__)
 
         for arg_tuple in cls._meta.args:
             arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
-            Field.arguments.append(arg)
-        cls.Field = Field
+            field.arguments.append(arg)
+        cls.field = field
 
     def resolve_mutation(self, info, *args, **kwargs):
         raise NotImplementedError()(

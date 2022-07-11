@@ -52,7 +52,7 @@ else:
 
 class Cap:
     @strawberry.mutation
-    def Field(self) -> CaptchaType:
+    def field(self) -> CaptchaType:
         return Captcha.create_captcha()
 
 
