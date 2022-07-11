@@ -2,6 +2,7 @@ import dataclasses
 import typing
 from typing import Union
 
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
 import strawberry
@@ -145,6 +146,9 @@ class DynamicInputMixin:
     def field(self):
         raise NotImplementedError()
 
+    async def afield(self):
+        raise NotImplementedError()
+
 
 class DynamicArgsMixin:
     """
@@ -198,12 +202,14 @@ class DynamicArgsMixin:
             cls._meta.args = []
         super().__init_subclass__()
 
-    @property
     def field(self):
         raise NotImplementedError(
             "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
         )
+
+    async def afield(self):
+        raise NotImplementedError()
 
 
 class DynamicPayloadMixin:
@@ -287,6 +293,15 @@ class DynamicRelayMutationMixin:
             field.arguments.pop(0)  # if no input
         cls.field = field
 
+        @strawberry.mutation(description=cls.__doc__)
+        async def afield(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
+            arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
+            return await sync_to_async(cls.resolve_mutation(info, **arguments))(info, **arguments)
+
+        if afield.arguments[0].type is None:
+            afield.arguments.pop(0)  # if no input
+        cls.afield = afield
+
     def resolve_mutation(self, info, **kwargs):
         raise NotImplementedError()(
             "This has method has to be implemented by the logic delegated mixin"
@@ -305,6 +320,17 @@ class DynamicArgsMutationMixin:
             arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
             field.arguments.append(arg)
         cls.field = field
+
+        async def afield(info: Info, **kwargs) -> cls.output:
+            return await sync_to_async(cls.resolve_mutation(info, **kwargs))(info, **kwargs)
+
+        afield = hide_args_kwargs(afield)
+        afield = strawberry.mutation(afield, description=cls.__doc__)
+
+        for arg_tuple in cls._meta.args:
+            arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
+            afield.arguments.append(arg)
+        cls.afield = afield
 
     def resolve_mutation(self, info, *args, **kwargs):
         raise NotImplementedError()(
