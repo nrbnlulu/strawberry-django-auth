@@ -70,6 +70,9 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
+        "OPTIONS": {
+            "timeout": 1000000,
+        },
         "NAME": str(cwd / "db.sqlite3"),
     }
 }
@@ -99,7 +102,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 AUTHENTICATION_BACKENDS = [
     "gqlauth.backends.GraphQLAuthBackend",
-    "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -111,7 +113,6 @@ GRAPHQL_JWT = {
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 GQL_AUTH = GqlAuthSettings(
-    EMAIL_ASYNC_TASK="testproject.pseudo_async_email_support.pseudo_async_email_support",
     LOGIN_REQUIRE_CAPTCHA=True,
     REGISTER_REQUIRE_CAPTCHA=True,
     SEND_ACTIVATION_EMAIL=False,

@@ -4,7 +4,7 @@ import strawberry
 from strawberry.tools import merge_types
 
 from gqlauth.user import relay
-from gqlauth.user.types import UserFilter, UserType
+from gqlauth.user.types_ import UserFilter, UserType
 
 
 @strawberry.type

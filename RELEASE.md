@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.3
+### v0.3.3.1 - pre-release
+
+- **API changes**
+  - Previously, following the graphene version, we did i.e ` token_auth = relay.ObtainJSONWebToken.field`,\
+    In order to respect pep8 (since it is a function)\
+    and Strawberry style we changed it to ` token_auth = relay.ObtainJSONWebToken.field`.
+- **Deprecations**
+  - Removed setting ASYNC_EMAIL_TASK, (originally this was a celery task).
 
 ### v0.3.16
 

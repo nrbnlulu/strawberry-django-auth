@@ -835,27 +835,27 @@ Now let's add some mutations to our schema, starting with the registration. On t
 
         @strawberry.type
         class UserMutations:
-            register = arg_mutations.Register.Field
-            verify_account = arg_mutations.VerifyAccount.Field
-            resend_activation_email = arg_mutations.ResendActivationEmail.Field
-            send_password_reset_email = arg_mutations.SendPasswordResetEmail.Field
-            password_reset = arg_mutations.PasswordReset.Field
-            password_set = arg_mutations.PasswordSet.Field
-            password_change = arg_mutations.PasswordChange.Field
-            archive_account = arg_mutations.ArchiveAccount.Field
-            delete_account = arg_mutations.DeleteAccount.Field
-            update_account = arg_mutations.UpdateAccount.Field
-            send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.Field
-            verify_secondary_email = arg_mutations.VerifySecondaryEmail.Field
-            swap_emails = arg_mutations.SwapEmails.Field
-            captcha = arg_mutations.Cap.Field
+            register = arg_mutations.Register.field
+            verify_account = arg_mutations.VerifyAccount.field
+            resend_activation_email = arg_mutations.ResendActivationEmail.field
+            send_password_reset_email = arg_mutations.SendPasswordResetEmail.field
+            password_reset = arg_mutations.PasswordReset.field
+            password_set = arg_mutations.PasswordSet.field
+            password_change = arg_mutations.PasswordChange.field
+            archive_account = arg_mutations.ArchiveAccount.field
+            delete_account = arg_mutations.DeleteAccount.field
+            update_account = arg_mutations.UpdateAccount.field
+            send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.field
+            verify_secondary_email = arg_mutations.VerifySecondaryEmail.field
+            swap_emails = arg_mutations.SwapEmails.field
+            captcha = arg_mutations.Cap.field
 
             # django-graphql-jwt authentication
             # with some extra features
-            token_auth = arg_mutations.ObtainJSONWebToken.Field
-            verify_token = arg_mutations.VerifyToken.Field
-            refresh_token = arg_mutations.RefreshToken.Field
-            revoke_token = arg_mutations.RevokeToken.Field
+            token_auth = arg_mutations.ObtainJSONWebToken.field
+            verify_token = arg_mutations.VerifyToken.field
+            refresh_token = arg_mutations.RefreshToken.field
+            revoke_token = arg_mutations.RevokeToken.field
 
         schema = strawberry.Schema(
                     query=UserQueries,
@@ -877,27 +877,27 @@ Now let's add some mutations to our schema, starting with the registration. On t
 
         @strawberry.type
         class UserMutations:
-            register = relay.Register.Field
-            verify_account = relay.VerifyAccount.Field
-            resend_activation_email = relay.ResendActivationEmail.Field
-            send_password_reset_email = relay.SendPasswordResetEmail.Field
-            password_reset = relay.PasswordReset.Field
-            password_set = relay.PasswordSet.Field
-            password_change = relay.PasswordChange.Field
-            archive_account = relay.ArchiveAccount.Field
-            delete_account = relay.DeleteAccount.Field
-            update_account = relay.UpdateAccount.Field
-            send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
-            verify_secondary_email = relay.VerifySecondaryEmail.Field
-            swap_emails = relay.SwapEmails.Field
-            captcha = relay.Cap.Field
+            register = relay.Register.field
+            verify_account = relay.VerifyAccount.field
+            resend_activation_email = relay.ResendActivationEmail.field
+            send_password_reset_email = relay.SendPasswordResetEmail.field
+            password_reset = relay.PasswordReset.field
+            password_set = relay.PasswordSet.field
+            password_change = relay.PasswordChange.field
+            archive_account = relay.ArchiveAccount.field
+            delete_account = relay.DeleteAccount.field
+            update_account = relay.UpdateAccount.field
+            send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
+            verify_secondary_email = relay.VerifySecondaryEmail.field
+            swap_emails = relay.SwapEmails.field
+            captcha = relay.Cap.field
 
             # django-graphql-jwt authentication
             # with some extra features
-            token_auth = relay.ObtainJSONWebToken.Field
-            verify_token = relay.VerifyToken.Field
-            refresh_token = relay.RefreshToken.Field
-            revoke_token = relay.RevokeToken.Field
+            token_auth = relay.ObtainJSONWebToken.field
+            verify_token = relay.VerifyToken.field
+            refresh_token = relay.RefreshToken.field
+            revoke_token = relay.RevokeToken.field
 
         schema = strawberry.Schema(
                     query=UserQueries,

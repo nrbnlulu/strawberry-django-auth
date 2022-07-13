@@ -67,24 +67,24 @@ The following are the minimum steps required to get it running. It should not ta
 
         @strawberry.type
         class UserMutations:
-            token_auth = arg_mutations.ObtainJSONWebToken.Field # login mutation
-            verify_token = arg_mutations.VerifyToken.Field
-            refresh_token = arg_mutations.RefreshToken.Field
-            revoke_token = arg_mutations.RevokeToken.Field
-            register = arg_mutations.Register.Field
-            verify_account = arg_mutations.VerifyAccount.Field
-            update_account = arg_mutations.UpdateAccount.Field
-            resend_activation_email = arg_mutations.ResendActivationEmail.Field
-            archive_account = arg_mutations.ArchiveAccount.Field
-            delete_account = arg_mutations.DeleteAccount.Field
-            password_change = arg_mutations.PasswordChange.Field
-            send_password_reset_email = arg_mutations.SendPasswordResetEmail.Field
-            password_reset = arg_mutations.PasswordReset.Field
-            password_set = arg_mutations.PasswordSet.Field
-            verify_secondary_email = arg_mutations.VerifySecondaryEmail.Field
-            swap_emails = arg_mutations.SwapEmails.Field
-            remove_secondary_email = arg_mutations.RemoveSecondaryEmail.Field
-            send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.Field
+            token_auth = arg_mutations.ObtainJSONWebToken.field # login mutation
+            verify_token = arg_mutations.VerifyToken.field
+            refresh_token = arg_mutations.RefreshToken.field
+            revoke_token = arg_mutations.RevokeToken.field
+            register = arg_mutations.Register.field
+            verify_account = arg_mutations.VerifyAccount.field
+            update_account = arg_mutations.UpdateAccount.field
+            resend_activation_email = arg_mutations.ResendActivationEmail.field
+            archive_account = arg_mutations.ArchiveAccount.field
+            delete_account = arg_mutations.DeleteAccount.field
+            password_change = arg_mutations.PasswordChange.field
+            send_password_reset_email = arg_mutations.SendPasswordResetEmail.field
+            password_reset = arg_mutations.PasswordReset.field
+            password_set = arg_mutations.PasswordSet.field
+            verify_secondary_email = arg_mutations.VerifySecondaryEmail.field
+            swap_emails = arg_mutations.SwapEmails.field
+            remove_secondary_email = arg_mutations.RemoveSecondaryEmail.field
+            send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.field
         ```
 
     === "Relay"
@@ -94,24 +94,24 @@ The following are the minimum steps required to get it running. It should not ta
 
         @strawberry.type
         class UserMutations:
-            token_auth = relay.ObtainJSONWebToken.Field  # login mutation
-            verify_token = relay.VerifyToken.Field
-            refresh_token = relay.RefreshToken.Field
-            revoke_token = relay.RevokeToken.Field
-            register = relay.Register.Field
-            verify_account = relay.VerifyAccount.Field
-            update_account = relay.UpdateAccount.Field
-            resend_activation_email = relay.ResendActivationEmail.Field
-            archive_account = relay.ArchiveAccount.Field
-            delete_account = relay.DeleteAccount.Field
-            password_change = relay.PasswordChange.Field
-            send_password_reset_email = relay.SendPasswordResetEmail.Field
-            password_reset = relay.PasswordReset.Field
-            password_set = relay.PasswordSet.Field
-            verify_secondary_email = relay.VerifySecondaryEmail.Field
-            swap_emails = relay.SwapEmails.Field
-            remove_secondary_email = relay.RemoveSecondaryEmail.Field
-            send_secondary_email_activation = relay.SendSecondaryEmailActivation.Field
+            token_auth = relay.ObtainJSONWebToken.field  # login mutation
+            verify_token = relay.VerifyToken.field
+            refresh_token = relay.RefreshToken.field
+            revoke_token = relay.RevokeToken.field
+            register = relay.Register.field
+            verify_account = relay.VerifyAccount.field
+            update_account = relay.UpdateAccount.field
+            resend_activation_email = relay.ResendActivationEmail.field
+            archive_account = relay.ArchiveAccount.field
+            delete_account = relay.DeleteAccount.field
+            password_change = relay.PasswordChange.field
+            send_password_reset_email = relay.SendPasswordResetEmail.field
+            password_reset = relay.PasswordReset.field
+            password_set = relay.PasswordSet.field
+            verify_secondary_email = relay.VerifySecondaryEmail.field
+            swap_emails = relay.SwapEmails.field
+            remove_secondary_email = relay.RemoveSecondaryEmail.field
+            send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
         ```
     ```py
     # yourapp/schema.py

@@ -4,68 +4,68 @@ from .testCases import DefaultTestCase, RelayTestCase
 
 
 class PasswordResetTestCaseMixin:
-    def setUp(self):
-        self.user1 = self.register_user(
+    def setUp(self, unverified_user):
+        unverified_user = self.register_user(
             email="gaa@email.com", username="gaa", verified=True, archived=False
         )
-        self.user1_old_pass = self.user1.password
+        unverified_user_old_pass = unverified_user.password
 
-    def test_reset_password(self):
-        token = get_token(self.user1, "password_reset")
+    def test_reset_password(self, unverified_user):
+        token = get_token(unverified_user, "password_reset")
         query = self.get_query(token)
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass == self.user1.password)
+        assert executed["success"]
+        assert not executed["errors"]
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass == unverified_user.password)
 
-    def test_reset_password_invalid_form(self):
-        token = get_token(self.user1, "password_reset")
+    def test_reset_password_invalid_form(self, unverified_user):
+        token = get_token(unverified_user, "password_reset")
         query = self.get_query(token, "wrong_pass")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"])
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass != unverified_user.password)
 
-    def test_reset_password_invalid_token(self):
+    def test_reset_password_invalid_token(self, unverified_user):
         query = self.get_query("fake_token")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["nonFieldErrors"])
-        self.user1.refresh_from_db()
-        self.assertTrue(self.user1_old_pass == self.user1.password)
+        unverified_user.refresh_from_db()
+        self.assertTrue(unverified_user_old_pass == unverified_user.password)
 
-    def test_revoke_refresh_tokens_on_password_reset(self):
+    def test_revoke_refresh_tokens_on_password_reset(self, unverified_user):
         executed = self.make_request(self.login_query())
-        self.user1.refresh_from_db()
-        refresh_tokens = self.user1.refresh_tokens.all()
+        unverified_user.refresh_from_db()
+        refresh_tokens = unverified_user.refresh_tokens.all()
         for token in refresh_tokens:
             self.assertFalse(token.revoked)
-        token = get_token(self.user1, "password_reset")
+        token = get_token(unverified_user, "password_reset")
         query = self.get_query(token)
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass == self.user1.password)
-        refresh_tokens = self.user1.refresh_tokens.all()
+        assert executed["success"]
+        assert not executed["errors"]
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass == unverified_user.password)
+        refresh_tokens = unverified_user.refresh_tokens.all()
         for token in refresh_tokens:
-            self.assertTrue(token.revoked)
+            assert token.revoked
 
-    def test_reset_password_verify_user(self):
-        self.user1.verified = False
-        self.user1.save()
+    def test_reset_password_verify_user(self, unverified_user):
+        unverified_user.verified = False
+        unverified_user.save()
 
-        token = get_token(self.user1, "password_reset")
+        token = get_token(unverified_user, "password_reset")
         query = self.get_query(token)
         executed = self.make_request(query)
 
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass == self.user1.password)
-        self.assertTrue(self.user1.status.verified)
+        assert executed["success"]
+        assert not executed["errors"]
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass == unverified_user.password)
+        self.assertTrue(unverified_user.status.verified)
 
 
 class PasswordResetTestCase(PasswordResetTestCaseMixin, DefaultTestCase):

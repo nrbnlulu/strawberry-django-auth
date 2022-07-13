@@ -15,18 +15,18 @@ class VerifySecondaryEmailCaseMixin:
             secondary_email="new_email@email.com",
         )
         executed = self.make_request(self.verify_query(token))
-        self.assertEqual(executed["success"], True)
+        assert executed["success"]
         self.assertFalse(executed["errors"])
 
     def test_invalid_token(self):
         executed = self.make_request(self.verify_query("faketoken"))
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"])
 
     def test_email_in_use(self):
         token = get_token(self.user, "activation_secondary_email", secondary_email="foo@email.com")
         executed = self.make_request(self.verify_query(token))
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"])
 
 

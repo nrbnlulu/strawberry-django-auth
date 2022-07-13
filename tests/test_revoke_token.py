@@ -7,10 +7,10 @@ from .testCases import DefaultTestCase, RelayTestCase
 
 class RevokeTokenTestCaseMixin:
     def setUp(self):
-        self.user1 = self.register_user(email="foo@email.com", username="foo_username")
-        self.user1.status.verified = True
-        self.user1.status.save()
-        self.user1.refresh_from_db()
+        unverified_user = self.register_user(email="foo@email.com", username="foo_username")
+        unverified_user.status.verified = True
+        unverified_user.status.save()
+        unverified_user.refresh_from_db()
         super().setUp()
 
     def test_revoke_token(self):

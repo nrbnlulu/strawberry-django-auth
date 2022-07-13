@@ -6,7 +6,6 @@ from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
-from django.utils.module_loading import import_string
 import strawberry
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
@@ -34,7 +33,7 @@ from gqlauth.models import Captcha, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
-from gqlauth.types import CaptchaType
+from gqlauth.types_ import CaptchaType
 from gqlauth.utils import (
     g_user,
     get_payload_from_token,
@@ -44,10 +43,6 @@ from gqlauth.utils import (
 )
 
 UserModel = get_user_model()
-if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, str):
-    async_email_func = import_string(app_settings.EMAIL_ASYNC_TASK)
-else:
-    async_email_func = None
 
 
 class Cap:
@@ -124,18 +119,10 @@ class RegisterMixin:
                         and email
                     )
                     if send_activation:
-                        # TODO CHECK FOR EMAIL ASYNC SETTING
-                        if async_email_func:
-                            async_email_func(user.status.send_activation_email, (info,))
-                        else:
-                            user.status.send_activation_email(info)
+                        user.status.send_activation_email(info)
 
                     if send_password_set:
-                        # TODO CHECK FOR EMAIL ASYNC SETTING
-                        if async_email_func:
-                            async_email_func(user.status.send_password_set_email, (info,))
-                        else:
-                            user.status.send_password_set_email(info)
+                        user.status.send_password_set_email(info)
 
                     user_registered.send(sender=cls, user=user)
                     return cls.output(success=True)
@@ -237,10 +224,7 @@ class ResendActivationEmailMixin:
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = get_user_by_email(email)
-                if async_email_func:
-                    async_email_func(user.status.resend_activation_email, (info,))
-                else:
-                    user.status.resend_activation_email(info)
+                user.status.resend_activation_email(info)
                 return cls.output(success=True)
             return cls.output(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
@@ -274,10 +258,7 @@ class SendPasswordResetEmailMixin:
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = get_user_by_email(email)
-                if async_email_func:
-                    async_email_func(user.status.send_password_reset_email, (info, [email]))
-                else:
-                    user.status.send_password_reset_email(info, [email])
+                user.status.send_password_reset_email(info, [email])
                 return cls.output(success=True)
             return cls.output(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
@@ -287,10 +268,7 @@ class SendPasswordResetEmailMixin:
         except UserNotVerified:
             user = get_user_by_email(email)
             try:
-                if async_email_func:
-                    async_email_func(user.status.resend_activation_email, (info,))
-                else:
-                    user.status.resend_activation_email(info)
+                user.status.resend_activation_email(info)
                 return cls(
                     success=False,
                     errors={"email": Messages.NOT_VERIFIED_PASSWORD_RESET},
@@ -672,10 +650,7 @@ class SendSecondaryEmailActivationMixin:
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = g_user(info)
-                if async_email_func:
-                    async_email_func(user.status.send_secondary_email_activation, (info, email))
-                else:
-                    user.status.send_secondary_email_activation(info, email)
+                user.status.send_secondary_email_activation(info, email)
                 return cls.output(success=True)
             return cls.output(success=False, errors=f.errors.get_json_data())
         except EmailAlreadyInUse:

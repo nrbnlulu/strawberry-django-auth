@@ -5,16 +5,16 @@ from .testCases import DefaultTestCase, RelayTestCase
 
 class PasswordSetTestCaseMixin:
     def setUp(self):
-        self.user1 = self.register_user(
+        unverified_user = self.register_user(
             email="gaa@email.com", username="gaa", verified=True, archived=False
         )
-        self.user1_old_pass = self.user1.password
+        unverified_user_old_pass = unverified_user.password
 
     def test_already_set_password(self):
-        token = get_token(self.user1, "password_set")
+        token = get_token(unverified_user, "password_set")
         query = self.get_query(token)
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertEqual(
             executed["errors"],
             {
@@ -26,25 +26,25 @@ class PasswordSetTestCaseMixin:
                 ]
             },
         )
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass != unverified_user.password)
 
     def test_set_password_invalid_form(self):
-        token = get_token(self.user1, "password_set")
+        token = get_token(unverified_user, "password_set")
         query = self.get_query(token, "wrong_pass")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"])
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass != unverified_user.password)
 
     def test_set_password_invalid_token(self):
         query = self.get_query("fake_token")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["nonFieldErrors"])
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
+        unverified_user.refresh_from_db()
+        self.assertFalse(unverified_user_old_pass != unverified_user.password)
 
 
 class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):

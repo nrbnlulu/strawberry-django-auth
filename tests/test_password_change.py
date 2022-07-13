@@ -15,8 +15,8 @@ class PasswordChangeTestCaseMixin:
         """
         variables = {"user": self.user}
         executed = self.make_request(self.get_query(), variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
         self.assertTrue(executed["obtainPayload"]["token"])
         self.assertTrue(executed["obtainPayload"]["refreshToken"])
         self.user.refresh_from_db()
@@ -28,7 +28,7 @@ class PasswordChangeTestCaseMixin:
         """
         variables = {"user": self.user}
         executed = self.make_request(self.get_query("wrong"), variables)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
         self.assertFalse(executed["obtainPayload"])
         self.user.refresh_from_db()
@@ -40,7 +40,7 @@ class PasswordChangeTestCaseMixin:
         """
         variables = {"user": self.user}
         executed = self.make_request(self.get_query("123", "123"), variables)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
         self.assertFalse(executed["obtainPayload"])
 
@@ -52,8 +52,8 @@ class PasswordChangeTestCaseMixin:
             self.assertFalse(token.revoked)
         variables = {"user": self.user}
         executed = self.make_request(self.get_query(), variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
         self.assertTrue(executed["obtainPayload"]["token"])
         self.assertTrue(executed["obtainPayload"]["refreshToken"])
         self.user.refresh_from_db()
@@ -63,7 +63,7 @@ class PasswordChangeTestCaseMixin:
         self.user.refresh_from_db()
         refresh_tokens = self.user.refresh_tokens.all()
         for token in refresh_tokens:
-            self.assertTrue(token.revoked)
+            assert token.revoked
 
 
 class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):

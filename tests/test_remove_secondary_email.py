@@ -12,7 +12,7 @@ class RemoveSecondaryEmailCaseMixin:
 
     def test_remove_email(self):
         executed = self.make_request(self.query(), {"user": self.user})
-        self.assertEqual(executed["success"], True)
+        assert executed["success"]
         self.assertFalse(executed["errors"])
         self.user.refresh_from_db()
         self.assertEqual(self.user.status.secondary_email, None)

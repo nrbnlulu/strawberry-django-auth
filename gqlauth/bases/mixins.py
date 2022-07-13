@@ -4,7 +4,6 @@ from typing import Union
 
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-from django.utils.module_loading import import_string
 import strawberry
 from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
@@ -12,14 +11,9 @@ from strawberry.utils.str_converters import to_camel_case
 from gqlauth.bases.exceptions import WrongUsage
 from gqlauth.bases.interfaces import OutputInterface
 from gqlauth.bases.scalars import ExpectedErrorType
-from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.utils import create_strawberry_argument, hide_args_kwargs, list_to_dict
 
 UserModel = get_user_model()
-if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, str):
-    async_email_func = import_string(app_settings.EMAIL_ASYNC_TASK)
-else:
-    async_email_func = None
 
 
 def make_dataclass_helper(
@@ -204,7 +198,7 @@ class DynamicArgsMixin:
 
     def field(self):
         raise NotImplementedError(
-            "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
+            "This mixin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
         )
 
@@ -296,7 +290,7 @@ class DynamicRelayMutationMixin:
         @strawberry.mutation(description=cls.__doc__)
         async def afield(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
             arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
-            return await sync_to_async(cls.resolve_mutation(info, **arguments))(info, **arguments)
+            return await sync_to_async(cls.resolve_mutation)(info, **arguments)
 
         if afield.arguments[0].type is None:
             afield.arguments.pop(0)  # if no input
@@ -322,7 +316,7 @@ class DynamicArgsMutationMixin:
         cls.field = field
 
         async def afield(info: Info, **kwargs) -> cls.output:
-            return await sync_to_async(cls.resolve_mutation(info, **kwargs))(info, **kwargs)
+            return await sync_to_async(cls.resolve_mutation)(info, **kwargs)
 
         afield = hide_args_kwargs(afield)
         afield = strawberry.mutation(afield, description=cls.__doc__)

@@ -1,9 +1,10 @@
 import pprint
 import re
 
+from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory
+from django.test import AsyncRequestFactory, RequestFactory
 import pytest
 
 from gqlauth.models import Captcha, UserStatus
@@ -24,11 +25,8 @@ class TestBase:
         return client.execute["data"]["register"]
     """
 
+    wrong_password = "wrong password"
     default_password = "FAKE@gfagfdfa132"
-
-    @staticmethod
-    def gen_captcha():
-        return Captcha.create_captcha()
 
     def register_user(
         self, password=None, verified=False, archived=False, secondary_email="", *args, **kwargs
@@ -47,14 +45,32 @@ class TestBase:
         user.refresh_from_db()
         return user
 
-    def make_request(self, query, variables=None, raw=False, schema: str = None):
+    @pytest.fixture()
+    def unverified_user(self, db):
+        return self.register_user(
+            email="unverified@email.com", username="unverified", verified=False
+        )
+
+    @pytest.fixture()
+    def verified_user(self, db):
+        return self.register_user(email="verified@email.com", username="verified", verified=True)
+
+    @pytest.fixture()
+    def verified_tokens(self):
+        return self.make_request(self.login_query(username="verified"))
+
+    @staticmethod
+    def gen_captcha():
+        return Captcha.create_captcha()
+
+    def make_request(self, query, variables=None, raw=False):
         if variables is None:
             variables = {"user": AnonymousUser()}
         from .schema import default_schema, relay_schema
 
         request_factory = RequestFactory()
         context = request_factory.post("/api/")
-        if schema == "relay":
+        if self.RELAY:
             schema = relay_schema
         else:
             schema = default_schema
@@ -74,26 +90,51 @@ class TestBase:
         finally:
             pprint.pprint(executed.errors)
 
+    @async_to_sync
+    async def amake_request(self, query, variables=None, raw=False):
+        if variables is None:
+            variables = {"user": AnonymousUser()}
+        from .async_schema import default_schema, relay_schema
+
+        context = AsyncRequestFactory().post("/api/")
+        if self.RELAY:
+            schema = relay_schema
+        else:
+            schema = default_schema
+        for key in variables:
+            setattr(context, key, variables[key])
+        executed = await schema.execute(query, context_value=context)
+        if raw:
+            return executed.data
+        pattern = r"{\s*(?P<target>\w*)"
+        m = re.search(pattern, query)
+        m = m.groupdict()
+        try:
+            return executed.data[m["target"]]
+        except Exception:
+            print("\nInvalid query!")
+            raise Exception(*[error.message for error in executed.errors])
+        finally:
+            pprint.pprint(executed.errors)
+
 
 class RelayTestCase(TestBase):
-    def make_request(self, *args, **kwargs):
-        return super().make_request(schema="relay", *args, **kwargs)
+    RELAY = True
 
-    def login_query(self, username="foo", password=None):
+    def login_query(self, username, password=None):
         cap = self.gen_captcha()
         return """
           mutation {{
         tokenAuth(input:{{username: "{}", password: "{}",identifier: "{}", userEntry: "{}"}})
                       {{
-    success
-    errors
-    obtainPayload{{
-      token
-      refreshToken
-    }}
-  }}
-}}
-
+            success
+            errors
+            obtainPayload{{
+              token
+              refreshToken
+            }}
+          }}
+        }}
         """.format(
             username,
             password or self.default_password,
@@ -103,10 +144,9 @@ class RelayTestCase(TestBase):
 
 
 class DefaultTestCase(TestBase):
-    def make_request(self, *args, **kwargs):
-        return super().make_request(schema="default", *args, **kwargs)
+    RELAY = False
 
-    def login_query(self, username="foo", password=None):
+    def login_query(self, username="unverified", password=None):
         cap = self.gen_captcha()
         return """
            mutation {{
@@ -127,3 +167,22 @@ class DefaultTestCase(TestBase):
             cap.uuid,
             cap.text,
         )
+
+
+class AsyncTestCaseMixin:
+    def make_request(self, *args, **kwargs):
+        res = self.amake_request(*args, **kwargs)
+        return res
+
+    @pytest.fixture()
+    def verified_tokens(self):
+        # calling the sync version of make request.
+        return super().make_request(self.login_query(username="verified"))
+
+
+class AsyncDefaultTestCase(AsyncTestCaseMixin, DefaultTestCase):
+    ...
+
+
+class AsyncRelayTestCase(AsyncTestCaseMixin, RelayTestCase):
+    ...

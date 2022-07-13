@@ -18,7 +18,7 @@ class RegisterTestCaseMixin:
 
         # register
         executed = self.make_request(self.register_query("123"))
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"])
 
     def test_register(self):
@@ -36,18 +36,18 @@ class RegisterTestCaseMixin:
 
         # register
         executed = self.make_request(self.register_query())
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
         self.assertTrue(signal_received)
 
         # try to register again
         executed = self.make_request(self.register_query())
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["username"])
 
         # try to register again
         executed = self.make_request(self.register_query(username="other_username"))
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     def test_register_duplicate_unique_email(self):
@@ -59,13 +59,13 @@ class RegisterTestCaseMixin:
         )
 
         executed = self.make_request(self.register_query())
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     def test_register_duplicate_unique_email_2(self):
         self.register_user(email="foo@email.com", username="foo")
         executed = self.make_request(self.register_query())
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     @mock.patch(
@@ -78,7 +78,7 @@ class RegisterTestCaseMixin:
 
         app_settings.SEND_ACTIVATION_EMAIL = True
         executed = self.make_request(self.register_query())
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
         self.assertEqual(len(get_user_model().objects.all()), 0)
 

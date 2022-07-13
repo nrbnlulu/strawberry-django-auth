@@ -101,8 +101,6 @@ class GqlAuthSettings:
     # others
     # turn is_active to False instead
     ALLOW_DELETE_ACCOUNT: bool = False
-    # string path for email function wrapper, see the testproject example
-    EMAIL_ASYNC_TASK: bool = False
     # mutation error type
     CUSTOM_ERROR_TYPE: strawberry.scalar = "gqlauth.bases.scalars.ExpectedErrorType"
     # registration with no password

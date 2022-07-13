@@ -73,7 +73,7 @@ class LoginTestCaseMixin:
         query = self.get_query(self.not_verified_user.username)
         executed = self.make_request(query)
         self.assertFalse(executed["success"])
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
+        assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
         self.assertFalse(executed["obtainPayload"])
 
     @mark.settings_b

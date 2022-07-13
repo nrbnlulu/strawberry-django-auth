@@ -1,83 +1,85 @@
 from gqlauth.constants import Messages
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import (
+    AsyncDefaultTestCase,
+    AsyncRelayTestCase,
+    DefaultTestCase,
+    RelayTestCase,
+)
 
 
 class ArchiveAccountTestCaseMixin:
-    def setUp(self):
-        self.user1 = self.register_user(email="foo@email.com", username="foo")
-        self.user2 = self.register_user(email="bar@email.com", username="bar", verified=True)
-
     def test_not_authenticated(self):
         """
         try to archive not authenticated
         """
         query = self.make_query()
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.UNAUTHENTICATED)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.UNAUTHENTICATED
 
-    def test_invalid_password(self):
+    def test_invalid_password(self, verified_user):
         """
         try to archive account with invalid password
         """
+        variables = {"user": verified_user}
         query = self.make_query(password="123")
-        variables = {"user": self.user2}
         executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], False)
-        self.assertEqual(executed["errors"]["password"], Messages.INVALID_PASSWORD)
+        assert not executed["success"]
+        assert executed["errors"]["password"] == Messages.INVALID_PASSWORD
 
-    def test_valid_password(self):
+    def test_valid_password(self, verified_user):
         """
         try to archive account
         """
         query = self.make_query()
-        variables = {"user": self.user2}
-        self.assertEqual(self.user2.status.archived, False)
-        executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user2.refresh_from_db()
-        self.assertEqual(self.user2.status.archived, True)
+        variables = {"user": verified_user}
+        assert not verified_user.status.archived
+        executed = self.make_request(query, variables=variables)
+        assert executed["success"]
+        assert not executed["errors"]
+        verified_user.refresh_from_db()
+        assert verified_user.status.archived
 
-    def test_revoke_refresh_tokens_on_archive_account(self):
+    def test_revoke_refresh_tokens_on_archive_account(self, verified_user, verified_tokens):
         """
         when archive account, all refresh tokens should be revoked
         """
-        executed = self.make_request(self.login_query())
-        self.user2.refresh_from_db()
-        refresh_tokens = self.user2.refresh_tokens.all()
+        verified_user.refresh_from_db()
+        refresh_tokens = verified_user.refresh_tokens.all()
+        assert refresh_tokens
         for token in refresh_tokens:
-            self.assertFalse(token.revoked)
+            assert not token.revoked
 
         query = self.make_query()
-        variables = {"user": self.user2}
-        self.assertEqual(self.user2.status.archived, False)
+        variables = {"user": verified_user}
+        assert not verified_user.status.archived
         executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-        self.user2.refresh_from_db()
-        self.assertEqual(self.user2.status.archived, True)
+        assert executed["success"]
+        assert not executed["errors"]
+        verified_user.refresh_from_db()
+        assert verified_user.status.archived
 
-        self.user2.refresh_from_db()
-        refresh_tokens = self.user2.refresh_tokens.all()
+        verified_user.refresh_from_db()
+        refresh_tokens = verified_user.refresh_tokens.all()
+        assert refresh_tokens
         for token in refresh_tokens:
-            self.assertTrue(token.revoked)
+            assert token.revoked
 
-    def test_not_verified_user(self):
+    def test_not_verified_user(self, unverified_user):
         """
         try to archive account
         """
-        query = self.make_query()
-        variables = {"user": self.user1}
-        self.assertEqual(self.user1.status.archived, False)
+        query = self.make_query(self.wrong_password)
+        variables = {"user": unverified_user}
+        assert not unverified_user.status.archived
         executed = self.make_request(query, variables)
-        self.assertEqual(executed["success"], False)
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.NOT_VERIFIED)
-        self.assertEqual(self.user1.status.archived, False)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
+        assert not unverified_user.status.archived
 
 
-class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
+class TestArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
     def make_query(self, password=None):
         return """
             mutation {{
@@ -90,7 +92,33 @@ class ArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
         )
 
 
-class ArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
+class TestArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
+    def make_query(self, password=None):
+        return """
+            mutation {{
+              archiveAccount(input: {{ password: "{}"}}) {{
+                success, errors
+              }}
+            }}
+        """.format(
+            password or self.default_password,
+        )
+
+
+class TestAsyncArchiveAccountTestCase(ArchiveAccountTestCaseMixin, AsyncDefaultTestCase):
+    def make_query(self, password=None):
+        return """
+            mutation {{
+              archiveAccount(password: "{}") {{
+                success, errors
+              }}
+            }}
+        """.format(
+            password or self.default_password,
+        )
+
+
+class TestAsyncArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
     def make_query(self, password=None):
         return """
             mutation {{

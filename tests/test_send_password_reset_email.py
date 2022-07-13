@@ -8,7 +8,7 @@ from .testCases import DefaultTestCase, RelayTestCase
 
 class SendPasswordResetEmailTestCaseMixin:
     def setUp(self):
-        self.user1 = self.register_user(email="foo@email.com", username="foo", verified=False)
+        unverified_user = self.register_user(email="foo@email.com", username="foo", verified=False)
         self.user2 = self.register_user(
             email="bar@email.com",
             username="bar",
@@ -22,26 +22,26 @@ class SendPasswordResetEmailTestCaseMixin:
         """
         query = self.get_query("invalid@email.com")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
 
     def test_invalid_form(self):
         query = self.get_query("baremail.com")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     def test_send_email_valid_email_verified_user(self):
         query = self.get_query("bar@email.com")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
 
     def test_send_to_secondary_email(self):
         query = self.get_query("secondary@email.com")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
+        assert executed["success"]
+        assert not executed["errors"]
 
     @mock.patch(
         "gqlauth.models.UserStatus.send_password_reset_email",
@@ -51,7 +51,7 @@ class SendPasswordResetEmailTestCaseMixin:
         mock
         query = self.get_query("bar@email.com")
         executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
+        assert not executed["success"]
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
 
 
