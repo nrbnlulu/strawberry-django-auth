@@ -16,11 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-from strawberry.django.views import GraphQLView
+from strawberry.django.views import GraphQLView, AsyncGraphQLView
 
-from .schema import schema
+from . import schema
+from . import async_schema
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api", csrf_exempt(GraphQLView.as_view(schema=schema))),
+    path("arg_schema", csrf_exempt(GraphQLView.as_view(schema=schema.arg_schema))),
+    path("relay_schema", csrf_exempt(GraphQLView.as_view(schema=schema.relay_schema))),
+    path("async_arg_schema", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema.arg_schema))),
+    path("async_relay_schema", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema.relay_schema))),
 ]

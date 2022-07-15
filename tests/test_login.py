@@ -30,7 +30,7 @@ class LoginTestCaseMixin:
     def test_archived_user_becomes_active_on_login(self):
         self.assertEqual(self.archived_user.status.archived, True)
         query = self.get_query(self.archived_user.username)
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.archived_user.refresh_from_db()
         self.assertEqual(self.archived_user.status.archived, False)
         self.assertTrue(executed["success"])
@@ -40,14 +40,14 @@ class LoginTestCaseMixin:
 
     def test_login_username(self):
         query = self.get_query(self.verified_user.username)
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertTrue(executed["success"])
         self.assertFalse(executed["errors"])
         self.assertTrue(executed["obtainPayload"]["token"])
         self.assertTrue(executed["obtainPayload"]["refreshToken"])
         gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
         query = self.get_query(self.not_verified_user.username)
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertTrue(executed["success"])
         self.assertFalse(executed["errors"])
         self.assertTrue(executed["obtainPayload"]["token"])
@@ -55,14 +55,14 @@ class LoginTestCaseMixin:
 
     def test_login_wrong_credentials(self):
         query = self.get_query("username", "wrong")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
         self.assertFalse(executed["obtainPayload"])
 
     def test_login_wrong_credentials_2(self):
         query = self.get_query(self.verified_user.username, "wrongpass")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertFalse(executed["success"])
         self.assertTrue(executed["errors"])
         self.assertFalse(executed["obtainPayload"])
@@ -71,7 +71,7 @@ class LoginTestCaseMixin:
     def test_not_verified_login_not_verified(self):
         gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = False
         query = self.get_query(self.not_verified_user.username)
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertFalse(executed["success"])
         assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
         self.assertFalse(executed["obtainPayload"])
@@ -80,7 +80,7 @@ class LoginTestCaseMixin:
     def test_setting_not_verified_allowed_but_with_wrong_pass(self):
         gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
         query = self.get_query(self.not_verified_user.username, "wrongpass")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertFalse(executed["success"])
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.INVALID_CREDENTIALS)
         self.assertFalse(executed["obtainPayload"])
@@ -104,7 +104,7 @@ class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
 
         """.format(
             username,
-            password or self.default_password,
+            password or self.DEFAULT_PASSWORD,
             cap.uuid,
             cap.text,
         )
@@ -127,7 +127,7 @@ class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
 
         """.format(
             username,
-            password or self.default_password,
+            password or self.DEFAULT_PASSWORD,
             cap.uuid,
             cap.text,
         )

@@ -27,7 +27,7 @@ class PasswordChangeTestCaseMixin:
         wrong inputs
         """
         variables = {"user": self.user}
-        executed = self.make_request(self.get_query("wrong"), variables)
+        executed = self.make_request(query=self.get_query("wrong"), user=variables)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
         self.assertFalse(executed["obtainPayload"])
@@ -39,19 +39,19 @@ class PasswordChangeTestCaseMixin:
         easy password
         """
         variables = {"user": self.user}
-        executed = self.make_request(self.get_query("123", "123"), variables)
+        executed = self.make_request(query=self.get_query("123", "123"), user=variables)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
         self.assertFalse(executed["obtainPayload"])
 
     def test_revoke_refresh_tokens_on_password_change(self):
-        executed = self.make_request(self.login_query())
+        executed = self.make_request(query=self.login_query())
         self.user.refresh_from_db()
         refresh_tokens = self.user.refresh_tokens.all()
         for token in refresh_tokens:
             self.assertFalse(token.revoked)
         variables = {"user": self.user}
-        executed = self.make_request(self.get_query(), variables)
+        executed = self.make_request(query=self.get_query(), user=variables)
         assert executed["success"]
         assert not executed["errors"]
         self.assertTrue(executed["obtainPayload"]["token"])
@@ -85,7 +85,7 @@ class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
   }}
 }}
         """.format(
-            self.default_password,
+            self.DEFAULT_PASSWORD,
             new_password1,
             new_password2,
         )
@@ -111,7 +111,7 @@ class PasswordChangeRelayTestCase(PasswordChangeTestCaseMixin, RelayTestCase):
   }}
 }}
         """.format(
-            self.default_password,
+            self.DEFAULT_PASSWORD,
             new_password1,
             new_password2,
         )

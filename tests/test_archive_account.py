@@ -4,17 +4,38 @@ from .testCases import (
     AsyncDefaultTestCase,
     AsyncRelayTestCase,
     DefaultTestCase,
-    RelayTestCase,
-)
+    RelayTestCase, AsyncDefaultFailsTestCase, AsyncRelayFailsTestCase)
 
 
 class ArchiveAccountTestCaseMixin:
+
+    def _relay_query(self, password=None):
+        return """
+            mutation {{
+              archiveAccount(password: "{}") {{
+                success, errors
+              }}
+            }}
+        """.format(
+            password or self.DEFAULT_PASSWORD,
+        )
+    def _arg_query(self, password=None):
+        return """
+            mutation {{
+              archiveAccount(input: {{ password: "{}"}}) {{
+                success, errors
+              }}
+            }}
+        """.format(
+            password or self.DEFAULT_PASSWORD,
+        )
+
     def test_not_authenticated(self):
         """
         try to archive not authenticated
         """
         query = self.make_query()
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         assert executed["errors"]["nonFieldErrors"] == Messages.UNAUTHENTICATED
 
@@ -22,9 +43,8 @@ class ArchiveAccountTestCaseMixin:
         """
         try to archive account with invalid password
         """
-        variables = {"user": verified_user}
-        query = self.make_query(password="123")
-        executed = self.make_request(query, variables)
+        query = self.make_query(password=self.WRONG_PASSWORD)
+        executed = self.make_request(query=query, user_status=self.verified_user_status_type)
         assert not executed["success"]
         assert executed["errors"]["password"] == Messages.INVALID_PASSWORD
 
@@ -35,7 +55,7 @@ class ArchiveAccountTestCaseMixin:
         query = self.make_query()
         variables = {"user": verified_user}
         assert not verified_user.status.archived
-        executed = self.make_request(query, variables=variables)
+        executed = self.make_request(query=query, user=variables)
         assert executed["success"]
         assert not executed["errors"]
         verified_user.refresh_from_db()
@@ -54,7 +74,7 @@ class ArchiveAccountTestCaseMixin:
         query = self.make_query()
         variables = {"user": verified_user}
         assert not verified_user.status.archived
-        executed = self.make_request(query, variables)
+        executed = self.make_request(query=query, user=variables)
         assert executed["success"]
         assert not executed["errors"]
         verified_user.refresh_from_db()
@@ -70,10 +90,10 @@ class ArchiveAccountTestCaseMixin:
         """
         try to archive account
         """
-        query = self.make_query(self.wrong_password)
+        query = self.make_query(self.WRONG_PASSWORD)
         variables = {"user": unverified_user}
         assert not unverified_user.status.archived
-        executed = self.make_request(query, variables)
+        executed = self.make_request(query=query, user=variables)
         assert not executed["success"]
         assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
         assert not unverified_user.status.archived
@@ -81,51 +101,21 @@ class ArchiveAccountTestCaseMixin:
 
 class TestArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
     def make_query(self, password=None):
-        return """
-            mutation {{
-              archiveAccount(password: "{}") {{
-                success, errors
-              }}
-            }}
-        """.format(
-            password or self.default_password,
-        )
+        return self._relay_query(password)
 
 
 class TestArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
     def make_query(self, password=None):
-        return """
-            mutation {{
-              archiveAccount(input: {{ password: "{}"}}) {{
-                success, errors
-              }}
-            }}
-        """.format(
-            password or self.default_password,
-        )
+        return self._arg_query(password)
 
+class TestAsyncArchiveAccountTestCase(TestArchiveAccountTestCase, ArchiveAccountTestCaseMixin, AsyncDefaultTestCase):
+    ...
 
-class TestAsyncArchiveAccountTestCase(ArchiveAccountTestCaseMixin, AsyncDefaultTestCase):
-    def make_query(self, password=None):
-        return """
-            mutation {{
-              archiveAccount(password: "{}") {{
-                success, errors
-              }}
-            }}
-        """.format(
-            password or self.default_password,
-        )
+class TestAsyncArchiveAccountRelayTestCase(TestArchiveAccountRelayTestCase, ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
+    ...
 
+class TestAsyncFailsArchiveAccountTestCase(TestArchiveAccountTestCase, ArchiveAccountTestCaseMixin, AsyncDefaultFailsTestCase):
+    ...
 
-class TestAsyncArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
-    def make_query(self, password=None):
-        return """
-            mutation {{
-              archiveAccount(input: {{ password: "{}"}}) {{
-                success, errors
-              }}
-            }}
-        """.format(
-            password or self.default_password,
-        )
+class TestAsyncArchiveFailsAccountRelayTestCase(TestArchiveAccountRelayTestCase, ArchiveAccountTestCaseMixin, AsyncRelayFailsTestCase):
+    ...

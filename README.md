@@ -53,6 +53,7 @@ your implementation*.
 import strawberry
 from gqlauth.user import arg_mutations as mutations
 
+
 @strawberry.type
 class AuthMutation:
     register = mutations.Register.field
@@ -68,7 +69,7 @@ class AuthMutation:
     send_secondary_email_activation = mutations.SendSecondaryEmailActivation.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
     swap_emails = mutations.SwapEmails.field
-    captcha = mutations.Cap.field
+    captcha = mutations.Captcha.field
 
     # django-graphql-jwt authentication
     # with some extra features
@@ -76,6 +77,7 @@ class AuthMutation:
     verify_token = mutations.VerifyToken.field
     refresh_token = mutations.RefreshToken.field
     revoke_token = mutations.RevokeToken.field
+
 
 schema = strawberry.Schema(mutation=AuthMutation)
 ```

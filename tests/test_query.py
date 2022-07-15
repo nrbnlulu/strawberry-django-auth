@@ -18,7 +18,7 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query, variables={"user": self.user2})
+        executed = self.make_request(query=query, user={"user": self.user2})
         self.assertTrue(executed["username"])
 
     def test_me_anonymous(self):
@@ -29,7 +29,7 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         self.assertIsNone(executed)
 
     def test_public_user_query(self):
@@ -40,5 +40,5 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query, variables={"user": unverified_user})
+        executed = self.make_request(query=query, user={"user": unverified_user})
         self.assertEqual(executed, {"verified": False})

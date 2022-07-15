@@ -14,7 +14,7 @@ class SwapEmailsCaseMixin:
         self.user2 = self.register_user(email="baa@email.com", username="baa", verified=True)
 
     def test_swap_emails(self):
-        executed = self.make_request(self.query(), {"user": self.user})
+        executed = make_request(query=self.query(), user={"user": self.user})
         assert executed["success"]
         self.assertFalse(executed["errors"])
         self.user.refresh_from_db()
@@ -35,7 +35,7 @@ class SwapEmailsCase(SwapEmailsCaseMixin, DefaultTestCase):
                 { success, errors }
             }
         """ % (
-            password or self.default_password
+            password or self.DEFAULT_PASSWORD
         )
 
 
@@ -47,5 +47,5 @@ class SwapEmailsRelayTestCase(SwapEmailsCaseMixin, RelayTestCase):
             { success, errors  }
         }
         """ % (
-            password or self.default_password
+            password or self.DEFAULT_PASSWORD
         )

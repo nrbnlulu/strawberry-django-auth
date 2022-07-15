@@ -50,9 +50,6 @@ class UserFilter:
     is_staff: auto
     is_active: auto
     date_joined: auto
-    # connablealert_set: auto
-    # groups: auto
-    # user_permissions: auto
     status: UserStatusFilter
 
 

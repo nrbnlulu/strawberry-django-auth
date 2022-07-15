@@ -64,7 +64,7 @@ relay_schema = strawberry.Schema(
     ],
 )
 
-default_schema = strawberry.Schema(
+arg_schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
     extensions=[

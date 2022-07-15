@@ -11,7 +11,7 @@ class RemoveSecondaryEmailCaseMixin:
         )
 
     def test_remove_email(self):
-        executed = self.make_request(self.query(), {"user": self.user})
+        executed = make_request(query=self.query(), user={"user": self.user})
         assert executed["success"]
         self.assertFalse(executed["errors"])
         self.user.refresh_from_db()
@@ -26,7 +26,7 @@ class RemoveSecondaryEmailCase(RemoveSecondaryEmailCaseMixin, DefaultTestCase):
                 { success, errors }
             }
         """ % (
-            password or self.default_password
+            password or self.DEFAULT_PASSWORD
         )
 
 
@@ -38,5 +38,5 @@ class RemoveSecondaryEmailRelayTestCase(RemoveSecondaryEmailCaseMixin, RelayTest
             { success, errors  }
         }
         """ % (
-            password or self.default_password
+            password or self.DEFAULT_PASSWORD
         )

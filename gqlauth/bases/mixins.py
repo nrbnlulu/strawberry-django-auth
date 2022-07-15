@@ -212,21 +212,23 @@ class DynamicPayloadMixin:
     payload from a list or dict
     and to merge parent payload to the given payload
 
-    as dict { payload_name: payload_type }
-    as list [inputname,] -> defaults to String
+    as dict { payload_name: payload_type }.
+    as list [output_name,] -> defaults to String.
+    or from the resolve_mutation return annotation.
 
     #usage:
         class SomeMutation(DynamicInputMixin, OutputMixin, MutationMixin):
                 _outputs = [some, non, required, fields]
                 _required_outputs = {some:str, required:int, fields:list}
 
-                def resolve_mutation(self, input):
+                def resolve_mutation(self, input) -> SomeType:
                     logic...
     """
 
     def __init_subclass__(cls, **kwargs):
         _outputs = getattr(cls._meta, "_outputs", [])
         _required_outputs = getattr(cls._meta, "_required_outputs", [])
+
         if _outputs or _required_outputs:
             if not isinstance(_outputs, (dict, list, None)) and _outputs:
                 raise WrongUsage(f"dynamic outputs can be list or dict not{type(_outputs)}")

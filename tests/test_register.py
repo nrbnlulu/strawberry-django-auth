@@ -17,7 +17,7 @@ class RegisterTestCaseMixin:
         """
 
         # register
-        executed = self.make_request(self.register_query("123"))
+        executed = self.make_request(query=self.register_query("123"))
         assert not executed["success"]
         self.assertTrue(executed["errors"])
 
@@ -35,18 +35,18 @@ class RegisterTestCaseMixin:
         user_registered.connect(receive_signal)
 
         # register
-        executed = self.make_request(self.register_query())
+        executed = self.make_request(query=self.register_query())
         assert executed["success"]
         assert not executed["errors"]
         self.assertTrue(signal_received)
 
         # try to register again
-        executed = self.make_request(self.register_query())
+        executed = self.make_request(query=self.register_query())
         assert not executed["success"]
         self.assertTrue(executed["errors"]["username"])
 
         # try to register again
-        executed = self.make_request(self.register_query(username="other_username"))
+        executed = self.make_request(query=self.register_query(username="other_username"))
         assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
@@ -58,13 +58,13 @@ class RegisterTestCaseMixin:
             secondary_email="test@email.com",
         )
 
-        executed = self.make_request(self.register_query())
+        executed = self.make_request(query=self.register_query())
         assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     def test_register_duplicate_unique_email_2(self):
         self.register_user(email="foo@email.com", username="foo")
-        executed = self.make_request(self.register_query())
+        executed = self.make_request(query=self.register_query())
         assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
@@ -77,7 +77,7 @@ class RegisterTestCaseMixin:
         from gqlauth.settings import gqlauth_settings as app_settings
 
         app_settings.SEND_ACTIVATION_EMAIL = True
-        executed = self.make_request(self.register_query())
+        executed = self.make_request(query=self.register_query())
         assert not executed["success"]
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
         self.assertEqual(len(get_user_model().objects.all()), 0)

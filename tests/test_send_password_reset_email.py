@@ -21,25 +21,25 @@ class SendPasswordResetEmailTestCaseMixin:
         invalid email should be successful request
         """
         query = self.get_query("invalid@email.com")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert executed["success"]
         assert not executed["errors"]
 
     def test_invalid_form(self):
         query = self.get_query("baremail.com")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["email"])
 
     def test_send_email_valid_email_verified_user(self):
         query = self.get_query("bar@email.com")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert executed["success"]
         assert not executed["errors"]
 
     def test_send_to_secondary_email(self):
         query = self.get_query("secondary@email.com")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert executed["success"]
         assert not executed["errors"]
 
@@ -50,7 +50,7 @@ class SendPasswordResetEmailTestCaseMixin:
     def test_send_email_fail_to_send_email(self):
         mock
         query = self.get_query("bar@email.com")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
 

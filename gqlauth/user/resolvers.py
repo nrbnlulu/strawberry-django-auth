@@ -1,6 +1,7 @@
 from smtplib import SMTPException
 from uuid import UUID
 
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
@@ -29,7 +30,7 @@ from gqlauth.forms import (
     RegisterForm,
     UpdateAccountForm,
 )
-from gqlauth.models import Captcha, UserStatus
+from gqlauth.models import Captcha as Captcha_, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
@@ -45,10 +46,25 @@ from gqlauth.utils import (
 UserModel = get_user_model()
 
 
-class Cap:
-    @strawberry.mutation
+class Captcha:
+    """
+    Creates a brand-new captcha.
+    Returns a base64 encoded string of the captcha.
+    And uuid representing the captcha id in the database.
+    When you will try to log in or register You will
+    need submit that uuid With the user input.
+    **The captcha will be invoked when the timout expires**.
+    """
+    @strawberry.mutation(description=__doc__)
     def field(self) -> CaptchaType:
-        return Captcha.create_captcha()
+
+        return Captcha_.create_captcha()
+
+    @strawberry.mutation(description=__doc__)
+    @sync_to_async
+    def afield(self) -> CaptchaType:
+        return Captcha_.create_captcha()
+
 
 
 class RegisterMixin:
@@ -437,7 +453,6 @@ class ObtainJSONWebTokenMixin:
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # this will raise if not successful
                 res = cls.obtain.get_result(None, None, [cls, info], query_input_)
-
                 return cls.output(success=True, obtainPayload=res)
             else:
                 raise UserNotVerified

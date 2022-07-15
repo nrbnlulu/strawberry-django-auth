@@ -13,7 +13,7 @@ class PasswordSetTestCaseMixin:
     def test_already_set_password(self):
         token = get_token(unverified_user, "password_set")
         query = self.get_query(token)
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertEqual(
             executed["errors"],
@@ -32,7 +32,7 @@ class PasswordSetTestCaseMixin:
     def test_set_password_invalid_form(self):
         token = get_token(unverified_user, "password_set")
         query = self.get_query(token, "wrong_pass")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertTrue(executed["errors"])
         unverified_user.refresh_from_db()
@@ -40,7 +40,7 @@ class PasswordSetTestCaseMixin:
 
     def test_set_password_invalid_token(self):
         query = self.get_query("fake_token")
-        executed = self.make_request(query)
+        executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["nonFieldErrors"])
         unverified_user.refresh_from_db()
