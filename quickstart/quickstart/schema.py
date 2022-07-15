@@ -21,7 +21,7 @@ class AuthMutation:
     send_secondary_email_activation = mutations.SendSecondaryEmailActivation.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
     swap_emails = mutations.SwapEmails.field
-    captcha = mutations.Cap.field
+    captcha = mutations.Captcha.field
 
     # django-graphql-jwt authentication
     # with some extra features
