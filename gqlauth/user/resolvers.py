@@ -30,7 +30,7 @@ from gqlauth.forms import (
     RegisterForm,
     UpdateAccountForm,
 )
-from gqlauth.models import Captcha as Captcha_, UserStatus
+from gqlauth.models import Captcha as CaptchaModel, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
@@ -58,12 +58,12 @@ class Captcha:
     @strawberry.mutation(description=__doc__)
     def field(self) -> CaptchaType:
 
-        return Captcha_.create_captcha()
+        return CaptchaModel.create_captcha()
 
     @strawberry.mutation(description=__doc__)
     @sync_to_async
     def afield(self) -> CaptchaType:
-        return Captcha_.create_captcha()
+        return CaptchaModel.create_captcha()
 
 
 
@@ -109,8 +109,8 @@ class RegisterMixin:
     def check_captcha(cls, input_):
         uuid = input_.get("identifier")
         try:
-            obj = Captcha.objects.get(uuid=uuid)
-        except Captcha.DoesNotExist:
+            obj = CaptchaModel.objects.get(uuid=uuid)
+        except CaptchaModel.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
         return obj.validate(input_.get("userEntry"))
 
@@ -424,8 +424,8 @@ class ObtainJSONWebTokenMixin:
     def check_captcha(cls, **input_):
         uuid = input_.get("identifier")
         try:
-            obj = Captcha.objects.get(uuid=uuid)
-        except Captcha.DoesNotExist:
+            obj = CaptchaModel.objects.get(uuid=uuid)
+        except CaptchaModel.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
 
         return obj.validate(input_.get("userEntry"))
@@ -447,7 +447,7 @@ class ObtainJSONWebTokenMixin:
             user = get_user_to_login(**query_input_)
             query_input_["password"] = password
 
-            if user.status.archived is True:  # unarchive on login
+            if user.status.archived is True:  # un-archive on login
                 UserStatus.unarchive(user)
 
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:

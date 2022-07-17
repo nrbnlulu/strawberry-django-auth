@@ -12,8 +12,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 from pathlib import Path
 import sys
+import os
 
 from gqlauth.settings_type import GqlAuthSettings
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 cwd = Path(__file__).parent
 sys.path.append(str(cwd / "testproject"))

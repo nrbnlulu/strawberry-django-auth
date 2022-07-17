@@ -3,7 +3,9 @@ from django.views.decorators.csrf import csrf_exempt
 from strawberry.django.views import GraphQLView, AsyncGraphQLView
 
 from .schema import schema
+from .aschema import aschema
 
 urlpatterns = [
     path("", csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    path("async", csrf_exempt(AsyncGraphQLView.as_view(graphiql=True, schema=aschema))),
 ]

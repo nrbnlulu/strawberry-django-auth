@@ -1,15 +1,13 @@
+import asyncio
 import pprint
 import re
 from dataclasses import dataclass, asdict
-from enum import Enum
 from typing import Union, NewType
 
-import password
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from django.contrib.auth import get_user_model
 from django.core.exceptions import SynchronousOnlyOperation
-from django.test import AsyncClient, Client
-from django.forms.models import model_to_dict
+from django.test import AsyncClient, Client, RequestFactory, AsyncRequestFactory
 import pytest
 
 from gqlauth.models import Captcha, UserStatus
@@ -32,16 +30,34 @@ class UserType:
 
 @dataclass
 class UserStatusType:
-    user: UserType
-    verified: bool = False
+    verified: bool
     archived: bool = False
     secondary_email: str = ""
+    user: Union[UserModel, UserType] = None
 
-    @classmethod
-    def create(cls, user_status: "UserStatusType") -> UserModel:
-        user_status.user = UserModel(**asdict(user_status.user))
-        user_status = UserStatus(**asdict(user_status))
-        return user_status.user
+    def create(self):
+        """
+        This will create a new user with user status
+        from the user_status_type class and will return the same object
+        with the django user inside it.
+        """
+        user = self.user  # caching the user type object
+        self.user = UserModel(**asdict(user))
+        # password must be set via this method.
+        self.user.set_password(user.password)
+        # must save for status to be created
+        self.user.save()
+        for field, value in asdict(self).items():
+            setattr(self.user.status, field, value)
+        self.user.status.save()
+        self.user.refresh_from_db()
+        user.obj = self.user
+        self.user = user
+        db_status = self.user.obj.status
+        if self.verified:
+            assert db_status.verified
+        else:
+            assert not db_status.verified
 
 
 class PATHS:
@@ -68,51 +84,59 @@ class TestBase:
 
     WRONG_PASSWORD = "wrong password"
 
-    verified_user_status_type = UserStatusType(
-        verified=True,
-        user=UserType(email="verified@email.com",
-                      username='verified_user'),
-    )
-    unverified_user_status_type = UserStatusType(
-        verified=False,
-        user=UserType(email="unverified@email.com",
-                      username='unverified_user'),
-    )
+    def verified_user_status_type(self):
+        return UserStatusType(
+            verified=True,
+            user=UserType(email="verified@email.com",
+                          username='verified_user'),
+        )
 
-    verified_user_type = verified_user_status_type.user
-    unverified_user_type = unverified_user_status_type.user
-
-    def register_user(
-            self, user_status_type: UserType
-    ):
-        user = user_status_type.create(user_status_type)
-        user.save()
-        user.refresh_from_db()
-        return user
-
-    @pytest.fixture()
-    def unverified_user(self, db):
-        return self.register_user(
-            self.verified_user_status_type
+    def unverified_user_status_type(self):
+        return UserStatusType(
+            verified=False,
+            user=UserType(email="unverified@email.com",
+                          username='unverified_user'),
         )
 
     @pytest.fixture()
-    def verified_user(self, db):
-        return self.register_user(
-            self.verified_user_status_type
+    def wrong_pass_ver_user_status_type(self):
+        return UserStatusType(
+            verified=True,
+            user=UserType(email="verified@email.com",
+                          username='verified_user',
+                          password=self.WRONG_PASSWORD,
+                          ),
         )
 
     @pytest.fixture()
-    def verified_tokens(self):
-        return self.make_request(query=self.login_query(username="verified"))
+    def wrong_pass_unverified_user_status_type(self):
+        us = self.unverified_user_status_type()
+        us.user.password = self.WRONG_PASSWORD
+        return us
+
+    def get_tokens(self, user_status: UserStatusType):
+        # call make_request with no user_status to ignore the default login_query
+        return self.make_request(self.login_query(user_status), user_status=None)
+
+    @pytest.fixture()
+    def db_unverified_user_status(self, db) -> UserStatusType:
+        us = self.unverified_user_status_type()
+        us.create()
+        return us
+
+    @pytest.fixture()
+    def db_verified_user_status(self, db) -> UserStatusType:
+        us = self.verified_user_status_type()
+        us.create()
+        return us
 
     @staticmethod
     def gen_captcha():
         return Captcha.create_captcha()
 
     def make_request(
-            self, query: Query = None,
-            user_status: UserStatusType = verified_user_status_type,
+            self, query: Query,
+            user_status: UserStatusType,
             raw: bool = False,
             path: Union[
                 "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ARG
@@ -127,9 +151,11 @@ class TestBase:
         if user_status:
             token = client.post(path=path,
                                 content_type='application/json',
-                                data={'query': self.login_query(user_status)})
-            token = token.json()['data']
-            headers = {'Authorization': f'JWT {token}'}
+                                data={'query': self.login_query(user_status)}).json()['data'][
+                'tokenAuth']
+            if token['success']:
+                token = token['obtainPayload']['token']
+                headers = {'HTTP_AUTHORIZATION': f'JWT {token}'}
         res = client.post(path=path, content_type='application/json',
                           data={'query': query}, **headers)
 
@@ -146,13 +172,12 @@ class TestBase:
         finally:
             pprint.pprint(res)
 
-    @async_to_sync
     async def amake_request(
             self, query: Query = None,
-            user_status: UserStatusType = verified_user_status_type,
+            user_status: UserStatusType = None,
             raw: bool = False,
             path: Union[
-                "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ARG,
+                "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ASYNC_ARG,
             test_fail_sync_req: bool = False,
     ) -> dict:
         if self.RELAY:
@@ -163,17 +188,20 @@ class TestBase:
         if test_fail_sync_req:
             client = Client(raise_request_exception=True)
 
-        headers = {}
+        headers = dict()
         # if user_status_type was not provided then we should
         # ignore login query since there is no user
         if user_status:
+            login_query = await sync_to_async(self.login_query)(user_status)
             token = await client.post(path=path,
                                 content_type='application/json',
-                                data={'query': self.login_query(user_status)})
-            token = token.json()['data']
-            headers = {'Authorization': f'JWT {token}'}
+                                data={'query': login_query})
+            token = token.json()['data']['tokenAuth']
+            if token['success']:
+                token = token['obtainPayload']['token']
+                headers = {'AUTHORIZATION': f'JWT {token}'}
         res = await client.post(path=path, content_type='application/json',
-                          data={'query': query}, **headers)
+                                data={'query': query}, **headers)
 
         res = res.json()
         if raw:
@@ -187,6 +215,7 @@ class TestBase:
             raise Exception(*[error['message'] for error in res['errors']])
         finally:
             pprint.pprint(res)
+
 
 class RelayTestCase(TestBase):
     RELAY = True
@@ -243,7 +272,7 @@ class DefaultTestCase(TestBase):
 
 class AsyncTestCaseMixin:
     def make_request(self, *args, **kwargs):
-        return self.amake_request(*args, **kwargs)
+        return async_to_sync(self.amake_request)(*args, **kwargs)
 
     @pytest.fixture()
     def verified_tokens(self):
@@ -264,6 +293,7 @@ class AsyncFailTestMixin(AsyncTestCaseMixin):
     This TestMixin checks whether a request sent with wsgi context is
     failing. Although async code can call sync code, It should raise
     """
+
     def make_request(self, *args, **kwargs):
         with pytest.raises(SynchronousOnlyOperation):
             return self.amake_request(*args, test_fail_sync_req=True, **kwargs)
