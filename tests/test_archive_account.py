@@ -1,23 +1,12 @@
-import copy
-import dataclasses
-
-import pytest
-
 from gqlauth.constants import Messages
-from django.conf import settings as django_settings
 from .testCases import (
     AsyncDefaultTestCase,
     AsyncRelayTestCase,
     DefaultTestCase,
     RelayTestCase,
-    AsyncDefaultFailsTestCase,
-    AsyncRelayFailsTestCase,
     UserStatusType,
 )
 
-
-@pytest.mark.django_db(transaction=True)
-@pytest.mark.asyncio
 class ArchiveAccountTestCaseMixin:
 
     def _relay_query(self, user_status_type: UserStatusType):
@@ -58,6 +47,7 @@ class ArchiveAccountTestCaseMixin:
         """
         try to archive account with invalid password
         """
+
         query = self.make_query(wrong_pass_ver_user_status_type)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert not executed["success"]
@@ -99,11 +89,13 @@ class ArchiveAccountTestCaseMixin:
         for token in refresh_tokens:
             assert token.revoked
 
-    def test_not_verified_user(self, db_unverified_user_status, wrong_pass_unverified_user_status_type):
+    def test_not_verified_user(self,
+                               allow_login_not_verified,
+                               db_unverified_user_status,
+                               wrong_pass_unverified_user_status_type):
         """
         try to archive account
         """
-        django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = True
         user = db_unverified_user_status.user.obj
         query = self.make_query(wrong_pass_unverified_user_status_type)
         assert not user.status.archived
@@ -124,6 +116,7 @@ class TestArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase
 
 class TestAsyncArchiveAccountTestCase(TestArchiveAccountTestCase, ArchiveAccountTestCaseMixin, AsyncDefaultTestCase):
     ...
+
 
 class TestAsyncArchiveAccountRelayTestCase(TestArchiveAccountRelayTestCase, ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
     ...

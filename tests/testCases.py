@@ -1,16 +1,15 @@
-import asyncio
 import pprint
 import re
 from dataclasses import dataclass, asdict
 from typing import Union, NewType
+from django.conf import settings as django_settings
 
 from asgiref.sync import async_to_sync, sync_to_async
 from django.contrib.auth import get_user_model
-from django.core.exceptions import SynchronousOnlyOperation
-from django.test import AsyncClient, Client, RequestFactory, AsyncRequestFactory
+from django.test import AsyncClient, Client
 import pytest
 
-from gqlauth.models import Captcha, UserStatus
+from gqlauth.models import Captcha
 
 Query = NewType("Query", str)
 UserModel = get_user_model()
@@ -67,7 +66,7 @@ class PATHS:
     ASYNC_ARG = r'/async_arg_schema'
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestBase:
     """
     provide make_request helper to easily make
@@ -98,6 +97,14 @@ class TestBase:
                           username='unverified_user'),
         )
 
+    def get_tokens(self, user_status: UserStatusType):
+        # call make_request with no user_status to ignore the default login_query
+        return self.make_request(self.login_query(user_status), user_status=None)
+
+    @staticmethod
+    def gen_captcha():
+        return Captcha.create_captcha()
+
     @pytest.fixture()
     def wrong_pass_ver_user_status_type(self):
         return UserStatusType(
@@ -114,10 +121,6 @@ class TestBase:
         us.user.password = self.WRONG_PASSWORD
         return us
 
-    def get_tokens(self, user_status: UserStatusType):
-        # call make_request with no user_status to ignore the default login_query
-        return self.make_request(self.login_query(user_status), user_status=None)
-
     @pytest.fixture()
     def db_unverified_user_status(self, db) -> UserStatusType:
         us = self.unverified_user_status_type()
@@ -130,9 +133,11 @@ class TestBase:
         us.create()
         return us
 
-    @staticmethod
-    def gen_captcha():
-        return Captcha.create_captcha()
+    @pytest.fixture()
+    def allow_login_not_verified(self):
+        django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = True
+        yield
+        django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = False
 
     def make_request(
             self, query: Query,
@@ -288,20 +293,3 @@ class AsyncRelayTestCase(AsyncTestCaseMixin, RelayTestCase):
     ...
 
 
-class AsyncFailTestMixin(AsyncTestCaseMixin):
-    """
-    This TestMixin checks whether a request sent with wsgi context is
-    failing. Although async code can call sync code, It should raise
-    """
-
-    def make_request(self, *args, **kwargs):
-        with pytest.raises(SynchronousOnlyOperation):
-            return self.amake_request(*args, test_fail_sync_req=True, **kwargs)
-
-
-class AsyncDefaultFailsTestCase(AsyncFailTestMixin, DefaultTestCase):
-    ...
-
-
-class AsyncRelayFailsTestCase(AsyncFailTestMixin, RelayTestCase):
-    ...

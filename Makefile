@@ -8,8 +8,8 @@ asgi-quickstart:
 
 test:
 	poetry run python -m migrate
-	poetry run pytest --ds=tests.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
-	poetry run pytest --ds=tests.settings_b -m 'settings_b' --cov=gqlauth --cov-report=xml --cov-append
+	poetry run pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
+	poetry run pytest --ds=testproject.settings_b -m 'settings_b' --cov=gqlauth --cov-report=xml --cov-append
 
 
 serve:

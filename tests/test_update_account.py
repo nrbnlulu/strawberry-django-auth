@@ -20,7 +20,7 @@ class UpdateAccountTestCaseMixin:
     def test_update_account_unauthenticated(self):
         executed = self.make_request(self.get_query())
         assert not executed["success"]
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.UNAUTHENTICATED)
+        assert executed["errors"]["nonFieldErrors"] == Messages.UNAUTHENTICATED
 
     def test_update_account_not_verified(self):
         variables = {"user": unverified_user}

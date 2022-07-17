@@ -9,7 +9,7 @@ from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 from gqlauth.signals import user_registered
 
-from .testCases import RelayTestCase, AsyncRelayFailsTestCase, AsyncRelayTestCase
+from .testCases import RelayTestCase, AsyncRelayTestCase
 
 
 class CaptchaTestCaseMixin:
