@@ -41,7 +41,7 @@ class PasswordResetTestCaseMixin:
         unverified_user.refresh_from_db()
         refresh_tokens = unverified_user.refresh_tokens.all()
         for token in refresh_tokens:
-            self.assertFalse(token.revoked)
+            assert not token.revoked
         token = get_token(unverified_user, "password_reset")
         query = self.get_query(token)
         executed = self.make_request(query=query)

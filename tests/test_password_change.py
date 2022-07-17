@@ -1,117 +1,146 @@
+import dataclasses
+
 from gqlauth.utils import revoke_user_refresh_token
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import DefaultTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
+    AsyncRelayTestCase
 
 
 class PasswordChangeTestCaseMixin:
-    def setUp(self):
-        super().setUp()
-        self.user = self.register_user(email="gaa@email.com", username="gaa", verified=True)
-        self.old_pass = self.user.password
+    SECURE_PASSWORD = "SuperSecureP@ssw0rd.com"
 
-    def test_password_change(self):
+    @dataclasses.dataclass
+    class PasswordChangeForm:
+        password_1: str
+        password_2: str
+
+    @classmethod
+    def _arg_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
+        return """
+                mutation {{
+                    passwordChange(
+                        oldPassword: "{}",
+                        newPassword1: "{}",
+                        newPassword2: "{}"
+                    )
+                    {{
+            success
+            errors
+            obtainPayload{{
+              token
+              refreshToken
+            }}
+          }}
+        }}
+        """.format(
+            user_status.user.password,
+            password_form.password_1,
+            password_form.password_2,
+        )
+
+    @classmethod
+    def _relay_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
+        return """
+                mutation {{
+                    passwordChange(
+                        input: {{
+                            oldPassword: "{}",
+                            newPassword1: "{}",
+                            newPassword2: "{}"
+                        }})
+                   {{
+            success
+            errors
+            obtainPayload{{
+              token
+              refreshToken
+            }}
+          }}
+        }}
+        """.format(
+            user_status.user.password,
+            password_form.password_1,
+            password_form.password_2,
+        )
+
+    def test_password_change(self, db_verified_user_status):
         """
         change password
         """
-        variables = {"user": self.user}
-        executed = self.make_request(self.get_query(), variables)
+        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD)
+        query = self.make_query(user_status=db_verified_user_status, password_form=form)
+        executed = self.make_request(query=query, user_status=db_verified_user_status)
+        user = db_verified_user_status.user.obj
         assert executed["success"]
         assert not executed["errors"]
         assert executed["obtainPayload"]["token"]
         assert executed["obtainPayload"]["refreshToken"]
-        self.user.refresh_from_db()
-        self.assertFalse(self.old_pass == self.user.password)
+        user.refresh_from_db()
+        assert not db_verified_user_status.user.password == user.password
 
-    def test_mismatch_passwords(self):
+    def test_mismatch_passwords(self, db_verified_user_status):
         """
         wrong inputs
         """
-        variables = {"user": self.user}
-        executed = self.make_request(query=self.get_query("wrong"), user=variables)
+        user = db_verified_user_status.user.obj
+        old_password = user.password
+        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD + "mismatch")
+        query = self.make_query(user_status=db_verified_user_status, password_form=form)
+        executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert not executed["success"]
-        self.assertTrue(executed["errors"]["newPassword2"])
+        assert executed["errors"]["newPassword2"]
         assert not executed["obtainPayload"]
-        self.user.refresh_from_db()
-        self.assertTrue(self.old_pass == self.user.password)
+        user.refresh_from_db()
+        assert user.password == old_password
 
-    def test_passwords_validation(self):
+    def test_passwords_validation(self, db_verified_user_status):
         """
         easy password
         """
-        variables = {"user": self.user}
-        executed = self.make_request(query=self.get_query("123", "123"), user=variables)
+        simple_password = self.PasswordChangeForm('123', '123')
+        query = self.make_query(user_status=db_verified_user_status, password_form=simple_password)
+        executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert not executed["success"]
-        self.assertTrue(executed["errors"]["newPassword2"])
+        assert executed["errors"]["newPassword2"]
         assert not executed["obtainPayload"]
 
-    def test_revoke_refresh_tokens_on_password_change(self):
-        executed = self.make_request(query=self.login_query())
-        self.user.refresh_from_db()
-        refresh_tokens = self.user.refresh_tokens.all()
+    def test_revoke_refresh_tokens_on_password_change(self, db_verified_user_status):
+        user = db_verified_user_status.user.obj
+        old_password = user.password
+        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD)
+        query = self.make_query(user_status=db_verified_user_status, password_form=form)
+        # creating token and verify that it is valid.
+        self.get_tokens(db_verified_user_status)
+        user.refresh_from_db()
+        refresh_tokens = user.refresh_tokens.all()
+        assert refresh_tokens
         for token in refresh_tokens:
-            self.assertFalse(token.revoked)
-        variables = {"user": self.user}
-        executed = self.make_request(query=self.get_query(), user=variables)
+            assert not token.revoked
+        executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert executed["success"]
         assert not executed["errors"]
         assert executed["obtainPayload"]["token"]
         assert executed["obtainPayload"]["refreshToken"]
-        self.user.refresh_from_db()
-        self.assertFalse(self.old_pass == self.user.password)
-        refresh_tokens = self.user.refresh_tokens.all()
-        revoke_user_refresh_token(self.user)
-        self.user.refresh_from_db()
-        refresh_tokens = self.user.refresh_tokens.all()
-        for token in refresh_tokens:
+        user.refresh_from_db()
+        assert not old_password == user.password
+        refresh_tokens = user.refresh_tokens.all()
+        assert refresh_tokens
+        # the last token is not revoked
+        # since it is returned by the password change mutation.
+        for token in list(refresh_tokens)[:-1]:
             assert token.revoked
 
 
-class PasswordChangeTestCase(PasswordChangeTestCaseMixin, DefaultTestCase):
-    def get_query(self, new_password1="new_password", new_password2="new_password"):
-        return """
-        mutation {{
-            passwordChange(
-                oldPassword: "{}",
-                newPassword1: "{}",
-                newPassword2: "{}"
-            )
-            {{
-    success
-    errors
-    obtainPayload{{
-      token
-      refreshToken
-    }}
-  }}
-}}
-        """.format(
-            self.DEFAULT_PASSWORD,
-            new_password1,
-            new_password2,
-        )
+class TestArgPasswordChange(PasswordChangeTestCaseMixin, DefaultTestCase):
+    ...
 
 
-class PasswordChangeRelayTestCase(PasswordChangeTestCaseMixin, RelayTestCase):
-    def get_query(self, new_password1="new_password", new_password2="new_password"):
-        return """
-        mutation {{
-            passwordChange(
-                input: {{
-                    oldPassword: "{}",
-                    newPassword1: "{}",
-                    newPassword2: "{}"
-                }})
-           {{
-    success
-    errors
-    obtainPayload{{
-      token
-      refreshToken
-    }}
-  }}
-}}
-        """.format(
-            self.DEFAULT_PASSWORD,
-            new_password1,
-            new_password2,
-        )
+class TestRelayPasswordChange(PasswordChangeTestCaseMixin, RelayTestCase):
+    ...
+
+class TestAsyncArgPasswordChange(PasswordChangeTestCaseMixin, AsyncDefaultTestCase):
+    ...
+
+
+class TestAsyncRelayPasswordChange(PasswordChangeTestCaseMixin, AsyncRelayTestCase):
+    ...
