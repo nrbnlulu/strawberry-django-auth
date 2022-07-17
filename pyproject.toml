@@ -36,8 +36,6 @@ packaging = ">=20.0,<30.0"
 importlib-metadata = { version = ">=1.7,<5.0", python = "<=3.7" }
 Pillow = "^9.2.0"
 strawberry-django-jwt = "^0.2.1"
-password = "^0.2"
-secondary = "^1.0"
 
 [tool.poetry.dev-dependencies]
 cryptography = "^37.0"
@@ -62,7 +60,7 @@ mkdocs-minify-plugin = "^0.5.0"
 pymdown-extensions = "^9.5"
 Markdown = "^3.3.7"
 Faker = "^13.15.0"
-pre-commit = "^2.19.0"
+pre-commit = "^2.20.0"
 pytest-asyncio = "^0.18.3"
 daphne = "^3.0.2"
 
