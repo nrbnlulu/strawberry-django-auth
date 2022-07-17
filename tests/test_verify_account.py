@@ -22,7 +22,7 @@ class VerifyAccountCaseMixin:
         token = get_token(unverified_user, "activation")
         executed = self.make_request(self.verify_query(token))
         assert executed["success"]
-        self.assertFalse(executed["errors"])
+        assert not executed["errors"]
         self.assertTrue(signal_received)
 
     def test_verified_user(self):

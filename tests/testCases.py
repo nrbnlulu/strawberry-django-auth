@@ -134,6 +134,13 @@ class TestBase:
         return us
 
     @pytest.fixture()
+    def db_archived_user_status(self, db) -> UserStatusType:
+        us = self.verified_user_status_type()
+        us.archived = True
+        us.create()
+        return us
+
+    @pytest.fixture()
     def allow_login_not_verified(self):
         django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = True
         yield
@@ -141,8 +148,9 @@ class TestBase:
 
     def make_request(
             self, query: Query,
-            user_status: UserStatusType,
+            user_status: UserStatusType = None,
             raw: bool = False,
+            no_login_query: bool = False,
             path: Union[
                 "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ARG
     ) -> dict:
@@ -153,7 +161,7 @@ class TestBase:
         headers = {}
         # if user_status_type was not provided then we should
         # ignore login query since there is no user
-        if user_status:
+        if user_status and not no_login_query:
             token = client.post(path=path,
                                 content_type='application/json',
                                 data={'query': self.login_query(user_status)}).json()['data'][
@@ -180,6 +188,7 @@ class TestBase:
     async def amake_request(
             self, query: Query = None,
             user_status: UserStatusType = None,
+            no_login_query: bool = False,
             raw: bool = False,
             path: Union[
                 "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ASYNC_ARG,
@@ -196,7 +205,7 @@ class TestBase:
         headers = dict()
         # if user_status_type was not provided then we should
         # ignore login query since there is no user
-        if user_status:
+        if user_status and not no_login_query:
             login_query = await sync_to_async(self.login_query)(user_status)
             token = await client.post(path=path,
                                 content_type='application/json',
@@ -225,6 +234,9 @@ class TestBase:
 class RelayTestCase(TestBase):
     RELAY = True
 
+    def make_query(self, user_status: UserStatusType):
+        return self._relay_query(user_status)
+
     def login_query(self, user_status: UserStatusType):
         cap = self.gen_captcha()
         user = user_status.user
@@ -251,6 +263,9 @@ class RelayTestCase(TestBase):
 class DefaultTestCase(TestBase):
     RELAY = False
 
+    def make_query(self, user_status: UserStatusType):
+        return self._arg_query(user_status)
+
     def login_query(self, user_status: UserStatusType):
         cap = self.gen_captcha()
         user = user_status.user
@@ -276,6 +291,7 @@ class DefaultTestCase(TestBase):
 
 
 class AsyncTestCaseMixin:
+
     def make_request(self, *args, **kwargs):
         return async_to_sync(self.amake_request)(*args, **kwargs)
 

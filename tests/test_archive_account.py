@@ -7,9 +7,10 @@ from .testCases import (
     UserStatusType,
 )
 
+
 class ArchiveAccountTestCaseMixin:
 
-    def _relay_query(self, user_status_type: UserStatusType):
+    def _arg_query(self, user_status_type: UserStatusType):
         return """
             mutation {{
               archiveAccount(password: "{}") {{
@@ -19,7 +20,8 @@ class ArchiveAccountTestCaseMixin:
         """.format(
             user_status_type.user.password
         )
-    def _arg_query(self, user_status_type: UserStatusType):
+
+    def _relay_query(self, user_status_type: UserStatusType):
         return """
             mutation {{
               archiveAccount(input: {{ password: "{}"}}) {{
@@ -41,7 +43,6 @@ class ArchiveAccountTestCaseMixin:
         executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert not executed["success"]
         assert executed["errors"]["nonFieldErrors"] == Messages.UNAUTHENTICATED
-
 
     def test_invalid_password(self, db_verified_user_status, wrong_pass_ver_user_status_type):
         """
@@ -105,19 +106,19 @@ class ArchiveAccountTestCaseMixin:
         assert not user.status.archived
 
 
-class TestArchiveAccountTestCase(ArchiveAccountTestCaseMixin, DefaultTestCase):
-    def make_query(self, password=None):
-        return self._relay_query(password)
-
-
-class TestArchiveAccountRelayTestCase(ArchiveAccountTestCaseMixin, RelayTestCase):
-    def make_query(self, password=None):
-        return self._arg_query(password)
-
-class TestAsyncArchiveAccountTestCase(TestArchiveAccountTestCase, ArchiveAccountTestCaseMixin, AsyncDefaultTestCase):
+class TestArgArchiveAccount(ArchiveAccountTestCaseMixin, DefaultTestCase):
     ...
 
 
-class TestAsyncArchiveAccountRelayTestCase(TestArchiveAccountRelayTestCase, ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
+class TestRelayArchiveAccount(ArchiveAccountTestCaseMixin, RelayTestCase):
     ...
 
+
+class TestAsyncArgArchiveAccount(ArchiveAccountTestCaseMixin,
+                                 AsyncDefaultTestCase):
+    ...
+
+
+class TestAsyncRelayArchiveAccount(ArchiveAccountTestCaseMixin,
+                                   AsyncRelayTestCase):
+    ...

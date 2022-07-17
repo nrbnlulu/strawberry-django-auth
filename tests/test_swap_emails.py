@@ -16,7 +16,7 @@ class SwapEmailsCaseMixin:
     def test_swap_emails(self):
         executed = make_request(query=self.query(), user={"user": self.user})
         assert executed["success"]
-        self.assertFalse(executed["errors"])
+        assert not executed["errors"]
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "secondary@email.com")
         self.assertEqual(self.user.status.secondary_email, "bar@email.com")

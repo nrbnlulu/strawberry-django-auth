@@ -76,10 +76,8 @@ class DeleteAccountTestCaseMixin:
 
 
 class TestArgDeleteAccount(DeleteAccountTestCaseMixin, DefaultTestCase):
-    def make_query(self, user_status: UserStatusType):
-        return self._arg_query(user_status)
+    ...
 
 
 class TestRelayDeleteAccountRelay(DeleteAccountTestCaseMixin, RelayTestCase):
-    def make_query(self, user_status: UserStatusType):
-        return self._relay_query(user_status)
+    ...

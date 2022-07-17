@@ -17,8 +17,8 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(self.get_query(), variables)
         assert executed["success"]
         assert not executed["errors"]
-        self.assertTrue(executed["obtainPayload"]["token"])
-        self.assertTrue(executed["obtainPayload"]["refreshToken"])
+        assert executed["obtainPayload"]["token"]
+        assert executed["obtainPayload"]["refreshToken"]
         self.user.refresh_from_db()
         self.assertFalse(self.old_pass == self.user.password)
 
@@ -30,7 +30,7 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(query=self.get_query("wrong"), user=variables)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
-        self.assertFalse(executed["obtainPayload"])
+        assert not executed["obtainPayload"]
         self.user.refresh_from_db()
         self.assertTrue(self.old_pass == self.user.password)
 
@@ -42,7 +42,7 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(query=self.get_query("123", "123"), user=variables)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["newPassword2"])
-        self.assertFalse(executed["obtainPayload"])
+        assert not executed["obtainPayload"]
 
     def test_revoke_refresh_tokens_on_password_change(self):
         executed = self.make_request(query=self.login_query())
@@ -54,8 +54,8 @@ class PasswordChangeTestCaseMixin:
         executed = self.make_request(query=self.get_query(), user=variables)
         assert executed["success"]
         assert not executed["errors"]
-        self.assertTrue(executed["obtainPayload"]["token"])
-        self.assertTrue(executed["obtainPayload"]["refreshToken"])
+        assert executed["obtainPayload"]["token"]
+        assert executed["obtainPayload"]["refreshToken"]
         self.user.refresh_from_db()
         self.assertFalse(self.old_pass == self.user.password)
         refresh_tokens = self.user.refresh_tokens.all()

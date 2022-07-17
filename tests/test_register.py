@@ -19,7 +19,7 @@ class RegisterTestCaseMixin:
         # register
         executed = self.make_request(query=self.register_query("123"))
         assert not executed["success"]
-        self.assertTrue(executed["errors"])
+        assert executed["errors"]
 
     def test_register(self):
         """

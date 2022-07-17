@@ -4,90 +4,16 @@ from gqlauth.constants import Messages
 from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import DefaultTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
+    AsyncRelayTestCase
 
 
 class LoginTestCaseMixin:
     def setUp(self):
         gqlauth_settings.ALLOW_DELETE_ACCOUNT = True
-        self.archived_user = self.register_user(
-            email="gaa@email.com", username="gaa", verified=True, archived=True
-        )
-        self.not_verified_user = self.register_user(
-            email="boo@email.com", username="boo", verified=False
-        )
-        self.verified_user = self.register_user(
-            email="foo@email.com",
-            username="foo",
-            verified=True,
-            secondary_email="secondary@email.com",
-        )
 
-    @staticmethod
-    def gen_captcha():
-        return Captcha.create_captcha()
-
-    def test_archived_user_becomes_active_on_login(self):
-        self.assertEqual(self.archived_user.status.archived, True)
-        query = self.get_query(self.archived_user.username)
-        executed = self.make_request(query=query)
-        self.archived_user.refresh_from_db()
-        self.assertEqual(self.archived_user.status.archived, False)
-        self.assertTrue(executed["success"])
-        self.assertFalse(executed["errors"])
-        self.assertTrue(executed["obtainPayload"]["token"])
-        self.assertTrue(executed["obtainPayload"]["refreshToken"])
-
-    def test_login_username(self):
-        query = self.get_query(self.verified_user.username)
-        executed = self.make_request(query=query)
-        self.assertTrue(executed["success"])
-        self.assertFalse(executed["errors"])
-        self.assertTrue(executed["obtainPayload"]["token"])
-        self.assertTrue(executed["obtainPayload"]["refreshToken"])
-        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
-        query = self.get_query(self.not_verified_user.username)
-        executed = self.make_request(query=query)
-        self.assertTrue(executed["success"])
-        self.assertFalse(executed["errors"])
-        self.assertTrue(executed["obtainPayload"]["token"])
-        self.assertTrue(executed["obtainPayload"]["refreshToken"])
-
-    def test_login_wrong_credentials(self):
-        query = self.get_query("username", "wrong")
-        executed = self.make_request(query=query)
-        self.assertFalse(executed["success"])
-        self.assertTrue(executed["errors"])
-        self.assertFalse(executed["obtainPayload"])
-
-    def test_login_wrong_credentials_2(self):
-        query = self.get_query(self.verified_user.username, "wrongpass")
-        executed = self.make_request(query=query)
-        self.assertFalse(executed["success"])
-        self.assertTrue(executed["errors"])
-        self.assertFalse(executed["obtainPayload"])
-
-    @mark.settings_b
-    def test_not_verified_login_not_verified(self):
-        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = False
-        query = self.get_query(self.not_verified_user.username)
-        executed = self.make_request(query=query)
-        self.assertFalse(executed["success"])
-        assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
-        self.assertFalse(executed["obtainPayload"])
-
-    @mark.settings_b
-    def test_setting_not_verified_allowed_but_with_wrong_pass(self):
-        gqlauth_settings.ALLOW_LOGIN_NOT_VERIFIED = True
-        query = self.get_query(self.not_verified_user.username, "wrongpass")
-        executed = self.make_request(query=query)
-        self.assertFalse(executed["success"])
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.INVALID_CREDENTIALS)
-        self.assertFalse(executed["obtainPayload"])
-
-
-class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
-    def get_query(self, username, password=None):
+    def _arg_query(self, user_status: UserStatusType):
+        user = user_status.user
         cap = self.gen_captcha()
         return """
         mutation {{
@@ -103,16 +29,15 @@ class LoginTestCase(LoginTestCaseMixin, DefaultTestCase):
             }}
 
         """.format(
-            username,
-            password or self.DEFAULT_PASSWORD,
+            user.username,
+            user.password,
             cap.uuid,
             cap.text,
         )
 
-
-class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
-    def get_query(self, username, password=None):
+    def _relay_query(self, user_status: UserStatusType):
         cap = self.gen_captcha()
+        user = user_status.user
         return """
         mutation {{
         tokenAuth(input:{{username: "{}", password: "{}",identifier: "{}", userEntry: "{}"}})  {{
@@ -126,8 +51,91 @@ class LoginRelayTestCase(LoginTestCaseMixin, RelayTestCase):
         }}
 
         """.format(
-            username,
-            password or self.DEFAULT_PASSWORD,
+            user.username,
+            user.password,
             cap.uuid,
             cap.text,
         )
+
+    def test_archived_user_becomes_active_on_login(self, db_archived_user_status):
+        user = db_archived_user_status.user.obj
+        assert user.status.archived
+        query = self.make_query(db_archived_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        user.refresh_from_db()
+        assert not user.status.archived
+        assert executed["success"]
+        assert not executed["errors"]
+        assert executed["obtainPayload"]["token"]
+        assert executed["obtainPayload"]["refreshToken"]
+
+    def test_login_username(self,
+                            db_verified_user_status,
+                            db_unverified_user_status,
+                            allow_login_not_verified,
+                            ):
+        query = self.make_query(db_verified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert executed["success"]
+        assert not executed["errors"]
+        assert executed["obtainPayload"]["token"]
+        assert executed["obtainPayload"]["refreshToken"]
+        query = self.make_query(db_unverified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert executed["success"]
+        assert not executed["errors"]
+        assert executed["obtainPayload"]["token"]
+        assert executed["obtainPayload"]["refreshToken"]
+
+    def test_login_wrong_username(self, db_verified_user_status):
+        db_verified_user_status.user.username = "wrong_username"
+        query = self.make_query(db_verified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]
+        assert not executed["obtainPayload"]
+
+    def test_login_wrong_password(self, db_verified_user_status):
+        db_verified_user_status.user.password = self.WRONG_PASSWORD
+        query = self.make_query(db_verified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]
+        assert not executed["obtainPayload"]
+
+    def test_not_verified_login_not_verified(self, db_unverified_user_status):
+        query = self.make_query(db_unverified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
+        assert not executed["obtainPayload"]
+
+    def test_setting_not_verified_allowed_but_with_wrong_pass(
+        self,
+        db_unverified_user_status,
+        allow_login_not_verified,
+    ):
+        db_unverified_user_status.user.password = self.WRONG_PASSWORD
+        query = self.make_query(db_unverified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.INVALID_CREDENTIALS
+        assert not executed["obtainPayload"]
+
+
+class TestArgLogin(LoginTestCaseMixin, DefaultTestCase):
+    ...
+
+
+class TestRelayLogin(LoginTestCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgArchiveAccount(LoginTestCaseMixin,
+                                 AsyncDefaultTestCase):
+    ...
+
+
+class TestAsyncRelayArchiveAccount(LoginTestCaseMixin,
+                                   AsyncRelayTestCase):
+    ...

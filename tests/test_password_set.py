@@ -34,7 +34,7 @@ class PasswordSetTestCaseMixin:
         query = self.get_query(token, "wrong_pass")
         executed = self.make_request(query=query)
         assert not executed["success"]
-        self.assertTrue(executed["errors"])
+        assert executed["errors"]
         unverified_user.refresh_from_db()
         self.assertFalse(unverified_user_old_pass != unverified_user.password)
 
