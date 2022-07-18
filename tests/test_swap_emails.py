@@ -1,6 +1,6 @@
 from gqlauth.constants import Messages
 
-from .testCases import ArgTestCase, RelayTestCase, UserType
+from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncArgTestCase, AsyncRelayTestCase
 
 
 class SwapEmailsCaseMixin:
@@ -50,9 +50,9 @@ class TestArgSwapEmails(SwapEmailsCaseMixin, ArgTestCase):
 class TestRelaySwapEmail(SwapEmailsCaseMixin, RelayTestCase):
     ...
 
-class TestAsyncArgSwapEmails(SwapEmailsCaseMixin, ArgTestCase):
+class TestAsyncArgSwapEmails(SwapEmailsCaseMixin, AsyncArgTestCase):
     ...
 
 
-class TestAsyncRelaySwapEmail(SwapEmailsCaseMixin, RelayTestCase):
+class TestAsyncRelaySwapEmail(SwapEmailsCaseMixin, AsyncRelayTestCase):
     ...

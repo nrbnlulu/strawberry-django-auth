@@ -2,7 +2,7 @@ from pytest import mark
 
 from gqlauth.constants import Messages
 
-from .testCases import ArgTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncRelayTestCase, AsyncArgTestCase
 
 
 class UpdateAccountTestCaseMixin:
@@ -80,4 +80,12 @@ class TestArgUpdateAccount(UpdateAccountTestCaseMixin, ArgTestCase):
 
 
 class TestRelayUpdateAccount(UpdateAccountTestCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgUpdateAccount(UpdateAccountTestCaseMixin, AsyncArgTestCase):
+    ...
+
+
+class TestAsyncRelayUpdateAccount(UpdateAccountTestCaseMixin, AsyncRelayTestCase):
     ...
