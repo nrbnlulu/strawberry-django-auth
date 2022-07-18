@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 import strawberry
+from strawberry.types import Info
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
 from gqlauth.constants import Messages, TokenAction
@@ -708,6 +709,6 @@ class RemoveSecondaryEmailMixin:
     @classmethod
     @secondary_email_required
     @password_confirmation_required
-    def resolve_mutation(cls, info, **input_):
-        info.context.user.status.remove_secondary_email()
+    def resolve_mutation(cls, info: Info, **input_):
+        g_user(info).status.remove_secondary_email()
         return cls.output(success=True)

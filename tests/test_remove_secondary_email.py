@@ -1,42 +1,46 @@
-from .testCases import ArgTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncDefaultTestCase, \
+    AsyncRelayTestCase
 
 
 class RemoveSecondaryEmailCaseMixin:
-    def setUp(self):
-        self.user = self.register_user(
-            email="bar@email.com",
-            username="bar",
-            verified=True,
-            secondary_email="secondary@email.com",
-        )
-
-    def test_remove_email(self):
-        executed = make_request(query=self.query(), user={"user": self.user})
-        assert executed["success"]
-        assert not executed["errors"]
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.status.secondary_email, None)
-
-
-class RemoveSecondaryEmailCase(RemoveSecondaryEmailCaseMixin, ArgTestCase):
-    def query(self, password=None):
+    def _arg_query(self, user: UserType):
         return """
         mutation {
             removeSecondaryEmail(password: "%s")
                 { success, errors }
             }
         """ % (
-            password or self.DEFAULT_PASSWORD
+                user.password
         )
-
-
-class RemoveSecondaryEmailRelayTestCase(RemoveSecondaryEmailCaseMixin, RelayTestCase):
-    def query(self, password=None):
+    def _relay_query(self, user: UserType):
         return """
         mutation {
         removeSecondaryEmail(input:{ password: "%s"})
             { success, errors  }
         }
         """ % (
-            password or self.DEFAULT_PASSWORD
+                user.password
         )
+
+    def test_remove_email(self, db_verified_user_status):
+        user = db_verified_user_status.user.obj
+        user.status.secondary_email = "secondary@email.com"
+        user.status.save()
+        executed = self.make_request(query=self.make_query(db_verified_user_status.user), user_status=db_verified_user_status)
+        assert executed["success"]
+        assert not executed["errors"]
+        user.refresh_from_db()
+        assert not user.status.secondary_email
+
+
+class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, ArgTestCase):
+    ...
+
+class TestRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, RelayTestCase):
+    ...
+
+class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncDefaultTestCase):
+    ...
+
+class TestRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncRelayTestCase):
+    ...
