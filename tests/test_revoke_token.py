@@ -1,4 +1,4 @@
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 # GRAPHQL_JWT = {
 #     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
@@ -32,7 +32,7 @@ class RevokeTokenTestCaseMixin:
         self.assertFalse(executed["revokePayload"])
 
 
-class RevokeTokenTestCase(RevokeTokenTestCaseMixin, DefaultTestCase):
+class RevokeTokenTestCase(RevokeTokenTestCaseMixin, ArgTestCase):
     def get_revoke_query(self, token):
         return """
         mutation {

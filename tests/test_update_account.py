@@ -2,7 +2,7 @@ from pytest import mark
 
 from gqlauth.constants import Messages
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class UpdateAccountTestCaseMixin:
@@ -157,7 +157,7 @@ class UpdateAccountTestCaseMixin:
         # because there can easily be two persons with the same first and last name
 
 
-class UpdateAccountTestCase(UpdateAccountTestCaseMixin, DefaultTestCase):
+class UpdateAccountTestCase(UpdateAccountTestCaseMixin, ArgTestCase):
     def make_query(self, first_name="firstname"):
         return """
         mutation {

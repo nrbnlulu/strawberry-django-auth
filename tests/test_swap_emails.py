@@ -1,6 +1,6 @@
 from gqlauth.constants import Messages
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class SwapEmailsCaseMixin:
@@ -27,7 +27,7 @@ class SwapEmailsCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.SECONDARY_EMAIL_REQUIRED)
 
 
-class SwapEmailsCase(SwapEmailsCaseMixin, DefaultTestCase):
+class SwapEmailsCase(SwapEmailsCaseMixin, ArgTestCase):
     def query(self, password=None):
         return """
         mutation {

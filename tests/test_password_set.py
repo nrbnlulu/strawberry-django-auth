@@ -3,7 +3,7 @@ import pytest
 from gqlauth.constants import Messages
 from gqlauth.utils import get_token
 
-from .testCases import DefaultTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
 
 
 class PasswordSetTestCaseMixin:
@@ -79,7 +79,7 @@ class PasswordSetTestCaseMixin:
         assert user_status.user.old_password == user.password
 
 
-class TestArgPasswordSet(PasswordSetTestCaseMixin, DefaultTestCase):
+class TestArgPasswordSet(PasswordSetTestCaseMixin, ArgTestCase):
     ...
 
 

@@ -3,7 +3,7 @@ from unittest import mock
 
 from gqlauth.constants import Messages
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class SendPasswordResetEmailTestCaseMixin:
@@ -29,7 +29,7 @@ class SendPasswordResetEmailTestCaseMixin:
         query = self.make_query("baremail.com")
         executed = self.make_request(query=query)
         assert not executed["success"]
-        self.assertTrue(executed["errors"]["email"])
+        assert executed["errors"]["email"]
 
     def test_send_email_valid_email_verified_user(self):
         query = self.make_query("bar@email.com")
@@ -52,10 +52,10 @@ class SendPasswordResetEmailTestCaseMixin:
         query = self.make_query("bar@email.com")
         executed = self.make_request(query=query)
         assert not executed["success"]
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
+        assert executed["errors"]["nonFieldErrors"] == Messages.EMAIL_FAIL
 
 
-class SendPasswordResetEmailTestCase(SendPasswordResetEmailTestCaseMixin, DefaultTestCase):
+class SendPasswordResetEmailTestCase(SendPasswordResetEmailTestCaseMixin, ArgTestCase):
     def make_query(self, email):
         return """
         mutation {

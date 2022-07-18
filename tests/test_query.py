@@ -1,7 +1,7 @@
-from .testCases import DefaultTestCase
+from .testCases import ArgTestCase
 
 
-class TestQueries(DefaultTestCase):
+class TestQueries(ArgTestCase):
 
     def test_me_authenticated(self, db_verified_user_status):
         query = """

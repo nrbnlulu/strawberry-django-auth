@@ -264,7 +264,7 @@ class RelayTestCase(TestBase):
         )
 
 
-class DefaultTestCase(TestBase):
+class ArgTestCase(TestBase):
     RELAY = False
 
     def make_query(self, *args, **kwargs):
@@ -301,7 +301,7 @@ class AsyncTestCaseMixin:
 
 
 
-class AsyncDefaultTestCase(AsyncTestCaseMixin, DefaultTestCase):
+class AsyncDefaultTestCase(AsyncTestCaseMixin, ArgTestCase):
     ...
 
 

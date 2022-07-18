@@ -2,7 +2,7 @@ import dataclasses
 
 from gqlauth.utils import revoke_user_refresh_token
 
-from .testCases import DefaultTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
+from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
     AsyncRelayTestCase
 
 
@@ -131,7 +131,7 @@ class PasswordChangeTestCaseMixin:
             assert token.revoked
 
 
-class TestArgPasswordChange(PasswordChangeTestCaseMixin, DefaultTestCase):
+class TestArgPasswordChange(PasswordChangeTestCaseMixin, ArgTestCase):
     ...
 
 

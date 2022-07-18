@@ -5,7 +5,7 @@ from pytest import mark
 from gqlauth.constants import Messages
 from gqlauth.settings import gqlauth_settings as app_settings
 
-from .testCases import DefaultTestCase, RelayTestCase, UserStatusType
+from .testCases import ArgTestCase, RelayTestCase, UserStatusType
 
 
 class DeleteAccountTestCaseMixin:
@@ -75,7 +75,7 @@ class DeleteAccountTestCaseMixin:
 
 
 
-class TestArgDeleteAccount(DeleteAccountTestCaseMixin, DefaultTestCase):
+class TestArgDeleteAccount(DeleteAccountTestCaseMixin, ArgTestCase):
     ...
 
 

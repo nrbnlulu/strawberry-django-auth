@@ -1,4 +1,4 @@
-from .testCases import DefaultTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
 
 
 class RefreshTokenTestCaseMixin:
@@ -67,7 +67,7 @@ class RefreshTokenTestCaseMixin:
         assert executed["errors"]
 
 
-class TestArgRefreshToken(RefreshTokenTestCaseMixin, DefaultTestCase):
+class TestArgRefreshToken(RefreshTokenTestCaseMixin, ArgTestCase):
     ...
 
 

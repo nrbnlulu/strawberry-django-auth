@@ -2,7 +2,7 @@ from gqlauth.constants import Messages
 from gqlauth.signals import user_verified
 from gqlauth.utils import get_token
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class VerifyAccountCaseMixin:
@@ -43,7 +43,7 @@ class VerifyAccountCaseMixin:
         self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.INVALID_TOKEN)
 
 
-class VerifyAccountCase(VerifyAccountCaseMixin, DefaultTestCase):
+class VerifyAccountCase(VerifyAccountCaseMixin, ArgTestCase):
     def verify_query(self, token):
         return """
         mutation {

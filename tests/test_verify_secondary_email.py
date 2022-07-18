@@ -1,6 +1,6 @@
 from gqlauth.utils import get_token
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class VerifySecondaryEmailCaseMixin:
@@ -30,7 +30,7 @@ class VerifySecondaryEmailCaseMixin:
         assert executed["errors"]
 
 
-class VerifySecondaryEmailCase(VerifySecondaryEmailCaseMixin, DefaultTestCase):
+class VerifySecondaryEmailCase(VerifySecondaryEmailCaseMixin, ArgTestCase):
     def verify_query(self, token):
         return """
         mutation {

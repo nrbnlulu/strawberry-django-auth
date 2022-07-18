@@ -4,7 +4,7 @@ from gqlauth.constants import Messages
 from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 
-from .testCases import DefaultTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
+from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
     AsyncRelayTestCase
 
 
@@ -123,7 +123,7 @@ class LoginTestCaseMixin:
         assert not executed["obtainPayload"]
 
 
-class TestArgLogin(LoginTestCaseMixin, DefaultTestCase):
+class TestArgLogin(LoginTestCaseMixin, ArgTestCase):
     ...
 
 

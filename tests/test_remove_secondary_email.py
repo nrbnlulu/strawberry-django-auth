@@ -1,4 +1,4 @@
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase
 
 
 class RemoveSecondaryEmailCaseMixin:
@@ -18,7 +18,7 @@ class RemoveSecondaryEmailCaseMixin:
         self.assertEqual(self.user.status.secondary_email, None)
 
 
-class RemoveSecondaryEmailCase(RemoveSecondaryEmailCaseMixin, DefaultTestCase):
+class RemoveSecondaryEmailCase(RemoveSecondaryEmailCaseMixin, ArgTestCase):
     def query(self, password=None):
         return """
         mutation {

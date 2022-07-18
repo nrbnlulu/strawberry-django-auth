@@ -2,7 +2,7 @@ from gqlauth.constants import Messages
 from .testCases import (
     AsyncDefaultTestCase,
     AsyncRelayTestCase,
-    DefaultTestCase,
+    ArgTestCase,
     RelayTestCase,
     UserStatusType,
 )
@@ -106,7 +106,7 @@ class ArchiveAccountTestCaseMixin:
         assert not user.status.archived
 
 
-class TestArgArchiveAccount(ArchiveAccountTestCaseMixin, DefaultTestCase):
+class TestArgArchiveAccount(ArchiveAccountTestCaseMixin, ArgTestCase):
     ...
 
 
