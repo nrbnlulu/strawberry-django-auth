@@ -19,6 +19,7 @@
     - removed all the dicts that was flying around and used dataclasses.
     - added async tests for all tests.
     - no longer using request factory, now using test client as it emulates more real life environment.
+
 ### v0.3.16
 
 - Nothing new, adding `PyJWT<=2.0.0` to requirements

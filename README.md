@@ -24,11 +24,11 @@ your implementation*.
 
 ## Features
 
-* [x] [Awesome docs](https://nrbnlulu.github.io/strawberry-django-auth/):tada:
-* [ ] Fully compatible with [Relay](https://github.com/facebook/relay>)
-* [x] Works with **default or custom** user model
-* [x] JWT authentication *(with [strawberry-django-jwt](https://github.com/KundaPanda/strawberry-django-jwt))*
-* [x] User query with filters
+* [x] Awesome docs!
+* [x] Captcha validation
+* [x] Async/Sync supported!
+* [x] Works with ==default or custom== user model
+* [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
 * [x] Resend activation email
@@ -36,13 +36,15 @@ your implementation*.
 * [x] Archive user
 * [x] Permanently delete user or make it inactive
 * [x] Turn archived user active again on login
-* [x] Track user status (archived, verified, secondary email)
+* [x] Track user status <small>(archived, verified, secondary email)</small>
 * [x] Password change
 * [x] Password reset through email
-* [x] Revoke user refresh tokens on account archive/delete/password change/reset
+* [x] Revoke user tokens on account archive/delete/password change/reset
 * [x] All mutations return `success` and `errors`
-* [x] Default email templates *(you will customize though)*
-* [x] Customizable, no lock-in.
+* [x] Default email templates <small>(you will customize though)</small>
+* [x] Customizable, no lock-in
+* [x] Passwordless registration
+* [ ] Currently, only mutation
 
 
 ### Full schema features
