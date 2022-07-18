@@ -38,7 +38,7 @@ if __name__ == "__main__":
         file.write(yaml_string)
 
     # copy files from project root to docs dir
-    files = ["CONTRIBUTORS.md", "CHANGES.md", "CONTRIBUTING.md"]
+    files = ["CONTRIBUTORS.md", "RELEASE.md", "CONTRIBUTING.md"]
     dest = ["contributors.md", "changelog.md", "contributing.md"]
     for index, file in enumerate(files):
         shutil.copyfile(root_dir / file, root_dir / "docs" / dest[index])

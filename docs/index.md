@@ -1,6 +1,6 @@
-# Django GraphQL Auth
-
-[Django](https://github.com/django/django) registration and authentication with GraphQL.
+# Strawberry Graphql Auth
+![Logo](./images/logo.png){ align=center }
+*Registration and authentication with strawberry and django.*
 
 
 [![downloads](https://img.shields.io/pypi/dm/strawberry-django-auth)](https://pypistats.org/packages/strawberry-django-auth)
@@ -16,7 +16,7 @@
 ## About
 
 Abstract all the basic logic of handling user accounts out of your app,
-so you don't need to think about it and can ==get up and running faster==.
+so you don't need to think about it and can ==get you up and running faster==.
 
 No lock-in. When you are ready to implement your own code or this package
 is not up to your expectations , it's ^^easy to extend or switch to
@@ -28,6 +28,7 @@ your implementation^^.
 
 * [x] Awesome docs!
 * [x] Captcha validation
+* [x] Async/Sync supported!
 * [x] Works with ==default or custom== user model
 * [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
 * [x] User registration with email verification
@@ -46,7 +47,6 @@ your implementation^^.
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
 * [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay>)
-* [ ] Async is not supported yet, but you expect this in the close future
 
 ---
 

@@ -7,7 +7,7 @@ from strawberry.types import Info
 from gqlauth.utils import g_user
 
 # project
-from .types import UserFilter, UserType
+from .types_ import UserFilter, UserType
 
 
 @strawberry.django.type(model=get_user_model(), filters=UserFilter)

@@ -3,77 +3,95 @@ from unittest import mock
 
 from gqlauth.constants import Messages
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserType,
+)
 
 
 class SendPasswordResetEmailTestCaseMixin:
-    def setUp(self):
-        self.user1 = self.register_user(email="foo@email.com", username="foo", verified=False)
-        self.user2 = self.register_user(
-            email="bar@email.com",
-            username="bar",
-            verified=True,
-            secondary_email="secondary@email.com",
-        )
-
-    def test_send_email_invalid_email(self):
-        """
-        invalid email should be successful request
-        """
-        query = self.get_query("invalid@email.com")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-
-    def test_invalid_form(self):
-        query = self.get_query("baremail.com")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertTrue(executed["errors"]["email"])
-
-    def test_send_email_valid_email_verified_user(self):
-        query = self.get_query("bar@email.com")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-
-    def test_send_to_secondary_email(self):
-        query = self.get_query("secondary@email.com")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], True)
-        self.assertEqual(executed["errors"], None)
-
-    @mock.patch(
-        "gqlauth.models.UserStatus.send_password_reset_email",
-        mock.MagicMock(side_effect=SMTPException),
-    )
-    def test_send_email_fail_to_send_email(self):
-        mock
-        query = self.get_query("bar@email.com")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertEqual(executed["errors"]["nonFieldErrors"], Messages.EMAIL_FAIL)
-
-
-class SendPasswordResetEmailTestCase(SendPasswordResetEmailTestCaseMixin, DefaultTestCase):
-    def get_query(self, email):
+    def _arg_query(self, user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(email: "%s")
             { success, errors }
         }
         """ % (
-            email
+            user.email
         )
 
-
-class SendPasswordResetEmailRelayTestCase(SendPasswordResetEmailTestCaseMixin, RelayTestCase):
-    def get_query(self, email):
+    def _relay_query(self, user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(input:{ email: "%s"})
             { success, errors  }
         }
         """ % (
-            email
+            user.email
         )
+
+    def test_send_email_invalid_email(self, db_verified_user_status):
+        """
+        invalid email should be successful request.
+        (due to security measures)
+        """
+        user = db_verified_user_status.user
+        user.email = "invalid@email.com"
+        query = self.make_query(user)
+        executed = self.make_request(query=query)
+        assert executed["success"]
+        assert not executed["errors"]
+
+    def test_invalid_form(self, db_verified_user_status):
+        user = db_verified_user_status.user
+        user.email = "invalid * form@email.com"
+        query = self.make_query(user)
+        executed = self.make_request(query=query)
+        assert not executed["success"]
+        assert executed["errors"]["email"]
+
+    def test_send_email_valid_email_verified_user(self, db_verified_user_status):
+        query = self.make_query(db_verified_user_status.user)
+        executed = self.make_request(query=query)
+        assert executed["success"]
+        assert not executed["errors"]
+
+    def test_send_to_secondary_email(self, db_verified_user_status):
+        user = db_verified_user_status.user
+        user.email = "foo@bar.com"
+        user.obj.status.secondary_email = user.email
+        user.obj.status.save()
+
+        query = self.make_query(user)
+        executed = self.make_request(query=query)
+        assert executed["success"]
+        assert not executed["errors"]
+
+    @mock.patch(
+        "gqlauth.models.UserStatus.send_password_reset_email",
+        mock.MagicMock(side_effect=SMTPException),
+    )
+    def test_send_email_fail_to_send_email(self, db_verified_user_status):
+        query = self.make_query(db_verified_user_status.user)
+        executed = self.make_request(query=query)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.EMAIL_FAIL
+
+
+class TestArgSendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, ArgTestCase):
+    ...
+
+
+class TestRelaySendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgSendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, AsyncArgTestCase):
+    ...
+
+
+class TestAsyncRelaySendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, AsyncRelayTestCase):
+    ...

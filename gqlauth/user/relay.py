@@ -10,7 +10,7 @@ from gqlauth.bases.mixins import (
 )
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
-    Cap,
+    Captcha,
     DeleteAccountMixin,
     ObtainJSONWebTokenMixin,
     PasswordChangeMixin,
@@ -30,8 +30,26 @@ from gqlauth.user.resolvers import (
     VerifyTokenMixin,
 )
 
-# fooling isort
-_var_ = Cap
+__all__ = [
+    "Register",
+    "VerifyAccount",
+    "ResendActivationEmail",
+    "SendPasswordResetEmail",
+    "SendSecondaryEmailActivation",
+    "SwapEmails",
+    "RemoveSecondaryEmail",
+    "PasswordSet",
+    "PasswordReset",
+    "ObtainJSONWebToken",
+    "ObtainJSONWebToken",
+    "DeleteAccount",
+    "PasswordChange",
+    "UpdateAccount",
+    "VerifyToken",
+    "RefreshToken",
+    "RevokeToken",
+    "Captcha",
+]
 
 
 class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):

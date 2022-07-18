@@ -1,54 +1,13 @@
+import pytest
+
+from gqlauth.constants import Messages
 from gqlauth.utils import get_token
 
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class PasswordSetTestCaseMixin:
-    def setUp(self):
-        self.user1 = self.register_user(
-            email="gaa@email.com", username="gaa", verified=True, archived=False
-        )
-        self.user1_old_pass = self.user1.password
-
-    def test_already_set_password(self):
-        token = get_token(self.user1, "password_set")
-        query = self.get_query(token)
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertEqual(
-            executed["errors"],
-            {
-                "nonFieldErrors": [
-                    {
-                        "code": "password_already_set",
-                        "message": "Password already set for account.",
-                    }
-                ]
-            },
-        )
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
-
-    def test_set_password_invalid_form(self):
-        token = get_token(self.user1, "password_set")
-        query = self.get_query(token, "wrong_pass")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertTrue(executed["errors"])
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
-
-    def test_set_password_invalid_token(self):
-        query = self.get_query("fake_token")
-        executed = self.make_request(query)
-        self.assertEqual(executed["success"], False)
-        self.assertTrue(executed["errors"]["nonFieldErrors"])
-        self.user1.refresh_from_db()
-        self.assertFalse(self.user1_old_pass != self.user1.password)
-
-
-class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
-    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
+    def _arg_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {{
             passwordSet(
@@ -64,9 +23,7 @@ class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
             new_password2,
         )
 
-
-class PasswordSetRelayTestCase(PasswordSetTestCaseMixin, RelayTestCase):
-    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
+    def _relay_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {{
             passwordSet(
@@ -82,3 +39,57 @@ class PasswordSetRelayTestCase(PasswordSetTestCaseMixin, RelayTestCase):
             new_password1,
             new_password2,
         )
+
+    @pytest.fixture()
+    def set_token_with_unverified_user(self, db_unverified_user_status) -> tuple:
+        db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
+        return (
+            db_unverified_user_status,
+            get_token(db_unverified_user_status.user.obj, "password_set"),
+        )
+
+    def test_already_set_password(self, set_token_with_unverified_user):
+        user_status, token = set_token_with_unverified_user
+        user = user_status.user.obj
+        query = self.make_query(token)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"] == Messages.PASSWORD_ALREADY_SET
+        user.refresh_from_db()
+        assert user_status.user.old_password == user.password
+
+    def test_set_password_invalid_form(self, set_token_with_unverified_user):
+        user_status, token = set_token_with_unverified_user
+        user = user_status.user.obj
+        query = self.make_query(token, "wrong_pass")
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]
+        user.refresh_from_db()
+        assert user_status.user.old_password == user.password
+
+    def test_set_password_invalid_token(self, set_token_with_unverified_user):
+        user_status, _ = set_token_with_unverified_user
+        user = user_status.user.obj
+        query = self.make_query("fake_token")
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert executed["errors"]["nonFieldErrors"]
+        user.refresh_from_db()
+        assert user_status.user.old_password == user.password
+
+
+class TestArgPasswordSet(PasswordSetTestCaseMixin, ArgTestCase):
+    ...
+
+
+class TestRelayPasswordSet(PasswordSetTestCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgPasswordSet(PasswordSetTestCaseMixin, AsyncArgTestCase):
+    ...
+
+
+class TestAsyncRelayPasswordSet(PasswordSetTestCaseMixin, AsyncRelayTestCase):
+    ...

@@ -43,7 +43,7 @@ def generate_text() -> str:
     return app_settings.CAPTCHA_TEXT_FACTORY()
 
 
-def generate_city_captcha():
+def generate_captcha_text():
     text = generate_text()
     image = get_image(text)
     return CaptchaType(image=image, text=text)

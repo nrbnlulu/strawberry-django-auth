@@ -2,8 +2,8 @@ import dataclasses
 import typing
 from typing import Union
 
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-from django.utils.module_loading import import_string
 import strawberry
 from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
@@ -11,14 +11,9 @@ from strawberry.utils.str_converters import to_camel_case
 from gqlauth.bases.exceptions import WrongUsage
 from gqlauth.bases.interfaces import OutputInterface
 from gqlauth.bases.scalars import ExpectedErrorType
-from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.utils import create_strawberry_argument, hide_args_kwargs, list_to_dict
 
 UserModel = get_user_model()
-if app_settings.EMAIL_ASYNC_TASK and isinstance(app_settings.EMAIL_ASYNC_TASK, str):
-    async_email_func = import_string(app_settings.EMAIL_ASYNC_TASK)
-else:
-    async_email_func = None
 
 
 def make_dataclass_helper(
@@ -142,7 +137,10 @@ class DynamicInputMixin:
             cls._meta.inputs = None
         super().__init_subclass__()
 
-    def Field(self):
+    def field(self):
+        raise NotImplementedError()
+
+    async def afield(self):
         raise NotImplementedError()
 
 
@@ -198,12 +196,14 @@ class DynamicArgsMixin:
             cls._meta.args = []
         super().__init_subclass__()
 
-    @property
-    def Field(self):
+    def field(self):
         raise NotImplementedError(
-            "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
+            "This mixin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
         )
+
+    async def afield(self):
+        raise NotImplementedError()
 
 
 class DynamicPayloadMixin:
@@ -212,21 +212,23 @@ class DynamicPayloadMixin:
     payload from a list or dict
     and to merge parent payload to the given payload
 
-    as dict { payload_name: payload_type }
-    as list [inputname,] -> defaults to String
+    as dict { payload_name: payload_type }.
+    as list [output_name,] -> defaults to String.
+    or from the resolve_mutation return annotation.
 
     #usage:
         class SomeMutation(DynamicInputMixin, OutputMixin, MutationMixin):
                 _outputs = [some, non, required, fields]
                 _required_outputs = {some:str, required:int, fields:list}
 
-                def resolve_mutation(self, input):
+                def resolve_mutation(self, input) -> SomeType:
                     logic...
     """
 
     def __init_subclass__(cls, **kwargs):
         _outputs = getattr(cls._meta, "_outputs", [])
         _required_outputs = getattr(cls._meta, "_required_outputs", [])
+
         if _outputs or _required_outputs:
             if not isinstance(_outputs, (dict, list, None)) and _outputs:
                 raise WrongUsage(f"dynamic outputs can be list or dict not{type(_outputs)}")
@@ -269,7 +271,7 @@ class DynamicPayloadMixin:
         super().__init_subclass__()
 
     @property
-    def Field(self):
+    def field(self):
         raise NotImplementedError()(
             "This mimxin has to be mixed with either `DynamicRelayMutationMixin`,"
             " or `DynamicDefaultMutationMixin`"
@@ -279,13 +281,22 @@ class DynamicPayloadMixin:
 class DynamicRelayMutationMixin:
     def __init_subclass__(cls, **kwargs):
         @strawberry.mutation(description=cls.__doc__)
-        def Field(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
+        def field(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
             arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
             return cls.resolve_mutation(info, **arguments)
 
-        if Field.arguments[0].type is None:
-            Field.arguments.pop(0)  # if no input
-        cls.Field = Field
+        if field.arguments[0].type is None:
+            field.arguments.pop(0)  # if no input
+        cls.field = field
+
+        @strawberry.mutation(description=cls.__doc__)
+        async def afield(info: Info, input: cls._meta.inputs) -> cls.output:  # noqa: A002
+            arguments = {f.name: getattr(input, f.name) for f in dataclasses.fields(input)}
+            return await sync_to_async(cls.resolve_mutation)(info, **arguments)
+
+        if afield.arguments[0].type is None:
+            afield.arguments.pop(0)  # if no input
+        cls.afield = afield
 
     def resolve_mutation(self, info, **kwargs):
         raise NotImplementedError()(
@@ -295,16 +306,27 @@ class DynamicRelayMutationMixin:
 
 class DynamicArgsMutationMixin:
     def __init_subclass__(cls, **kwargs):
-        def Field(info: Info, **kwargs) -> cls.output:
+        def field(info: Info, **kwargs) -> cls.output:
             return cls.resolve_mutation(info, **kwargs)
 
-        Field = hide_args_kwargs(Field)
-        Field = strawberry.mutation(Field, description=cls.__doc__)
+        field = hide_args_kwargs(field)
+        field = strawberry.mutation(field, description=cls.__doc__)
 
         for arg_tuple in cls._meta.args:
             arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
-            Field.arguments.append(arg)
-        cls.Field = Field
+            field.arguments.append(arg)
+        cls.field = field
+
+        async def afield(info: Info, **kwargs) -> cls.output:
+            return await sync_to_async(cls.resolve_mutation)(info, **kwargs)
+
+        afield = hide_args_kwargs(afield)
+        afield = strawberry.mutation(afield, description=cls.__doc__)
+
+        for arg_tuple in cls._meta.args:
+            arg = create_strawberry_argument(arg_tuple[0], arg_tuple[0], arg_tuple[1])
+            afield.arguments.append(arg)
+        cls.afield = afield
 
     def resolve_mutation(self, info, *args, **kwargs):
         raise NotImplementedError()(

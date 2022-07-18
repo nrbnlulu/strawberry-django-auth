@@ -10,7 +10,7 @@ from gqlauth.user import relay
 
 @strawberry.type
 class AuthMutation:
-   register = relay.Register.Field
+   register = relay.Register.field
 ```
 ___
 
