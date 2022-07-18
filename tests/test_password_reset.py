@@ -119,9 +119,9 @@ class TestRelyPasswordReset(PasswordResetTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgPasswordChange(PasswordResetTestCaseMixin, AsyncDefaultTestCase):
+class TestAsyncArgPasswordReset(PasswordResetTestCaseMixin, AsyncDefaultTestCase):
     ...
 
 
-class TestAsyncRelayPasswordChange(PasswordResetTestCaseMixin, AsyncRelayTestCase):
+class TestAsyncRelayPasswordReset(PasswordResetTestCaseMixin, AsyncRelayTestCase):
     ...
