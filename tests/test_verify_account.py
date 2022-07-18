@@ -2,7 +2,7 @@ from gqlauth.constants import Messages
 from gqlauth.signals import user_verified
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
 
 
 class VerifyAccountCaseMixin:
@@ -75,9 +75,9 @@ class TestArgVerifyAccount(VerifyAccountCaseMixin, ArgTestCase):
 class TestRelayVerifyAccountRelay(VerifyAccountCaseMixin, RelayTestCase):
     ...
 
-class TestAsyncArgVerifyAccount(VerifyAccountCaseMixin, ArgTestCase):
+class TestAsyncArgVerifyAccount(VerifyAccountCaseMixin, AsyncArgTestCase):
     ...
 
 
-class TestAsyncRelayVerifyAccountRelay(VerifyAccountCaseMixin, RelayTestCase):
+class TestAsyncRelayVerifyAccountRelay(VerifyAccountCaseMixin, AsyncRelayTestCase):
     ...

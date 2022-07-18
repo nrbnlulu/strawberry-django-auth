@@ -1,37 +1,10 @@
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncRelayTestCase, AsyncArgTestCase
 
 
 class VerifySecondaryEmailCaseMixin:
-    def setUp(self):
-        self.user = self.register_user(email="bar@email.com", username="bar", verified=True)
-        self.user2 = self.register_user(email="foo@email.com", username="foo", verified=True)
-
-    def test_verify_secondary_email(self):
-        token = get_token(
-            self.user,
-            "activation_secondary_email",
-            secondary_email="new_email@email.com",
-        )
-        executed = self.make_request(self.verify_query(token))
-        assert executed["success"]
-        assert not executed["errors"]
-
-    def test_invalid_token(self):
-        executed = self.make_request(self.verify_query("faketoken"))
-        assert not executed["success"]
-        assert executed["errors"]
-
-    def test_email_in_use(self):
-        token = get_token(self.user, "activation_secondary_email", secondary_email="foo@email.com")
-        executed = self.make_request(self.verify_query(token))
-        assert not executed["success"]
-        assert executed["errors"]
-
-
-class VerifySecondaryEmailCase(VerifySecondaryEmailCaseMixin, ArgTestCase):
-    def verify_query(self, token):
+    def _arg_query(self, token):
         return """
         mutation {
             verifySecondaryEmail(token: "%s")
@@ -41,14 +14,55 @@ class VerifySecondaryEmailCase(VerifySecondaryEmailCaseMixin, ArgTestCase):
             token
         )
 
-
-class VerifySecondaryEmailRelayTestCase(VerifySecondaryEmailCaseMixin, RelayTestCase):
-    def verify_query(self, token):
+    def _relay_query(self, token):
         return """
         mutation {
         verifySecondaryEmail(input:{ token: "%s"})
             { success, errors  }
         }
-        """ % (
+         """ % (
             token
         )
+    
+    def test_verify_secondary_email(self, db_verified_user_status):
+
+        token = get_token(
+            db_verified_user_status.user.obj,
+            "activation_secondary_email",
+            secondary_email="new_email@email.com",
+        )
+        executed = self.make_request(query=self.make_query(token))
+        assert executed["success"]
+        assert not executed["errors"]
+
+    def test_invalid_token(self):
+        executed = self.make_request(query=self.make_query("fake-token"))
+        assert not executed["success"]
+        assert executed["errors"]
+
+    def test_email_in_use(self, db_verified_user_status, db_unverified_user_status):
+        # just for having an "in use email"
+        user_obj2 = db_unverified_user_status.user.obj
+        user_obj2.status.verified = True
+        user_obj2.save()
+        user_obj = db_verified_user_status.user.obj
+        token = get_token(user_obj, "activation_secondary_email", secondary_email=user_obj2.email)
+        executed = self.make_request(query=self.make_query(token))
+        assert not executed["success"]
+        assert executed["errors"]
+
+
+class TestArgVerifySecondaryEmail(VerifySecondaryEmailCaseMixin, ArgTestCase):
+    ...
+
+
+class TestRelayVerifySecondaryEmail(VerifySecondaryEmailCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgVerifySecondaryEmail(VerifySecondaryEmailCaseMixin, AsyncArgTestCase):
+    ...
+
+
+class TestAsyncRelayVerifySecondaryEmail(VerifySecondaryEmailCaseMixin, AsyncRelayTestCase):
+    ...
