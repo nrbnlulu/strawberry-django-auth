@@ -63,7 +63,7 @@ jobs:
     needs: [lint, tests]
     if: ${{ needs.lint.result == 'success' &&
       needs.tests.result == 'success' &&
-      github.event.action == 'released' }}
+      github.event.action == 'published' }}
 
     steps:
       - uses: actions/checkout@v2
