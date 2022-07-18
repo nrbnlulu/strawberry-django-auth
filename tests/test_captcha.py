@@ -1,15 +1,15 @@
 from unittest.mock import MagicMock
 from uuid import uuid4
 
-import pytest
 from django.contrib.auth import get_user_model
+import pytest
 
 from gqlauth.constants import Messages
 from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 from gqlauth.signals import user_registered
 
-from .testCases import RelayTestCase, AsyncRelayTestCase
+from .testCases import AsyncRelayTestCase, RelayTestCase
 
 
 class CaptchaTestCaseMixin:
@@ -28,16 +28,19 @@ class CaptchaTestCaseMixin:
 
     def test_register_user_require_captcha_validation(self):
         try:
-            self.make_request(query=self.register_query_without_cap_fields(username="fdsafsdfgv"),
-                              user_status=None)
+            self.make_request(
+                query=self.register_query_without_cap_fields(username="fdsafsdfgv"),
+                user_status=None,
+            )
         except Exception as e:
             assert "identifier' of required type 'UUID!' was not provided." in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_login_require_captcha_validation(self):
         try:
-            self.make_request(query=self.login_query_without_cap_fields(username="fake"),
-                              user_status=None)
+            self.make_request(
+                query=self.login_query_without_cap_fields(username="fake"), user_status=None
+            )
         except Exception as e:
             assert "identifier' of required type 'String!' was not provided" in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
@@ -47,21 +50,22 @@ class CaptchaTestCaseMixin:
         assert res["errors"]["captcha"] == Messages.CAPTCHA_INVALID
 
     def test_register_wrong_uuid(self, cap):
-        res = self.make_request(query=self.register_query(uuid=uuid4(), input_=cap.text),
-                                user_status=None)
+        res = self.make_request(
+            query=self.register_query(uuid=uuid4(), input_=cap.text), user_status=None
+        )
         assert res["errors"]["captcha"] == Messages.CAPTCHA_EXPIRED
 
     def test_register_correct_captcha_create_user(self, cap, username="test_captcha"):
         handler = MagicMock()
         user_registered.connect(handler)
-        self.make_request(query=
-        self.register_query(
-            username=username,
-            password="SuperSecureP@ssw0rd",
-            uuid=cap.uuid,
-            input_=cap.text,
-        ),
-            user_status=None
+        self.make_request(
+            query=self.register_query(
+                username=username,
+                password="SuperSecureP@ssw0rd",
+                uuid=cap.uuid,
+                input_=cap.text,
+            ),
+            user_status=None,
         )
         user = get_user_model().objects.get(username=username)
         handler.assert_called_once()
@@ -69,8 +73,10 @@ class CaptchaTestCaseMixin:
 
     def test_login_user_require_captcha_validation(self):
         try:
-            self.make_request(query=self.register_query_without_cap_fields(username="fdsafsdfgv"),
-                              user_status=None)
+            self.make_request(
+                query=self.register_query_without_cap_fields(username="fdsafsdfgv"),
+                user_status=None,
+            )
         except Exception as e:
             assert "identifier' of required type 'UUID!' was not provided" in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
@@ -158,6 +164,6 @@ class CaptchaTestCaseMixin:
 class TestCaptchaRelay(CaptchaTestCaseMixin, RelayTestCase):
     ...
 
+
 class TestCaptchaAsync(CaptchaTestCaseMixin, AsyncRelayTestCase):
     ...
-

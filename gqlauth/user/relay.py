@@ -10,6 +10,7 @@ from gqlauth.bases.mixins import (
 )
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
+    Captcha,
     DeleteAccountMixin,
     ObtainJSONWebTokenMixin,
     PasswordChangeMixin,
@@ -27,16 +28,29 @@ from gqlauth.user.resolvers import (
     VerifyAccountMixin,
     VerifySecondaryEmailMixin,
     VerifyTokenMixin,
-    Captcha
 )
 
+__all__ = [
+    "Register",
+    "VerifyAccount",
+    "ResendActivationEmail",
+    "SendPasswordResetEmail",
+    "SendSecondaryEmailActivation",
+    "SwapEmails",
+    "RemoveSecondaryEmail",
+    "PasswordSet",
+    "PasswordReset",
+    "ObtainJSONWebToken",
+    "ObtainJSONWebToken",
+    "DeleteAccount",
+    "PasswordChange",
+    "UpdateAccount",
+    "VerifyToken",
+    "RefreshToken",
+    "RevokeToken",
+    "Captcha",
+]
 
-__all__ = ['Register', 'VerifyAccount', 'ResendActivationEmail', 'SendPasswordResetEmail',
-           'SendSecondaryEmailActivation', 'SwapEmails', 'RemoveSecondaryEmail', 'PasswordSet',
-           'PasswordReset', 'ObtainJSONWebToken', 'ObtainJSONWebToken', 'DeleteAccount',
-           'PasswordChange', 'UpdateAccount', 'VerifyToken', 'RefreshToken', 'RevokeToken',
-           'Captcha'
-           ]
 
 class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):
     __doc__ = RegisterMixin.__doc__

@@ -1,11 +1,13 @@
-from pytest import mark
-
 from gqlauth.constants import Messages
-from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 
-from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncArgTestCase, \
-    AsyncRelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserStatusType,
+)
 
 
 class LoginTestCaseMixin:
@@ -69,11 +71,12 @@ class LoginTestCaseMixin:
         assert executed["obtainPayload"]["token"]
         assert executed["obtainPayload"]["refreshToken"]
 
-    def test_login_username(self,
-                            db_verified_user_status,
-                            db_unverified_user_status,
-                            allow_login_not_verified,
-                            ):
+    def test_login_username(
+        self,
+        db_verified_user_status,
+        db_unverified_user_status,
+        allow_login_not_verified,
+    ):
         query = self.make_query(db_verified_user_status)
         executed = self.make_request(query=query, no_login_query=True)
         assert executed["success"]
@@ -131,11 +134,9 @@ class TestRelayLogin(LoginTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgArchiveAccount(LoginTestCaseMixin,
-                                 AsyncArgTestCase):
+class TestAsyncArgArchiveAccount(LoginTestCaseMixin, AsyncArgTestCase):
     ...
 
 
-class TestAsyncRelayArchiveAccount(LoginTestCaseMixin,
-                                   AsyncRelayTestCase):
+class TestAsyncRelayArchiveAccount(LoginTestCaseMixin, AsyncRelayTestCase):
     ...

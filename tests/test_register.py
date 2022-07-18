@@ -2,23 +2,28 @@ from smtplib import SMTPException
 from unittest import mock
 
 from django.contrib.auth import get_user_model
-from pytest import mark
 
 from gqlauth.constants import Messages
 from gqlauth.signals import user_registered
 
-from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncArgTestCase, \
-    AsyncRelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserType,
+)
 
 
 class RegisterTestCaseMixin:
     class RegisterUserType(UserType):
         password_2: str = None
+
         def __post_init__(self):
             if not self.password_2:
                 self.password_2 = self.password
 
-    def _arg_query(self,user: UserType):
+    def _arg_query(self, user: UserType):
         cap = self.gen_captcha()
         return """
         mutation {{
@@ -41,7 +46,7 @@ class RegisterTestCaseMixin:
             cap.text,
         )
 
-    def _relay_query(self,user: UserType):
+    def _relay_query(self, user: UserType):
         cap = self.gen_captcha()
         return """
             mutation {{
@@ -61,7 +66,6 @@ class RegisterTestCaseMixin:
             cap.uuid,
             cap.text,
         )
-
 
     def test_register_invalid_password_validation(self):
         """
@@ -85,6 +89,7 @@ class RegisterTestCaseMixin:
             assert user.id is not None
             nonlocal signal_received
             signal_received = True
+
         user_registered.connect(receive_signal)
 
         us = self.verified_user_status_type().user
@@ -118,6 +123,7 @@ class RegisterTestCaseMixin:
     )
     def test_register_email_send_fail(self):
         from gqlauth.settings import gqlauth_settings as app_settings
+
         us = self.verified_user_status_type().user
         app_settings.SEND_ACTIVATION_EMAIL = True
         executed = self.make_request(query=self.make_query(us))
@@ -140,4 +146,3 @@ class TestAsyncArgRegister(RegisterTestCaseMixin, AsyncArgTestCase):
 
 class TestAsyncRelayRegister(RegisterTestCaseMixin, AsyncRelayTestCase):
     ...
-

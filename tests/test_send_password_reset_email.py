@@ -3,7 +3,13 @@ from unittest import mock
 
 from gqlauth.constants import Messages
 
-from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserType,
+)
 
 
 class SendPasswordResetEmailTestCaseMixin:
@@ -81,6 +87,7 @@ class TestArgSendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, ArgTest
 
 class TestRelaySendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, RelayTestCase):
     ...
+
 
 class TestAsyncArgSendPasswordResetEmail(SendPasswordResetEmailTestCaseMixin, AsyncArgTestCase):
     ...

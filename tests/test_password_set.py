@@ -3,7 +3,7 @@ import pytest
 from gqlauth.constants import Messages
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class PasswordSetTestCaseMixin:
@@ -39,13 +39,13 @@ class PasswordSetTestCaseMixin:
             new_password1,
             new_password2,
         )
-    
+
     @pytest.fixture()
     def set_token_with_unverified_user(self, db_unverified_user_status) -> tuple:
         db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
         return (
-                db_unverified_user_status,
-                get_token(db_unverified_user_status.user.obj, "password_set")
+            db_unverified_user_status,
+            get_token(db_unverified_user_status.user.obj, "password_set"),
         )
 
     def test_already_set_password(self, set_token_with_unverified_user):
@@ -54,7 +54,7 @@ class PasswordSetTestCaseMixin:
         query = self.make_query(token)
         executed = self.make_request(query=query, no_login_query=True)
         assert not executed["success"]
-        assert executed["errors"]['nonFieldErrors'] == Messages.PASSWORD_ALREADY_SET
+        assert executed["errors"]["nonFieldErrors"] == Messages.PASSWORD_ALREADY_SET
         user.refresh_from_db()
         assert user_status.user.old_password == user.password
 
@@ -85,6 +85,7 @@ class TestArgPasswordSet(PasswordSetTestCaseMixin, ArgTestCase):
 
 class TestRelayPasswordSet(PasswordSetTestCaseMixin, RelayTestCase):
     ...
+
 
 class TestAsyncArgPasswordSet(PasswordSetTestCaseMixin, AsyncArgTestCase):
     ...

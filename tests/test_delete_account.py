@@ -1,15 +1,13 @@
-import pytest
 from django.core.exceptions import ObjectDoesNotExist
+import pytest
 from pytest import mark
 
 from gqlauth.constants import Messages
-from gqlauth.settings import gqlauth_settings as app_settings
 
 from .testCases import ArgTestCase, RelayTestCase, UserStatusType
 
 
 class DeleteAccountTestCaseMixin:
-
     def _arg_query(self, user_status: UserStatusType):
         return """
             mutation {{
@@ -18,7 +16,7 @@ class DeleteAccountTestCaseMixin:
               }}
             }}
         """.format(
-           user_status.user.password
+            user_status.user.password
         )
 
     def _relay_query(self, user_status: UserStatusType):
@@ -29,7 +27,7 @@ class DeleteAccountTestCaseMixin:
               }}
             }}
         """.format(
-           user_status.user.password
+            user_status.user.password
         )
 
     def test_not_authenticated(self, db_verified_user_status):
@@ -49,10 +47,10 @@ class DeleteAccountTestCaseMixin:
         assert executed["errors"]["password"] == Messages.INVALID_PASSWORD
 
     def test_not_verified_user(
-            self,
-            allow_login_not_verified,
-            db_unverified_user_status,
-            wrong_pass_unverified_user_status_type
+        self,
+        allow_login_not_verified,
+        db_unverified_user_status,
+        wrong_pass_unverified_user_status_type,
     ):
         query = self.make_query(wrong_pass_unverified_user_status_type)
         user = db_unverified_user_status.user.obj
@@ -72,7 +70,6 @@ class DeleteAccountTestCaseMixin:
         assert not executed["errors"]
         with pytest.raises(ObjectDoesNotExist):
             user.refresh_from_db()
-
 
 
 class TestArgDeleteAccount(DeleteAccountTestCaseMixin, ArgTestCase):

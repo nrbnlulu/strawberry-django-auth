@@ -5,7 +5,7 @@
 
 - **New features**
   - async support using ASGI, the resolvers are still sync because of django's ORM
-  - 
+  -
 - **API changes**
   - Previously, following the graphene version, we did i.e ` token_auth = relay.ObtainJSONWebToken.field`,\
     In order to respect pep8 (since it is a function)\
@@ -16,7 +16,7 @@
 
 - **Development Notes**
   - Major refactoring of how the test work:
-    - removed all the dicts that was flying around and used dataclasses. 
+    - removed all the dicts that was flying around and used dataclasses.
     - added async tests for all tests.
     - no longer using request factory, now using test client as it emulates more real life environment.
 ### v0.3.16

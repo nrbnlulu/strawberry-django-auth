@@ -1,4 +1,4 @@
-from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class RefreshTokenTestCaseMixin:

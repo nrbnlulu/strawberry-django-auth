@@ -1,15 +1,15 @@
 from gqlauth.constants import Messages
+
 from .testCases import (
+    ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
-    ArgTestCase,
     RelayTestCase,
     UserStatusType,
 )
 
 
 class ArchiveAccountTestCaseMixin:
-
     def _arg_query(self, user_status_type: UserStatusType):
         return """
             mutation {{
@@ -90,10 +90,12 @@ class ArchiveAccountTestCaseMixin:
         for token in refresh_tokens:
             assert token.revoked
 
-    def test_not_verified_user(self,
-                               allow_login_not_verified,
-                               db_unverified_user_status,
-                               wrong_pass_unverified_user_status_type):
+    def test_not_verified_user(
+        self,
+        allow_login_not_verified,
+        db_unverified_user_status,
+        wrong_pass_unverified_user_status_type,
+    ):
         """
         try to archive account
         """
@@ -114,11 +116,9 @@ class TestRelayArchiveAccount(ArchiveAccountTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgArchiveAccount(ArchiveAccountTestCaseMixin,
-                                 AsyncArgTestCase):
+class TestAsyncArgArchiveAccount(ArchiveAccountTestCaseMixin, AsyncArgTestCase):
     ...
 
 
-class TestAsyncRelayArchiveAccount(ArchiveAccountTestCaseMixin,
-                                   AsyncRelayTestCase):
+class TestAsyncRelayArchiveAccount(ArchiveAccountTestCaseMixin, AsyncRelayTestCase):
     ...

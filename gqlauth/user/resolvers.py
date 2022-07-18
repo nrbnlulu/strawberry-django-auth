@@ -31,7 +31,8 @@ from gqlauth.forms import (
     RegisterForm,
     UpdateAccountForm,
 )
-from gqlauth.models import Captcha as CaptchaModel, UserStatus
+from gqlauth.models import Captcha as CaptchaModel
+from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.shortcuts import get_user_by_email, get_user_to_login
 from gqlauth.signals import user_registered, user_verified
@@ -54,8 +55,9 @@ class Captcha:
     And uuid representing the captcha id in the database.
     When you will try to log in or register You will
     need submit that uuid With the user input.
-    **The captcha will be invoked when the timout expires**.
+    **The captcha will be invoked when the timeout expires**.
     """
+
     @strawberry.mutation(description=__doc__)
     def field(self) -> CaptchaType:
 
@@ -65,7 +67,6 @@ class Captcha:
     @sync_to_async
     def afield(self) -> CaptchaType:
         return CaptchaModel.create_captcha()
-
 
 
 class RegisterMixin:

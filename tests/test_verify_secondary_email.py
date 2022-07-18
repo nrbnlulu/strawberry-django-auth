@@ -1,6 +1,6 @@
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncRelayTestCase, AsyncArgTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class VerifySecondaryEmailCaseMixin:
@@ -23,7 +23,7 @@ class VerifySecondaryEmailCaseMixin:
          """ % (
             token
         )
-    
+
     def test_verify_secondary_email(self, db_verified_user_status):
 
         token = get_token(

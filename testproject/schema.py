@@ -1,5 +1,3 @@
-from typing import List
-
 import strawberry
 from strawberry.tools import merge_types
 from strawberry_django_jwt.middleware import JSONWebTokenMiddleware

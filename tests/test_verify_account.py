@@ -2,7 +2,7 @@ from gqlauth.constants import Messages
 from gqlauth.signals import user_verified
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class VerifyAccountCaseMixin:
@@ -57,7 +57,7 @@ class VerifyAccountCaseMixin:
     def test_invalid_token(self):
         executed = self.make_request(self.make_query("faketoken"))
         assert not executed["success"]
-        executed["errors"]["nonFieldErrors"] == Messages.INVALID_TOKEN
+        assert executed["errors"]["nonFieldErrors"] == Messages.INVALID_TOKEN
 
     def test_other_token(self, db_unverified_user_status):
         user_status = db_unverified_user_status
@@ -65,7 +65,7 @@ class VerifyAccountCaseMixin:
         token = get_token(user_obj, "password_reset")
         executed = self.make_request(self.make_query(token))
         assert not executed["success"]
-        executed["errors"]["nonFieldErrors"] == Messages.INVALID_TOKEN
+        assert executed["errors"]["nonFieldErrors"] == Messages.INVALID_TOKEN
 
 
 class TestArgVerifyAccount(VerifyAccountCaseMixin, ArgTestCase):
@@ -74,6 +74,7 @@ class TestArgVerifyAccount(VerifyAccountCaseMixin, ArgTestCase):
 
 class TestRelayVerifyAccountRelay(VerifyAccountCaseMixin, RelayTestCase):
     ...
+
 
 class TestAsyncArgVerifyAccount(VerifyAccountCaseMixin, AsyncArgTestCase):
     ...

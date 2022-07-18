@@ -1,4 +1,4 @@
-from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class RevokeTokenTestCaseMixin:
@@ -17,7 +17,7 @@ class RevokeTokenTestCaseMixin:
         """ % (
             token
         )
-    
+
     def _relay_query(self, token):
         return """
         mutation {
@@ -56,11 +56,14 @@ class RevokeTokenTestCaseMixin:
 class TestArgRevokeToken(RevokeTokenTestCaseMixin, ArgTestCase):
     ...
 
+
 class TestRelayVerifyToken(RevokeTokenTestCaseMixin, RelayTestCase):
     ...
 
+
 class TestAsyncArgRevokeToken(RevokeTokenTestCaseMixin, AsyncArgTestCase):
     ...
+
 
 class TestAsyncRelayVerifyToken(RevokeTokenTestCaseMixin, AsyncRelayTestCase):
     ...

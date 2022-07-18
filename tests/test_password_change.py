@@ -1,9 +1,12 @@
 import dataclasses
 
-from gqlauth.utils import revoke_user_refresh_token
-
-from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncArgTestCase, \
-    AsyncRelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserStatusType,
+)
 
 
 class PasswordChangeTestCaseMixin:
@@ -76,7 +79,7 @@ class PasswordChangeTestCaseMixin:
         assert executed["obtainPayload"]["token"]
         assert executed["obtainPayload"]["refreshToken"]
         user.refresh_from_db()
-        assert not db_verified_user_status.user.password == user.password
+        assert db_verified_user_status.user.password != user.password
 
     def test_mismatch_passwords(self, db_verified_user_status):
         """
@@ -97,7 +100,7 @@ class PasswordChangeTestCaseMixin:
         """
         easy password
         """
-        simple_password = self.PasswordChangeForm('123', '123')
+        simple_password = self.PasswordChangeForm("123", "123")
         query = self.make_query(user_status=db_verified_user_status, password_form=simple_password)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
         assert not executed["success"]
@@ -122,7 +125,7 @@ class PasswordChangeTestCaseMixin:
         assert executed["obtainPayload"]["token"]
         assert executed["obtainPayload"]["refreshToken"]
         user.refresh_from_db()
-        assert not old_password == user.password
+        assert old_password != user.password
         refresh_tokens = user.refresh_tokens.all()
         assert refresh_tokens
         # the last token is not revoked
@@ -137,6 +140,7 @@ class TestArgPasswordChange(PasswordChangeTestCaseMixin, ArgTestCase):
 
 class TestRelayPasswordChange(PasswordChangeTestCaseMixin, RelayTestCase):
     ...
+
 
 class TestAsyncArgPasswordChange(PasswordChangeTestCaseMixin, AsyncArgTestCase):
     ...

@@ -104,6 +104,7 @@ class UserStatus(models.Model):
     """
     A helper model that handles user account stuff.
     """
+
     user = models.OneToOneField(
         django_settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="status"
     )

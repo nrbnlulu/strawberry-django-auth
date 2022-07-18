@@ -10,11 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 import sys
-import os
 
 from gqlauth.settings_type import GqlAuthSettings
+
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 cwd = Path(__file__).parent

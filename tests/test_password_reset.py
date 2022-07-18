@@ -2,7 +2,7 @@ import pytest
 
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 
 
 class PasswordResetTestCaseMixin:
@@ -43,8 +43,8 @@ class PasswordResetTestCaseMixin:
     def reset_token_with_unverified_user(self, db_unverified_user_status) -> tuple:
         db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
         return (
-                db_unverified_user_status,
-                get_token(db_unverified_user_status.user.obj, "password_reset")
+            db_unverified_user_status,
+            get_token(db_unverified_user_status.user.obj, "password_reset"),
         )
 
     def test_reset_password(self, reset_token_with_unverified_user):
@@ -78,7 +78,9 @@ class PasswordResetTestCaseMixin:
         user.refresh_from_db()
         assert user_status.user.old_password == user.password
 
-    def test_revoke_refresh_tokens_on_password_reset(self, allow_login_not_verified, reset_token_with_unverified_user):
+    def test_revoke_refresh_tokens_on_password_reset(
+        self, allow_login_not_verified, reset_token_with_unverified_user
+    ):
         user_status, reset_token = reset_token_with_unverified_user
         user = user_status.user.obj
         self.get_tokens(user_status)
