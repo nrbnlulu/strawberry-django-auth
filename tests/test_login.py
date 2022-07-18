@@ -4,7 +4,7 @@ from gqlauth.constants import Messages
 from gqlauth.models import Captcha
 from gqlauth.settings import gqlauth_settings
 
-from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncDefaultTestCase, \
+from .testCases import ArgTestCase, RelayTestCase, UserStatusType, AsyncArgTestCase, \
     AsyncRelayTestCase
 
 
@@ -132,7 +132,7 @@ class TestRelayLogin(LoginTestCaseMixin, RelayTestCase):
 
 
 class TestAsyncArgArchiveAccount(LoginTestCaseMixin,
-                                 AsyncDefaultTestCase):
+                                 AsyncArgTestCase):
     ...
 
 

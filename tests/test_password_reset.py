@@ -2,7 +2,7 @@ import pytest
 
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
 
 
 class PasswordResetTestCaseMixin:
@@ -119,7 +119,7 @@ class TestRelyPasswordReset(PasswordResetTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgPasswordReset(PasswordResetTestCaseMixin, AsyncDefaultTestCase):
+class TestAsyncArgPasswordReset(PasswordResetTestCaseMixin, AsyncArgTestCase):
     ...
 
 

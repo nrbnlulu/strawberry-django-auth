@@ -1,6 +1,6 @@
 from gqlauth.constants import Messages
 from .testCases import (
-    AsyncDefaultTestCase,
+    AsyncArgTestCase,
     AsyncRelayTestCase,
     ArgTestCase,
     RelayTestCase,
@@ -115,7 +115,7 @@ class TestRelayArchiveAccount(ArchiveAccountTestCaseMixin, RelayTestCase):
 
 
 class TestAsyncArgArchiveAccount(ArchiveAccountTestCaseMixin,
-                                 AsyncDefaultTestCase):
+                                 AsyncArgTestCase):
     ...
 
 

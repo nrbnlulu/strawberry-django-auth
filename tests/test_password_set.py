@@ -3,7 +3,7 @@ import pytest
 from gqlauth.constants import Messages
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
 
 
 class PasswordSetTestCaseMixin:
@@ -86,7 +86,7 @@ class TestArgPasswordSet(PasswordSetTestCaseMixin, ArgTestCase):
 class TestRelayPasswordSet(PasswordSetTestCaseMixin, RelayTestCase):
     ...
 
-class TestAsyncArgPasswordSet(PasswordSetTestCaseMixin, AsyncDefaultTestCase):
+class TestAsyncArgPasswordSet(PasswordSetTestCaseMixin, AsyncArgTestCase):
     ...
 
 

@@ -301,7 +301,7 @@ class AsyncTestCaseMixin:
 
 
 
-class AsyncDefaultTestCase(AsyncTestCaseMixin, ArgTestCase):
+class AsyncArgTestCase(AsyncTestCaseMixin, ArgTestCase):
     ...
 
 

@@ -1,4 +1,4 @@
-from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncDefaultTestCase, \
+from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncArgTestCase, \
     AsyncRelayTestCase
 
 
@@ -39,7 +39,7 @@ class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, ArgTestCase):
 class TestRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, RelayTestCase):
     ...
 
-class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncDefaultTestCase):
+class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncArgTestCase):
     ...
 
 class TestRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncRelayTestCase):

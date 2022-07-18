@@ -1,4 +1,4 @@
-from .testCases import ArgTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
+from .testCases import ArgTestCase, RelayTestCase, AsyncArgTestCase, AsyncRelayTestCase
 
 
 class RefreshTokenTestCaseMixin:
@@ -75,7 +75,7 @@ class TestRelayRefreshToken(RefreshTokenTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgRefreshToken(RefreshTokenTestCaseMixin, AsyncDefaultTestCase):
+class TestAsyncArgRefreshToken(RefreshTokenTestCaseMixin, AsyncArgTestCase):
     ...
 
 

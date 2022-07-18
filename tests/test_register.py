@@ -7,7 +7,7 @@ from pytest import mark
 from gqlauth.constants import Messages
 from gqlauth.signals import user_registered
 
-from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncDefaultTestCase, \
+from .testCases import ArgTestCase, RelayTestCase, UserType, AsyncArgTestCase, \
     AsyncRelayTestCase
 
 
@@ -134,7 +134,7 @@ class TestRelayRegister(RegisterTestCaseMixin, RelayTestCase):
     ...
 
 
-class TestAsyncArgRegister(RegisterTestCaseMixin, AsyncDefaultTestCase):
+class TestAsyncArgRegister(RegisterTestCaseMixin, AsyncArgTestCase):
     ...
 
 
