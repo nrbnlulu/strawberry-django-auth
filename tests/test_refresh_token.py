@@ -1,34 +1,8 @@
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import DefaultTestCase, RelayTestCase, AsyncDefaultTestCase, AsyncRelayTestCase
 
 
 class RefreshTokenTestCaseMixin:
-    def setUp(self):
-        self.user = self.register_user(
-            email="foo@email.com", username="foo", verified=True, archived=False
-        )
-
-    def test_refresh_token(self):
-        query = self.login_query()
-        executed = self.make_request(query=query)
-        assert executed["obtainPayload"]["refreshToken"]
-
-        query = self.get_verify_query(executed["obtainPayload"]["refreshToken"])
-        executed = self.make_request(query=query)
-        assert executed["success"]
-        self.assertTrue(executed["refreshPayload"]["refreshToken"])
-        self.assertTrue(executed["refreshPayload"]["payload"])
-        assert not executed["errors"]
-
-    def test_invalid_token(self):
-        query = self.get_verify_query("invalid_token")
-        executed = self.make_request(query=query)
-        assert not executed["success"]
-        self.assertFalse(executed["refreshPayload"])
-        assert executed["errors"]
-
-
-class RefreshTokenTestCase(RefreshTokenTestCaseMixin, DefaultTestCase):
-    def get_verify_query(self, token):
+    def _arg_query(self, token: str):
         return """
         mutation {
         refreshToken(refreshToken: "%s" )
@@ -51,9 +25,7 @@ class RefreshTokenTestCase(RefreshTokenTestCaseMixin, DefaultTestCase):
             token
         )
 
-
-class RefreshTokenRelayTestCase(RefreshTokenTestCaseMixin, RelayTestCase):
-    def get_verify_query(self, token):
+    def _relay_query(self, token: str):
         return """
         mutation {
         refreshToken(input: {refreshToken: "%s"} )
@@ -75,3 +47,37 @@ class RefreshTokenRelayTestCase(RefreshTokenTestCaseMixin, RelayTestCase):
         """ % (
             token
         )
+
+    def test_refresh_token(self, db_verified_user_status):
+        query = self.login_query(user_status=db_verified_user_status)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert (token := executed["obtainPayload"]["refreshToken"])
+        query = self.make_query(token)
+        executed = self.make_request(query=query)
+        assert executed["success"]
+        assert executed["refreshPayload"]["refreshToken"]
+        assert executed["refreshPayload"]["payload"]
+        assert not executed["errors"]
+
+    def test_invalid_token(self):
+        query = self.make_query("invalid_token")
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed["success"]
+        assert not executed["refreshPayload"]
+        assert executed["errors"]
+
+
+class TestArgRefreshToken(RefreshTokenTestCaseMixin, DefaultTestCase):
+    ...
+
+
+class TestRelayRefreshToken(RefreshTokenTestCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgRefreshToken(RefreshTokenTestCaseMixin, AsyncDefaultTestCase):
+    ...
+
+
+class TestAsyncRelayRefreshToken(RefreshTokenTestCaseMixin, AsyncRelayTestCase):
+    ...

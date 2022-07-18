@@ -1,16 +1,9 @@
 from .testCases import DefaultTestCase
 
 
-class QueryTestCase(DefaultTestCase):
-    def setUp(self):
-        unverified_user = self.register_user(email="foo@email.com", username="foo", verified=False)
-        self.user2 = self.register_user(email="bar@email.com", username="bar", verified=True)
-        self.user3 = self.register_user(
-            email="gaa@email.com", username="gaa", verified=True, archived=True
-        )
-        super().setUp()
+class TestQueries(DefaultTestCase):
 
-    def test_me_authenticated(self):
+    def test_me_authenticated(self, db_verified_user_status):
         query = """
         query {
             me {
@@ -18,8 +11,8 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query=query, user={"user": self.user2})
-        self.assertTrue(executed["username"])
+        executed = self.make_request(query=query, user_status=db_verified_user_status)
+        assert executed["username"]
 
     def test_me_anonymous(self):
         query = """
@@ -29,10 +22,10 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query=query)
-        self.assertIsNone(executed)
+        executed = self.make_request(query=query, no_login_query=True)
+        assert not executed
 
-    def test_public_user_query(self):
+    def test_public_user_query(self, db_unverified_user_status, allow_login_not_verified):
         query = """
         query {
             publicUser {
@@ -40,5 +33,5 @@ class QueryTestCase(DefaultTestCase):
             }
         }
         """
-        executed = self.make_request(query=query, user={"user": unverified_user})
-        self.assertEqual(executed, {"verified": False})
+        executed = self.make_request(query=query, user_status=db_unverified_user_status)
+        assert executed == {"verified": False}
