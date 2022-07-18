@@ -238,8 +238,8 @@ class TestBase:
 class RelayTestCase(TestBase):
     RELAY = True
 
-    def make_query(self, user_status: UserStatusType, **kwargs):
-        return self._relay_query(user_status, **kwargs)
+    def make_query(self, *args, **kwargs):
+        return self._relay_query(*args, **kwargs)
 
     def login_query(self, user_status: UserStatusType):
         cap = self.gen_captcha()
@@ -267,8 +267,8 @@ class RelayTestCase(TestBase):
 class DefaultTestCase(TestBase):
     RELAY = False
 
-    def make_query(self, user_status: UserStatusType, **kwargs):
-        return self._arg_query(user_status, **kwargs)
+    def make_query(self, *args, **kwargs):
+        return self._arg_query(*args, **kwargs)
 
     def login_query(self, user_status: UserStatusType):
         cap = self.gen_captcha()

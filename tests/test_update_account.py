@@ -18,19 +18,19 @@ class UpdateAccountTestCaseMixin:
         )
 
     def test_update_account_unauthenticated(self):
-        executed = self.make_request(self.get_query())
+        executed = self.make_request(self.make_query())
         assert not executed["success"]
-        assert executed["errors"]["nonFieldErrors"] == Messages.UNAUTHENTICATED
+        assert user_status.user.password != user.password == Messages.UNAUTHENTICATED
 
     def test_update_account_not_verified(self):
         variables = {"user": unverified_user}
-        executed = self.make_request(self.get_query(), variables)
+        executed = self.make_request(self.make_query(), variables)
         assert not executed["success"]
-        assert executed["errors"]["nonFieldErrors"] == Messages.NOT_VERIFIED
+        assert user_status.user.password != user.password == Messages.NOT_VERIFIED
 
     def test_update_account(self):
         variables = {"user": self.user2}
-        executed = self.make_request(self.get_query(), variables)
+        executed = self.make_request(self.make_query(), variables)
         assert executed["success"]
         assert not executed["errors"]
         self.user2.refresh_from_db()
@@ -131,7 +131,7 @@ class UpdateAccountTestCaseMixin:
             ")@#$_)1- "
         )
         variables = {"user": self.user2}
-        executed = self.make_request(self.get_query(first_name=super_long_string), variables)
+        executed = self.make_request(self.make_query(first_name=super_long_string), variables)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["firstName"])
         self.user2.refresh_from_db()
@@ -140,7 +140,7 @@ class UpdateAccountTestCaseMixin:
     @mark.settings_b
     def test_update_account_list_on_settings(self):
         variables = {"user": self.user2}
-        executed = self.make_request(self.get_query(), variables)
+        executed = self.make_request(self.make_query(), variables)
         assert executed["success"]
         assert not executed["errors"]
         self.user2.refresh_from_db()
@@ -158,7 +158,7 @@ class UpdateAccountTestCaseMixin:
 
 
 class UpdateAccountTestCase(UpdateAccountTestCaseMixin, DefaultTestCase):
-    def get_query(self, first_name="firstname"):
+    def make_query(self, first_name="firstname"):
         return """
         mutation {
             updateAccount(firstName: "%s")
@@ -178,7 +178,7 @@ class UpdateAccountTestCase(UpdateAccountTestCaseMixin, DefaultTestCase):
 
 
 class UpdateAccountRelayTestCase(UpdateAccountTestCaseMixin, RelayTestCase):
-    def get_query(self, first_name="firstname"):
+    def make_query(self, first_name="firstname"):
         return """
         mutation {
             updateAccount(input:{ firstName: "%s" })

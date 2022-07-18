@@ -79,5 +79,5 @@ class UserType:
     def secondary_email(self, info: Info) -> Optional[str]:
         return self.status.secondary_email
 
-    def get_queryset(self, queryset, info: Info, **kwargs):
+    def make_queryset(self, queryset, info: Info, **kwargs):
         return queryset.select_related("status")

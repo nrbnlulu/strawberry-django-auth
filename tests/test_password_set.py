@@ -12,7 +12,7 @@ class PasswordSetTestCaseMixin:
 
     def test_already_set_password(self):
         token = get_token(unverified_user, "password_set")
-        query = self.get_query(token)
+        query = self.make_query(token)
         executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertEqual(
@@ -27,28 +27,28 @@ class PasswordSetTestCaseMixin:
             },
         )
         unverified_user.refresh_from_db()
-        self.assertFalse(unverified_user_old_pass != unverified_user.password)
+        assert user_status.user.password == user.password
 
     def test_set_password_invalid_form(self):
         token = get_token(unverified_user, "password_set")
-        query = self.get_query(token, "wrong_pass")
+        query = self.make_query(token, "wrong_pass")
         executed = self.make_request(query=query)
         assert not executed["success"]
         assert executed["errors"]
         unverified_user.refresh_from_db()
-        self.assertFalse(unverified_user_old_pass != unverified_user.password)
+        assert user_status.user.password == user.password
 
     def test_set_password_invalid_token(self):
-        query = self.get_query("fake_token")
+        query = self.make_query("fake_token")
         executed = self.make_request(query=query)
         assert not executed["success"]
         self.assertTrue(executed["errors"]["nonFieldErrors"])
         unverified_user.refresh_from_db()
-        self.assertFalse(unverified_user_old_pass != unverified_user.password)
+        assert user_status.user.password == user.password
 
 
 class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
-    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
+    def make_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {{
             passwordSet(
@@ -66,7 +66,7 @@ class PasswordSetTestCase(PasswordSetTestCaseMixin, DefaultTestCase):
 
 
 class PasswordSetRelayTestCase(PasswordSetTestCaseMixin, RelayTestCase):
-    def get_query(self, token, new_password1="new_password", new_password2="new_password"):
+    def make_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {{
             passwordSet(
