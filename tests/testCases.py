@@ -138,6 +138,14 @@ class TestBase:
         return us
 
     @pytest.fixture()
+    def db_verified_with_secondary_email(self, db_verified_user_status) -> UserStatusType:
+        user = db_verified_user_status.user.obj
+        user.status.secondary_email = "secondary@email.com"
+        user.status.save()
+        user.refresh_from_db()
+        return db_verified_user_status
+
+    @pytest.fixture()
     def db_archived_user_status(self, db) -> UserStatusType:
         us = self.verified_user_status_type()
         us.archived = True

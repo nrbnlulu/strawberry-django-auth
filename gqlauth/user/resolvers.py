@@ -692,7 +692,7 @@ class SwapEmailsMixin:
     @secondary_email_required
     @password_confirmation_required
     def resolve_mutation(cls, info, **input_):
-        info.context.user.status.swap_emails()
+        g_user(info).status.swap_emails()
         return cls.output(success=True)
 
 
