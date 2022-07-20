@@ -212,9 +212,6 @@ class TestBase:
 
         client = AsyncClient(raise_request_exception=True)
 
-        if test_fail_sync_req:
-            client = Client(raise_request_exception=True)
-
         headers = {}
         # if user_status_type was not provided then we should
         # ignore login query since there is no user
