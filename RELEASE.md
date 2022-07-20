@@ -1,6 +1,24 @@
+
 # Changelog
 
-## v0.3
+### v0.3.3.1 - pre-release
+
+- **New features**
+  - async support using ASGI, the resolvers are still sync because of django's ORM
+  -
+- **API changes**
+  - Previously, following the graphene version, we did i.e ` token_auth = relay.ObtainJSONWebToken.field`,\
+    In order to respect pep8 (since it is a function)\
+    and Strawberry style we changed it to ` token_auth = relay.ObtainJSONWebToken.field`.
+  - Renamed `Cap.field` to `Captcha.field`, Also added support for arg_mutations for Captcha.
+- **Deprecations**
+  - Removed setting ASYNC_EMAIL_TASK, (originally this was a celery task).
+
+- **Development Notes**
+  - Major refactoring of how the test work:
+    - removed all the dicts that was flying around and used dataclasses.
+    - added async tests for all tests.
+    - no longer using request factory, now using test client as it emulates more real life environment.
 
 ### v0.3.16
 

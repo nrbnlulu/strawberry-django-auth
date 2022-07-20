@@ -10,13 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 import sys
 
 from gqlauth.settings_type import GqlAuthSettings
 
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
 cwd = Path(__file__).parent
 sys.path.append(str(cwd / "testproject"))
+
 SECRET_KEY = "FAKE_KEY"
 
 DEBUG = True
@@ -69,6 +73,9 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
+        "OPTIONS": {
+            "timeout": 1000000,
+        },
         "NAME": str(cwd / "db.sqlite3"),
     }
 }
@@ -109,7 +116,6 @@ GRAPHQL_JWT = {
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 GQL_AUTH = GqlAuthSettings(
-    EMAIL_ASYNC_TASK="testproject.pseudo_async_email_support.pseudo_async_email_support",
     LOGIN_REQUIRE_CAPTCHA=True,
     REGISTER_REQUIRE_CAPTCHA=True,
     SEND_ACTIVATION_EMAIL=False,

@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 
-from gqlauth.factory.captcha_factorty import generate_city_captcha
+from gqlauth.factory.captcha_factorty import generate_captcha_text
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -39,8 +39,10 @@ class Captcha(models.Model):
 
     @classmethod
     def create_captcha(cls):
-        cap = generate_city_captcha()
+        cap = generate_captcha_text()
         obj = cls(text=cap.text)
+        # saving the image for future use when resolving to base64
+        obj.image = cap.image
         obj.save()
         if app_settings.FORCE_SHOW_CAPTCHA:
             cap.image.show()

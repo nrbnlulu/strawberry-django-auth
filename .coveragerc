@@ -1,6 +1,6 @@
 [run]
 source = gqlauth
-omit = .venv/**,tests/migrations/**,manage.py
+omit = .venv/**,tests/migrations/**,manage.py, docs/**,  quickstart/**, setup.py, migrate.py
 
 [report]
 precision = 2

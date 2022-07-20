@@ -1,42 +1,57 @@
-from .testCases import DefaultTestCase, RelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    UserType,
+)
 
 
 class RemoveSecondaryEmailCaseMixin:
-    def setUp(self):
-        self.user = self.register_user(
-            email="bar@email.com",
-            username="bar",
-            verified=True,
-            secondary_email="secondary@email.com",
-        )
-
-    def test_remove_email(self):
-        executed = self.make_request(self.query(), {"user": self.user})
-        self.assertEqual(executed["success"], True)
-        self.assertFalse(executed["errors"])
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.status.secondary_email, None)
-
-
-class RemoveSecondaryEmailCase(RemoveSecondaryEmailCaseMixin, DefaultTestCase):
-    def query(self, password=None):
+    def _arg_query(self, user: UserType):
         return """
         mutation {
             removeSecondaryEmail(password: "%s")
                 { success, errors }
             }
         """ % (
-            password or self.default_password
+            user.password
         )
 
-
-class RemoveSecondaryEmailRelayTestCase(RemoveSecondaryEmailCaseMixin, RelayTestCase):
-    def query(self, password=None):
+    def _relay_query(self, user: UserType):
         return """
         mutation {
         removeSecondaryEmail(input:{ password: "%s"})
             { success, errors  }
         }
         """ % (
-            password or self.default_password
+            user.password
         )
+
+    def test_remove_email(self, db_verified_user_status):
+        user = db_verified_user_status.user.obj
+        user.status.secondary_email = "secondary@email.com"
+        user.status.save()
+        executed = self.make_request(
+            query=self.make_query(db_verified_user_status.user), user_status=db_verified_user_status
+        )
+        assert executed["success"]
+        assert not executed["errors"]
+        user.refresh_from_db()
+        assert not user.status.secondary_email
+
+
+class TestArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, ArgTestCase):
+    ...
+
+
+class TestRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, RelayTestCase):
+    ...
+
+
+class TestAsyncArgRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncArgTestCase):
+    ...
+
+
+class TestAsyncRelayRemoveSecondaryEmail(RemoveSecondaryEmailCaseMixin, AsyncRelayTestCase):
+    ...
