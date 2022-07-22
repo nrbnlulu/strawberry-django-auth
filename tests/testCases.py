@@ -205,7 +205,6 @@ class TestBase:
         path: Union[
             "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"
         ] = PATHS.ASYNC_ARG,
-        test_fail_sync_req: bool = False,
     ) -> dict:
         if self.RELAY:
             path = PATHS.ASYNC_RELAY

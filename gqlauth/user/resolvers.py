@@ -406,10 +406,10 @@ class ObtainJSONWebTokenMixin:
     and secondary email if set. The fields are
     defined on settings.
 
-    Not verified users can login by default. This
+    Not verified users can log in by default. This
     can be changes on settings.
 
-    If user is archived, make it unarchive and
+    If user is archived, make it unarchived and
     return `unarchiving=True` on OutputBase.
     """
 
@@ -443,7 +443,7 @@ class ObtainJSONWebTokenMixin:
             USERNAME_FIELD = UserModel.USERNAME_FIELD
 
             # extract USERNAME_FIELD to use in query
-            username = input_.get("username")
+            username = input_.get(USERNAME_FIELD)
             password = input_.get("password")
             query_input_ = {USERNAME_FIELD: username}
             user = get_user_to_login(**query_input_)

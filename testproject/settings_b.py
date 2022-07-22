@@ -12,4 +12,4 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
 
 INSTALLED_APPS += ["tests"]  # noqa F405
 
-AUTH_USER_MODEL = "tests.CustomUser"
+AUTH_USER_MODEL = "testproject.CustomUser"
