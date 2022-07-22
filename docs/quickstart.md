@@ -488,7 +488,7 @@ in your settings.py add the following:
 from gqlauth.settings_type import GqlAuthSettings
 
 GQL_AUTH = GqlAuthSettings(
-    LOGIN_REQUIRE_CAPTHA=False,
+    LOGIN_REQUIRE_CAPTCHA=False,
     REGISTER_REQUIRE_CAPTCHA=False,
 )
 ```
