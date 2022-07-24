@@ -1,6 +1,8 @@
 from smtplib import SMTPException
 from unittest import mock
 
+import pytest
+
 from gqlauth.constants import Messages
 
 from .testCases import (
@@ -12,6 +14,7 @@ from .testCases import (
 )
 
 
+@pytest.mark.default_user
 class SendPasswordResetEmailTestCaseMixin:
     def _arg_query(self, user: UserType):
         return """

@@ -1,83 +1,23 @@
 import dataclasses
 import typing
-from typing import Union
 
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 import strawberry
 from strawberry.types import Info
-from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.bases.exceptions import WrongUsage
 from gqlauth.bases.interfaces import OutputInterface
 from gqlauth.bases.scalars import ExpectedErrorType
-from gqlauth.utils import create_strawberry_argument, hide_args_kwargs, list_to_dict
+from gqlauth.utils import (
+    create_strawberry_argument,
+    hide_args_kwargs,
+    is_optional,
+    list_to_dict,
+    make_dataclass_helper,
+)
 
 UserModel = get_user_model()
-
-
-def make_dataclass_helper(
-    required: Union[dict, list], non_required: Union[dict, list], camelize=True
-):
-    res_req = []
-    res_non_req = []
-
-    if isinstance(required, dict):
-        if camelize:
-            for key in required:
-                res_req.append((to_camel_case(key), required[key]))
-        else:
-            for key in required:
-                res_req.append((key, required[key]))
-
-    elif isinstance(required, list):
-        if camelize:
-            for key in required:
-                res_req.append((to_camel_case(key), str))
-
-        else:
-            for key in required:
-                res_req.append((key, str))
-
-    if isinstance(non_required, dict):
-        if camelize:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        to_camel_case(key),
-                        typing.Optional[non_required[key]],
-                        dataclasses.field(default=None),
-                    )
-                )
-        else:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        key,
-                        typing.Optional[non_required[key]],
-                        dataclasses.field(default=None),
-                    )
-                )
-
-    elif isinstance(non_required, list):
-        if camelize:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        to_camel_case(key),
-                        typing.Optional[str],
-                        dataclasses.field(default=None),
-                    )
-                )
-        else:
-            for key in non_required:
-                res_non_req.append((key, typing.Optional[str], dataclasses.field(default=None)))
-
-    return res_req + res_non_req
-
-
-def is_optional(field):
-    return typing.get_origin(field) is Union and type(None) in typing.get_args(field)
 
 
 class DynamicInputMixin:

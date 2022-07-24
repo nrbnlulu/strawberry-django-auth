@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 import strawberry
@@ -6,8 +6,8 @@ from strawberry import auto
 from strawberry.types import Info
 
 from gqlauth import models
-from gqlauth.exceptions import WrongUsage
 from gqlauth.settings import gqlauth_settings
+from gqlauth.utils import inject_many
 
 USER_MODEL = get_user_model()
 user_pk_field = USER_MODEL._meta.pk.name
@@ -15,36 +15,11 @@ user_pk_field = USER_MODEL._meta.pk.name
 USER_FIELDS = [
     [
         user_pk_field,
+        USER_MODEL.USERNAME_FIELD,
+        USER_MODEL.EMAIL_FIELD,
     ],
     gqlauth_settings.UPDATE_MUTATION_FIELDS,
-    gqlauth_settings.REGISTER_MUTATION_FIELDS,
-    gqlauth_settings.REGISTER_MUTATION_FIELDS_OPTIONAL,
 ]
-
-
-def inject_fields(fields: Union[Dict[str, type], List[str]]):
-    def wrapped(cls):
-        if isinstance(fields, dict):
-            cls.__annotations__.update(fields)
-        elif isinstance(fields, list):
-            cls.__annotations__.update({field: auto for field in fields})
-        else:
-            raise WrongUsage(
-                "Can handle only list of strings or dict of name and types."
-                f"You provided {type(fields)}"
-            )
-        return cls
-
-    return wrapped
-
-
-def inject_many(fields: List[Union[Dict[str, type], List[str]]]):
-    def wrapped(cls):
-        for node in fields:
-            inject_fields(node)(cls)
-        return cls
-
-    return wrapped
 
 
 @strawberry.django.filters.filter(models.UserStatus)
@@ -95,7 +70,3 @@ class UserType:
     @strawberry.django.field
     def secondary_email(self, info: Info) -> Optional[str]:
         return self.status.secondary_email
-
-    def make_queryset(self, queryset, info: Info, **kwargs):
-        raise Exception("This is not redundant")
-        return queryset.select_related("status")

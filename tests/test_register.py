@@ -1,7 +1,11 @@
 from smtplib import SMTPException
+from typing import Dict, List, Union
 from unittest import mock
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+import pytest
+from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.constants import Messages
 from gqlauth.signals import user_registered
@@ -15,56 +19,48 @@ from .testCases import (
 )
 
 
-class RegisterTestCaseMixin:
-    class RegisterUserType(UserType):
-        password_2: str = None
+def ensure_list(data: Union[Dict, List]):
+    if isinstance(data, list):
+        return data
+    else:
+        return [keys for keys, _ in data.items()]
 
-        def __post_init__(self):
-            if not self.password_2:
-                self.password_2 = self.password
+
+class RegisterTestCaseMixin:
+    def _generate_register_args(self, user: UserType) -> str:
+        initial = f'password1: "{user.password}",  password2: "{user.password}"'
+        if settings.GQL_AUTH.REGISTER_REQUIRE_CAPTCHA:
+            cap = self.gen_captcha()
+            initial += f',  identifier: "{cap.uuid}", userEntry:"{cap.text}"'
+        for field in ensure_list(settings.GQL_AUTH.REGISTER_MUTATION_FIELDS):
+            if "password" not in field:
+                initial += f', {to_camel_case(field)}: "{getattr(user, field)}"'
+        return initial
 
     def _arg_query(self, user: UserType):
-        cap = self.gen_captcha()
         return """
         mutation {{
             register(
-                email: "{}",
-                username: "{}",
-                password1: "{}",
-                password2: "{}",
-                identifier: "{}",
-                userEntry:"{}"
+                {}
             )
             {{ success, errors  }}
         }}
         """.format(
-            user.email,
-            user.username,
-            user.password,
-            user.password,
-            cap.uuid,
-            cap.text,
+            self._generate_register_args(user)
         )
 
     def _relay_query(self, user: UserType):
-        cap = self.gen_captcha()
         return """
             mutation {{
             register(
             input:{{
-             email: "{}",
-              username: "{}", password1: "{}", password2: "{}" , identifier: "{}", userEntry:"{}"
+             {}
             }}
             )
             {{ success, errors }}
         }}
         """.format(
-            user.email,
-            user.username,
-            user.password,
-            user.password,
-            cap.uuid,
-            cap.text,
+            self._generate_register_args(user)
         )
 
     def test_register_invalid_password_validation(self):
@@ -79,7 +75,7 @@ class RegisterTestCaseMixin:
         assert not executed["success"]
         assert executed["errors"]
 
-    def test_register_twice_fails(self):
+    def test_register_twice_fails(self, current_markers):
         """
         Register user, fail to register same user again
         """
@@ -101,15 +97,17 @@ class RegisterTestCaseMixin:
         # try to register again
         executed = self.make_request(query=self.make_query(us))
         assert not executed["success"]
-        assert executed["errors"]["username"]
+        assert executed["errors"][self.CC_USERNAME_FIELD]
+        # try to register again other fields but same email
+        # in setting_b we don't have email field os there is only one unique field.
+        if "not settings_b" in current_markers:
+            us1 = self.verified_user_status_type().user
+            us1.email = us.email
+            executed = self.make_request(query=self.make_query(us1))
+            assert not executed["success"]
+            assert executed["errors"]["email"]
 
-        us1 = self.verified_user_status_type().user
-        us1.username = "foo_username"
-        # try to register again
-        executed = self.make_request(query=self.make_query(us1))
-        assert not executed["success"]
-        assert executed["errors"]["email"]
-
+    @pytest.mark.default_user
     def test_register_duplicate_unique_email(self, db_verified_user_status):
         us = db_verified_user_status.user
         us.username = "foo_username"  # dropping duplication for username
@@ -121,6 +119,7 @@ class RegisterTestCaseMixin:
         "gqlauth.models.UserStatus.send_activation_email",
         mock.MagicMock(side_effect=SMTPException),
     )
+    @pytest.mark.default_user
     def test_register_email_send_fail(self):
         from gqlauth.settings import gqlauth_settings as app_settings
 

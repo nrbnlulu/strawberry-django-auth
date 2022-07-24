@@ -51,7 +51,6 @@ class ArchiveAccountTestCaseMixin:
 
         query = self.make_query(wrong_pass_ver_user_status_type)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert not executed["success"]
         assert executed["errors"]["password"] == Messages.INVALID_PASSWORD
 
     def test_valid_password(self, db_verified_user_status):

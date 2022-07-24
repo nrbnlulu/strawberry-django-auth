@@ -1,7 +1,16 @@
 
 # Changelog
 
-### v0.3.3.2 - pre-release
+### v0.3.3.2
+
+
+- **New features**
+  - Any fields that are in either
+    `UPDATE_MUTATION_FIELDS`,
+    `REGISTER_MUTATION_FIELDS`,
+    `REGISTER_MUTATION_FIELDS_OPTIONAL`
+     And the pk field of the model.
+     Will be inserted to UserType and will be in user queries.
 
 - **Bug fixed**
   - Issue #45, #43

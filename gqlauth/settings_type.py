@@ -45,6 +45,7 @@ class GqlAuthSettings:
     These fields would be used to authenticate with SD-jwt `authenticate` function.
     This function will call each of our `AUTHENTICATION_BACKENDS`,
     And will return the user from one of them unless `PermissionDenied` was raised.
+    You can pass any fields that would be accepted by your backends.
     """
 
     REGISTER_MUTATION_FIELDS: Union[dict, list] = field(
@@ -79,7 +80,7 @@ class GqlAuthSettings:
         default_factory=lambda: {"first_name": str, "last_name": str}
     )
 
-    # tokens
+    # email tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
     EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1)
     EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN: timedelta = timedelta(hours=1)
@@ -122,3 +123,8 @@ class GqlAuthSettings:
     # registration with no password
     ALLOW_PASSWORDLESS_REGISTRATION: bool = False
     SEND_PASSWORD_SET_EMAIL: bool = False
+
+    def __post_init__(self):
+        # if there override the defaults
+        if "email" not in self.REGISTER_MUTATION_FIELDS:
+            self.SEND_ACTIVATION_EMAIL = False

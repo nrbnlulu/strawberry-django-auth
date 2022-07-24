@@ -12,6 +12,10 @@ from gqlauth.signals import user_registered
 from .testCases import AsyncRelayTestCase, RelayTestCase
 
 
+@pytest.mark.skipif(
+    not gqlauth_settings.LOGIN_REQUIRE_CAPTCHA or not gqlauth_settings.REGISTER_REQUIRE_CAPTCHA,
+    reason="This test requires captcha mutation fields to be initialized",
+)
 class CaptchaTestCaseMixin:
     @classmethod
     @pytest.fixture()

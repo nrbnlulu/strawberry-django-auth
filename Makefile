@@ -2,6 +2,7 @@
 
 run-quickstart:
 	cd quickstart; python -m manage runserver;
+
 asgi-quickstart:
 	cd quickstart; daphne quickstart.asgi:application
 
@@ -9,7 +10,7 @@ asgi-quickstart:
 test:
 	poetry run python -m migrate
 	poetry run pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
-	poetry run pytest --ds=testproject.settings_b -m 'settings_b' --cov=gqlauth --cov-report=xml --cov-append
+	poetry run pytest --ds=testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
 
 
 serve:
@@ -20,13 +21,6 @@ build-docs:
 	poetry install
 	python docs/pre_build.py
 	mkdocs build
-
-format:
-	black --exclude "/migrations/" quickstart tests
-
-lint:
-	flake8 gqlauth
-
 
 # gh only!
 deploy-docs:

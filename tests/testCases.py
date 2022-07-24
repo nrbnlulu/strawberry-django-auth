@@ -7,24 +7,47 @@ from asgiref.sync import async_to_sync, sync_to_async
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.test import AsyncClient, Client
+from faker import Faker
+from faker.providers import BaseProvider
 import pytest
+from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.models import Captcha
+from gqlauth.utils import inject_fields
+
+
+class FitProvider(BaseProvider):
+    _fake = Faker()
+
+    def username(self) -> str:
+        return self._fake.user_name()
+
 
 Query = NewType("Query", str)
 UserModel = get_user_model()
+fake = Faker()
+fake.add_provider(FitProvider)
+
+additional_fields = UserModel.USERNAME_FIELD, UserModel.EMAIL_FIELD
 
 
 @dataclass
+@inject_fields(additional_fields)
 class UserType:
-    username: str
-    email: str
-    first_name: str = None
-    password: str = "FAKE@gfagfdfa132"
+    password: str = fake.password()
 
-    def __post_init__(self):
-        if not self.first_name:
-            self.first_name = self.username
+    @classmethod
+    def generate(cls):
+        kwargs = {field: getattr(fake, field)() for field, _ in cls.__annotations__.items()}
+        return cls(**kwargs)
+
+    @property
+    def USERNAME_FIELD(self):
+        return getattr(self, UserModel.USERNAME_FIELD)
+
+    @USERNAME_FIELD.setter
+    def USERNAME_FIELD(self, value):
+        setattr(self, UserModel.USERNAME_FIELD, value)
 
 
 @dataclass
@@ -82,17 +105,31 @@ class TestBase:
     """
 
     WRONG_PASSWORD = "wrong password"
+    CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
+    USERNAME_FIELD = UserModel.USERNAME_FIELD
+
+    def _generate_login_args(self, user_status: UserStatusType):
+        cap = self.gen_captcha()
+        user = user_status.user
+        initial = (
+            f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.USERNAME_FIELD}",'
+            f' password: "{user.password}"'
+        )
+
+        if django_settings.GQL_AUTH.LOGIN_REQUIRE_CAPTCHA:
+            initial += f', identifier: "{cap.uuid}" ,userEntry: "{cap.text}"'
+        return initial
 
     def verified_user_status_type(self):
         return UserStatusType(
             verified=True,
-            user=UserType(email="verified@email.com", username="verified_user"),
+            user=UserType.generate(),
         )
 
     def unverified_user_status_type(self):
         return UserStatusType(
             verified=False,
-            user=UserType(email="unverified@email.com", username="unverified_user"),
+            user=UserType.generate(),
         )
 
     def get_tokens(self, user_status: UserStatusType):
@@ -107,14 +144,9 @@ class TestBase:
 
     @pytest.fixture()
     def wrong_pass_ver_user_status_type(self):
-        return UserStatusType(
-            verified=True,
-            user=UserType(
-                email="verified@email.com",
-                username="verified_user",
-                password=self.WRONG_PASSWORD,
-            ),
-        )
+        user_type = UserType.generate()
+        user_type.password = self.WRONG_PASSWORD
+        return UserStatusType(verified=True, user=user_type)
 
     @pytest.fixture()
     def wrong_pass_unverified_user_status_type(self):
@@ -248,11 +280,9 @@ class RelayTestCase(TestBase):
         return self._relay_query(*args, **kwargs)
 
     def login_query(self, user_status: UserStatusType):
-        cap = self.gen_captcha()
-        user = user_status.user
         return """
           mutation {{
-        tokenAuth(input:{{username: "{}", password: "{}",identifier: "{}", userEntry: "{}"}})
+        tokenAuth(input:{{{}}})
                       {{
             success
             errors
@@ -263,10 +293,7 @@ class RelayTestCase(TestBase):
           }}
         }}
         """.format(
-            user.username,
-            user.password,
-            cap.uuid,
-            cap.text,
+            self._generate_login_args(user_status)
         )
 
 
@@ -277,11 +304,10 @@ class ArgTestCase(TestBase):
         return self._arg_query(*args, **kwargs)
 
     def login_query(self, user_status: UserStatusType):
-        cap = self.gen_captcha()
-        user = user_status.user
+
         return """
            mutation {{
-           tokenAuth(username: "{}", password: "{}" ,identifier: "{}" ,userEntry: "{}")
+           tokenAuth({})
                   {{
                 success
                 errors
@@ -293,10 +319,7 @@ class ArgTestCase(TestBase):
             }}
 
            """.format(
-            user.username,
-            user.password,
-            cap.uuid,
-            cap.text,
+            self._generate_login_args(user_status)
         )
 
 

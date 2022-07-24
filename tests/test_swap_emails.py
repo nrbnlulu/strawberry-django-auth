@@ -1,3 +1,5 @@
+import pytest
+
 from gqlauth.constants import Messages
 
 from .testCases import (
@@ -30,6 +32,7 @@ class SwapEmailsCaseMixin:
             user.password
         )
 
+    @pytest.mark.default_user
     def test_swap_emails(self, db_verified_with_secondary_email):
         user = db_verified_with_secondary_email.user
         user_obj = user.obj
@@ -43,6 +46,7 @@ class SwapEmailsCaseMixin:
         assert user_obj.email == prev_secondary_email
         assert user_obj.status.secondary_email == user.email
 
+    @pytest.mark.default_user
     def test_swap_emails_without_secondary_email(self, db_verified_user_status):
         executed = self.make_request(
             query=self.make_query(db_verified_user_status.user), user_status=db_verified_user_status

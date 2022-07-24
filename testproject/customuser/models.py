@@ -41,7 +41,7 @@ class PhoneNumberUserManager(BaseUserManager):
 
 
 class CustomPhoneNumberUser(AbstractBaseUser, PermissionsMixin):
-    phone_number = models.IntegerField(default=False, unique=True)
+    phone_number = models.CharField(default=False, max_length=255, unique=True)
     is_registered = models.BooleanField(default=False)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
@@ -65,6 +65,9 @@ class CustomPhoneNumberUser(AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD = ""
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} - {str(self.phone_number)}"
 
     class Meta:
         verbose_name = "user"
