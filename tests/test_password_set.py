@@ -55,6 +55,7 @@ class PasswordSetTestCaseMixin:
         executed = self.make_request(query=query, no_login_query=True)
         assert not executed["success"]
         assert executed["errors"]["nonFieldErrors"] == Messages.PASSWORD_ALREADY_SET
+
         user.refresh_from_db()
         assert user_status.user.old_password == user.password
 

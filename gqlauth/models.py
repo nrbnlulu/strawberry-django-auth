@@ -11,6 +11,7 @@ from django.db import models, transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
+from strawberry.types import Info
 
 from gqlauth.factory.captcha_factorty import generate_captcha_text
 
@@ -129,7 +130,7 @@ class UserStatus(models.Model):
             fail_silently=False,
         )
 
-    def get_email_context(self, info, path, action, **kwargs):
+    def get_email_context(self, info: Info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
         request = get_request(info)
         site = get_current_site(request)
