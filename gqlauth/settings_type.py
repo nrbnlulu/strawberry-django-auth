@@ -18,7 +18,7 @@ def default_text_factory():
     )
 
 
-_USER_NODE_FILTER_fieldS = {
+_USER_NODE_FILTER_FIELDS = {
     "email": ["exact"],
     "username": ["exact", "icontains", "istartswith"],
     "is_active": ["exact"],
@@ -41,28 +41,44 @@ class GqlAuthSettings:
     LOGIN_REQUIRED_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["username", "password"]
     )
-    # required fields on register, plus password1 and password2,
-    # can be a dict like UPDATE_MUTATION_fieldS setting
+    """
+    These fields would be used to authenticate with SD-jwt `authenticate` function.
+    This function will call each of our `AUTHENTICATION_BACKENDS`,
+    And will return the user from one of them unless `PermissionDenied` was raised.
+    """
+
     REGISTER_MUTATION_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["email", "username"]
     )
+    """
+    required fields on register, plus password1 and password2,
+    can be a dict like UPDATE_MUTATION_fieldS setting
+    """
     REGISTER_MUTATION_FIELDS_OPTIONAL: list = field(default_factory=lambda: [])
     REGISTER_REQUIRE_CAPTCHA: bool = True
     # captcha stuff
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
     CAPTCHA_MAX_RETRIES: int = 5
-    # any function that returns a string
     CAPTCHA_TEXT_FACTORY: Callable = default_text_factory
-    # a function that receives the original string vs user input
+    """
+    A callable with no arguments that returns a string.
+    This will be used to generate the captcha image.
+    """
     CAPTCHA_TEXT_VALIDATOR: Callable[[str, str], bool] = (
         lambda original, received: original == received
     )
-    # will show captcha every time you create one
+    """
+    A callable that will receive the original string vs user input and returns a boolean.
+    """
     FORCE_SHOW_CAPTCHA: bool = False
+    """
+    Whether to show the captcha image after it has been created for debugging purposes.
+    """
     # optional fields on update account, can be list of fields
     UPDATE_MUTATION_FIELDS: Union[dict, list] = field(
         default_factory=lambda: {"first_name": str, "last_name": str}
     )
+
     # tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
     EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1)
@@ -97,7 +113,7 @@ class GqlAuthSettings:
     USER_NODE_EXCLUDE_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["password", "is_superuser"]
     )
-    USER_NODE_FILTER_FIELDS: dict = field(default_factory=lambda: _USER_NODE_FILTER_fieldS)
+    USER_NODE_FILTER_FIELDS: dict = field(default_factory=lambda: _USER_NODE_FILTER_FIELDS)
     # others
     # turn is_active to False instead
     ALLOW_DELETE_ACCOUNT: bool = False

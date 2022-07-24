@@ -1,8 +1,7 @@
-from datetime import timezone
-
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 # The following setup is adopted from Aria Moradi in issue #45
@@ -41,9 +40,11 @@ class PhoneNumberUserManager(BaseUserManager):
         return self._create_user(phone_number, password, **extra_fields)
 
 
-class PhoneNumberAbstractUser(AbstractBaseUser, PermissionsMixin):
-    phone_number = models.IntegerField(unique=True)
+class CustomPhoneNumberUser(AbstractBaseUser, PermissionsMixin):
+    phone_number = models.IntegerField(default=False, unique=True)
     is_registered = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=255, blank=True)
+    last_name = models.CharField(max_length=255, blank=True)
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -68,4 +69,3 @@ class PhoneNumberAbstractUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
-        abstract = True

@@ -1,16 +1,32 @@
 
 # Changelog
 
+### v0.3.3.2 - pre-release
+
+- **Bug fixed**
+  - Issue #45, #43
+    - `LOGIN_REQUIRED_FIELDS` is now supported,\
+       These fields would be used to authenticate with SD-jwt `authenticate` function.
+       This function will call each of our `AUTHENTICATION_BACKENDS`,
+       And will return the user from one of them unless `PermissionDenied` was raised.
+
+    - `REGISTER_REQUIRED_FIELDS` is now supported,\
+    Fields that will be registered there will be required by Register mutation
+
+- **Development Notes**
+
+
 ### v0.3.3.1 - pre-release
 
 - **New features**
   - async support using ASGI, the resolvers are still sync because of django's ORM
   -
 - **API changes**
-  - Previously, following the graphene version, we did i.e ` token_auth = relay.ObtainJSONWebToken.field`,\
+  - Previously, following the graphene version, we did i.e ` token_auth = relay.ObtainJSONWebToken.Field`,\
     In order to respect pep8 (since it is a function)\
     and Strawberry style we changed it to ` token_auth = relay.ObtainJSONWebToken.field`.
-  - Renamed `Cap.field` to `Captcha.field`, Also added support for arg_mutations for Captcha.
+  - Renamed `Cap.Field` to `Captcha.field`.
+
 - **Deprecations**
   - Removed setting ASYNC_EMAIL_TASK, (originally this was a celery task).
 
