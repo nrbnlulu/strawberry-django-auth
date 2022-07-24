@@ -3,7 +3,6 @@
 
 ### v0.3.3.2
 
-
 - **New features**
   - Any fields that are in either
     `UPDATE_MUTATION_FIELDS`,
@@ -11,19 +10,20 @@
     `REGISTER_MUTATION_FIELDS_OPTIONAL`
      And the pk field of the model.
      Will be inserted to UserType and will be in user queries.
-
+  - Doc strings in gqlquth_settings object
 - **Bug fixed**
-  - Issue #45, #43
+  - Issue #45, #42
     - `LOGIN_REQUIRED_FIELDS` is now supported,\
        These fields would be used to authenticate with SD-jwt `authenticate` function.
        This function will call each of our `AUTHENTICATION_BACKENDS`,
        And will return the user from one of them unless `PermissionDenied` was raised.
 
-    - `REGISTER_REQUIRED_FIELDS` is now supported,\
+    - `REGISTER_MUTATION_FIELDS` is now supported,\
     Fields that will be registered there will be required by Register mutation
 
 - **Development Notes**
-
+    - Added new marker for pytest, `default_user` this is the user defined in the default
+      settings, And the custom user is in `settings_b.py` with no email field.
 
 ### v0.3.3.1 - pre-release
 
