@@ -1,17 +1,21 @@
 import contextlib
+import dataclasses
 import inspect
+import typing
+from typing import Dict, Iterable, Union
 import warnings
 
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from django.core import signing
+from strawberry import auto
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.arguments import StrawberryArgument
 from strawberry.unset import UNSET
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError
 
-from .exceptions import TokenScopeError
+from .exceptions import TokenScopeError, WrongUsage
 
 
 def hide_args_kwargs(field):
@@ -128,3 +132,112 @@ def create_strawberry_argument(python_name: str, graphql_name: str, type_, defau
         type_annotation=StrawberryAnnotation(type_),
         default=default or UNSET,
     )
+
+
+def inject_fields(fields: Union[Dict[str, type], Iterable[str]]):
+    """
+    Injects the supplied fields to the decorated class.
+    If the given fields are list they would be annotated with `auto`
+    """
+
+    def wrapped(cls):
+        annotations = list(cls.__annotations__.items())
+        res = fields
+        if isinstance(fields, Iterable):
+            # Checking that the field is not a "" redundant string
+            # This is quite common behavior with django's user model that a user override
+            res = {field: auto for field in fields if field}
+
+        elif not isinstance(fields, dict):
+            raise WrongUsage(
+                "Can handle only list of strings or dict of name and types."
+                f"You provided {type(fields)}"
+            )
+        # this solves non default fields after default fields
+        annotations.extend(list(res.items()))
+        annotations.reverse()
+        annotations = {name: annotation for name, annotation in annotations}
+        cls.__annotations__ = annotations
+        return cls
+
+    return wrapped
+
+
+def inject_many(fields: Iterable[Union[Dict[str, type], Iterable[str]]]):
+    """
+    Injects the supplied iterables to the decorated class.
+    """
+
+    def wrapped(cls):
+        for node in fields:
+            inject_fields(node)(cls)
+        return cls
+
+    return wrapped
+
+
+def make_dataclass_helper(
+    required: Union[dict, list], non_required: Union[dict, list], camelize=True
+):
+    res_req = []
+    res_non_req = []
+
+    if isinstance(required, dict):
+        if camelize:
+            for key in required:
+                res_req.append((to_camel_case(key), required[key]))
+        else:
+            for key in required:
+                res_req.append((key, required[key]))
+
+    elif isinstance(required, list):
+        if camelize:
+            for key in required:
+                res_req.append((to_camel_case(key), str))
+
+        else:
+            for key in required:
+                res_req.append((key, str))
+
+    if isinstance(non_required, dict):
+        if camelize:
+            for key in non_required:
+                res_non_req.append(
+                    (
+                        to_camel_case(key),
+                        typing.Optional[non_required[key]],
+                        dataclasses.field(default=None),
+                    )
+                )
+        else:
+            for key in non_required:
+                res_non_req.append(
+                    (
+                        key,
+                        typing.Optional[non_required[key]],
+                        dataclasses.field(default=None),
+                    )
+                )
+
+    elif isinstance(non_required, list):
+        if camelize:
+            for key in non_required:
+                res_non_req.append(
+                    (
+                        to_camel_case(key),
+                        typing.Optional[str],
+                        dataclasses.field(default=None),
+                    )
+                )
+        else:
+            for key in non_required:
+                res_non_req.append((key, typing.Optional[str], dataclasses.field(default=None)))
+
+    return res_req + res_non_req
+
+
+def is_optional(field):
+    """
+    whether strawberry field is optional or not
+    """
+    return typing.get_origin(field) is Union and type(None) in typing.get_args(field)

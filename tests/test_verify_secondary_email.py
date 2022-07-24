@@ -1,3 +1,5 @@
+import pytest
+
 from gqlauth.utils import get_token
 
 from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
@@ -40,6 +42,7 @@ class VerifySecondaryEmailCaseMixin:
         assert not executed["success"]
         assert executed["errors"]
 
+    @pytest.mark.default_user
     def test_email_in_use(self, db_verified_user_status, db_unverified_user_status):
         # just for having an "in use email"
         user_obj2 = db_unverified_user_status.user.obj

@@ -16,6 +16,8 @@ import sys
 
 from gqlauth.settings_type import GqlAuthSettings
 
+# WARNING: This is a workaround for an async-safety issue in strawberry_django_jwt
+#  see https://github.com/KundaPanda/strawberry-django-jwt/issues/337
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 cwd = Path(__file__).parent
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     "strawberry_django_jwt.refresh_token",
     "gqlauth",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -99,7 +102,7 @@ STATIC_URL = "/static/"
 
 # custom settings start here
 EMAIL_HOST = "mail.privateemail.com"
-EMAIL_HOST_USER = "some_testsEmail@cccc.com"
+EMAIL_HOST_USER = "diffrent_than_gqlauth_default@cccc.com"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 

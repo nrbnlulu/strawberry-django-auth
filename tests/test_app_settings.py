@@ -1,13 +1,22 @@
 import pytest
 
-from gqlauth import settings as app_settings
+from gqlauth.settings_type import GqlAuthSettings
+
+defaults = GqlAuthSettings()
 
 
 def test_load_user_settings_from_django_settings(settings):
-    assert app_settings.gqlauth_settings.EMAIL_FROM == settings.DEFAULT_FROM_EMAIL
+    assert defaults.EMAIL_FROM != "diffrent_than_gqlauth_default@cccc.com"
+    assert settings.DEFAULT_FROM_EMAIL == "diffrent_than_gqlauth_default@cccc.com"
 
 
 @pytest.mark.settings_b
 def test_user_can_override_django_settings(settings):
-    assert settings.GQL_AUTH.EMAIL_FROM == app_settings.gqlauth_settings.EMAIL_FROM
-    assert app_settings.gqlauth_settings.EMAIL_FROM != settings.DEFAULT_FROM_EMAIL
+    assert settings.DEFAULT_FROM_EMAIL != "SomeDiffrentEmail@thanInDjango.settings"
+    assert settings.GQL_AUTH.EMAIL_FROM == "SomeDiffrentEmail@thanInDjango.settings"
+
+
+@pytest.mark.settings_b
+def test_if_no_email_in_REGISTER_MUTATION_FIELDS_send_email_is_false(settings):
+    assert defaults.SEND_ACTIVATION_EMAIL
+    assert not settings.GQL_AUTH.SEND_ACTIVATION_EMAIL

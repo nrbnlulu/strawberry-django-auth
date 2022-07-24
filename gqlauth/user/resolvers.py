@@ -1,4 +1,5 @@
 from smtplib import SMTPException
+from typing import Dict
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -9,6 +10,7 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 import strawberry
 from strawberry.types import Info
+from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
 from gqlauth.constants import Messages, TokenAction
@@ -117,7 +119,7 @@ class RegisterMixin:
         return obj.validate(input_.get("userEntry"))
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, **input_: Dict):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
@@ -125,6 +127,9 @@ class RegisterMixin:
 
         try:
             with transaction.atomic():
+                USERNAME_FIELD = UserModel.USERNAME_FIELD
+                # extract USERNAME_FIELD that was camelized to use in query
+                input_[USERNAME_FIELD] = input_.pop(to_camel_case(USERNAME_FIELD))
                 f = cls.form(input_)
                 if f.is_valid():
                     email = input_.get("email")
@@ -406,10 +411,10 @@ class ObtainJSONWebTokenMixin:
     and secondary email if set. The fields are
     defined on settings.
 
-    Not verified users can login by default. This
+    Not verified users can log in by default. This
     can be changes on settings.
 
-    If user is archived, make it unarchive and
+    If user is archived, make it unarchived and
     return `unarchiving=True` on OutputBase.
     """
 
@@ -441,9 +446,8 @@ class ObtainJSONWebTokenMixin:
 
         try:
             USERNAME_FIELD = UserModel.USERNAME_FIELD
-
             # extract USERNAME_FIELD to use in query
-            username = input_.get("username")
+            username = input_.get(to_camel_case(USERNAME_FIELD))
             password = input_.get("password")
             query_input_ = {USERNAME_FIELD: username}
             user = get_user_to_login(**query_input_)

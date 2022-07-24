@@ -46,6 +46,8 @@ class UpdateAccountTestCaseMixin:
     def test_invalid_form(self, db_verified_user_status):
         user_status = db_verified_user_status
         user_obj = user_status.user.obj
+        user_obj.first_name = user_status.user.USERNAME_FIELD
+        user_obj.save()
         super_long_string = "10" * 150  # django.auth first_name field is 150 characters or fewer.
         executed = self.make_request(
             self.make_query(first_name=super_long_string), user_status=db_verified_user_status
@@ -53,7 +55,7 @@ class UpdateAccountTestCaseMixin:
         assert not executed["success"]
         assert executed["errors"]["firstName"]
         user_obj.refresh_from_db()
-        assert user_obj.first_name == user_status.user.username
+        assert user_obj.first_name == user_status.user.USERNAME_FIELD
 
     # @mark.settings_b
     def test_update_account_list_on_settings(self, db_verified_user_status):

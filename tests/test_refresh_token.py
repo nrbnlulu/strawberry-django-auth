@@ -11,7 +11,6 @@ class RefreshTokenTestCaseMixin:
               payload{
                 exp
                 origIat
-                username
               }
               token
               refreshToken
@@ -34,7 +33,6 @@ class RefreshTokenTestCaseMixin:
               payload{
                 exp
                 origIat
-                username
               }
               token
               refreshToken
