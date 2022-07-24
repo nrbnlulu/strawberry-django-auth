@@ -9,6 +9,7 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
     ALLOW_DELETE_ACCOUNT=True,
     ALLOW_LOGIN_NOT_VERIFIED=False,
     LOGIN_REQUIRED_FIELDS=["phone_number", "password"],
+    LOGIN_OPTIONAL_FIELDS=["first_name", "last_name"],
     REGISTER_MUTATION_FIELDS={"phone_number": str},
     UPDATE_MUTATION_FIELDS=["first_name", "last_name"],
     EMAIL_FROM="SomeDiffrentEmail@thanInDjango.settings",

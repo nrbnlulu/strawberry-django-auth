@@ -3,7 +3,6 @@ import dataclasses
 import inspect
 import typing
 from typing import Dict, Iterable, Union
-import warnings
 
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
@@ -11,6 +10,7 @@ from django.core import signing
 from strawberry import auto
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.arguments import StrawberryArgument
+from strawberry.types import Info
 from strawberry.unset import UNSET
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError
@@ -49,16 +49,13 @@ def list_to_dict(lst: [str]):
     return new_dict
 
 
-warnings.simplefilter("once")
-
-
-def get_request(info):
+def get_request(info: Info):
     if hasattr(info.context, "user"):
         return info.context
     return info.context.request
 
 
-def g_user(info) -> User:
+def g_user(info: Info) -> User:
     # returns a user from info obj
     user = getattr(info.context, "user", False)
     if user:
@@ -176,62 +173,37 @@ def inject_many(fields: Iterable[Union[Dict[str, type], Iterable[str]]]):
     return wrapped
 
 
-def make_dataclass_helper(
-    required: Union[dict, list], non_required: Union[dict, list], camelize=True
-):
+def make_dataclass_helper(required: Union[dict, list], non_required: Union[dict, list]):
     res_req = []
     res_non_req = []
 
     if isinstance(required, dict):
-        if camelize:
-            for key in required:
-                res_req.append((to_camel_case(key), required[key]))
-        else:
-            for key in required:
-                res_req.append((key, required[key]))
+        for key in required:
+            res_req.append((to_camel_case(key), required[key]))
 
     elif isinstance(required, list):
-        if camelize:
-            for key in required:
-                res_req.append((to_camel_case(key), str))
-
-        else:
-            for key in required:
-                res_req.append((key, str))
+        for key in required:
+            res_req.append((to_camel_case(key), str))
 
     if isinstance(non_required, dict):
-        if camelize:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        to_camel_case(key),
-                        typing.Optional[non_required[key]],
-                        dataclasses.field(default=None),
-                    )
+        for key in non_required:
+            res_non_req.append(
+                (
+                    to_camel_case(key),
+                    typing.Optional[non_required[key]],
+                    dataclasses.field(default=None),
                 )
-        else:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        key,
-                        typing.Optional[non_required[key]],
-                        dataclasses.field(default=None),
-                    )
-                )
+            )
 
     elif isinstance(non_required, list):
-        if camelize:
-            for key in non_required:
-                res_non_req.append(
-                    (
-                        to_camel_case(key),
-                        typing.Optional[str],
-                        dataclasses.field(default=None),
-                    )
+        for key in non_required:
+            res_non_req.append(
+                (
+                    to_camel_case(key),
+                    typing.Optional[str],
+                    dataclasses.field(default=None),
                 )
-        else:
-            for key in non_required:
-                res_non_req.append((key, typing.Optional[str], dataclasses.field(default=None)))
+            )
 
     return res_req + res_non_req
 
