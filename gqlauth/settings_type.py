@@ -75,6 +75,11 @@ class GqlAuthSettings:
     """
     Whether to show the captcha image after it has been created for debugging purposes.
     """
+    CAPTCHA_SAVE_IMAGE: bool = False
+    """
+    if True, an png representation of the captcha will be saved under
+    MEDIA_ROOT/captcha/<datetime>/<uuid>.png
+    """
     # optional fields on update account, can be list of fields
     UPDATE_MUTATION_FIELDS: Union[dict, list] = field(
         default_factory=lambda: {"first_name": str, "last_name": str}

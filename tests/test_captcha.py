@@ -1,6 +1,8 @@
+from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
 
+from PIL import Image
 from django.contrib.auth import get_user_model
 import pytest
 
@@ -163,6 +165,12 @@ class CaptchaTestCaseMixin:
             uuid,
             input_,
         )
+
+    @staticmethod
+    def test_captcha_saved_if_settings_is_on(cap):
+        assert Path(cap.image.path).exists()
+        # if this didn't raise we are good.
+        Image.open(cap.image.path)
 
 
 class TestCaptchaRelay(CaptchaTestCaseMixin, RelayTestCase):

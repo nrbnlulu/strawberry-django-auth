@@ -1,10 +1,10 @@
-from base64 import b64encode
 from dataclasses import dataclass
 import io
 from pathlib import Path
 import sys
 
 from PIL.Image import Image
+from django.core.files.base import ContentFile
 
 from gqlauth.settings import gqlauth_settings as app_settings
 
@@ -15,17 +15,18 @@ FONTS_PATH = str(Path(__file__).parent.joinpath("fonts"))
 
 
 @dataclass
-class CaptchaType:
-    image: Image
+class CaptchaInstanceType:
+    pil_image: Image
     text: str
 
-    def as_base64(self):
+    def to_django(self, name: str) -> ContentFile:
+        # inspired by https://stackoverflow.com/questions/34140900
         bytes_array = io.BytesIO()
-        self.image.save(bytes_array, format="PNG")
-        return b64encode(bytes_array.getvalue())
+        self.pil_image.save(bytes_array, format="PNG")
+        return ContentFile(bytes_array.getvalue(), name + ".png")
 
     def show(self):
-        self.image.show()
+        self.pil_image.show()
 
 
 def get_image(text):
@@ -43,7 +44,7 @@ def generate_text() -> str:
     return app_settings.CAPTCHA_TEXT_FACTORY()
 
 
-def generate_captcha_text():
+def generate_captcha_text() -> CaptchaInstanceType:
     text = generate_text()
     image = get_image(text)
-    return CaptchaType(image=image, text=text)
+    return CaptchaInstanceType(pil_image=image, text=text)
