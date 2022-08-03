@@ -42,9 +42,6 @@ class Captcha(models.Model):
         help_text="url for the captcha image",
     )
 
-    def generate_file_name(self, instance: "Captcha", url):
-        ...
-
     @staticmethod
     def _format(text: str):
         return text.lower().replace(" ", "")
