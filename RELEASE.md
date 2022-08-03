@@ -1,5 +1,10 @@
 
 # Changelog
+### v0.3.4.0
+- **New features**
+    - serve Captcha over static files. New setting introduced,
+    `CAPTCHA_SAVE_IMAGE: bool = False`.
+
 
 ### v0.3.3.2
 
