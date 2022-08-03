@@ -8,4 +8,40 @@ the default setting are:
     "LOGIN_REQUIRE_CAPTCHA": True,
     "REGISTER_REQUIRE_CAPTCHA": True,
 ```
-if you don't like this set them to False
+if you don't like this set them to False.
+
+The Captcha is available to query via a base64 encoded string or via a static .png image.
+
+!!! Note "Note: The Image is in PNG format"
+
+=== "base64"
+
+    ```graphql
+    mutation MyMutation {
+      captcha {
+        uuid
+        pilImage
+      }
+    }
+    ```
+
+    !!! Note "You will further be needed to implement a translation in the UI."
+
+
+=== "static"
+    For the creation of a static set `CAPTCHA_SAVE_IMAGE = True` on your settings.
+    This will use django's Imagefield to store the captcha image.
+
+    ```graphql
+    mutation MyMutation {
+      captcha {
+        uuid
+        image{
+          width
+          height
+          url
+
+        }
+      }
+    }
+    ```

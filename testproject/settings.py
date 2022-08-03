@@ -20,8 +20,8 @@ from gqlauth.settings_type import GqlAuthSettings
 #  see https://github.com/KundaPanda/strawberry-django-jwt/issues/337
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-cwd = Path(__file__).parent
-sys.path.append(str(cwd / "testproject"))
+BASE_DIR = Path(__file__).parent
+sys.path.append(str(BASE_DIR / "testproject"))
 
 SECRET_KEY = "FAKE_KEY"
 
@@ -59,7 +59,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            cwd / "testproject" / "templates",
+            BASE_DIR / "testproject" / "templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -79,7 +79,7 @@ DATABASES = {
         "OPTIONS": {
             "timeout": 1000000,
         },
-        "NAME": str(cwd / "db.sqlite3"),
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
 }
 
@@ -99,6 +99,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
+
+MEDIA_ROOT = BASE_DIR / "media"
 
 # custom settings start here
 EMAIL_HOST = "mail.privateemail.com"
@@ -121,5 +123,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 GQL_AUTH = GqlAuthSettings(
     LOGIN_REQUIRE_CAPTCHA=True,
     REGISTER_REQUIRE_CAPTCHA=True,
+    CAPTCHA_SAVE_IMAGE=True,
     SEND_ACTIVATION_EMAIL=False,
 )

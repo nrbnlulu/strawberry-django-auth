@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 from strawberry.types import Info
 
-from gqlauth.factory.captcha_factorty import generate_captcha_text
+from gqlauth.factory.captcha_factorty import CaptchaInstanceType, generate_captcha_text
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -29,10 +29,18 @@ USER_MODEL = get_user_model()
 
 
 class Captcha(models.Model):
+    instance: CaptchaInstanceType
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=50, editable=False)
     insert_time = models.DateTimeField(auto_now_add=True, editable=False)
     tries = models.IntegerField(default=0)
+    image = models.ImageField(
+        blank=False,
+        null=False,
+        upload_to="captcha/%Y/%m/%d/",
+        editable=False,
+        help_text="url for the captcha image",
+    )
 
     @staticmethod
     def _format(text: str):
@@ -42,11 +50,15 @@ class Captcha(models.Model):
     def create_captcha(cls):
         cap = generate_captcha_text()
         obj = cls(text=cap.text)
-        # saving the image for future use when resolving to base64
-        obj.image = cap.image
+        # saving the image for future use when resolving to base64 or saving to .png
+        obj.instance = cap
         obj.save()
         if app_settings.FORCE_SHOW_CAPTCHA:
-            cap.image.show()
+            cap.pil_image.show()
+        if app_settings.CAPTCHA_SAVE_IMAGE:
+            django_content_file = obj.instance.to_django(name=str(obj.uuid))
+            obj.image.save(django_content_file.name, django_content_file)
+
         return obj
 
     def save(self, *args, **kwargs):
@@ -90,8 +102,12 @@ class Captcha(models.Model):
         return Messages.CAPTCHA_INVALID
 
     def as_bytes(self):
+        """
+        Stores the image on a bytes_array.
+        The scalar will further convert it to b64 string representation.
+        """
         bytes_array = io.BytesIO()
-        self.image.save(bytes_array, format="PNG")
+        self.instance.pil_image.save(bytes_array, format="PNG")
         return bytes_array.getvalue()
 
     def __str__(self):
