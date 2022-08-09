@@ -6,11 +6,12 @@ from .testCases import (
     AsyncRelayTestCase,
     RelayTestCase,
     UserStatusType,
+    fake,
 )
 
 
 class PasswordChangeTestCaseMixin:
-    SECURE_PASSWORD = "SuperSecureP@ssw0rd.com"
+    SECURE_PASSWORD = fake.password()
 
     @dataclasses.dataclass
     class PasswordChangeForm:
