@@ -1,7 +1,8 @@
 
-![Tests](https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml/badge.svg)
-[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+![Tests](https://img.shields.io/github/workflow/status/nrbnlulu/strawberry-django-auth/Run%20Tests?label=Tests&style=for-the-badge)
+![Codecov](https://img.shields.io/codecov/c/github/nrbnlulu/strawberry-django-auth?style=for-the-badge)
+[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg?style=for-the-badge&logo=appveyor)](https://pypi.org/project/strawberry-django-auth/)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge&logo=appveyor)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
 # Strawberry-django Auth
 [Django](https://github.com/django/django) registration and authentication with [Strawberry](https://strawberry.rocks/).
 
