@@ -19,82 +19,33 @@ If you have a specific contribution in mind, be sure to check the [issues](https
 
 ## Project setup
 
-After cloning this repo, ensure dependencies are installed by running:
-
-```bash
-make dev-setup
-```
-
-and
-
-```bash
-pip install tox
-```
+1. Fork this repository.
+2. Clone your fork.
+3. Install with poetry - `poetry install`.
+4. run `pre-commit install`, this will perform some checks when you commit.
+5. create a new branch from the main with the name of your contribution topic.
+6. You are good to go!
 
 ## Running tests
+```bash
+make test
+```
+this will run tests against two django settings modules.
 
-After developing, you can run tests with:
 
 ```bash
 # python=3.7 and django=3.0
 make test
 ```
-
-You can specify versions, for the full list see the `tox.ini` file.
-
-```bash
-# python=3.6 and django=2.2
-make test p=36 d=22
-```
-
-Test directly with tox:
-
-```bash
-tox
-```
-
-Single file test shortcut:
-
-```bash
-# run only tests in tests/test_register.py
-make test-file f=register
-```
-
-For live testing on a django project, you can use the testproject.
- Create a different virtualenv, install the dependencies again and run:
-
-```bash
-cd testproject
-make install-local v=<CURRENT VERSION IN gqlauth.__init__>
-```
-
-## Opening Pull Requests
-
-Please fork the project and open a pull request against the master branch.
-
-This will trigger a series of tests and lint checks.
-
-We advise that you format and run lint locally before doing this to save time:
-
-```bash
-make format
-make lint
-```
+tests against other Python version will run on github workflows.
 
 ## Documentation
 
 The documentation is generated using the excellent [MkDocs](https://www.mkdocs.org/) with [material theme](https://squidfunk.github.io/mkdocs-material/).
 
-The documentation dependencies are installed by running:
-
-```bash
-pip install -r docs/requirements.txt
-```
-
-Then to produce a HTML version of the documentation, for live editing:
-
+To see that your docs are written well check them with the development server:
 ```bash
 make serve
 ```
 
-It will run the `docs/pre_build.py` script before building the docs.
+_It will run the `docs/pre_build.py` script before building the docs._

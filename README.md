@@ -1,7 +1,11 @@
 
-![Tests](https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml/badge.svg)
-[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+[![Tests](https://img.shields.io/github/workflow/status/nrbnlulu/strawberry-django-auth/Run%20Tests?label=Tests&style=for-the-badge)](https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/nrbnlulu/strawberry-django-auth?style=for-the-badge)](https://app.codecov.io/gh/nrbnlulu/strawberry-django-auth)
+[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg?style=for-the-badge&logo=appveyor)](https://pypi.org/project/strawberry-django-auth/)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge&logo=appveyor)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+[![Pypi downloads](https://img.shields.io/pypi/dm/strawberry-django-auth?style=for-the-badge)](https://pypistats.org/packages/strawberry-django-auth)
+[![Python versions](https://img.shields.io/pypi/pyversions/strawberry-django-auth?style=social)](https://pypi.org/project/strawberry-django-auth/)
+
 # Strawberry-django Auth
 [Django](https://github.com/django/django) registration and authentication with [Strawberry](https://strawberry.rocks/).
 
@@ -10,7 +14,7 @@
 ![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif)
 
 ## About
-### This Library is the strawberry version of ![Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
+### This Library is the strawberry version of! [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
 
 Abstract all the basic logic of handling user accounts out of your app,
 so you don't need to think about it and can **get you up and running faster**.
@@ -27,7 +31,7 @@ your implementation*.
 * [x] Awesome docs!
 * [x] Captcha validation
 * [x] Async/Sync supported!
-* [x] Works with ==default or custom== user model
+* [x] Works with **default or custom** user model
 * [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
@@ -44,7 +48,7 @@ your implementation*.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
-* [ ] Currently, only mutation
+* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay)
 
 
 ### Full schema features
