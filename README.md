@@ -1,8 +1,11 @@
 
 ![Tests](https://img.shields.io/github/workflow/status/nrbnlulu/strawberry-django-auth/Run%20Tests?label=Tests&style=for-the-badge)
-![Codecov](https://img.shields.io/codecov/c/github/nrbnlulu/strawberry-django-auth?style=for-the-badge)
+[![Codecov](https://img.shields.io/codecov/c/github/nrbnlulu/strawberry-django-auth?style=for-the-badge)](https://app.codecov.io/gh/nrbnlulu/strawberry-django-auth)
 [![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg?style=for-the-badge&logo=appveyor)](https://pypi.org/project/strawberry-django-auth/)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge&logo=appveyor)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+[![Pypi downloads](https://img.shields.io/pypi/dm/strawberry-django-auth?style=for-the-badge)](https://pypistats.org/packages/strawberry-django-auth)
+[![Python versions](https://img.shields.io/pypi/pyversions/strawberry-django-auth?style=social)](https://pypi.org/project/strawberry-django-auth/)
+
 # Strawberry-django Auth
 [Django](https://github.com/django/django) registration and authentication with [Strawberry](https://strawberry.rocks/).
 
@@ -11,7 +14,7 @@
 ![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif)
 
 ## About
-### This Library is the strawberry version of ![Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
+### This Library is the strawberry version of! [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
 
 Abstract all the basic logic of handling user accounts out of your app,
 so you don't need to think about it and can **get you up and running faster**.
