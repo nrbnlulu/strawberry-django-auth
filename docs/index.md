@@ -46,7 +46,7 @@ your implementation^^.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
-* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay>)
+* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay)
 
 ---
 

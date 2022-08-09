@@ -27,7 +27,7 @@ your implementation*.
 * [x] Awesome docs!
 * [x] Captcha validation
 * [x] Async/Sync supported!
-* [x] Works with ==default or custom== user model
+* [x] Works with **default or custom** user model
 * [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
@@ -44,7 +44,7 @@ your implementation*.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
-* [ ] Currently, only mutation
+* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay)
 
 
 ### Full schema features
