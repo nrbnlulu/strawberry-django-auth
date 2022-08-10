@@ -98,12 +98,7 @@ class PasswordSet(PasswordSetMixin, ArgMixin):
     __doc__ = PasswordSetMixin.__doc__
 
 
-class PasswordReset(
-    PasswordResetMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-):
+class PasswordReset(PasswordResetMixin, ArgMixin):
     __doc__ = PasswordResetMixin.__doc__
 
 

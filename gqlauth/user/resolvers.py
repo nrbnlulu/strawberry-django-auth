@@ -313,26 +313,25 @@ class PasswordResetMixin:
     Also, if user has not been verified yet, verify it.
     """
 
-    class _meta:
-        _required_inputs = ["token", "new_password1", "new_password2"]
+    @strawberry.input
+    class PasswordResetInput:
+        token: str
+        new_password1: str
+        new_password2: str
 
     form = SetPasswordForm
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, _, input_: PasswordResetInput) -> MutationNormalOutput:
         try:
-            token = input_.get("token")
             payload = get_payload_from_token(
-                token,
+                input_.token,
                 TokenAction.PASSWORD_RESET,
                 app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-            form_dict = {
-                "new_password1": input_["newPassword1"],
-                "new_password2": input_["newPassword2"],
-            }
-            f = cls.form(user, form_dict)
+
+            f = cls.form(user, asdict(input_))
             if f.is_valid():
                 revoke_user_refresh_token(user)
                 user = f.save()
@@ -341,12 +340,12 @@ class PasswordResetMixin:
                     user.status.save(update_fields=["verified"])
                     user_verified.send(sender=cls, user=user)
 
-                return cls.output(success=True)
-            return cls.output(success=False, errors=f.errors.get_json_data())
+                return MutationNormalOutput(success=True)
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except SignatureExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
         except (BadSignature, TokenScopeError):
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class PasswordSetMixin:
@@ -380,9 +379,7 @@ class PasswordSetMixin:
                 app_settings.EXPIRATION_PASSWORD_SET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-            form_dict = asdict(input_)
-            form_dict.pop("token")
-            f = cls.form(user, form_dict)
+            f = cls.form(user, asdict(input_))
             if f.is_valid():
                 # Check if user has already set a password
                 if user.has_usable_password():
