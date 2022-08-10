@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from smtplib import SMTPException
+from typing import Union
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -10,10 +11,19 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 import strawberry
 from strawberry.types import Info
-from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
+from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
+from strawberry_django_jwt.mutations import Refresh as RefreshParent
+from strawberry_django_jwt.mutations import Revoke as RevokeParent
+from strawberry_django_jwt.mutations import Verify as VerifyParent
 
-from gqlauth.bases.interfaces import MutationNormalOutput
+from gqlauth.bases.types_ import (
+    MutationNormalOutput,
+    ObtainJSONWebTokenPayload,
+    RefreshTokenPayload,
+    RevokeTokenPayload,
+    VerifyTokenPayload,
+)
 from gqlauth.constants import Messages, TokenAction
 from gqlauth.decorators import (
     _password_confirmation_required,
@@ -44,9 +54,7 @@ from gqlauth.utils import (
     g_user,
     get_payload_from_token,
     inject_fields,
-    normalize_fields,
     revoke_user_refresh_token,
-    using_refresh_tokens,
 )
 
 UserModel = get_user_model()
@@ -64,13 +72,23 @@ class Captcha:
 
     @strawberry.mutation(description=__doc__)
     def field(self) -> CaptchaType:
-
         return CaptchaModel.create_captcha()
 
     @strawberry.mutation(description=__doc__)
     @sync_to_async
     def afield(self) -> CaptchaType:
         return CaptchaModel.create_captcha()
+
+
+def check_captcha(
+    input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenMixin.ObtainJSONWebTokenMInput"]
+):
+    uuid = input_.identifier
+    try:
+        obj = CaptchaModel.objects.get(uuid=uuid)
+    except CaptchaModel.DoesNotExist:
+        return Messages.CAPTCHA_EXPIRED
+    return obj.validate(input_.userEntry)
 
 
 class RegisterMixin:
@@ -95,7 +113,7 @@ class RegisterMixin:
     """
 
     @strawberry.input
-    @inject_fields(app_settings.REGISTER_MUTATION_FIELDS, auto_annotation=str)
+    @inject_fields(app_settings.REGISTER_MUTATION_FIELDS)
     class RegisterInput:
         if not app_settings.ALLOW_PASSWORDLESS_REGISTRATION:
             password1: str
@@ -110,18 +128,9 @@ class RegisterMixin:
     )
 
     @classmethod
-    def check_captcha(cls, input_: RegisterInput):
-        uuid = input_.identifier
-        try:
-            obj = CaptchaModel.objects.get(uuid=uuid)
-        except CaptchaModel.DoesNotExist:
-            return Messages.CAPTCHA_EXPIRED
-        return obj.validate(input_.userEntry)
-
-    @classmethod
     def resolve_mutation(cls, info, input_: RegisterInput) -> MutationNormalOutput:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            check_res = cls.check_captcha(input_)
+            check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
                 return MutationNormalOutput(success=False, errors={"captcha": check_res})
 
@@ -129,20 +138,20 @@ class RegisterMixin:
             with transaction.atomic():
                 f = cls.form(asdict(input_))
                 if f.is_valid():
-                    email = input_.email
+                    email = getattr(input_, "email", False)
                     UserStatus.clean_email(email)
                     user = f.save()
-                    send_activation = app_settings.SEND_ACTIVATION_EMAIL is True and email
-                    send_password_set = (
-                        app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
-                        and app_settings.SEND_PASSWORD_SET_EMAIL is True
-                        and email
-                    )
-                    if send_activation:
-                        user.status.send_activation_email(info)
+                    if email:
+                        send_activation = app_settings.SEND_ACTIVATION_EMAIL is True
+                        send_password_set = (
+                            app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
+                            and app_settings.SEND_PASSWORD_SET_EMAIL is True
+                        )
+                        if send_activation:
+                            user.status.send_activation_email(info)
 
-                    if send_password_set:
-                        user.status.send_password_set_email(info)
+                        if send_password_set:
+                            user.status.send_password_set_email(info)
 
                     user_registered.send(sender=cls, user=user)
                     return MutationNormalOutput(success=True)
@@ -416,65 +425,51 @@ class ObtainJSONWebTokenMixin:
     return `unarchiving=True` on OutputBase.
     """
 
-    class _meta:
-        additional_req = {}
+    @strawberry.input
+    @inject_fields(app_settings.LOGIN_FIELDS)
+    class ObtainJSONWebTokenMInput:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            additional_req.update({"identifier": UUID, "userEntry": str})
-        _required_inputs = normalize_fields(app_settings.LOGIN_REQUIRED_FIELDS, additional_req)
-
-        _inputs = app_settings.LOGIN_OPTIONAL_FIELDS
-        _parent_resolver_name = "obtain"
+            identifier: UUID
+            userEntry: str
 
     @classmethod
-    def check_captcha(cls, **input_):
-        uuid = input_.get("identifier")
-        try:
-            obj = CaptchaModel.objects.get(uuid=uuid)
-        except CaptchaModel.DoesNotExist:
-            return Messages.CAPTCHA_EXPIRED
-
-        return obj.validate(input_.get("userEntry"))
-
-    @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenMInput) -> ObtainJSONWebTokenPayload:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            check_res = cls.check_captcha(**input_)
+            check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
-                return cls.output(success=False, errors={"captcha": check_res})
+                return ObtainJSONWebTokenPayload(success=False, errors={"captcha": check_res})
 
         try:
-            USERNAME_FIELD = UserModel.USERNAME_FIELD
-            # extract USERNAME_FIELD to use in query
-            username = input_.get(to_camel_case(USERNAME_FIELD))
-            password = input_.get("password")
-            query_input_ = {USERNAME_FIELD: username}
-            user = get_user_to_login(**query_input_)
-            query_input_["password"] = password
-
+            args = asdict(input_)
+            user = get_user_to_login(**args)
             if user.status.archived is True:  # un-archive on login
                 UserStatus.unarchive(user)
 
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # this will raise if not successful
-                res = cls.obtain.get_result(None, None, [cls, info], query_input_)
-                return cls.output(success=True, obtainPayload=res)
+                res = JwtObtainParent.obtain.get_result(None, None, [cls, info], args)
+                return ObtainJSONWebTokenPayload(success=True, obtainPayload=res)
             else:
                 raise UserNotVerified
 
         except (JSONWebTokenError, ObjectDoesNotExist, InvalidCredentials):
-            return cls.output(success=False, errors=Messages.INVALID_CREDENTIALS)
+            return ObtainJSONWebTokenPayload(success=False, errors=Messages.INVALID_CREDENTIALS)
         except UserNotVerified:
-            return cls.output(success=False, errors=Messages.NOT_VERIFIED)
+            return ObtainJSONWebTokenPayload(success=False, errors=Messages.NOT_VERIFIED)
 
 
 class ArchiveOrDeleteMixin:
+    @strawberry.input
+    class ArchiveOrDeleteMixinInput:
+        password: str
+
     @classmethod
     @verification_required
     @_password_confirmation_required
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
         user = g_user(info)
         cls.resolve_action(user, info=info)
-        return cls.output(success=True)
+        return MutationNormalOutput(success=True)
 
 
 class ArchiveAccountMixin(ArchiveOrDeleteMixin):
@@ -484,11 +479,8 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin):
     User must be verified and confirm password.
     """
 
-    class _meta:
-        _required_inputs = ["password"]
-
     @classmethod
-    def resolve_action(cls, user, **input_):
+    def resolve_action(cls, user):
         UserStatus.archive(user)
         revoke_user_refresh_token(user=user)
 
@@ -503,11 +495,8 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin):
     User must be verified and confirm password.
     """
 
-    class _meta:
-        _required_inputs = ["password"]
-
     @classmethod
-    def resolve_action(cls, user, *args, **input_):
+    def resolve_action(cls, user):
         if app_settings.ALLOW_DELETE_ACCOUNT:
             revoke_user_refresh_token(user=user)
             user.delete()
@@ -520,37 +509,33 @@ class PasswordChangeMixin:
     A new token and refresh token are sent. User must be verified.
     """
 
-    class _meta:
-        _required_inputs = ["old_password", "new_password1", "new_password2"]
-        _outputs = []
-        if using_refresh_tokens():
-            _outputs = ["refresh_token", "token"]
-        _parent_resolver_name = "obtain"
+    @strawberry.input
+    class PasswordChangeInput:
+        old_password: str
+        new_password1: str
+        new_password2: str
 
     form = PasswordChangeForm
 
     @classmethod
     @verification_required
     @_password_confirmation_required
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: PasswordChangeInput) -> ObtainJSONWebTokenPayload:
         user = g_user(info)
-        form_dict = {
-            "old_password": input_["oldPassword"],
-            "new_password1": input_["newPassword1"],
-            "new_password2": input_["newPassword2"],
-        }
-        f = cls.form(user, form_dict)
+        args = asdict(input_)
+        user = get_user_to_login(**args)
+        f = cls.form(user, args)
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
             parent_input = {
                 user.USERNAME_FIELD: getattr(user, user.USERNAME_FIELD),
-                "password": input_.get("newPassword1"),
+                "password": input_.new_password1,
             }
-            parent_res = cls.obtain.get_result(None, None, [cls, info], parent_input)
-            return cls.output(success=True, obtainPayload=parent_res)
+            parent_res = JwtObtainParent.obtain.get_result(None, None, [cls, info], parent_input)
+            return ObtainJSONWebTokenPayload(success=True, obtainPayload=parent_res)
         else:
-            return cls.output(success=False, errors=f.errors.get_json_data())
+            return ObtainJSONWebTokenPayload(success=False, errors=f.errors.get_json_data())
 
 
 class UpdateAccountMixin:
@@ -560,27 +545,26 @@ class UpdateAccountMixin:
     User must be verified.
     """
 
-    class _meta:
-        _inputs = app_settings.UPDATE_MUTATION_FIELDS
+    @strawberry.input
+    @inject_fields(app_settings.UPDATE_MUTATION_FIELDS)
+    class UpdateAccountInput:
+        ...
 
     form = UpdateAccountForm
 
     @classmethod
     @verification_required
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
         user = g_user(info)
         f = cls.form(
-            {
-                "first_name": input_.get("firstName"),
-                "last_name": input_.get("lastName"),
-            },
+            asdict(input_),
             instance=user,
         )
         if f.is_valid():
             f.save()
-            return cls.output(success=True)
+            return MutationNormalOutput(success=True)
         else:
-            return cls.output(success=False, errors=f.errors.get_json_data())
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
 
 
 class VerifyTokenMixin:
@@ -588,18 +572,19 @@ class VerifyTokenMixin:
     Checks if a token is not expired and correct
     """
 
-    class _meta:
-        _parent_resolver_name = "verify"
+    @strawberry.input
+    class VerifyTokenInput:
+        token: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: VerifyTokenInput) -> VerifyTokenPayload:
         try:
-            payload = cls.verify.get_result(None, None, [cls, info], input_)
-            return cls.output(success=True, verifyPayload=(payload))
+            payload = VerifyParent.verify.get_result(None, None, [cls, info], asdict(input_))
+            return VerifyTokenPayload(success=True, verifyPayload=payload)
         except JSONWebTokenExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return VerifyTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
         except JSONWebTokenError:
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return VerifyTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class RefreshTokenMixin:
@@ -611,21 +596,20 @@ class RefreshTokenMixin:
     with renewed expiration time for non-expired tokens
     """
 
-    class _meta:
-        _parent_resolver_name = "refresh"
+    @strawberry.input
+    class RefreshTokenInput:
+        refresh_token: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: RefreshTokenInput) -> RefreshTokenPayload:
         try:
-            parent_input = {"refresh_token": input_.get("refreshToken")}
-
-            res = cls.refresh.get_result(None, None, [cls, info], parent_input)
-            return cls.output(success=True, refreshPayload=res)
+            res = RefreshParent.refresh.get_result(None, None, [cls, info], asdict(input_))
+            return RefreshTokenPayload(success=True, refreshPayload=res)
 
         except JSONWebTokenExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return RefreshTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
         except JSONWebTokenError:
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return RefreshTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class RevokeTokenMixin:
@@ -633,21 +617,20 @@ class RevokeTokenMixin:
     Suspends a refresh token
     """
 
-    class _meta:
-        _parent_resolver_name = "revoke"
+    @strawberry.input
+    class RevokeTokenInput:
+        refresh_token: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: RevokeTokenInput) -> RevokeTokenPayload:
         try:
-            parent_input = {"refresh_token": input_.get("refreshToken")}
-
-            res = cls.revoke.get_result(None, None, [cls, info], parent_input)
-            return cls.output(success=True, revokePayload=res)
+            res = RevokeParent.revoke.get_result(None, None, [cls, info], asdict(input_))
+            return RevokeTokenPayload(success=True, revokePayload=res)
 
         except JSONWebTokenExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return RevokeTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
         except JSONWebTokenError:
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return RevokeTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class SendSecondaryEmailActivationMixin:

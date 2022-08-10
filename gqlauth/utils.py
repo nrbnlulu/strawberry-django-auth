@@ -1,5 +1,4 @@
 import contextlib
-import dataclasses
 import inspect
 import typing
 from typing import Dict, Iterable, Union
@@ -7,11 +6,8 @@ from typing import Dict, Iterable, Union
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from django.core import signing
-from strawberry import auto
-from strawberry.annotation import StrawberryAnnotation
-from strawberry.arguments import StrawberryArgument
+from strawberry.field import StrawberryField
 from strawberry.types import Info
-from strawberry.unset import UNSET
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError
 
@@ -100,12 +96,8 @@ def revoke_user_refresh_token(user):
                 refresh_token.revoke()
 
 
-def flat_dict(dict_or_list):
-    """
-    if is dict, return list of dict keys,
-    if is list, return the list
-    """
-    return list(dict_or_list.keys()) if isinstance(dict_or_list, dict) else dict_or_list
+def fields_names(strawberry_fields: Iterable[StrawberryField]):
+    return [field.python_name for field in strawberry_fields]
 
 
 def normalize_fields(dict_or_list, extra_list_or_dict):
@@ -122,49 +114,14 @@ def normalize_fields(dict_or_list, extra_list_or_dict):
     return dict_or_list
 
 
-def create_strawberry_argument(python_name: str, graphql_name: str, type_, default=None):
-    return StrawberryArgument(
-        python_name=python_name,
-        graphql_name=graphql_name,
-        type_annotation=StrawberryAnnotation(type_),
-        default=default or UNSET,
-    )
-
-
-def inject_fields(fields: Union[Dict[str, type], Iterable[str]], auto_annotation=auto):
-    """
-    Injects the supplied fields to the decorated class. These are always non-default.,
-
-    :param fields: The fields to inject. If a plain string `auto` will be annotated.,
-    :param auto_annotation: if `fields` are `list` will annotate them with this param.
-    """
-
-    def wrapped(cls):
-        annotations = list(cls.__annotations__.items())
-        res = fields
-        if isinstance(fields, Iterable) and not isinstance(fields, dict):
-            # Checking that the field is not a "" redundant string.
-            # This is quite common behavior with django's user model that a user override.
-            res = {field: auto_annotation for field in fields if field}
-
-        # this solves non default fields after default fields
-        annotations.extend(list(res.items()))
-        annotations.reverse()
-        annotations = {name: annotation for name, annotation in annotations}
-        cls.__annotations__ = annotations
-        return cls
-
-    return wrapped
-
-
-def inject_many(fields: Iterable[Union[Dict[str, type], Iterable[str]]]):
-    """
-    Injects the supplied iterables to the decorated class.
-    """
-
-    def wrapped(cls):
-        for node in fields:
-            inject_fields(node)(cls)
+def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=False):
+    def wrapped(cls: type):
+        for field in fields:
+            if not field.name:
+                continue
+            if not annotations_only:
+                setattr(cls, field.name, field)
+            cls.__annotations__[field.name] = field.type_annotation.annotation
         return cls
 
     return wrapped
@@ -187,41 +144,6 @@ def inject_arguments(args: Dict[str, type]):
         return fn
 
     return wrapped
-
-
-def make_dataclass_helper(required: Union[dict, list], non_required: Union[dict, list]):
-    res_req = []
-    res_non_req = []
-
-    if isinstance(required, dict):
-        for key in required:
-            res_req.append((to_camel_case(key), required[key]))
-
-    elif isinstance(required, list):
-        for key in required:
-            res_req.append((to_camel_case(key), str))
-
-    if isinstance(non_required, dict):
-        for key in non_required:
-            res_non_req.append(
-                (
-                    to_camel_case(key),
-                    typing.Optional[non_required[key]],
-                    dataclasses.field(default=None),
-                )
-            )
-
-    elif isinstance(non_required, list):
-        for key in non_required:
-            res_non_req.append(
-                (
-                    to_camel_case(key),
-                    typing.Optional[str],
-                    dataclasses.field(default=None),
-                )
-            )
-
-    return res_req + res_non_req
 
 
 def is_optional(field):

@@ -9,17 +9,17 @@ from django.contrib.auth.forms import (
 
 from gqlauth.settings import gqlauth_settings as app_settings
 
-from .utils import flat_dict
+from .utils import fields_names
+
+REGISTER_MUTATION_FIELDS = fields_names(app_settings.REGISTER_MUTATION_FIELDS)
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required="email" in app_settings.REGISTER_MUTATION_FIELDS)
+    email = forms.EmailField(required="email" in REGISTER_MUTATION_FIELDS)
 
     class Meta:
         model = get_user_model()
-        fields = flat_dict(app_settings.REGISTER_MUTATION_FIELDS) + flat_dict(
-            app_settings.REGISTER_MUTATION_FIELDS_OPTIONAL
-        )
+        fields = REGISTER_MUTATION_FIELDS
 
 
 class PasswordChangeFormGql(PasswordChangeForm):
@@ -37,7 +37,7 @@ class CustomUsernameField(UsernameField):
 class UpdateAccountForm(UserChangeForm):
     class Meta:
         model = get_user_model()
-        fields = flat_dict(app_settings.UPDATE_MUTATION_FIELDS)
+        fields = fields_names(app_settings.UPDATE_MUTATION_FIELDS)
         field_classes = {"username": CustomUsernameField}
 
 
@@ -48,9 +48,7 @@ class PasswordLessRegisterForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = flat_dict(app_settings.REGISTER_MUTATION_FIELDS) + flat_dict(
-            app_settings.REGISTER_MUTATION_FIELDS_OPTIONAL
-        )
+        fields = REGISTER_MUTATION_FIELDS
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

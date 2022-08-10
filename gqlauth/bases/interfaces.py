@@ -11,9 +11,3 @@ T = TypeVar("T")
 class OutputInterface:
     success: bool
     errors: Optional[ExpectedErrorType]
-
-
-@strawberry.type
-class MutationNormalOutput:
-    success: bool
-    errors: Optional[ExpectedErrorType] = None

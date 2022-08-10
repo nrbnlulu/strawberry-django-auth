@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
-from typing import Any, Callable, NewType, Union
+from typing import Any, Callable, NewType, Set, Union
 
 from django.conf import settings as django_settings
 import strawberry
+from strawberry.annotation import StrawberryAnnotation
+from strawberry.field import StrawberryField
 
 
 def default_text_factory():
@@ -18,16 +20,26 @@ def default_text_factory():
     )
 
 
-_USER_NODE_FILTER_FIELDS = {
-    "email": ["exact"],
-    "username": ["exact", "icontains", "istartswith"],
-    "is_active": ["exact"],
-    "status__archived": ["exact"],
-    "status__verified": ["exact"],
-    "status__secondary_email": ["exact"],
-}
-
 DjangoSetting = NewType("DjangoSetting", Union[dict, list, str, Any])
+
+username_field = StrawberryField(
+    python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
+)
+password_field = StrawberryField(
+    python_name="password", default=None, type_annotation=StrawberryAnnotation(str)
+)
+first_name_field = StrawberryField(
+    python_name="first_name", default=None, type_annotation=StrawberryAnnotation(str)
+)
+last_name_field = StrawberryField(
+    python_name="last_name", default=None, type_annotation=StrawberryAnnotation(str)
+)
+email_field = StrawberryField(
+    python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
+)
+email_field = StrawberryField(
+    python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
+)
 
 
 @dataclass
@@ -36,10 +48,8 @@ class GqlAuthSettings:
     # the register mutation will return a token
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     # mutation fields options
-    LOGIN_OPTIONAL_FIELDS: list = field(default_factory=lambda: [])
-    LOGIN_REQUIRE_CAPTCHA: bool = True
-    LOGIN_REQUIRED_FIELDS: Union[dict, list] = field(
-        default_factory=lambda: ["username", "password"]
+    LOGIN_FIELDS: Set[StrawberryField] = field(
+        default_factory=lambda: {username_field, password_field}
     )
     """
     These fields would be used to authenticate with SD-jwt `authenticate` function.
@@ -47,15 +57,14 @@ class GqlAuthSettings:
     And will return the user from one of them unless `PermissionDenied` was raised.
     You can pass any fields that would be accepted by your backends.
     """
-
-    REGISTER_MUTATION_FIELDS: Union[dict, list] = field(
-        default_factory=lambda: ["email", "username"]
+    LOGIN_REQUIRE_CAPTCHA: bool = True
+    REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
+        default_factory=lambda: {email_field, username_field}
     )
     """
-    required fields on register, plus password1 and password2,
+    fields on register, plus password1 and password2,
     can be a dict like UPDATE_MUTATION_fieldS setting
     """
-    REGISTER_MUTATION_FIELDS_OPTIONAL: list = field(default_factory=lambda: [])
     REGISTER_REQUIRE_CAPTCHA: bool = True
     # captcha stuff
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
@@ -81,9 +90,12 @@ class GqlAuthSettings:
     MEDIA_ROOT/captcha/<datetime>/<uuid>.png
     """
     # optional fields on update account, can be list of fields
-    UPDATE_MUTATION_FIELDS: Union[dict, list] = field(
-        default_factory=lambda: {"first_name": str, "last_name": str}
+    UPDATE_MUTATION_FIELDS: Set[StrawberryField] = field(
+        default_factory=lambda: {first_name_field, last_name_field}
     )
+    """
+    fields on update account mutation.
+    """
 
     # email tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
@@ -119,7 +131,6 @@ class GqlAuthSettings:
     USER_NODE_EXCLUDE_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["password", "is_superuser"]
     )
-    USER_NODE_FILTER_FIELDS: dict = field(default_factory=lambda: _USER_NODE_FILTER_FIELDS)
     # others
     # turn is_active to False instead
     ALLOW_DELETE_ACCOUNT: bool = False
