@@ -1,5 +1,5 @@
+from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Dict
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -13,6 +13,7 @@ from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
 
+from gqlauth.bases.interfaces import MutationNormalOutput
 from gqlauth.constants import Messages, TokenAction
 from gqlauth.decorators import (
     password_confirmation_required,
@@ -42,6 +43,7 @@ from gqlauth.types_ import CaptchaType
 from gqlauth.utils import (
     g_user,
     get_payload_from_token,
+    inject_fields,
     normalize_fields,
     revoke_user_refresh_token,
     using_refresh_tokens,
@@ -92,47 +94,45 @@ class RegisterMixin:
     If allowed to not verified users login, return token.
     """
 
-    class _meta:
+    @strawberry.input
+    @inject_fields(app_settings.REGISTER_MUTATION_FIELDS, auto_annotation=str)
+    class RegisterInput:
+        if not app_settings.ALLOW_PASSWORDLESS_REGISTRATION:
+            password1: str
+            password2: str
 
-        password_fields = (
-            [] if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else ["password1", "password2"]
-        )
-        extra_fields = password_fields
         if app_settings.REGISTER_REQUIRE_CAPTCHA:
-            captcha_fields = {"identifier": UUID, "userEntry": str}
-            extra_fields = normalize_fields(captcha_fields, password_fields)
+            identifier: UUID
+            userEntry: str
 
-        _required_inputs = normalize_fields(app_settings.REGISTER_MUTATION_FIELDS, extra_fields)
-        _inputs = app_settings.REGISTER_MUTATION_FIELDS_OPTIONAL
+    _input_type = RegisterInput
+    _return_type = MutationNormalOutput
 
     form = (
         PasswordLessRegisterForm if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else RegisterForm
     )
 
     @classmethod
-    def check_captcha(cls, input_):
-        uuid = input_.get("identifier")
+    def check_captcha(cls, input_: RegisterInput):
+        uuid = input_.identifier
         try:
             obj = CaptchaModel.objects.get(uuid=uuid)
         except CaptchaModel.DoesNotExist:
             return Messages.CAPTCHA_EXPIRED
-        return obj.validate(input_.get("userEntry"))
+        return obj.validate(input_.userEntry)
 
     @classmethod
-    def resolve_mutation(cls, info, **input_: Dict):
+    def resolve_mutation(cls, info, input_: RegisterInput) -> MutationNormalOutput:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = cls.check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
-                return cls.output(success=False, errors={"captcha": check_res})
+                return MutationNormalOutput(success=False, errors={"captcha": check_res})
 
         try:
             with transaction.atomic():
-                USERNAME_FIELD = UserModel.USERNAME_FIELD
-                # extract USERNAME_FIELD that was camelized to use in query
-                input_[USERNAME_FIELD] = input_.pop(to_camel_case(USERNAME_FIELD))
-                f = cls.form(input_)
+                f = cls.form(asdict(input_))
                 if f.is_valid():
-                    email = input_.get("email")
+                    email = input_.email
                     UserStatus.clean_email(email)
                     user = f.save()
                     send_activation = app_settings.SEND_ACTIVATION_EMAIL is True and email
@@ -148,11 +148,11 @@ class RegisterMixin:
                         user.status.send_password_set_email(info)
 
                     user_registered.send(sender=cls, user=user)
-                    return cls.output(success=True)
+                    return MutationNormalOutput(success=True)
                 else:
-                    return cls.output(success=False, errors=f.errors.get_json_data())
+                    return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except EmailAlreadyInUse:
-            return cls.output(
+            return MutationNormalOutput(
                 success=False,
                 # if the email was set as a secondary email,
                 # the RegisterForm will not catch it,
@@ -160,7 +160,7 @@ class RegisterMixin:
                 errors={UserModel.EMAIL_FIELD: Messages.EMAIL_IN_USE},
             )
         except SMTPException:
-            return cls.output(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
 class VerifyAccountMixin:

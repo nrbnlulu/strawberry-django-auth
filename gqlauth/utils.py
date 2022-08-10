@@ -15,7 +15,7 @@ from strawberry.unset import UNSET
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError
 
-from .exceptions import TokenScopeError, WrongUsage
+from .exceptions import TokenScopeError
 
 
 def hide_args_kwargs(field):
@@ -131,25 +131,22 @@ def create_strawberry_argument(python_name: str, graphql_name: str, type_, defau
     )
 
 
-def inject_fields(fields: Union[Dict[str, type], Iterable[str]]):
+def inject_fields(fields: Union[Dict[str, type], Iterable[str]], auto_annotation=auto):
     """
-    Injects the supplied fields to the decorated class.
-    If the given fields are list they would be annotated with `auto`
+    Injects the supplied fields to the decorated class. These are always non-default.,
+
+    :param fields: The fields to inject. If a plain string `auto` will be annotated.,
+    :param auto_annotation: if `fields` are `list` will annotate them with this param.
     """
 
     def wrapped(cls):
         annotations = list(cls.__annotations__.items())
         res = fields
-        if isinstance(fields, Iterable):
-            # Checking that the field is not a "" redundant string
-            # This is quite common behavior with django's user model that a user override
-            res = {field: auto for field in fields if field}
+        if isinstance(fields, Iterable) and not isinstance(fields, dict):
+            # Checking that the field is not a "" redundant string.
+            # This is quite common behavior with django's user model that a user override.
+            res = {field: auto_annotation for field in fields if field}
 
-        elif not isinstance(fields, dict):
-            raise WrongUsage(
-                "Can handle only list of strings or dict of name and types."
-                f"You provided {type(fields)}"
-            )
         # this solves non default fields after default fields
         annotations.extend(list(res.items()))
         annotations.reverse()
@@ -169,6 +166,25 @@ def inject_many(fields: Iterable[Union[Dict[str, type], Iterable[str]]]):
         for node in fields:
             inject_fields(node)(cls)
         return cls
+
+    return wrapped
+
+
+def inject_arguments(args: Dict[str, type]):
+    """
+    injects arguments to the decorated resolver.
+    :param args: `dict[name, type]` of arguments to be injected.,
+    """
+
+    def wrapped(fn):
+        sig = inspect.signature(fn)
+        params = {
+            inspect.Parameter(name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type_)
+            for name, type_ in args.items()
+        }
+        params.update(sig.parameters.values())
+        fn.__signature__ = inspect.signature(fn).replace(parameters=params)
+        return fn
 
     return wrapped
 

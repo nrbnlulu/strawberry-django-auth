@@ -7,6 +7,7 @@ from gqlauth.bases.mixins import (
     DynamicInputMixin,
     DynamicPayloadMixin,
     DynamicRelayMutationMixin,
+    RelayMixin,
 )
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
@@ -52,7 +53,7 @@ __all__ = [
 ]
 
 
-class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):
+class Register(RelayMixin):
     __doc__ = RegisterMixin.__doc__
 
 

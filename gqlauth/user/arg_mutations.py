@@ -4,6 +4,7 @@ from strawberry_django_jwt.mutations import Revoke as RevokeParent
 from strawberry_django_jwt.mutations import Verify as VerifyParent
 
 from gqlauth.bases.mixins import (
+    ArgMixin,
     DynamicArgsMixin,
     DynamicArgsMutationMixin,
     DynamicPayloadMixin,
@@ -52,7 +53,12 @@ __all__ = [
 ]
 
 
-class Register(RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin):
+# class Register(RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin):
+#     __doc__ = RegisterMixin.__doc__
+#
+
+
+class Register(RegisterMixin, ArgMixin):
     __doc__ = RegisterMixin.__doc__
 
 

@@ -4,14 +4,16 @@ import typing
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 import strawberry
+from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.bases.exceptions import WrongUsage
-from gqlauth.bases.interfaces import OutputInterface
+from gqlauth.bases.interfaces import MutationNormalOutput
 from gqlauth.bases.scalars import ExpectedErrorType
 from gqlauth.utils import (
     create_strawberry_argument,
     hide_args_kwargs,
+    inject_arguments,
     is_optional,
     list_to_dict,
     make_dataclass_helper,
@@ -205,7 +207,7 @@ class DynamicPayloadMixin:
             )
             outputs = strawberry.type(dc)
         else:
-            outputs = strawberry.type(OutputInterface)
+            outputs = strawberry.type(MutationNormalOutput)
 
         cls.output = outputs
         super().__init_subclass__()
@@ -272,3 +274,50 @@ class DynamicArgsMutationMixin:
         raise NotImplementedError()(
             "This has method has to be implemented by the logic delegated mixin"
         )
+
+
+class ArgMixin:
+    field: StrawberryField
+    afield: StrawberryField
+
+    def __init_subclass__(cls, **kwargs):
+        input_type = cls._input_type
+        return_type = cls._return_type
+
+        @strawberry.mutation(description=cls.__doc__)
+        @inject_arguments(input_type.__annotations__)
+        @hide_args_kwargs
+        def field(info: Info, **kwargs) -> return_type:
+            return cls.resolve_mutation(info, input_type(**kwargs))
+
+        cls.field = field
+
+        @strawberry.mutation(description=cls.__doc__)
+        @inject_arguments(input_type.__annotations__)
+        @hide_args_kwargs
+        async def afield(info: Info, **kwargs) -> return_type:
+            return await sync_to_async(cls.resolve_mutation)(info, input_type(**kwargs))
+
+        cls.afield = afield
+
+
+class RelayMixin:
+    field: StrawberryField
+    afield: StrawberryField
+
+    def __init_subclass__(cls, **kwargs):
+        input_type = cls._input_type
+        return_type = cls._return_type
+
+        @strawberry.mutation(description=cls.__doc__)
+        @inject_arguments(input_type.__annotations__)
+        @hide_args_kwargs
+        def field(info: Info, input: input_type) -> return_type:
+            return cls.resolve_mutation(info, input)
+
+        cls.field = field
+
+        @strawberry.mutation(description=cls.__doc__)
+        @hide_args_kwargs
+        async def afield(info: Info, input: input_type) -> return_type:
+            return await sync_to_async(cls.resolve_mutation)(info, input)

@@ -1,18 +1,19 @@
-import typing
+from typing import Optional, TypeVar
 
 import strawberry
 
 from gqlauth.bases.scalars import ExpectedErrorType
 
-# ExpectedErrorType = app_settings.CUSTOM_ERROR_TYPE or ExpectedErrorType
+T = TypeVar("T")
 
 
 @strawberry.interface
 class OutputInterface:
-    """
-    A class to all public classes extend to
-    padronize the output
-    """
-
     success: bool
-    errors: typing.Optional[ExpectedErrorType] = None
+    errors: Optional[ExpectedErrorType]
+
+
+@strawberry.type
+class MutationNormalOutput:
+    success: bool
+    errors: Optional[ExpectedErrorType] = None
