@@ -658,28 +658,31 @@ class SendSecondaryEmailActivationMixin:
     User must be verified and confirm password.
     """
 
-    class _meta:
-        _required_inputs = ["password"]
+    @strawberry.input
+    class SendSecondaryEmailActivationInput:
+        password: str
 
     @classmethod
     @verification_required
     @password_confirmation_required
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(
+        cls, info, input_: SendSecondaryEmailActivationInput
+    ) -> MutationNormalOutput:
         try:
             email = input_.get("email")
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = g_user(info)
                 user.status.send_secondary_email_activation(info, email)
-                return cls.output(success=True)
-            return cls.output(success=False, errors=f.errors.get_json_data())
+                return MutationNormalOutput(success=True)
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except EmailAlreadyInUse:
             # while the token was sent and the user haven't verified,
-            # the email was free. If other account was created with it
+            # the email was free. If other account was created with if
             # it is already in use
-            return cls.output(success=False, errors={"email": Messages.EMAIL_IN_USE})
+            return MutationNormalOutput(success=False, errors={"email": Messages.EMAIL_IN_USE})
         except SMTPException:
-            return cls.output(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
 class SwapEmailsMixin:

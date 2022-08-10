@@ -1,5 +1,12 @@
 
 # Changelog
+### v0.3.4.0
+
+- **Development Notes**
+This Release is mainly a major refactor of the code base.
+We dropped the ugly compat hack that was used in graphql-django-auth
+to create strawberry types out of string. Introduced argument injection decorator, and two new
+mutation mixins (relay/args) instead.
 
 ### v0.3.3.2
 
