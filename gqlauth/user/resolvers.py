@@ -105,9 +105,6 @@ class RegisterMixin:
             identifier: UUID
             userEntry: str
 
-    _input_type = RegisterInput
-    _return_type = MutationNormalOutput
-
     form = (
         PasswordLessRegisterForm if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else RegisterForm
     )
@@ -172,21 +169,21 @@ class VerifyAccountMixin:
     by making the `user.status.verified` field true.
     """
 
-    class _meta:
-        _required_inputs = ["token"]
+    @strawberry.input
+    class VerifyAccountInput:
+        token: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info: Info, input_: VerifyAccountInput) -> MutationNormalOutput:
         try:
-            token = input_.get("token")
-            UserStatus.verify(token)
-            return cls.output(success=True)
+            UserStatus.verify(input_.token)
+            return MutationNormalOutput(success=True)
         except UserAlreadyVerified:
-            return cls.output(success=False, errors=Messages.ALREADY_VERIFIED)
+            return MutationNormalOutput(success=False, errors=Messages.ALREADY_VERIFIED)
         except SignatureExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
         except (BadSignature, TokenScopeError):
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class VerifySecondaryEmailMixin:
@@ -237,25 +234,26 @@ class ResendActivationEmailMixin:
     a successful response is returned.
     """
 
-    class _meta:
-        _required_inputs = ["email"]
+    @strawberry.input
+    class ResendActivationEmailInput:
+        email: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: ResendActivationEmailInput) -> MutationNormalOutput:
         try:
-            email = input_.get("email")
+            email = input_.email
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = get_user_by_email(email)
                 user.status.resend_activation_email(info)
-                return cls.output(success=True)
-            return cls.output(success=False, errors=f.errors.get_json_data())
+                return MutationNormalOutput(success=True)
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
-            return cls.output(success=True)  # even if user is not registered
+            return MutationNormalOutput(success=True)  # even if user is not registered
         except SMTPException:
-            return cls.output(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
         except UserAlreadyVerified:
-            return cls.output(success=False, errors={"email": Messages.ALREADY_VERIFIED})
+            return MutationNormalOutput(success=False, errors={"email": Messages.ALREADY_VERIFIED})
 
 
 class SendPasswordResetEmailMixin:

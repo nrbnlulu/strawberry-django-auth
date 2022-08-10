@@ -59,18 +59,14 @@ class Register(RegisterMixin, RelayMixin):
 
 class VerifyAccount(
     VerifyAccountMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
+    RelayMixin,
 ):
     __doc__ = VerifyAccountMixin.__doc__
 
 
 class ResendActivationEmail(
     ResendActivationEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
+    RelayMixin,
 ):
     __doc__ = ResendActivationEmailMixin.__doc__
 

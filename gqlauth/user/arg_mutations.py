@@ -53,30 +53,20 @@ __all__ = [
 ]
 
 
-# class Register(RegisterMixin, DynamicArgsMixin, DynamicPayloadMixin, DynamicArgsMutationMixin):
-#     __doc__ = RegisterMixin.__doc__
-#
-
-
 class Register(RegisterMixin, ArgMixin):
     __doc__ = RegisterMixin.__doc__
 
 
 class VerifyAccount(
     VerifyAccountMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-    VerifyParent,
+    ArgMixin,
 ):
     __doc__ = VerifyAccountMixin.__doc__
 
 
 class ResendActivationEmail(
     ResendActivationEmailMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
+    ArgMixin,
 ):
     __doc__ = ResendActivationEmailMixin.__doc__
 

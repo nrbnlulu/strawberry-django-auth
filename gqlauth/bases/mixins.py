@@ -281,8 +281,8 @@ class ArgMixin:
     afield: StrawberryField
 
     def __init_subclass__(cls, **kwargs):
-        input_type = cls._input_type
-        return_type = cls._return_type
+        input_type = cls.resolve_mutation.__annotations__["input_"]
+        return_type = cls.resolve_mutation.__annotations__["return"]
 
         @strawberry.mutation(description=cls.__doc__)
         @inject_arguments(input_type.__annotations__)
@@ -306,8 +306,8 @@ class RelayMixin:
     afield: StrawberryField
 
     def __init_subclass__(cls, **kwargs):
-        input_type = cls._input_type
-        return_type = cls._return_type
+        input_type = cls.resolve_mutation.__annotations__["input_"]
+        return_type = cls.resolve_mutation.__annotations__["return"]
 
         @strawberry.mutation(description=cls.__doc__)
         @hide_args_kwargs
