@@ -269,33 +269,34 @@ class SendPasswordResetEmailMixin:
     a successful response is returned.
     """
 
-    class _meta:
-        _required_inputs = ["email"]
+    @strawberry.input
+    class SendPasswordResetEmailInput:
+        email: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info, input_: SendPasswordResetEmailInput) -> MutationNormalOutput:
         try:
-            email = input_.get("email")
+            email = input_.email
             f = EmailForm({"email": email})
             if f.is_valid():
                 user = get_user_by_email(email)
                 user.status.send_password_reset_email(info, [email])
-                return cls.output(success=True)
-            return cls.output(success=False, errors=f.errors.get_json_data())
+                return MutationNormalOutput(success=True)
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except ObjectDoesNotExist:
-            return cls.output(success=True)  # even if user is not registered
+            return MutationNormalOutput(success=True)  # even if user is not registered
         except SMTPException:
-            return cls.output(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
         except UserNotVerified:
-            user = get_user_by_email(email)
+            user = get_user_by_email(input_.email)
             try:
                 user.status.resend_activation_email(info)
-                return cls(
+                return MutationNormalOutput(
                     success=False,
                     errors={"email": Messages.NOT_VERIFIED_PASSWORD_RESET},
                 )
             except SMTPException:
-                return cls.output(success=False, errors=Messages.EMAIL_FAIL)
+                return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
 class PasswordResetMixin:

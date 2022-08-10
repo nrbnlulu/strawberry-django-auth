@@ -71,12 +71,7 @@ class ResendActivationEmail(
     __doc__ = ResendActivationEmailMixin.__doc__
 
 
-class SendPasswordResetEmail(
-    SendPasswordResetEmailMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-):
+class SendPasswordResetEmail(SendPasswordResetEmailMixin, ArgMixin):
     __doc__ = SendPasswordResetEmailMixin.__doc__
 
 

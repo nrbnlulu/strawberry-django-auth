@@ -36,7 +36,6 @@ class GqlAuthSettings:
     # the register mutation will return a token
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     # mutation fields options
-    LOGIN_OPTIONAL_FIELDS: list = field(default_factory=lambda: [])
     LOGIN_REQUIRE_CAPTCHA: bool = True
     LOGIN_REQUIRED_FIELDS: Union[dict, list] = field(
         default_factory=lambda: ["username", "password"]
@@ -55,7 +54,6 @@ class GqlAuthSettings:
     required fields on register, plus password1 and password2,
     can be a dict like UPDATE_MUTATION_fieldS setting
     """
-    REGISTER_MUTATION_FIELDS_OPTIONAL: list = field(default_factory=lambda: [])
     REGISTER_REQUIRE_CAPTCHA: bool = True
     # captcha stuff
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
