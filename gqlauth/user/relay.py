@@ -53,7 +53,7 @@ __all__ = [
 ]
 
 
-class Register(RelayMixin):
+class Register(RegisterMixin, RelayMixin):
     __doc__ = RegisterMixin.__doc__
 
 

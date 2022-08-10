@@ -310,7 +310,6 @@ class RelayMixin:
         return_type = cls._return_type
 
         @strawberry.mutation(description=cls.__doc__)
-        @inject_arguments(input_type.__annotations__)
         @hide_args_kwargs
         def field(info: Info, input: input_type) -> return_type:
             return cls.resolve_mutation(info, input)
@@ -321,3 +320,5 @@ class RelayMixin:
         @hide_args_kwargs
         async def afield(info: Info, input: input_type) -> return_type:
             return await sync_to_async(cls.resolve_mutation)(info, input)
+
+        cls.afield = afield

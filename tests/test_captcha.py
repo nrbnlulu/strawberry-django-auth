@@ -39,8 +39,8 @@ class CaptchaTestCaseMixin:
                 user_status=None,
             )
         except Exception as e:
-            assert "identifier' of required type 'UUID!' was not provided." in e.args[0]
-            assert "userEntry' of required type 'String!' was not provided" in e.args[1]
+            assert "identifier' of required type 'UUID!' was not provided." in e.args[1]
+            assert "userEntry' of required type 'String!' was not provided" in e.args[0]
 
     def test_login_require_captcha_validation(self):
         try:
@@ -84,8 +84,8 @@ class CaptchaTestCaseMixin:
                 user_status=None,
             )
         except Exception as e:
-            assert "identifier' of required type 'UUID!' was not provided" in e.args[0]
-            assert "userEntry' of required type 'String!' was not provided" in e.args[1]
+            assert "identifier' of required type 'UUID!' was not provided" in e.args[1]
+            assert "userEntry' of required type 'String!' was not provided" in e.args[0]
 
     def test_max_tries_deletes_captcha(self, cap):
         for _ in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
