@@ -90,12 +90,7 @@ class SwapEmails(SwapEmailsMixin, RelayMixin):
     __doc__ = SwapEmailsMixin.__doc__
 
 
-class RemoveSecondaryEmail(
-    RemoveSecondaryEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class RemoveSecondaryEmail(RemoveSecondaryEmailMixin, RelayMixin):
     __doc__ = RemoveSecondaryEmailMixin.__doc__
 
 

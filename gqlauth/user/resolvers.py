@@ -16,7 +16,7 @@ from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpi
 from gqlauth.bases.interfaces import MutationNormalOutput
 from gqlauth.constants import Messages, TokenAction
 from gqlauth.decorators import (
-    password_confirmation_required,
+    _password_confirmation_required,
     secondary_email_required,
     verification_required,
 )
@@ -472,7 +472,7 @@ class ObtainJSONWebTokenMixin:
 class ArchiveOrDeleteMixin:
     @classmethod
     @verification_required
-    @password_confirmation_required
+    @_password_confirmation_required
     def resolve_mutation(cls, info, **input_):
         user = g_user(info)
         cls.resolve_action(user, info=info)
@@ -533,7 +533,7 @@ class PasswordChangeMixin:
 
     @classmethod
     @verification_required
-    @password_confirmation_required
+    @_password_confirmation_required
     def resolve_mutation(cls, info, **input_):
         user = g_user(info)
         form_dict = {
@@ -665,7 +665,7 @@ class SendSecondaryEmailActivationMixin:
 
     @classmethod
     @verification_required
-    @password_confirmation_required
+    @_password_confirmation_required
     def resolve_mutation(
         cls, info, input_: SendSecondaryEmailActivationInput
     ) -> MutationNormalOutput:
@@ -713,12 +713,15 @@ class RemoveSecondaryEmailMixin:
     Require password confirmation.
     """
 
-    class _meta:
-        _required_inputs = ["password"]
+    @strawberry.input
+    class RemoveSecondaryEmailInput:
+        password: str
 
     @classmethod
     @secondary_email_required
-    @password_confirmation_required
-    def resolve_mutation(cls, info: Info, **input_):
+    @_password_confirmation_required
+    def resolve_mutation(
+        cls, info: Info, input_: RemoveSecondaryEmailInput
+    ) -> MutationNormalOutput:
         g_user(info).status.remove_secondary_email()
-        return cls.output(success=True)
+        return MutationNormalOutput(success=True)

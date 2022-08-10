@@ -90,12 +90,7 @@ class SwapEmails(SwapEmailsMixin, ArgMixin):
     __doc__ = SwapEmailsMixin.__doc__
 
 
-class RemoveSecondaryEmail(
-    RemoveSecondaryEmailMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-):
+class RemoveSecondaryEmail(RemoveSecondaryEmailMixin, ArgMixin):
     __doc__ = RemoveSecondaryEmailMixin.__doc__
 
 

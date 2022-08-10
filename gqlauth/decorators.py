@@ -1,9 +1,11 @@
 from functools import wraps
 
+from strawberry.types import Info
+
 from gqlauth.utils import g_info, g_user
 
 from .constants import Messages
-from .exceptions import PermissionDenied, WrongUsage
+from .exceptions import PermissionDenied
 
 
 def login_required(fn):
@@ -52,22 +54,18 @@ def secondary_email_required(fn):
     return wrapper
 
 
-def password_confirmation_required(fn):
+def _password_confirmation_required(fn):
     @wraps(fn)
-    def wrapper(src, info, **kwargs):
-        try:
-            password_arg = next(i for i in kwargs.keys() if i in ["password", "oldPassword"])
-            password = kwargs[password_arg]
-        except Exception:
-            raise WrongUsage(
-                """
-                @password_confirmation is supposed to be used on
-                user with 'password' or 'old_password' field required.
-                """
-            )
+    def wrapper(src, info: Info, input_):
+        if password := getattr(input_, "password", False):
+            password_arg = "password"
+        else:
+            password = input_.oldPassword
+            password_arg = "oldPassword"
+
         user = g_user(info)
         if user.check_password(password):
-            return fn(src, info, **kwargs)
+            return fn(src, info, input_)
         errors = {password_arg: Messages.INVALID_PASSWORD}
         return src.output(success=False, errors=errors)
 

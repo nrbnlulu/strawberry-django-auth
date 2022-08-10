@@ -231,7 +231,7 @@ def is_optional(field):
     return typing.get_origin(field) is Union and type(None) in typing.get_args(field)
 
 
-def g_info(args: tuple) -> Info:
+def g_info(args: tuple) -> typing.Optional[Info, None]:
     for arg in args:
         if isinstance(arg, Info):
             return arg
