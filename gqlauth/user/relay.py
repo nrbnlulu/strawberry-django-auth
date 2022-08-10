@@ -94,12 +94,7 @@ class RemoveSecondaryEmail(RemoveSecondaryEmailMixin, RelayMixin):
     __doc__ = RemoveSecondaryEmailMixin.__doc__
 
 
-class PasswordSet(
-    PasswordSetMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class PasswordSet(PasswordSetMixin, RelayMixin):
     __doc__ = PasswordSetMixin.__doc__
 
 

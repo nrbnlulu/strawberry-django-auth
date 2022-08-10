@@ -55,6 +55,10 @@ def secondary_email_required(fn):
 
 
 def _password_confirmation_required(fn):
+    """
+    not to be used publicly.
+    """
+
     @wraps(fn)
     def wrapper(src, info: Info, input_):
         if password := getattr(input_, "password", False):

@@ -351,7 +351,7 @@ class PasswordResetMixin:
 
 class PasswordSetMixin:
     """
-    Set user password - for passwordless registration
+    Set user password - for password-less registration
 
     Receive the token that was sent by email.
 
@@ -362,25 +362,26 @@ class PasswordSetMixin:
     Also, if user has not been verified yet, verify it.
     """
 
-    class _meta:
-        _required_inputs = ["token", "new_password1", "new_password2"]
+    @strawberry.input
+    class PasswordSetInput:
+        token: str
+        new_password1: str
+        new_password2: str
 
     form = SetPasswordForm
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, _, input_: PasswordSetInput) -> MutationNormalOutput:
         try:
-            token = input_.get("token")
+            token = input_.token
             payload = get_payload_from_token(
                 token,
                 TokenAction.PASSWORD_SET,
                 app_settings.EXPIRATION_PASSWORD_SET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-            form_dict = {
-                "new_password1": input_["newPassword1"],
-                "new_password2": input_["newPassword2"],
-            }
+            form_dict = asdict(input_)
+            form_dict.pop("token")
             f = cls.form(user, form_dict)
             if f.is_valid():
                 # Check if user has already set a password
@@ -393,14 +394,14 @@ class PasswordSetMixin:
                     user.status.verified = True
                     user.status.save(update_fields=["verified"])
 
-                return cls.output(success=True)
-            return cls.output(success=False, errors=f.errors.get_json_data())
+                return MutationNormalOutput(success=True)
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except SignatureExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
         except (BadSignature, TokenScopeError):
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
-        except (PasswordAlreadySetError):
-            return cls.output(success=False, errors=Messages.PASSWORD_ALREADY_SET)
+            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
+        except PasswordAlreadySetError:
+            return MutationNormalOutput(success=False, errors=Messages.PASSWORD_ALREADY_SET)
 
 
 class ObtainJSONWebTokenMixin:
