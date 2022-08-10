@@ -82,21 +82,11 @@ class SendSecondaryEmailActivation(
     __doc__ = SendSecondaryEmailActivationMixin.__doc__
 
 
-class VerifySecondaryEmail(
-    VerifySecondaryEmailMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-):
+class VerifySecondaryEmail(VerifySecondaryEmailMixin, ArgMixin):
     __doc__ = VerifySecondaryEmailMixin.__doc__
 
 
-class SwapEmails(
-    SwapEmailsMixin,
-    DynamicArgsMixin,
-    DynamicPayloadMixin,
-    DynamicArgsMutationMixin,
-):
+class SwapEmails(SwapEmailsMixin, ArgMixin):
     __doc__ = SwapEmailsMixin.__doc__
 
 

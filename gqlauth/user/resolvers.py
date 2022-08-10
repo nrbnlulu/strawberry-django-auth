@@ -202,24 +202,25 @@ class VerifySecondaryEmailMixin:
     After being verified, it will no longer be available.
     """
 
-    class _meta:
-        _required_inputs = ["token"]
+    @strawberry.input
+    class VerifySecondaryEmailInput:
+        token: str
 
     @classmethod
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, input_: VerifySecondaryEmailInput) -> MutationNormalOutput:
         try:
             token = input_.get("token")
             UserStatus.verify_secondary_email(token)
-            return cls.output(success=True)
+            return MutationNormalOutput(success=True)
         except EmailAlreadyInUse:
             # while the token was sent and the user haven't
             # verified, the email was free. If other account
             # was created with it, it is already in use.
-            return cls.output(success=False, errors=Messages.EMAIL_IN_USE)
+            return MutationNormalOutput(success=False, errors=Messages.EMAIL_IN_USE)
         except SignatureExpired:
-            return cls.output(success=False, errors=Messages.EXPIRED_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
         except (BadSignature, TokenScopeError):
-            return cls.output(success=False, errors=Messages.INVALID_TOKEN)
+            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class ResendActivationEmailMixin:
@@ -692,15 +693,17 @@ class SwapEmailsMixin:
     Require password confirmation.
     """
 
-    class _meta:
-        _required_inputs = ["password"]
+    @strawberry.input
+    class SwapEmailsInput:
+        password: str
 
     @classmethod
     @secondary_email_required
-    @password_confirmation_required
-    def resolve_mutation(cls, info, **input_):
+    def resolve_mutation(cls, info: Info, input_: SwapEmailsInput) -> MutationNormalOutput:
+        if not g_user(info).check_password(input_.password):
+            return MutationNormalOutput(success=False, errors=Messages.INVALID_PASSWORD)
         g_user(info).status.swap_emails()
-        return cls.output(success=True)
+        return MutationNormalOutput(success=True)
 
 
 class RemoveSecondaryEmailMixin:

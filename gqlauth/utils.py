@@ -229,3 +229,10 @@ def is_optional(field):
     whether strawberry field is optional or not
     """
     return typing.get_origin(field) is Union and type(None) in typing.get_args(field)
+
+
+def g_info(args: tuple) -> Info:
+    for arg in args:
+        if isinstance(arg, Info):
+            return arg
+    return None
