@@ -1,5 +1,4 @@
 from smtplib import SMTPException
-from typing import Dict, List, Union
 from unittest import mock
 
 from django.conf import settings
@@ -19,20 +18,13 @@ from .testCases import (
 )
 
 
-def ensure_list(data: Union[Dict, List]):
-    if isinstance(data, list):
-        return data
-    else:
-        return [keys for keys, _ in data.items()]
-
-
 class RegisterTestCaseMixin:
     def _generate_register_args(self, user: UserType) -> str:
         initial = f'password1: "{user.password}",  password2: "{user.password}"'
         if settings.GQL_AUTH.REGISTER_REQUIRE_CAPTCHA:
             cap = self.gen_captcha()
             initial += f',  identifier: "{cap.uuid}", userEntry:"{cap.text}"'
-        for field in ensure_list(settings.GQL_AUTH.REGISTER_MUTATION_FIELDS):
+        for field in [field.name for field in settings.GQL_AUTH.REGISTER_MUTATION_FIELDS]:
             if "password" not in field:
                 initial += f', {to_camel_case(field)}: "{getattr(user, field)}"'
         return initial

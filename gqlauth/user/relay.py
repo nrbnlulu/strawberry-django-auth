@@ -1,13 +1,4 @@
-from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
-from strawberry_django_jwt.mutations import Refresh as RefreshParent
-from strawberry_django_jwt.mutations import Revoke as RevokeParent
-from strawberry_django_jwt.mutations import Verify as VerifyParent
-
-from gqlauth.bases.mixins import (
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-)
+from gqlauth.bases.mixins import RelayMixin
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
     Captcha,
@@ -52,163 +43,82 @@ __all__ = [
 ]
 
 
-class Register(RegisterMixin, DynamicInputMixin, DynamicPayloadMixin, DynamicRelayMutationMixin):
+class Register(RegisterMixin, RelayMixin):
     __doc__ = RegisterMixin.__doc__
 
 
 class VerifyAccount(
     VerifyAccountMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
+    RelayMixin,
 ):
     __doc__ = VerifyAccountMixin.__doc__
 
 
 class ResendActivationEmail(
     ResendActivationEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
+    RelayMixin,
 ):
     __doc__ = ResendActivationEmailMixin.__doc__
 
 
-class SendPasswordResetEmail(
-    SendPasswordResetEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class SendPasswordResetEmail(SendPasswordResetEmailMixin, RelayMixin):
     __doc__ = SendPasswordResetEmailMixin.__doc__
 
 
 class SendSecondaryEmailActivation(
     SendSecondaryEmailActivationMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
+    RelayMixin,
 ):
     __doc__ = SendSecondaryEmailActivationMixin.__doc__
 
 
-class VerifySecondaryEmail(
-    VerifySecondaryEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class VerifySecondaryEmail(VerifySecondaryEmailMixin, RelayMixin):
     __doc__ = VerifySecondaryEmailMixin.__doc__
 
 
-class SwapEmails(
-    SwapEmailsMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class SwapEmails(SwapEmailsMixin, RelayMixin):
     __doc__ = SwapEmailsMixin.__doc__
 
 
-class RemoveSecondaryEmail(
-    RemoveSecondaryEmailMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class RemoveSecondaryEmail(RemoveSecondaryEmailMixin, RelayMixin):
     __doc__ = RemoveSecondaryEmailMixin.__doc__
 
 
-class PasswordSet(
-    PasswordSetMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class PasswordSet(PasswordSetMixin, RelayMixin):
     __doc__ = PasswordSetMixin.__doc__
 
 
-class PasswordReset(
-    PasswordResetMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class PasswordReset(PasswordResetMixin, RelayMixin):
     __doc__ = PasswordResetMixin.__doc__
 
 
-class ObtainJSONWebToken(
-    ObtainJSONWebTokenMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-    JwtObtainParent,
-):
+class ObtainJSONWebToken(ObtainJSONWebTokenMixin, RelayMixin):
     __doc__ = ObtainJSONWebTokenMixin.__doc__
 
 
-class ArchiveAccount(
-    ArchiveAccountMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class ArchiveAccount(ArchiveAccountMixin, RelayMixin):
     __doc__ = ArchiveAccountMixin.__doc__
 
 
-class DeleteAccount(
-    DeleteAccountMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class DeleteAccount(DeleteAccountMixin, RelayMixin):
     __doc__ = DeleteAccountMixin.__doc__
 
 
-class PasswordChange(
-    PasswordChangeMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-    JwtObtainParent,
-):
+class PasswordChange(PasswordChangeMixin, RelayMixin):
     __doc__ = PasswordChangeMixin.__doc__
 
 
-class UpdateAccount(
-    UpdateAccountMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-):
+class UpdateAccount(UpdateAccountMixin, RelayMixin):
     __doc__ = UpdateAccountMixin.__doc__
 
 
-class VerifyToken(
-    VerifyTokenMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-    VerifyParent,
-):
+class VerifyToken(VerifyTokenMixin, RelayMixin):
     __doc__ = VerifyTokenMixin.__doc__
 
 
-class RefreshToken(
-    RefreshTokenMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-    RefreshParent,
-):
+class RefreshToken(RefreshTokenMixin, RelayMixin):
     __doc__ = RefreshTokenMixin.__doc__
 
 
-class RevokeToken(
-    RevokeTokenMixin,
-    DynamicInputMixin,
-    DynamicPayloadMixin,
-    DynamicRelayMutationMixin,
-    RevokeParent,
-):
+class RevokeToken(RevokeTokenMixin, RelayMixin):
     __doc__ = RevokeTokenMixin.__doc__

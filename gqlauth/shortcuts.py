@@ -6,7 +6,7 @@ from .models import UserStatus
 UserModel = get_user_model()
 
 
-def get_user_by_email(email):
+def get_user_by_email(email: str):
     """
     get user by email or by secondary email
     raise ObjectDoesNotExist

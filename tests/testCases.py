@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 import pprint
 import re
-from typing import NewType, Union
+from typing import Iterable, NewType, Union
 
 from asgiref.sync import async_to_sync, sync_to_async
 from django.conf import settings as django_settings
@@ -13,7 +13,6 @@ import pytest
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.models import Captcha
-from gqlauth.utils import inject_fields
 
 
 class FitProvider(BaseProvider):
@@ -29,6 +28,20 @@ fake = Faker()
 fake.add_provider(FitProvider)
 
 additional_fields = UserModel.USERNAME_FIELD, UserModel.EMAIL_FIELD
+
+
+def inject_fields(fields: Iterable[str]):
+    def wrapped(cls):
+        annotations = list(cls.__annotations__.items())
+        res = {field: str for field in fields if field}
+        # this solves non default fields after default fields
+        annotations.extend(list(res.items()))
+        annotations.reverse()
+        annotations = {name: annotation for name, annotation in annotations}
+        cls.__annotations__ = annotations
+        return cls
+
+    return wrapped
 
 
 @dataclass

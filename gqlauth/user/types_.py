@@ -3,23 +3,31 @@ from typing import Optional
 from django.contrib.auth import get_user_model
 import strawberry
 from strawberry import auto
+from strawberry.annotation import StrawberryAnnotation
+from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth import models
 from gqlauth.settings import gqlauth_settings
-from gqlauth.utils import inject_many
+from gqlauth.utils import inject_fields
 
 USER_MODEL = get_user_model()
-user_pk_field = USER_MODEL._meta.pk.name
-
-USER_FIELDS = [
-    [
-        user_pk_field,
-        USER_MODEL.USERNAME_FIELD,
-        USER_MODEL.EMAIL_FIELD,
-    ],
-    gqlauth_settings.UPDATE_MUTATION_FIELDS,
-]
+# UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.
+USER_FIELDS = {
+    StrawberryField(
+        python_name=USER_MODEL._meta.pk.name,
+        default=None,
+        type_annotation=StrawberryAnnotation(auto),
+    ),
+    StrawberryField(
+        python_name=USER_MODEL.USERNAME_FIELD,
+        default=None,
+        type_annotation=StrawberryAnnotation(auto),
+    ),
+    StrawberryField(
+        python_name=USER_MODEL.EMAIL_FIELD, default=None, type_annotation=StrawberryAnnotation(auto)
+    ),
+}.union(gqlauth_settings.UPDATE_MUTATION_FIELDS)
 
 
 @strawberry.django.filters.filter(models.UserStatus)
@@ -37,7 +45,7 @@ class UserStatusType:
 
 
 @strawberry.django.filters.filter(USER_MODEL)
-@inject_many(USER_FIELDS)
+@inject_fields(USER_FIELDS, annotations_only=True)
 class UserFilter:
     logentry_set: auto
     is_superuser: auto
@@ -49,7 +57,7 @@ class UserFilter:
 
 
 @strawberry.django.type(model=USER_MODEL, filters=UserFilter)
-@inject_many(USER_FIELDS)
+@inject_fields(USER_FIELDS, annotations_only=True)
 class UserType:
     logentry_set: auto
     is_superuser: auto

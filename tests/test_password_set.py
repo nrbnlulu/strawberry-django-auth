@@ -3,11 +3,19 @@ import pytest
 from gqlauth.constants import Messages
 from gqlauth.utils import get_token
 
-from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
+from .testCases import (
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+    fake,
+)
 
 
 class PasswordSetTestCaseMixin:
-    def _arg_query(self, token, new_password1="new_password", new_password2="new_password"):
+    @staticmethod
+    def _arg_query(token, password=None):
+        password = password or fake.password()
         return """
         mutation {{
             passwordSet(
@@ -19,11 +27,13 @@ class PasswordSetTestCaseMixin:
         }}
         """.format(
             token,
-            new_password1,
-            new_password2,
+            password,
+            password,
         )
 
-    def _relay_query(self, token, new_password1="new_password", new_password2="new_password"):
+    @staticmethod
+    def _relay_query(token, password=None):
+        password = password or fake.password()
         return """
         mutation {{
             passwordSet(
@@ -36,8 +46,8 @@ class PasswordSetTestCaseMixin:
         }}
         """.format(
             token,
-            new_password1,
-            new_password2,
+            password,
+            password,
         )
 
     @pytest.fixture()
@@ -62,6 +72,7 @@ class PasswordSetTestCaseMixin:
     def test_set_password_invalid_form(self, set_token_with_unverified_user):
         user_status, token = set_token_with_unverified_user
         user = user_status.user.obj
+        # too weak password.
         query = self.make_query(token, "wrong_pass")
         executed = self.make_request(query=query, no_login_query=True)
         assert not executed["success"]
