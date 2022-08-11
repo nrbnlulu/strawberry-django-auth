@@ -4,6 +4,7 @@ from strawberry.types import Info
 
 from gqlauth.utils import g_info, g_user
 
+from .bases.types_ import MutationNormalOutput
 from .constants import Messages
 from .exceptions import PermissionDenied
 
@@ -19,7 +20,7 @@ def login_required(fn):
         if g_user(info).is_authenticated:
             return fn(*args, **kwargs)
         else:
-            return fn.__annotations__["return"](success=False, errors=Messages.UNAUTHENTICATED)
+            return MutationNormalOutput(success=False, errors=Messages.UNAUTHENTICATED)
 
     return wrapper
 
@@ -34,7 +35,7 @@ def verification_required(fn):
     def wrapper(*args, **kwargs):
         info = g_info(args)
         if not g_user(info).status.verified:
-            return fn.__annotations__["return"](success=False, errors=Messages.NOT_VERIFIED)
+            return MutationNormalOutput(success=False, errors=Messages.NOT_VERIFIED)
         return fn(*args, **kwargs)
 
     return wrapper
@@ -46,9 +47,7 @@ def secondary_email_required(fn):
     def wrapper(*args, **kwargs):
         info = g_info(args)
         if not g_user(info).status.secondary_email:
-            return fn.__annotations__["return"](
-                success=False, errors=Messages.SECONDARY_EMAIL_REQUIRED
-            )
+            return MutationNormalOutput(success=False, errors=Messages.SECONDARY_EMAIL_REQUIRED)
         return fn(*args, **kwargs)
 
     return wrapper
@@ -64,14 +63,14 @@ def _password_confirmation_required(fn):
         if password := getattr(input_, "password", False):
             password_arg = "password"
         else:
-            password = input_.oldPassword
+            password = input_.old_password
             password_arg = "oldPassword"
 
         user = g_user(info)
         if user.check_password(password):
             return fn(src, info, input_)
         errors = {password_arg: Messages.INVALID_PASSWORD}
-        return src.output(success=False, errors=errors)
+        return MutationNormalOutput(success=False, errors=errors)
 
     return wrapper
 

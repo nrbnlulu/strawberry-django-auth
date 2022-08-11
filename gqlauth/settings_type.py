@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
+import typing
 from typing import Any, Callable, NewType, Set, Union
 
 from django.conf import settings as django_settings
@@ -29,10 +30,14 @@ password_field = StrawberryField(
     python_name="password", default=None, type_annotation=StrawberryAnnotation(str)
 )
 first_name_field = StrawberryField(
-    python_name="first_name", default=None, type_annotation=StrawberryAnnotation(str)
+    python_name="first_name",
+    default=None,
+    type_annotation=StrawberryAnnotation(typing.Optional[str]),
 )
 last_name_field = StrawberryField(
-    python_name="last_name", default=None, type_annotation=StrawberryAnnotation(str)
+    python_name="last_name",
+    default=None,
+    type_annotation=StrawberryAnnotation(typing.Optional[str]),
 )
 email_field = StrawberryField(
     python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
@@ -49,13 +54,17 @@ class GqlAuthSettings:
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     # mutation fields options
     LOGIN_FIELDS: Set[StrawberryField] = field(
-        default_factory=lambda: {username_field, password_field}
+        default_factory=lambda: {
+            username_field,
+        }
     )
     """
     These fields would be used to authenticate with SD-jwt `authenticate` function.
     This function will call each of our `AUTHENTICATION_BACKENDS`,
     And will return the user from one of them unless `PermissionDenied` was raised.
     You can pass any fields that would be accepted by your backends.
+
+    Note that `password field is mandatory` and cannot be removed.
     """
     LOGIN_REQUIRE_CAPTCHA: bool = True
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
@@ -142,5 +151,5 @@ class GqlAuthSettings:
 
     def __post_init__(self):
         # if there override the defaults
-        if "email" not in self.REGISTER_MUTATION_FIELDS:
+        if "email" not in {field_.name for field_ in self.REGISTER_MUTATION_FIELDS}:
             self.SEND_ACTIVATION_EMAIL = False

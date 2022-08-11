@@ -3,7 +3,7 @@ from smtplib import SMTPException
 from typing import Union
 from uuid import UUID
 
-from asgiref.sync import sync_to_async
+from asgiref.sync import async_to_sync, sync_to_async
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,6 +16,7 @@ from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParen
 from strawberry_django_jwt.mutations import Refresh as RefreshParent
 from strawberry_django_jwt.mutations import Revoke as RevokeParent
 from strawberry_django_jwt.mutations import Verify as VerifyParent
+from strawberry_django_jwt.utils import create_user_token
 
 from gqlauth.bases.types_ import (
     MutationNormalOutput,
@@ -81,7 +82,7 @@ class Captcha:
 
 
 def check_captcha(
-    input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenMixin.ObtainJSONWebTokenMInput"]
+    input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenMixin.ObtainJSONWebTokenInput"]
 ):
     uuid = input_.identifier
     try:
@@ -216,9 +217,9 @@ class VerifySecondaryEmailMixin:
         token: str
 
     @classmethod
-    def resolve_mutation(cls, input_: VerifySecondaryEmailInput) -> MutationNormalOutput:
+    def resolve_mutation(cls, _, input_: VerifySecondaryEmailInput) -> MutationNormalOutput:
         try:
-            token = input_.get("token")
+            token = input_.token
             UserStatus.verify_secondary_email(token)
             return MutationNormalOutput(success=True)
         except EmailAlreadyInUse:
@@ -427,27 +428,31 @@ class ObtainJSONWebTokenMixin:
 
     @strawberry.input
     @inject_fields(app_settings.LOGIN_FIELDS)
-    class ObtainJSONWebTokenMInput:
+    class ObtainJSONWebTokenInput:
+        password: str
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             identifier: UUID
             userEntry: str
 
     @classmethod
-    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenMInput) -> ObtainJSONWebTokenPayload:
+    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenPayload:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
                 return ObtainJSONWebTokenPayload(success=False, errors={"captcha": check_res})
 
         try:
-            args = asdict(input_)
+            args = {
+                UserModel.USERNAME_FIELD: getattr(input_, UserModel.USERNAME_FIELD),
+            }
+
             user = get_user_to_login(**args)
             if user.status.archived is True:  # un-archive on login
                 UserStatus.unarchive(user)
 
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # this will raise if not successful
-                res = JwtObtainParent.obtain.get_result(None, None, [cls, info], args)
+                res = JwtObtainParent.obtain.get_result(None, None, [cls, info], asdict(input_))
                 return ObtainJSONWebTokenPayload(success=True, obtainPayload=res)
             else:
                 raise UserNotVerified
@@ -468,7 +473,7 @@ class ArchiveOrDeleteMixin:
     @_password_confirmation_required
     def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
         user = g_user(info)
-        cls.resolve_action(user, info=info)
+        cls.resolve_action(user)
         return MutationNormalOutput(success=True)
 
 
@@ -520,19 +525,14 @@ class PasswordChangeMixin:
     @classmethod
     @verification_required
     @_password_confirmation_required
-    def resolve_mutation(cls, info, input_: PasswordChangeInput) -> ObtainJSONWebTokenPayload:
-        user = g_user(info)
+    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenPayload:
         args = asdict(input_)
-        user = get_user_to_login(**args)
+        user = g_user(info)
         f = cls.form(user, args)
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            parent_input = {
-                user.USERNAME_FIELD: getattr(user, user.USERNAME_FIELD),
-                "password": input_.new_password1,
-            }
-            parent_res = JwtObtainParent.obtain.get_result(None, None, [cls, info], parent_input)
+            parent_res = async_to_sync(create_user_token)(user)
             return ObtainJSONWebTokenPayload(success=True, obtainPayload=parent_res)
         else:
             return ObtainJSONWebTokenPayload(success=False, errors=f.errors.get_json_data())

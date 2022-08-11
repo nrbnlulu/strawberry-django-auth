@@ -39,8 +39,8 @@ class CaptchaTestCaseMixin:
                 user_status=None,
             )
         except Exception as e:
-            assert "identifier' of required type 'UUID!' was not provided." in e.args[1]
-            assert "userEntry' of required type 'String!' was not provided" in e.args[0]
+            assert "identifier' of required type 'UUID!' was not provided." in e.args[0]
+            assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_login_require_captcha_validation(self):
         try:
@@ -48,7 +48,7 @@ class CaptchaTestCaseMixin:
                 query=self.login_query_without_cap_fields(username="fake"), user_status=None
             )
         except Exception as e:
-            assert "identifier' of required type 'String!' was not provided" in e.args[0]
+            assert "identifier' of required type 'UUID!' was not provided" in e.args[0]
             assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_register_wrong_captcha_validation(self, cap):
@@ -84,8 +84,8 @@ class CaptchaTestCaseMixin:
                 user_status=None,
             )
         except Exception as e:
-            assert "identifier' of required type 'UUID!' was not provided" in e.args[1]
-            assert "userEntry' of required type 'String!' was not provided" in e.args[0]
+            assert "identifier' of required type 'UUID!' was not provided" in e.args[0]
+            assert "userEntry' of required type 'String!' was not provided" in e.args[1]
 
     def test_max_tries_deletes_captcha(self, cap):
         for _ in range(gqlauth_settings.CAPTCHA_MAX_RETRIES + 2):
@@ -173,6 +173,7 @@ class CaptchaTestCaseMixin:
         Image.open(cap.image.path)
 
 
+# captcha is not relay or arg_mutations. this is probably redundant.
 class TestCaptchaRelay(CaptchaTestCaseMixin, RelayTestCase):
     ...
 
