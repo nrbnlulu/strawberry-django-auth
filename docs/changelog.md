@@ -1,6 +1,6 @@
 
 # Changelog
-### v0.3.4.0
+### v0.3.4.1
 #### deprecations
 - `LOGIN_REQUIRED_FIELDS` and `LOGIN_OPTIONAL_FIELDS` are deprecated in favor of `LOGIN_FIELDS`.
 From now on you should pass `StrawberryField` instance to `LOGIN_FIELDS` and it is
@@ -8,11 +8,11 @@ absolutely your responsibility what would be optional/required.
 - `REGISTER_MUTATION_FIELDS_OPTIONAL` is deprecated in favor of `REGISTER_MUTATION_FIELDS`.
 - `UPDATE_MUTATION_FIELDS`, `REGISTER_MUTATION_FIELDS` are also taking `StrawberryField` instances from now on.
 
-#### Development Notes
-This Release is mainly a major refactor of the code base.
-We dropped the ugly compat hack that was used in graphql-django-auth
-to create strawberry types out of string. Introduced argument injection decorator, and two new
-mutation mixins (relay/args) instead.
+### v0.3.4.0
+- **New features**
+    - serve Captcha over static files. New setting introduced,
+    `CAPTCHA_SAVE_IMAGE: bool = False`.
+
 
 ### v0.3.3.2
 
