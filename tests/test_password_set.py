@@ -13,7 +13,8 @@ from .testCases import (
 
 
 class PasswordSetTestCaseMixin:
-    def _arg_query(self, token, password=None):
+    @staticmethod
+    def _arg_query(token, password=None):
         password = password or fake.password()
         return """
         mutation {{
@@ -30,7 +31,8 @@ class PasswordSetTestCaseMixin:
             password,
         )
 
-    def _relay_query(self, token, password=None):
+    @staticmethod
+    def _relay_query(token, password=None):
         password = password or fake.password()
         return """
         mutation {{
