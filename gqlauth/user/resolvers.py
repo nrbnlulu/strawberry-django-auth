@@ -480,7 +480,6 @@ class ArchiveOrDeleteMixin:
 class ArchiveAccountMixin(ArchiveOrDeleteMixin):
     """
     Archive account and revoke refresh tokens.
-
     User must be verified and confirm password.
     """
 
