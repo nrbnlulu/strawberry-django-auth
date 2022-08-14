@@ -4,7 +4,7 @@ import strawberry
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 
-from gqlauth.utils import hide_args_kwargs, inject_arguments
+from gqlauth.core.utils import hide_args_kwargs, inject_arguments
 
 UserModel = get_user_model()
 

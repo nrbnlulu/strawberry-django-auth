@@ -1,14 +1,20 @@
 from django.utils.translation import gettext as _
 
-from gqlauth.bases.exceptions import ErrorBase
 
-
-class GraphQLAuthError(ErrorBase):
+class GraphQLAuthError(Exception):
     def __init__(self, message=None):
         if message is None:
             message = " ".join([_("Authorization error:"), self.default_message])
 
         super().__init__(message)
+
+
+class WrongUsage(GraphQLAuthError):
+    """
+    internal exception
+    """
+
+    default_message = _("Wrong usage, check your code!.")
 
 
 class UserAlreadyVerified(GraphQLAuthError):
@@ -33,14 +39,6 @@ class TokenScopeError(GraphQLAuthError):
 
 class PasswordAlreadySetError(GraphQLAuthError):
     default_message = _("Password already set for account.")
-
-
-class WrongUsage(GraphQLAuthError):
-    """
-    internal exception
-    """
-
-    default_message = _("Wrong usage, check your code!.")
 
 
 class PermissionDenied(GraphQLAuthError):

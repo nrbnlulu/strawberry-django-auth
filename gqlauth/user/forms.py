@@ -7,9 +7,8 @@ from django.contrib.auth.forms import (
     UsernameField,
 )
 
+from gqlauth.core.utils import fields_names
 from gqlauth.settings import gqlauth_settings as app_settings
-
-from .utils import fields_names
 
 REGISTER_MUTATION_FIELDS = fields_names(app_settings.REGISTER_MUTATION_FIELDS)
 

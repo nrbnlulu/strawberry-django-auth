@@ -18,20 +18,10 @@ from strawberry_django_jwt.mutations import Revoke as RevokeParent
 from strawberry_django_jwt.mutations import Verify as VerifyParent
 from strawberry_django_jwt.utils import create_user_token
 
-from gqlauth.bases.types_ import (
-    MutationNormalOutput,
-    ObtainJSONWebTokenPayload,
-    RefreshTokenPayload,
-    RevokeTokenPayload,
-    VerifyTokenPayload,
-)
-from gqlauth.constants import Messages, TokenAction
-from gqlauth.decorators import (
-    _password_confirmation_required,
-    secondary_email_required,
-    verification_required,
-)
-from gqlauth.exceptions import (
+from gqlauth.captcha.models import Captcha as CaptchaModel
+from gqlauth.captcha.types_ import CaptchaType
+from gqlauth.core.constants import Messages, TokenAction
+from gqlauth.core.exceptions import (
     EmailAlreadyInUse,
     InvalidCredentials,
     PasswordAlreadySetError,
@@ -39,24 +29,34 @@ from gqlauth.exceptions import (
     UserAlreadyVerified,
     UserNotVerified,
 )
-from gqlauth.forms import (
-    EmailForm,
-    PasswordLessRegisterForm,
-    RegisterForm,
-    UpdateAccountForm,
+from gqlauth.core.shortcuts import get_user_by_email, get_user_to_login
+from gqlauth.core.types_ import (
+    MutationNormalOutput,
+    ObtainJSONWebTokenPayload,
+    RefreshTokenPayload,
+    RevokeTokenPayload,
+    VerifyTokenPayload,
 )
-from gqlauth.models import Captcha as CaptchaModel
-from gqlauth.models import UserStatus
-from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.shortcuts import get_user_by_email, get_user_to_login
-from gqlauth.signals import user_registered, user_verified
-from gqlauth.types_ import CaptchaType
-from gqlauth.utils import (
+from gqlauth.core.utils import (
     g_user,
     get_payload_from_token,
     inject_fields,
     revoke_user_refresh_token,
 )
+from gqlauth.settings import gqlauth_settings as app_settings
+from gqlauth.user.decorators import (
+    _password_confirmation_required,
+    secondary_email_required,
+    verification_required,
+)
+from gqlauth.user.forms import (
+    EmailForm,
+    PasswordLessRegisterForm,
+    RegisterForm,
+    UpdateAccountForm,
+)
+from gqlauth.user.models import UserStatus
+from gqlauth.user.signals import user_registered, user_verified
 
 UserModel = get_user_model()
 

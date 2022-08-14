@@ -7,9 +7,9 @@ from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 
-from gqlauth import models
+from gqlauth.core.utils import inject_fields
 from gqlauth.settings import gqlauth_settings
-from gqlauth.utils import inject_fields
+from gqlauth.user import models
 
 USER_MODEL = get_user_model()
 # UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.

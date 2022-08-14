@@ -12,7 +12,7 @@ from faker.providers import BaseProvider
 import pytest
 from strawberry.utils.str_converters import to_camel_case
 
-from gqlauth.models import Captcha
+from gqlauth.captcha.models import Captcha
 
 
 class FitProvider(BaseProvider):

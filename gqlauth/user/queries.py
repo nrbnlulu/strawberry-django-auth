@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 import strawberry
 from strawberry.types import Info
 
-from gqlauth.utils import g_user
+from gqlauth.core.utils import g_user
 
 # project
 from .types_ import UserFilter, UserType

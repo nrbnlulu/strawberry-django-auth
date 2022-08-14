@@ -11,7 +11,7 @@ from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django_jwt.exceptions import JSONWebTokenError
 
-from .exceptions import TokenScopeError
+from gqlauth.core.exceptions import TokenScopeError
 
 
 def hide_args_kwargs(field):

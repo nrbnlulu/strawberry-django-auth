@@ -1,6 +1,6 @@
 import pytest
 
-from gqlauth.utils import get_token
+from gqlauth.core.utils import get_token
 
 from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 

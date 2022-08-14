@@ -6,8 +6,8 @@ from django.contrib.auth import get_user_model
 import pytest
 from strawberry.utils.str_converters import to_camel_case
 
-from gqlauth.constants import Messages
-from gqlauth.signals import user_registered
+from gqlauth.core.constants import Messages
+from gqlauth.user.signals import user_registered
 
 from .testCases import (
     ArgTestCase,
@@ -108,7 +108,7 @@ class RegisterTestCaseMixin:
         assert executed["errors"]["email"]
 
     @mock.patch(
-        "gqlauth.models.UserStatus.send_activation_email",
+        "gqlauth.user.models.UserStatus.send_activation_email",
         mock.MagicMock(side_effect=SMTPException),
     )
     @pytest.mark.default_user

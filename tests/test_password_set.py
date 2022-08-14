@@ -1,7 +1,7 @@
 import pytest
 
-from gqlauth.constants import Messages
-from gqlauth.utils import get_token
+from gqlauth.core.constants import Messages
+from gqlauth.core.utils import get_token
 
 from .testCases import (
     ArgTestCase,

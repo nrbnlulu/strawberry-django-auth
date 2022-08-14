@@ -1,4 +1,4 @@
-from gqlauth.constants import Messages
+from gqlauth.core.constants import Messages
 
 from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
 

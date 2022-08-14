@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from gqlauth.constants import Messages
+from gqlauth.core.constants import Messages
 
 from .testCases import (
     ArgTestCase,
@@ -74,7 +74,7 @@ class SendPasswordResetEmailTestCaseMixin:
         assert not executed["errors"]
 
     @mock.patch(
-        "gqlauth.models.UserStatus.send_password_reset_email",
+        "gqlauth.user.models.UserStatus.send_password_reset_email",
         mock.MagicMock(side_effect=SMTPException),
     )
     def test_send_email_fail_to_send_email(self, db_verified_user_status):

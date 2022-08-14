@@ -5,8 +5,8 @@ from strawberry_django_jwt.mutations import Refresh as RefreshParent
 from strawberry_django_jwt.object_types import TokenDataType
 from strawberry_django_jwt.refresh_token.object_types import RevokeType
 
-from gqlauth.bases.interfaces import OutputInterface
-from gqlauth.bases.scalars import ExpectedErrorType
+from gqlauth.core.interfaces import OutputInterface
+from gqlauth.core.scalars import ExpectedErrorType
 
 refresh_payload_dt = RefreshParent.refresh.base_resolver.annotations["return"]
 

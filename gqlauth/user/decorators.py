@@ -2,11 +2,10 @@ from functools import wraps
 
 from strawberry.types import Info
 
-from gqlauth.utils import g_info, g_user
-
-from .bases.types_ import MutationNormalOutput
-from .constants import Messages
-from .exceptions import PermissionDenied
+from gqlauth.core.constants import Messages
+from gqlauth.core.exceptions import PermissionDenied
+from gqlauth.core.types_ import MutationNormalOutput
+from gqlauth.core.utils import g_info, g_user
 
 
 def login_required(fn):

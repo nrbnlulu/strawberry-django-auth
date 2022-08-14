@@ -2,7 +2,7 @@ from typing import Optional, TypeVar
 
 import strawberry
 
-from gqlauth.bases.scalars import ExpectedErrorType
+from gqlauth.core.scalars import ExpectedErrorType
 
 T = TypeVar("T")
 

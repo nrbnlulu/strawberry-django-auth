@@ -3,8 +3,8 @@ from uuid import UUID
 import strawberry
 import strawberry_django
 
-from gqlauth import models
-from gqlauth.scalars import image as Image
+from gqlauth.captcha import models
+from gqlauth.core.scalars import image as Image
 
 
 @strawberry_django.type(model=models.Captcha)

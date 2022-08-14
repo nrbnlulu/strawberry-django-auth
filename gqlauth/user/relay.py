@@ -1,4 +1,4 @@
-from gqlauth.bases.mixins import RelayMixin
+from gqlauth.core.mixins import RelayMixin
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
     Captcha,

@@ -1,7 +1,11 @@
+from base64 import b64decode, b64encode
+import typing
+
+from PIL.Image import Image
 import strawberry
 
-from gqlauth.bases.exceptions import WrongUsage
-from gqlauth.utils import camelize
+from gqlauth.core.exceptions import WrongUsage
+from gqlauth.core.utils import camelize
 
 
 def serialize_excpected_error(errors):
@@ -45,3 +49,10 @@ class ExpectedErrorType:
         ]
     }
     """
+
+
+image = strawberry.scalar(
+    typing.NewType("image", Image),
+    serialize=lambda v: b64encode(v).decode("ascii"),
+    parse_value=lambda v: b64decode(v),
+)

@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import pytest
 from pytest import mark
 
-from gqlauth.constants import Messages
+from gqlauth.core.constants import Messages
 
 from .testCases import ArgTestCase, RelayTestCase, UserStatusType
 
