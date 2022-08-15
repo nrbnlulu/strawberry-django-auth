@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 import strawberry
 from strawberry import auto
 from strawberry.types import Info
+import strawberry_django
 
 from gqlauth.core.constants import Messages
 from gqlauth.core.exceptions import TokenExpired
@@ -23,7 +24,7 @@ app_settings = settings.GQL_AUTH
 USER_MODEL = get_user_model()
 
 
-@strawberry.django.type(
+@strawberry_django.type(
     model=RefreshToken,
     description="""
 Refresh token can be used to obtain a new token instead of log in again
@@ -33,17 +34,17 @@ when the token expires.
 """,
 )
 class RefreshTokenType:
-    token: auto = strawberry.django.field(
+    token: auto = strawberry_django.field(
         description="randomly generated token that is attached to a FK user."
     )
     created: auto
     revoked: auto
 
-    @strawberry.django.field
+    @strawberry_django.field
     def expires_at(self: RefreshToken) -> datetime:
         return self.expires_at_()
 
-    @strawberry.django.field
+    @strawberry_django.field
     def is_expired(self: RefreshToken) -> bool:
         return self.is_expired_()
 
