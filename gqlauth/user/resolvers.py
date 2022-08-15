@@ -3,7 +3,7 @@ from smtplib import SMTPException
 from typing import Union
 from uuid import UUID
 
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,37 +11,33 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 import strawberry
 from strawberry.types import Info
-from strawberry_django_jwt.exceptions import JSONWebTokenError, JSONWebTokenExpired
-from strawberry_django_jwt.mutations import ObtainJSONWebToken as JwtObtainParent
-from strawberry_django_jwt.mutations import Refresh as RefreshParent
-from strawberry_django_jwt.mutations import Revoke as RevokeParent
-from strawberry_django_jwt.mutations import Verify as VerifyParent
-from strawberry_django_jwt.utils import create_user_token
 
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.exceptions import (
     EmailAlreadyInUse,
-    InvalidCredentials,
     PasswordAlreadySetError,
     TokenScopeError,
     UserAlreadyVerified,
     UserNotVerified,
 )
-from gqlauth.core.shortcuts import get_user_by_email, get_user_to_login
-from gqlauth.core.types_ import (
-    MutationNormalOutput,
-    ObtainJSONWebTokenPayload,
-    RefreshTokenPayload,
-    RevokeTokenPayload,
-    VerifyTokenPayload,
-)
+from gqlauth.core.shortcuts import get_user_by_email
+from gqlauth.core.types_ import MutationNormalOutput
 from gqlauth.core.utils import (
     g_user,
     get_payload_from_token,
     inject_fields,
     revoke_user_refresh_token,
+)
+from gqlauth.jwt.models import RefreshToken
+from gqlauth.jwt.types_ import (
+    ObtainJSONWebTokenInput,
+    ObtainJSONWebTokenType,
+    RevokeRefreshTokenType,
+    TokenType,
+    VerifyTokenInput,
+    VerifyTokenType,
 )
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.user.decorators import (
@@ -426,41 +422,14 @@ class ObtainJSONWebTokenMixin:
     return `unarchiving=True` on OutputBase.
     """
 
-    @strawberry.input
-    @inject_fields(app_settings.LOGIN_FIELDS)
-    class ObtainJSONWebTokenInput:
-        password: str
-        if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            identifier: UUID
-            userEntry: str
-
     @classmethod
-    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenPayload:
+    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenType:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
-                return ObtainJSONWebTokenPayload(success=False, errors={"captcha": check_res})
+                return ObtainJSONWebTokenType(success=False, errors={"captcha": check_res})
 
-        try:
-            args = {
-                UserModel.USERNAME_FIELD: getattr(input_, UserModel.USERNAME_FIELD),
-            }
-
-            user = get_user_to_login(**args)
-            if user.status.archived is True:  # un-archive on login
-                UserStatus.unarchive(user)
-
-            if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
-                # this will raise if not successful
-                res = JwtObtainParent.obtain.get_result(None, None, [cls, info], asdict(input_))
-                return ObtainJSONWebTokenPayload(success=True, obtainPayload=res)
-            else:
-                raise UserNotVerified
-
-        except (JSONWebTokenError, ObjectDoesNotExist, InvalidCredentials):
-            return ObtainJSONWebTokenPayload(success=False, errors=Messages.INVALID_CREDENTIALS)
-        except UserNotVerified:
-            return ObtainJSONWebTokenPayload(success=False, errors=Messages.NOT_VERIFIED)
+        return ObtainJSONWebTokenType.authenticate(info, input_)
 
 
 class ArchiveOrDeleteMixin:
@@ -524,17 +493,16 @@ class PasswordChangeMixin:
     @classmethod
     @verification_required
     @_password_confirmation_required
-    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenPayload:
+    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
         args = asdict(input_)
         user = g_user(info)
         f = cls.form(user, args)
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            parent_res = async_to_sync(create_user_token)(user)
-            return ObtainJSONWebTokenPayload(success=True, obtainPayload=parent_res)
+            return ObtainJSONWebTokenType.from_user(info, user)
         else:
-            return ObtainJSONWebTokenPayload(success=False, errors=f.errors.get_json_data())
+            return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
 
 class UpdateAccountMixin:
@@ -568,52 +536,50 @@ class UpdateAccountMixin:
 
 class VerifyTokenMixin:
     """
-    Checks if a token is not expired and correct
+    ### Checks if a token is not expired and correct.
+    *Note that this is not for refresh tokens.*
     """
 
-    @strawberry.input
-    class VerifyTokenInput:
-        token: str
-
     @classmethod
-    def resolve_mutation(cls, info, input_: VerifyTokenInput) -> VerifyTokenPayload:
-        try:
-            payload = VerifyParent.verify.get_result(None, None, [cls, info], asdict(input_))
-            return VerifyTokenPayload(success=True, verifyPayload=payload)
-        except JSONWebTokenExpired:
-            return VerifyTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
-        except JSONWebTokenError:
-            return VerifyTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
+    def resolve_mutation(cls, _: Info, input_: VerifyTokenInput) -> VerifyTokenType:
+        return VerifyTokenType.from_token(input_)
 
 
 class RefreshTokenMixin:
     """
-    ### refreshToken to refresh your token:
+    ### refreshToken to generate a new login token:
+    *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 
-    using the refresh token you already got during authorization.
-    this will obtain a brand-new token (and possibly a refresh token)
-    with renewed expiration time for non-expired tokens
+    using the refresh-token you already got during authorization, and
+    obtain a brand-new token (and possibly a refresh token).
+    This is an alternative to log in when your token expired.
     """
 
-    @strawberry.input
+    @strawberry.input(
+        description="If `revoke_refresh_token` is true,"
+        " revokes to refresh token an creates a new one."
+    )
     class RefreshTokenInput:
         refresh_token: str
+        revoke_refresh_token: bool = False
 
     @classmethod
-    def resolve_mutation(cls, info, input_: RefreshTokenInput) -> RefreshTokenPayload:
-        try:
-            res = RefreshParent.refresh.get_result(None, None, [cls, info], asdict(input_))
-            return RefreshTokenPayload(success=True, refreshPayload=res)
-
-        except JSONWebTokenExpired:
-            return RefreshTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
-        except JSONWebTokenError:
-            return RefreshTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
+    def resolve_mutation(cls, info, input_: RefreshTokenInput) -> ObtainJSONWebTokenType:
+        res = RefreshToken.objects.get(token=input_.refresh_token, revoked__isnull=True)
+        user = g_user(info)
+        if res.is_expired_(info):
+            return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+        ret = ObtainJSONWebTokenType(success=True, token=TokenType.from_user(info, user))
+        if input_.revoke_refresh_token:
+            res.revoked = True
+            ret.refresh_token = RefreshToken.from_user(user)
+        return ret
 
 
 class RevokeTokenMixin:
     """
-    Suspends a refresh token
+    ### Suspends a refresh token.
+    *token must exist to be revoked.*
     """
 
     @strawberry.input
@@ -621,15 +587,13 @@ class RevokeTokenMixin:
         refresh_token: str
 
     @classmethod
-    def resolve_mutation(cls, info, input_: RevokeTokenInput) -> RevokeTokenPayload:
-        try:
-            res = RevokeParent.revoke.get_result(None, None, [cls, info], asdict(input_))
-            return RevokeTokenPayload(success=True, revokePayload=res)
-
-        except JSONWebTokenExpired:
-            return RevokeTokenPayload(success=False, errors=Messages.EXPIRED_TOKEN)
-        except JSONWebTokenError:
-            return RevokeTokenPayload(success=False, errors=Messages.INVALID_TOKEN)
+    def resolve_mutation(cls, _: Info, input_: RevokeTokenInput) -> RevokeRefreshTokenType:
+        if refresh_token := RefreshToken.objects.get(
+            token=input_.refresh_token, revoked__isnull=True
+        ):
+            return RevokeRefreshTokenType(success=True, refresh_token=refresh_token)
+        else:
+            return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)
 
 
 class SendSecondaryEmailActivationMixin:

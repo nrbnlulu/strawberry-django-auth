@@ -3,30 +3,37 @@ from datetime import datetime
 import json
 
 from django.conf import settings as django_settings
+from django.contrib.auth import get_user_model
 from django.core.serializers.json import DjangoJSONEncoder
 import jwt
 from strawberry.types import Info
 
-from gqlauth.jwt.models import AbstractRefreshToken
-from gqlauth.jwt.types_ import TokenType
+from gqlauth.jwt.types_ import TokenPayloadType, TokenType
 
+USER_MODEL = get_user_model()
 app_settings = django_settings.GQL_AUTH
 
 
-def create_token_type(info: Info) -> TokenType:
-    ret = TokenType(
-        exp=datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA, origIat=datetime.utcnow()
+def create_token_type(_: Info, user: USER_MODEL) -> TokenType:
+    user_pk = app_settings.JWT_PAYLOAD_PK.python_name
+    pk_field = {user_pk: getattr(user, user_pk)}
+    payload = TokenPayloadType(
+        exp=datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA,
+        origIat=datetime.utcnow(),
+        **pk_field,
     )
-    serialized = json.dumps(asdict(ret), sort_keys=True, indent=1, cls=DjangoJSONEncoder)
-    ret.token = jwt.encode(
-        payload={"token_type": serialized},
-        key=app_settings.JWT_SECRET_KEY,
-        algorithm=app_settings.JWT_ALGORITHM,
+    serialized = json.dumps(asdict(payload), sort_keys=True, indent=1, cls=DjangoJSONEncoder)
+    return TokenType(
+        token=jwt.encode(
+            payload={"payload": serialized},
+            key=app_settings.JWT_SECRET_KEY,
+            algorithm=app_settings.JWT_ALGORITHM,
+        ),
+        payload=payload,
     )
-    return ret
 
 
-def decode_jwt(token: str, _: Info) -> TokenType:
+def decode_jwt(token: str) -> TokenType:
     return TokenType(
         json.loads(
             **jwt.decode(
@@ -39,7 +46,3 @@ def decode_jwt(token: str, _: Info) -> TokenType:
         ),
         cls=DjangoJSONEncoder,
     )
-
-
-def refresh_has_expired_handler(refresh_token: AbstractRefreshToken, _: Info) -> bool:
-    return refresh_token.created > (datetime.now() - app_settings.JWT_REFRESH_EXPIRATION_DELTA)

@@ -1,6 +1,5 @@
 # quickstart.schema.py
 import strawberry
-from strawberry_django_jwt.middleware import JSONWebTokenMiddleware
 
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
@@ -34,7 +33,4 @@ class AuthMutation:
 schema = strawberry.Schema(
     query=UserQueries,
     mutation=AuthMutation,
-    extensions=[
-        JSONWebTokenMiddleware,
-    ],
 )

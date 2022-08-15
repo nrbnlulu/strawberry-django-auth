@@ -1,6 +1,5 @@
 import strawberry
 from strawberry.tools import merge_types
-from strawberry_django_jwt.middleware import AsyncJSONWebTokenMiddleware
 
 from gqlauth.user import arg_mutations, relay
 from gqlauth.user.queries import UserQueries
@@ -59,15 +58,9 @@ RelayMutation = merge_types("RootRelay", (AuthRelayMutation,))
 relay_schema = strawberry.Schema(
     query=Query,
     mutation=RelayMutation,
-    extensions=[
-        AsyncJSONWebTokenMiddleware,
-    ],
 )
 
 arg_schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
-    extensions=[
-        AsyncJSONWebTokenMiddleware,
-    ],
 )

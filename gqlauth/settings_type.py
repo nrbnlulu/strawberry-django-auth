@@ -10,7 +10,6 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 if typing.TYPE_CHECKING:
-    from gqlauth.jwt.models import AbstractRefreshToken
     from gqlauth.jwt.types_ import TokenType
 
 
@@ -153,6 +152,23 @@ class GqlAuthSettings:
     SEND_PASSWORD_SET_EMAIL: bool = False
     # JWT stuff
     JWT_SECRET_KEY: DjangoSetting = lambda: django_settings.SECRET_KEY
+    JWT_ALGORITHM: str = "HS256"
+    JWT_PAYLOAD_HANDLER: Union[
+        Callable[[Info], "TokenType"], ImportString
+    ] = "gqlauth.jwt.default_hooks.create_token_type"
+    """
+    A custom function to generate the token datatype, its up to you to encode the token.
+    """
+    JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
+    """
+    field that will be used to generate the token from a user instance and
+    retrieve user based on the decoded token.
+    *This filed must be unique in the database*
+    """
+    JWT_DECODE_HANDLER: Union[
+        Callable[[str], "TokenType"], ImportString
+    ] = "gqlauth.jwt.default_hooks.decode_jwt"
+
     JWT_EXPIRATION_DELTA: timedelta = timedelta(minutes=5)
     """
     Timedelta added to `utcnow()` to set the expiration time.
@@ -174,22 +190,6 @@ class GqlAuthSettings:
     """
     Refresh token expiration time delta.
     """
-    JWT_REFRESH_EXPIRED_HANDLER: Union[
-        Callable[["AbstractRefreshToken", Info], bool], ImportString
-    ] = "gqlauth.jwt.default_hooks.refresh_has_expired_handler"
-    """
-    A custom function to determine if refresh has expired.
-    receives the instance of RefreshToken  with the Strawberry `Info` instance.
-    """
-    JWT_PAYLOAD_HANDLER: Union[
-        Callable[[Info], "TokenType"], ImportString
-    ] = "gqlauth.jwt.default_hooks.create_token_type"
-    """
-    A custom function to generate the token datatype, its up to you to encode the token.
-    """
-    JWT_DECODE_HANDLER: Union[
-        Callable[[str], "TokenType"], ImportString
-    ] = "gqlauth.jwt.default_hooks.decode_jwt"
 
     def __post_init__(self):
         # if there override the defaults

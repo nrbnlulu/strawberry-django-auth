@@ -297,11 +297,45 @@ class RelayTestCase(TestBase):
           mutation {{
         tokenAuth(input:{{{}}})
                       {{
-            success
             errors
-            obtainPayload{{
+            success
+            refreshToken {{
+              created
+              isExpired
+              expiresAt
               token
-              refreshToken
+              revoked
+            }}
+            token {{
+              token
+              payload {{
+                exp
+                origIat
+                username
+              }}
+            }}
+            user {{
+              archived
+              dateJoined
+              firstName
+              email
+              isActive
+              id
+              isStaff
+              isSuperuser
+              lastLogin
+              lastName
+              logentrySet {{
+                pk
+              }}
+              secondaryEmail
+              status {{
+                archived
+                verified
+                secondaryEmail
+              }}
+              username
+              verified
             }}
           }}
         }}
@@ -322,15 +356,48 @@ class ArgTestCase(TestBase):
            mutation {{
            tokenAuth({})
                   {{
-                success
-                errors
-                obtainPayload{{
-                  token
-                  refreshToken
-                }}
+            errors
+            success
+            refreshToken {{
+              created
+              isExpired
+              expiresAt
+              token
+              revoked
+            }}
+            token {{
+              token
+              payload {{
+                exp
+                origIat
+                username
               }}
             }}
-
+            user {{
+              archived
+              dateJoined
+              firstName
+              email
+              isActive
+              id
+              isStaff
+              isSuperuser
+              lastLogin
+              lastName
+              logentrySet {{
+                pk
+              }}
+              secondaryEmail
+              status {{
+                archived
+                verified
+                secondaryEmail
+              }}
+              username
+              verified
+            }}
+          }}
+        }}
            """.format(
             self._generate_login_args(user_status)
         )

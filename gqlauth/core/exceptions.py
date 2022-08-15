@@ -34,7 +34,11 @@ class EmailAlreadyInUse(GraphQLAuthError):
 
 
 class TokenScopeError(GraphQLAuthError):
-    default_message = _("This token if for something else.")
+    default_message = _("This token is for something else.")
+
+
+class TokenExpired(GraphQLAuthError):
+    default_message = _("This token is expired")
 
 
 class PasswordAlreadySetError(GraphQLAuthError):

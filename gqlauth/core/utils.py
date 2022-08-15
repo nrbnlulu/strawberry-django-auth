@@ -3,13 +3,11 @@ import inspect
 import typing
 from typing import Dict, Iterable, Union
 
-from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from django.core import signing
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
-from strawberry_django_jwt.exceptions import JSONWebTokenError
 
 from gqlauth.core.exceptions import TokenScopeError
 
@@ -78,22 +76,11 @@ def get_payload_from_token(token, action, exp=None):
     return payload
 
 
-def using_refresh_tokens():
-    if (
-        hasattr(django_settings, "GRAPHQL_JWT")
-        and django_settings.GRAPHQL_JWT.get("JWT_LONG_RUNNING_REFRESH_TOKEN", False)
-        and "strawberry_django_jwt.refresh_token" in django_settings.INSTALLED_APPS
-    ):
-        return True
-    return False
-
-
 def revoke_user_refresh_token(user):
-    if using_refresh_tokens():
-        refresh_tokens = user.refresh_tokens.all()
-        for refresh_token in refresh_tokens:
-            with contextlib.suppress(JSONWebTokenError):
-                refresh_token.revoke()
+    refresh_tokens = user.refresh_tokens.all()
+    for refresh_token in refresh_tokens:
+        with contextlib.suppress(Exception):
+            refresh_token.revoke()
 
 
 def fields_names(strawberry_fields: Iterable[StrawberryField]):

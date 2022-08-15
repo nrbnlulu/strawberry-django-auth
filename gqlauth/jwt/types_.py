@@ -1,40 +1,76 @@
 from datetime import datetime
+from typing import Optional
+from uuid import UUID
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
+from django.core.exceptions import PermissionDenied
 import strawberry
 from strawberry import auto
 from strawberry.types import Info
 
-import gqlauth.jwt.models
+from gqlauth.core.constants import Messages
+from gqlauth.core.exceptions import TokenExpired
+from gqlauth.core.interfaces import OutputInterface
+from gqlauth.core.scalars import ExpectedErrorType
+from gqlauth.core.utils import inject_fields
+from gqlauth.jwt.models import RefreshToken
+from gqlauth.user.models import UserStatus
+from gqlauth.user.types_ import UserType
 
 app_settings = settings.GQL_AUTH
 
 USER_MODEL = get_user_model()
 
 
-@strawberry.django.type(model=gqlauth.jwt.models.RefreshToken)
+@strawberry.django.type(
+    model=RefreshToken,
+    description="""
+Refresh token can be used to obtain a new token instead of log in again
+when the token expires.
+
+*This is only used if `JWT_LONG_RUNNING_REFRESH_TOKEN` is set to True.*
+""",
+)
 class RefreshTokenType:
-    user: auto
-    token: auto
+    token: auto = strawberry.django.field(
+        description="randomly generated token that is attached to a FK user."
+    )
     created: auto
     revoked: auto
 
     @strawberry.django.field
-    def expires_at(self: gqlauth.jwt.models.RefreshToken) -> datetime:
-        return self._expires_at()
+    def expires_at(self: RefreshToken) -> datetime:
+        return self.expires_at_()
 
     @strawberry.django.field
-    def is_expired(self: gqlauth.jwt.models.RefreshToken) -> bool:
-        return self._is_expired()
+    def is_expired(self: RefreshToken) -> bool:
+        return self.is_expired_()
 
 
-@strawberry.type
+@strawberry.type(
+    description="""
+the data that was used to create the token.
+"""
+)
+@inject_fields(
+    {
+        app_settings.JWT_PAYLOAD_PK,
+    }
+)
+class TokenPayloadType:
+    exp: datetime = strawberry.field(description="when the token will be expired")
+    origIat: datetime = strawberry.field(description="when the token was created")
+
+
+@strawberry.type(
+    description="""
+encapsulates the token with the payload that was used to create the token.
+"""
+)
 class TokenType:
-    exp: datetime
-    origIat: datetime
-    # token will be created later.
-    token: str = None
+    payload: TokenPayloadType
+    token: str = strawberry.field(description="The encoded payload, namely a token.")
 
     @classmethod
     def from_user(cls, info: Info, user: USER_MODEL) -> "TokenType":
@@ -42,11 +78,131 @@ class TokenType:
 
     @classmethod
     def from_token(cls, token: str) -> "TokenType":
-        return app_settings.JWT_
+        """
+        might raise TokenExpired
+        """
+        token_type: TokenType = app_settings.JWT_DECODE_HANDLER(token)
+        if token_type.payload.exp.utcnow() > (
+            datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA
+        ):
+            raise TokenExpired
+
+    def get_user_instance(self) -> USER_MODEL:
+        """
+        might raise not existed exception.
+        """
+        pk_name = app_settings.JWT_PAYLOAD_PK.python_name
+        query = {pk_name: getattr(self.payload, pk_name)}
+        return USER_MODEL.objects.get(**query)
+
+
+@strawberry.input
+@inject_fields(app_settings.LOGIN_FIELDS)
+class ObtainJSONWebTokenInput:
+    password: str
+    if app_settings.LOGIN_REQUIRE_CAPTCHA:
+        identifier: UUID
+        userEntry: str
+
+
+@strawberry.type(
+    description="""
+    encapsulates token data, and refresh token data if `JWT_LONG_RUNNING_REFRESH_TOKEN` is on.
+    with an output interface.
+    """
+)
+class ObtainJSONWebTokenType(OutputInterface):
+    success: bool
+    user: Optional[UserType] = None
+    token: Optional[TokenType] = None
+    if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
+        refresh_token: Optional[RefreshTokenType] = None
+    errors: Optional[ExpectedErrorType] = None
+
+    @classmethod
+    def from_user(cls, info: Info, user: USER_MODEL) -> "ObtainJSONWebTokenType":
+        """
+        creates a new token and possibly a new refresh token based on the user.
+        *call this method only for trusted users.*
+        """
+        ret = ObtainJSONWebTokenType(success=True, user=user, token=TokenType.from_user(info, user))
+        if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
+            ret.refresh_token = RefreshToken.from_user(user)
+        return ret
+
+    @classmethod
+    def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
+        """
+        return `ObtainJSONWebTokenType`.
+        authenticates against django authentication backends or from JWT headers.
+
+        *creates a new token and p.*
+        """
+        args = {
+            USER_MODEL.USERNAME_FIELD: getattr(input_, USER_MODEL.USERNAME_FIELD),
+            "password": input_.password,
+        }
+        try:
+            # authenticate against django authentication backends.
+            if not (user := authenticate(info.context.request, **args)):
+                # try to get user from JWT headers.
+                if not (token := info.context.request.headers.get("HTTP_AUTHORIZATION")):
+                    return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
+                # might raise TokenExpired
+                if not (token_type := TokenType.from_token(token)):
+                    return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
+                # find the user from the JWT payload.
+                try:
+                    user = token_type.get_user_instance()
+                except USER_MODEL.DoesNotExist:
+                    return ObtainJSONWebTokenType(
+                        success=False, errors=Messages.INVALID_CREDENTIALS
+                    )
+            # gqlauth logic
+            if user.status.archived is True:  # un-archive on login
+                UserStatus.unarchive(user)
+            if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
+                # successful login.
+                return ObtainJSONWebTokenType.from_user(info, user)
+            else:
+                return ObtainJSONWebTokenType(success=False, errors=Messages.NOT_VERIFIED)
+
+        except PermissionDenied:
+            # one of the authentication backends rejected the user.
+            return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
+
+        except TokenExpired:
+            return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+
+
+@strawberry.input
+class VerifyTokenInput:
+    token: str
 
 
 @strawberry.type
-class JWTType:
-    token: TokenType
-    if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
-        refresh_token: RefreshTokenType
+class VerifyTokenType(OutputInterface):
+    success: bool
+    token: Optional[TokenType] = None
+    user: Optional[UserType] = None
+    errors: Optional[ExpectedErrorType] = None
+
+    @classmethod
+    def from_token(cls, token_input: VerifyTokenInput) -> "VerifyTokenType":
+        try:
+            token_type = TokenType.from_token(token_input.token)
+            user = token_type.get_user_instance()
+        except USER_MODEL.DoesNotExist:
+            return VerifyTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+        except TokenExpired:
+            return VerifyTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+
+        else:
+            return VerifyTokenType(token=token_type, user=user, success=True)
+
+
+@strawberry.type
+class RevokeRefreshTokenType:
+    success: bool
+    refresh_token: Optional[RefreshTokenType] = None
+    errors: Optional[ExpectedErrorType] = None

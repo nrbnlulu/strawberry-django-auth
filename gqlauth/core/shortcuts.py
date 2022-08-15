@@ -17,16 +17,3 @@ def get_user_by_email(email: str):
     except ObjectDoesNotExist:
         status = UserStatus._default_manager.get(secondary_email=email)
         return status.user
-
-
-def get_user_to_login(**kwargs):
-    """
-    get user by kwargs or secondary email
-    to perform login
-    raise ObjectDoesNotExist
-    """
-    try:
-        user = UserModel._default_manager.get(**kwargs)
-        return user
-    except ObjectDoesNotExist:
-        raise ObjectDoesNotExist
