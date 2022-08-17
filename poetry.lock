@@ -7,7 +7,7 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-tests = ["mypy (>=0.800)", "pytest-asyncio", "pytest"]
+tests = ["pytest", "pytest-asyncio", "mypy (>=0.800)"]
 
 [[package]]
 name = "atomicwrites"
@@ -69,7 +69,7 @@ attrs = ">=19.2.0"
 six = "*"
 
 [package.extras]
-visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
+visualize = ["graphviz (>0.5.1)", "Twisted (>=16.1.1)"]
 
 [[package]]
 name = "backports.cached-property"
@@ -107,10 +107,10 @@ tomli = {version = ">=1.1.0", markers = "python_full_version < \"3.11.0a7\""}
 typing-extensions = {version = ">=3.10.0.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
-uvloop = ["uvloop (>=0.15.2)"]
-jupyter = ["tokenize-rt (>=3.2.0)", "ipython (>=7.8.0)"]
-d = ["aiohttp (>=3.7.4)"]
 colorama = ["colorama (>=0.4.3)"]
+d = ["aiohttp (>=3.7.4)"]
+jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
+uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "certifi"
@@ -232,7 +232,7 @@ autobahn = ">=0.18"
 twisted = {version = ">=18.7", extras = ["tls"]}
 
 [package.extras]
-tests = ["pytest-asyncio (>=0.8,<1.0)", "pytest (>=3.10,<4.0)", "hypothesis (==4.23)"]
+tests = ["hypothesis (==4.23)", "pytest (>=3.10,<4.0)", "pytest-asyncio (>=0.8,<1.0)"]
 
 [[package]]
 name = "databind"
@@ -284,7 +284,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 wrapt = ">=1.10,<2"
 
 [package.extras]
-dev = ["pytest-cov", "pytest", "PyTest-Cov (<2.6)", "PyTest (<5)", "zipp (<2)", "sphinxcontrib-websupport (<2)", "configparser (<5)", "importlib-resources (<4)", "importlib-metadata (<3)", "sphinx (<2)", "bump2version (<1)", "tox"]
+dev = ["tox", "bump2version (<1)", "sphinx (<2)", "importlib-metadata (<3)", "importlib-resources (<4)", "configparser (<5)", "sphinxcontrib-websupport (<2)", "zipp (<2)", "PyTest (<5)", "PyTest-Cov (<2.6)", "pytest", "pytest-cov"]
 
 [[package]]
 name = "distlib"
@@ -439,8 +439,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-testing = ["pytest-timeout (>=1.4.2)", "pytest-cov", "pytest (>=4)", "coverage (>=4)", "covdefaults (>=1.2.0)"]
-docs = ["sphinx-autodoc-typehints (>=1.12)", "sphinx (>=4.1)", "furo (>=2021.8.17b43)"]
+docs = ["furo (>=2021.8.17b43)", "sphinx (>=4.1)", "sphinx-autodoc-typehints (>=1.12)"]
+testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-cov", "pytest-timeout (>=1.4.2)"]
 
 [[package]]
 name = "ghp-import"
@@ -527,7 +527,7 @@ optional = false
 python-versions = "*"
 
 [package.extras]
-scripts = ["twisted (>=16.4.0)", "click (>=6.0)"]
+scripts = ["click (>=6.0)", "twisted (>=16.4.0)"]
 
 [[package]]
 name = "iniconfig"
@@ -546,10 +546,10 @@ optional = false
 python-versions = ">=3.6.1,<4.0"
 
 [package.extras]
-plugins = ["setuptools"]
+pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+requirements_deprecated_finder = ["pipreqs", "pip-api"]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
-requirements_deprecated_finder = ["pip-api", "pipreqs"]
-pipfile_deprecated_finder = ["requirementslib", "pipreqs"]
+plugins = ["setuptools"]
 
 [[package]]
 name = "jinja2"
@@ -585,7 +585,7 @@ python-versions = ">=3.7"
 importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
 
 [package.extras]
-testing = ["pyyaml", "coverage"]
+testing = ["coverage", "pyyaml"]
 
 [[package]]
 name = "markupsafe"
@@ -714,9 +714,9 @@ tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
 typing-extensions = ">=3.10"
 
 [package.extras]
-reports = ["lxml"]
-python2 = ["typed-ast (>=1.4.0,<2)"]
 dmypy = ["psutil (>=4.0)"]
+python2 = ["typed-ast (>=1.4.0,<2)"]
+reports = ["lxml"]
 
 [[package]]
 name = "mypy-extensions"
@@ -892,10 +892,10 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
-docs = ["zope.interface", "sphinx-rtd-theme", "sphinx"]
-dev = ["pre-commit", "mypy", "coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)", "cryptography (>=3.3.1)", "zope.interface", "sphinx-rtd-theme", "sphinx"]
 crypto = ["cryptography (>=3.3.1)"]
+dev = ["sphinx", "sphinx-rtd-theme", "zope.interface", "cryptography (>=3.3.1)", "pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)", "mypy", "pre-commit"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 
 [[package]]
 name = "pymdown-extensions"
@@ -920,8 +920,8 @@ python-versions = ">=3.6"
 cryptography = ">=35.0"
 
 [package.extras]
-test = ["pytest (>=3.0.1)", "pretend", "flaky"]
-docs = ["sphinx-rtd-theme", "sphinx"]
+docs = ["sphinx", "sphinx-rtd-theme"]
+test = ["flaky", "pretend", "pytest (>=3.0.1)"]
 
 [[package]]
 name = "pyparsing"
@@ -1082,10 +1082,10 @@ pyasn1-modules = "*"
 six = "*"
 
 [package.extras]
-tests = ["pytest", "coverage[toml] (>=5.0.2)"]
+dev = ["coverage[toml] (>=5.0.2)", "pytest", "sphinx", "furo", "idna", "pyopenssl"]
+docs = ["sphinx", "furo"]
 idna = ["idna"]
-docs = ["furo", "sphinx"]
-dev = ["pyopenssl", "idna", "furo", "sphinx", "pytest", "coverage[toml] (>=5.0.2)"]
+tests = ["coverage[toml] (>=5.0.2)", "pytest"]
 
 [[package]]
 name = "six"
@@ -1124,7 +1124,7 @@ dev = ["uvicorn[standard] (>=0.18.2,<0.19.0)"]
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.125.0"
+version = "0.125.1"
 description = "A library for creating GraphQL APIs"
 category = "main"
 optional = false
@@ -1242,9 +1242,9 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-twisted = ["twisted (>=20.3.0)", "zope.interface (>=5.2.0)"]
-dev = ["tox-gh-actions (>=2.2.0)", "twine (>=1.6.5)", "tox (>=2.1.1)", "sphinx-rtd-theme (>=0.1.9)", "sphinxcontrib-spelling (>=2.1.2)", "pyenchant (>=1.6.6)", "sphinx (>=1.2.3)", "pep8 (>=1.6.2)", "pytest-cov (>=1.8.1)", "pytest (>=2.6.4)", "wheel"]
-all = ["twisted (>=20.3.0)", "zope.interface (>=5.2.0)"]
+all = ["zope.interface (>=5.2.0)", "twisted (>=20.3.0)"]
+dev = ["wheel", "pytest (>=2.6.4)", "pytest-cov (>=1.8.1)", "pep8 (>=1.6.2)", "sphinx (>=1.2.3)", "pyenchant (>=1.6.6)", "sphinxcontrib-spelling (>=2.1.2)", "sphinx-rtd-theme (>=0.1.9)", "tox (>=2.1.1)", "twine (>=1.6.5)", "tox-gh-actions (>=2.2.0)"]
+twisted = ["zope.interface (>=5.2.0)", "twisted (>=20.3.0)"]
 
 [[package]]
 name = "types-cryptography"
@@ -2079,8 +2079,8 @@ strawberry-django-jwt = [
     {file = "strawberry_django_jwt-0.2.2-py3-none-any.whl", hash = "sha256:5771cf4a5668923324db07dd3833d16228f46812fea6eecd6155c5ac565cb7df"},
 ]
 strawberry-graphql = [
-    {file = "strawberry-graphql-0.125.0.tar.gz", hash = "sha256:ffc570a79a9b09fa95eea4b59557cb792606ac3dcee7f6276e1e68d5a2e5400a"},
-    {file = "strawberry_graphql-0.125.0-py3-none-any.whl", hash = "sha256:c8d93ff00b257749f7d2a2f20da0210963256d52be9b8e6a7dbfb5c4a6e8580a"},
+    {file = "strawberry-graphql-0.125.1.tar.gz", hash = "sha256:3abb7a891e652eb26ae48c88381348414a9911d8ac75091813aa8f0fda890367"},
+    {file = "strawberry_graphql-0.125.1-py3-none-any.whl", hash = "sha256:c44bb142b055ca7f41cb07898038b86d82aff165e8aa03c8b1184b313d606b2a"},
 ]
 strawberry-graphql-django = [
     {file = "strawberry-graphql-django-0.4.0.tar.gz", hash = "sha256:d321f173834f9156e33cc91a175000ff38e72afa9c7f412b30c678d7f274d014"},
