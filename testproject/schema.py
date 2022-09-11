@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 import strawberry
 from strawberry.types import Info
 import strawberry_django
 
-from gqlauth.core.field import GqlAuthRootField
+from gqlauth.core.directives import IsVerified
+from gqlauth.core.field import GqlAuthField, GqlAuthRootField
 from gqlauth.core.types_ import AuthWrapper
 from gqlauth.user import arg_mutations, relay
 from gqlauth.user.arg_mutations import Captcha
@@ -17,8 +18,7 @@ class AuthMutation:
     verify_token = arg_mutations.VerifyToken.field
     refresh_token = arg_mutations.RefreshToken.field
     revoke_token = arg_mutations.RevokeToken.field
-    register = arg_mutations.Register.field
-    verify_account = arg_mutations.VerifyAccount.field
+
     update_account = arg_mutations.UpdateAccount.field
     resend_activation_email = arg_mutations.ResendActivationEmail.field
     archive_account = arg_mutations.ArchiveAccount.field
@@ -57,8 +57,12 @@ class AuthRelayMutation:
 
 @strawberry.type
 class Queries(UserQueries):
-    @strawberry.field
-    def apples(self) -> List["AppleType"]:
+    @GqlAuthField(
+        directives=[
+            IsVerified(),
+        ]
+    )
+    def apples(self) -> Optional[List["AppleType"]]:
         return Apple.objects.all()
 
 
@@ -72,8 +76,8 @@ class AppleType:
 @strawberry.type
 class Query:
     @GqlAuthRootField()
-    def auth_entry(self, info: Info) -> AuthWrapper[Queries]:
-        ...
+    def auth_entry(self) -> AuthWrapper[Queries]:
+        return AuthWrapper(success=True, data=Queries())
 
 
 @strawberry.type
@@ -84,6 +88,8 @@ class Mutation:
 
     captcha = Captcha.field
     token_auth = arg_mutations.ObtainJSONWebToken.field
+    register = arg_mutations.Register.field
+    verify_account = arg_mutations.VerifyAccount.field
 
 
 @strawberry.type

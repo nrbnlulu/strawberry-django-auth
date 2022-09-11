@@ -13,7 +13,7 @@ from strawberry.utils.str_converters import to_camel_case
 from gqlauth.core.exceptions import TokenScopeError
 
 if typing.TYPE_CHECKING:
-    from gqlauth.user.models import UserStatus
+    from gqlauth.models import UserStatus
 
 USER_MODEL = get_user_model()
 
@@ -41,6 +41,15 @@ def camelize(data):
     return data
 
 
+JWT_PREFIX = "JWT "
+
+
+def get_token_from_headers(headers: dict) -> str:
+    jwt = headers["Authorization"]
+    assert isinstance(jwt, str)
+    return jwt.strip(JWT_PREFIX)
+
+
 def list_to_dict(lst: [str]):
     """takes list of string and creates a dict with str as their values"""
     new_dict = {}
@@ -53,6 +62,13 @@ def get_request(info: Info):
     if hasattr(info.context, "user"):
         return info.context
     return info.context.request
+
+
+def get_info(args: tuple) -> typing.Optional[Info]:
+    for arg in args:
+        if isinstance(arg, Info):
+            return arg
+    return None
 
 
 def get_status(user: Union[USER_MODEL, AnonymousUser]) -> typing.Optional["UserStatus"]:
@@ -156,10 +172,3 @@ def is_optional(field):
     whether strawberry field is optional or not
     """
     return typing.get_origin(field) is Union and type(None) in typing.get_args(field)
-
-
-def g_info(args: tuple) -> typing.Optional[Info]:
-    for arg in args:
-        if isinstance(arg, Info):
-            return arg
-    return None

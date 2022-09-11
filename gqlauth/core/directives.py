@@ -78,7 +78,7 @@ class HasPermission(BaseAuthDirective):
                 return ErrorMessage(
                     code=Error.NO_SUFFICIENT_PERMISSIONS,
                     message=_(
-                        f"User {user.first_name}, has not sufficient permissions to get {source}"
+                        f"User {user.first_name or getattr(user, user.USERNAME_FIELD, None)}, has not sufficient permissions for {info.path.key}"
                     ),
                 )
         return None

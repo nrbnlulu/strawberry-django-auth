@@ -9,6 +9,7 @@ from gqlauth.core.constants import Error
 from gqlauth.core.directives import BaseAuthDirective
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import AuthError, AuthWrapper, ErrorMessage, FieldError
+from gqlauth.core.utils import get_token_from_headers
 from gqlauth.jwt.types_ import TokenType
 
 __all__ = ["GqlAuthRootField", "GqlAuthField"]
@@ -20,7 +21,7 @@ class GqlAuthRootField(StrawberryField):
     def get_result(
         self, source: Any, info: Info, args: List[Any], kwargs: Dict[str, Any]
     ) -> Union[Awaitable[Any], Any]:
-        token = info.context.request.headers["Authorization"]
+        token = get_token_from_headers(info.context.request.headers)
         try:
             token_type = TokenType.from_token(token)
             user = token_type.get_user_instance()
@@ -49,7 +50,7 @@ class GqlAuthField(StrawberryDjangoField):
             ):
                 auth_output: AuthWrapper = info.context.auth_output
                 auth_output.errors.field_errors.append(
-                    FieldError(field=self.python_name, code=error)
+                    FieldError(field=self.python_name, code=error.code, message=error.message)
                 )
                 return None
         return super().get_result(source, info, args, kwargs)

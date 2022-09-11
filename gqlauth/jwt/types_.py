@@ -161,7 +161,7 @@ class ObtainJSONWebTokenType(OutputInterface):
             "password": input_.password,
         }
         try:
-            # TODO: move this to a separate function.
+            # TODO: move this to a separate function .
             # authenticate against django authentication backends.
             if not (user := authenticate(info.context.request, **args)):
                 # try to get user from JWT headers.

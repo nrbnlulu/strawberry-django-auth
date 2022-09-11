@@ -60,6 +60,9 @@ UserModel = get_user_model()
 class BaseMixin(Protocol):
     directives: List[BaseAuthDirective] = []
 
+    def resolve_mutation(self, *args, **kwargs):
+        ...
+
 
 class Captcha:
     """
@@ -92,7 +95,7 @@ def check_captcha(
     return obj.validate(input_.userEntry)
 
 
-class RegisterMixin:
+class RegisterMixin(BaseMixin):
     """
     Register user with fields defined in the settings.
     If the email field of the user model is part of the
@@ -170,7 +173,7 @@ class RegisterMixin:
             return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
-class VerifyAccountMixin:
+class VerifyAccountMixin(BaseMixin):
     """
     Verify user account.
 
@@ -196,7 +199,7 @@ class VerifyAccountMixin:
             return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
-class VerifySecondaryEmailMixin:
+class VerifySecondaryEmailMixin(BaseMixin):
     """
     Verify user secondary email.
 
@@ -233,7 +236,7 @@ class VerifySecondaryEmailMixin:
             return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
-class ResendActivationEmailMixin:
+class ResendActivationEmailMixin(BaseMixin):
     """
     Sends activation email.
 
@@ -267,7 +270,7 @@ class ResendActivationEmailMixin:
             return MutationNormalOutput(success=False, errors={"email": Messages.ALREADY_VERIFIED})
 
 
-class SendPasswordResetEmailMixin:
+class SendPasswordResetEmailMixin(BaseMixin):
     """
     Send password reset email.
 
@@ -310,7 +313,7 @@ class SendPasswordResetEmailMixin:
                 return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
-class PasswordResetMixin:
+class PasswordResetMixin(BaseMixin):
     """
     Change user password without old password.
 
@@ -358,7 +361,7 @@ class PasswordResetMixin:
             return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
 
 
-class PasswordSetMixin:
+class PasswordSetMixin(BaseMixin):
     """
     Set user password - for password-less registration
 
@@ -411,7 +414,7 @@ class PasswordSetMixin:
             return MutationNormalOutput(success=False, errors=Messages.PASSWORD_ALREADY_SET)
 
 
-class ObtainJSONWebTokenMixin:
+class ObtainJSONWebTokenMixin(BaseMixin):
     """
     Obtain JSON web token for given user.
 
@@ -545,7 +548,7 @@ class UpdateAccountMixin(BaseMixin):
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
 
 
-class VerifyTokenMixin:
+class VerifyTokenMixin(BaseMixin):
     """
     ### Checks if a token is not expired and correct.
     *Note that this is not for refresh tokens.*
@@ -556,7 +559,7 @@ class VerifyTokenMixin:
         return VerifyTokenType.from_token(input_)
 
 
-class RefreshTokenMixin:
+class RefreshTokenMixin(BaseMixin):
     """
     ### refreshToken to generate a new login token:
     *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
@@ -587,7 +590,7 @@ class RefreshTokenMixin:
         return ret
 
 
-class RevokeTokenMixin:
+class RevokeTokenMixin(BaseMixin):
     """
     ### Suspends a refresh token.
     *token must exist to be revoked.*

@@ -13,6 +13,7 @@ import pytest
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.captcha.models import Captcha
+from gqlauth.settings import gqlauth_settings
 
 
 class FitProvider(BaseProvider):
@@ -212,6 +213,10 @@ class TestBase:
         yield
         django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = False
 
+    @pytest.fixture()
+    def app_settings(self):
+        return gqlauth_settings
+
     def make_request(
         self,
         query: Query,
@@ -239,7 +244,6 @@ class TestBase:
         res = client.post(
             path=path, content_type="application/json", data={"query": query}, **headers
         )
-
         res = res.json()
         if raw:
             return res["data"]

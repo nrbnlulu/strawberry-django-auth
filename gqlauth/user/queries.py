@@ -21,7 +21,7 @@ class Sample:
     message: str = "fdsafdsafdsfa"
 
 
-@strawberry.django.type(model=USER_MODEL, filterDirectiveLocations=UserFilter)
+@strawberry.django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
     users: Optional[List[UserType]] = GqlAuthField(
         filters=UserFilter,

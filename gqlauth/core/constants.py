@@ -71,7 +71,7 @@ class Error(Enum):
     UNAUTHENTICATED = "Unauthenticated."
     INVALID_TOKEN = "Invalid token."
     EXPIRED_TOKEN = "Expired token."
-    NO_SUFFICIENT_PERMISSIONS = "Expired token."
+    NO_SUFFICIENT_PERMISSIONS = "Permissions found could not satisfy the required permissions."
 
     CAPTCHA_INVALID = "Captcha wrong, try again."
     CAPTCHA_MAX_RETRIES = "Maximum tries exceeded, please refresh the captcha"
