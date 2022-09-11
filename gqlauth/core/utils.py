@@ -3,13 +3,19 @@ import inspect
 import typing
 from typing import Dict, Iterable, Union
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core import signing
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.core.exceptions import TokenScopeError
+
+if typing.TYPE_CHECKING:
+    from gqlauth.user.models import UserStatus
+
+USER_MODEL = get_user_model()
 
 
 def hide_args_kwargs(field):
@@ -49,12 +55,20 @@ def get_request(info: Info):
     return info.context.request
 
 
-def g_user(info: Info) -> User:
-    # returns a user from info obj
-    user = getattr(info.context, "user", False)
-    if user:
+def get_status(user: Union[USER_MODEL, AnonymousUser]) -> typing.Optional["UserStatus"]:
+    from gqlauth.models import UserStatus
+
+    if status := getattr(user, "status", False):
+        assert isinstance(status, UserStatus)
+        return status
+    return None
+
+
+def get_user(info: Info) -> Union[USER_MODEL, AnonymousUser]:
+    if user := getattr(info.context, "user"):  # noqa: B009
+        assert isinstance(user, USER_MODEL)
         return user
-    return info.context.request.user
+    return AnonymousUser()
 
 
 def get_token(user, action, **kwargs):

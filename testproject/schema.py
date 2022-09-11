@@ -1,15 +1,19 @@
-import strawberry
-from strawberry.tools import merge_types
+from typing import List
 
+import strawberry
+from strawberry.types import Info
+import strawberry_django
+
+from gqlauth.core.field import GqlAuthRootField
+from gqlauth.core.types_ import AuthWrapper
 from gqlauth.user import arg_mutations, relay
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
+from testproject.sample.models import Apple
 
 
 @strawberry.type
 class AuthMutation:
-    captcha = Captcha.field
-    token_auth = arg_mutations.ObtainJSONWebToken.field
     verify_token = arg_mutations.VerifyToken.field
     refresh_token = arg_mutations.RefreshToken.field
     revoke_token = arg_mutations.RevokeToken.field
@@ -51,11 +55,46 @@ class AuthRelayMutation:
     send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
 
 
-Query = merge_types("RootQuery", (UserQueries,))
+@strawberry.type
+class Queries(UserQueries):
+    @strawberry.field
+    def apples(self) -> List["AppleType"]:
+        return Apple.objects.all()
 
-Mutation = merge_types("RootMutation", (AuthMutation,))
 
-RelayMutation = merge_types("RootRelay", (AuthRelayMutation,))
+@strawberry_django.type(model=Apple)
+class AppleType:
+    color: strawberry.auto
+    name: strawberry.auto
+    is_eaten: strawberry.auto
+
+
+@strawberry.type
+class Query:
+    @GqlAuthRootField()
+    def auth_entry(self, info: Info) -> AuthWrapper[Queries]:
+        ...
+
+
+@strawberry.type
+class Mutation:
+    @GqlAuthRootField()
+    def auth_entry(self, info: Info) -> AuthWrapper[AuthMutation]:
+        ...
+
+    captcha = Captcha.field
+    token_auth = arg_mutations.ObtainJSONWebToken.field
+
+
+@strawberry.type
+class RelayMutation:
+    @GqlAuthRootField()
+    def auth_entry(self, info: Info) -> AuthWrapper[AuthRelayMutation]:
+        ...
+
+    captcha = Captcha.field
+    token_auth = arg_mutations.ObtainJSONWebToken.field
+
 
 relay_schema = strawberry.Schema(
     query=Query,

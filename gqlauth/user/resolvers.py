@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Union
+from typing import List, Protocol, Union
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -15,6 +15,11 @@ from strawberry.types import Info
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
+from gqlauth.core.directives import (
+    BaseAuthDirective,
+    IsVerified,
+    SecondaryEmailRequired,
+)
 from gqlauth.core.exceptions import (
     EmailAlreadyInUse,
     PasswordAlreadySetError,
@@ -25,12 +30,11 @@ from gqlauth.core.exceptions import (
 from gqlauth.core.shortcuts import get_user_by_email
 from gqlauth.core.types_ import MutationNormalOutput
 from gqlauth.core.utils import (
-    g_user,
     get_payload_from_token,
+    get_user,
     inject_fields,
     revoke_user_refresh_token,
 )
-from gqlauth.jwt.models import RefreshToken
 from gqlauth.jwt.types_ import (
     ObtainJSONWebTokenInput,
     ObtainJSONWebTokenType,
@@ -39,22 +43,22 @@ from gqlauth.jwt.types_ import (
     VerifyTokenInput,
     VerifyTokenType,
 )
+from gqlauth.models import RefreshToken, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.decorators import (
-    _password_confirmation_required,
-    secondary_email_required,
-    verification_required,
-)
+from gqlauth.user.decorators import _password_confirmation_required
 from gqlauth.user.forms import (
     EmailForm,
     PasswordLessRegisterForm,
     RegisterForm,
     UpdateAccountForm,
 )
-from gqlauth.user.models import UserStatus
 from gqlauth.user.signals import user_registered, user_verified
 
 UserModel = get_user_model()
+
+
+class BaseMixin(Protocol):
+    directives: List[BaseAuthDirective] = []
 
 
 class Captcha:
@@ -432,16 +436,19 @@ class ObtainJSONWebTokenMixin:
         return ObtainJSONWebTokenType.authenticate(info, input_)
 
 
-class ArchiveOrDeleteMixin:
+class ArchiveOrDeleteMixin(BaseMixin):
     @strawberry.input
     class ArchiveOrDeleteMixinInput:
         password: str
 
+    directives = [
+        IsVerified(),
+    ]
+
     @classmethod
-    @verification_required
     @_password_confirmation_required
     def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
-        user = g_user(info)
+        user = get_user(info)
         cls.resolve_action(user)
         return MutationNormalOutput(success=True)
 
@@ -475,7 +482,7 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin):
             user.delete()
 
 
-class PasswordChangeMixin:
+class PasswordChangeMixin(BaseMixin):
     """
     Change account password when user knows the old password.
 
@@ -489,13 +496,15 @@ class PasswordChangeMixin:
         new_password2: str
 
     form = PasswordChangeForm
+    directives = [
+        IsVerified(),
+    ]
 
     @classmethod
-    @verification_required
     @_password_confirmation_required
     def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
         args = asdict(input_)
-        user = g_user(info)
+        user = get_user(info)
         f = cls.form(user, args)
         if f.is_valid():
             revoke_user_refresh_token(user)
@@ -505,7 +514,7 @@ class PasswordChangeMixin:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
 
-class UpdateAccountMixin:
+class UpdateAccountMixin(BaseMixin):
     """
     Update user model fields, defined on settings.
 
@@ -518,11 +527,13 @@ class UpdateAccountMixin:
         ...
 
     form = UpdateAccountForm
+    directives = [
+        IsVerified(),
+    ]
 
     @classmethod
-    @verification_required
     def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
-        user = g_user(info)
+        user = get_user(info)
         f = cls.form(
             asdict(input_),
             instance=user,
@@ -566,7 +577,7 @@ class RefreshTokenMixin:
     @classmethod
     def resolve_mutation(cls, info, input_: RefreshTokenInput) -> ObtainJSONWebTokenType:
         res = RefreshToken.objects.get(token=input_.refresh_token, revoked__isnull=True)
-        user = g_user(info)
+        user = get_user(info)
         if res.is_expired_(info):
             return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
         ret = ObtainJSONWebTokenType(success=True, token=TokenType.from_user(info, user))
@@ -596,19 +607,22 @@ class RevokeTokenMixin:
             return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)
 
 
-class SendSecondaryEmailActivationMixin:
+class SendSecondaryEmailActivationMixin(BaseMixin):
     """
     Send activation to secondary email.
 
     User must be verified and confirm password.
     """
 
+    directives = [
+        IsVerified(),
+    ]
+
     @strawberry.input
     class SendSecondaryEmailActivationInput:
         password: str
 
     @classmethod
-    @verification_required
     @_password_confirmation_required
     def resolve_mutation(
         cls, info, input_: SendSecondaryEmailActivationInput
@@ -617,7 +631,7 @@ class SendSecondaryEmailActivationMixin:
             email = input_.get("email")
             f = EmailForm({"email": email})
             if f.is_valid():
-                user = g_user(info)
+                user = get_user(info)
                 user.status.send_secondary_email_activation(info, email)
                 return MutationNormalOutput(success=True)
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
@@ -630,42 +644,48 @@ class SendSecondaryEmailActivationMixin:
             return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
 
-class SwapEmailsMixin:
+class SwapEmailsMixin(BaseMixin):
     """
     Swap between primary and secondary emails.
 
     Require password confirmation.
     """
 
+    directives = [
+        SecondaryEmailRequired(),
+    ]
+
     @strawberry.input
     class SwapEmailsInput:
         password: str
 
     @classmethod
-    @secondary_email_required
     def resolve_mutation(cls, info: Info, input_: SwapEmailsInput) -> MutationNormalOutput:
-        if not g_user(info).check_password(input_.password):
+        if not get_user(info).check_password(input_.password):
             return MutationNormalOutput(success=False, errors=Messages.INVALID_PASSWORD)
-        g_user(info).status.swap_emails()
+        get_user(info).status.swap_emails()
         return MutationNormalOutput(success=True)
 
 
-class RemoveSecondaryEmailMixin:
+class RemoveSecondaryEmailMixin(BaseMixin):
     """
     Remove user secondary email.
 
     Require password confirmation.
     """
 
+    directives = [
+        SecondaryEmailRequired(),
+    ]
+
     @strawberry.input
     class RemoveSecondaryEmailInput:
         password: str
 
     @classmethod
-    @secondary_email_required
     @_password_confirmation_required
     def resolve_mutation(
         cls, info: Info, input_: RemoveSecondaryEmailInput
     ) -> MutationNormalOutput:
-        g_user(info).status.remove_secondary_email()
+        get_user(info).status.remove_secondary_email()
         return MutationNormalOutput(success=True)

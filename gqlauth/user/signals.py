@@ -6,7 +6,7 @@ from django.dispatch import Signal, receiver
 @receiver(post_save, sender=django_settings.AUTH_USER_MODEL)
 def create_user_status(sender, instance, created, **kwargs):
     if created:
-        from .models import UserStatus
+        from gqlauth.models import UserStatus
 
         UserStatus._default_manager.get_or_create(user=instance)
 

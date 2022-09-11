@@ -153,6 +153,10 @@ class GqlAuthSettings:
     # JWT stuff
     JWT_SECRET_KEY: DjangoSetting = lambda: django_settings.SECRET_KEY
     JWT_ALGORITHM: str = "HS256"
+    JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"
+    """
+    A valid 'strftime' string that will be used to encode the token payload.
+    """
     JWT_PAYLOAD_HANDLER: Union[
         Callable[[Info], "TokenType"], ImportString
     ] = "gqlauth.jwt.default_hooks.create_token_type"

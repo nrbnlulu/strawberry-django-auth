@@ -173,7 +173,6 @@ class CaptchaTestCaseMixin:
         Image.open(cap.image.path)
 
 
-# captcha is not relay or arg_mutations. this is probably redundant.
 class TestCaptchaRelay(CaptchaTestCaseMixin, RelayTestCase):
     ...
 

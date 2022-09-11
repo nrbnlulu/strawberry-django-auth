@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -15,8 +16,7 @@ from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.interfaces import OutputInterface
 from gqlauth.core.scalars import ExpectedErrorType
 from gqlauth.core.utils import inject_fields
-from gqlauth.jwt.models import RefreshToken
-from gqlauth.user.models import UserStatus
+from gqlauth.models import RefreshToken
 from gqlauth.user.types_ import UserType
 
 app_settings = settings.GQL_AUTH
@@ -63,6 +63,22 @@ class TokenPayloadType:
     exp: datetime = strawberry.field(description="when the token will be expired")
     origIat: datetime = strawberry.field(description="when the token was created")
 
+    def as_dict(self):
+        ret = dataclasses.asdict(self)
+        for field in dataclasses.fields(self):
+            value = getattr(self, field.name)
+            if isinstance(value, datetime):
+                ret[field.name] = value.strftime(app_settings.JWT_TIME_FORMAT)
+        return ret
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TokenPayloadType":
+        for field in dataclasses.fields(cls):
+            value = data[field.name]
+            if isinstance(value, str) and field.type is datetime:
+                data[field.name] = datetime.strptime(value, app_settings.JWT_TIME_FORMAT)
+        return cls(**data)
+
 
 @strawberry.type(
     description="""
@@ -87,6 +103,7 @@ class TokenType:
             datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA
         ):
             raise TokenExpired
+        return token_type
 
     def get_user_instance(self) -> USER_MODEL:
         """
@@ -144,6 +161,7 @@ class ObtainJSONWebTokenType(OutputInterface):
             "password": input_.password,
         }
         try:
+            # TODO: move this to a separate function.
             # authenticate against django authentication backends.
             if not (user := authenticate(info.context.request, **args)):
                 # try to get user from JWT headers.
@@ -161,6 +179,8 @@ class ObtainJSONWebTokenType(OutputInterface):
                     )
             # gqlauth logic
             if user.status.archived is True:  # un-archive on login
+                from gqlauth.models import UserStatus
+
                 UserStatus.unarchive(user)
             if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.

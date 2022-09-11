@@ -28,7 +28,7 @@ for name, setting in gqlauth_settings.__dataclass_fields__.items():
     value = getattr(gqlauth_settings, name)
     if setting.type is DjangoSetting and value is getattr(defaults, name):
         setattr(gqlauth_settings, name, value())
-    if ImportString in get_args(setting.type) and isinstance(value, str):
+    elif ImportString in get_args(setting.type) and isinstance(value, str):
         setattr(gqlauth_settings, name, import_string(value))
 
 del defaults

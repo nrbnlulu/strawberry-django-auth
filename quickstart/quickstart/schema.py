@@ -1,14 +1,15 @@
 # quickstart.schema.py
 import strawberry
+from strawberry.types import Info
 
+from gqlauth.core.field import GqlAuthRootField
+from gqlauth.core.types_ import AuthWrapper
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 
 
 @strawberry.type
 class AuthMutation:
-    register = mutations.Register.field
-    verify_account = mutations.VerifyAccount.field
     resend_activation_email = mutations.ResendActivationEmail.field
     send_password_reset_email = mutations.SendPasswordResetEmail.field
     password_reset = mutations.PasswordReset.field
@@ -22,15 +23,27 @@ class AuthMutation:
     swap_emails = mutations.SwapEmails.field
     captcha = mutations.Captcha.field
 
-    # django-graphql-jwt authentication
-    # with some extra features
-    token_auth = mutations.ObtainJSONWebToken.field
     verify_token = mutations.VerifyToken.field
     refresh_token = mutations.RefreshToken.field
     revoke_token = mutations.RevokeToken.field
 
 
-schema = strawberry.Schema(
-    query=UserQueries,
-    mutation=AuthMutation,
-)
+@strawberry.type
+class Query:
+    @GqlAuthRootField()
+    def auth_entry(self, info: Info) -> AuthWrapper[UserQueries]:
+        return AuthWrapper(success=True, data=UserQueries())
+
+
+@strawberry.type
+class Mutation:
+    @GqlAuthRootField()
+    def auth_entry(self) -> AuthWrapper[AuthMutation]:
+        return AuthWrapper(data=AuthMutation())
+
+    token_auth = mutations.ObtainJSONWebToken.field
+    register = mutations.Register.field
+    verify_account = mutations.VerifyAccount.field
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)

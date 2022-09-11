@@ -7,7 +7,6 @@ from django.utils import timezone
 from gqlauth.captcha.captcha_factorty import CaptchaInstanceType, generate_captcha_text
 from gqlauth.core.constants import Messages
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.models import logger
 
 
 class Captcha(models.Model):
@@ -59,7 +58,7 @@ class Captcha(models.Model):
             try:
                 self.delete()
             except ValueError:
-                logger.info("object already deleted")
+                ...  # object is deleted
             return Messages.CAPTCHA_MAX_RETRIES
 
         else:
@@ -70,7 +69,7 @@ class Captcha(models.Model):
             try:
                 self.delete()
             except ValueError:
-                logger.info("object aleardy deleted")
+                ...  # object is deleted
             return Messages.CAPTCHA_EXPIRED
 
         # validate

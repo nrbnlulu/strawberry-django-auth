@@ -180,6 +180,18 @@ class TestBase:
         return us
 
     @pytest.fixture()
+    def db_verified_user_status_can_eat(self, db_verified_user_status) -> UserStatusType:
+        from django.contrib.contenttypes.models import ContentType
+
+        from testproject.sample.models import Apple
+
+        ct = ContentType.objects.get_for_model(Apple)
+        us = db_verified_user_status.user.obj
+        perm = ct.permission_set.get(codename="can_eat")
+        us.user_permissions.set((perm,))
+        return db_verified_user_status
+
+    @pytest.fixture()
     def db_verified_with_secondary_email(self, db_verified_user_status) -> UserStatusType:
         user = db_verified_user_status.user.obj
         user.status.secondary_email = "secondary@email.com"
@@ -222,7 +234,7 @@ class TestBase:
                 data={"query": self.login_query(user_status)},
             ).json()["data"]["tokenAuth"]
             if token["success"]:
-                token = token["obtainPayload"]["token"]
+                token = token["token"]["token"]
                 headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
         res = client.post(
             path=path, content_type="application/json", data={"query": query}, **headers
@@ -266,7 +278,7 @@ class TestBase:
             )
             token = token.json()["data"]["tokenAuth"]
             if token["success"]:
-                token = token["obtainPayload"]["token"]
+                token = token["token"]["token"]
                 headers = {"AUTHORIZATION": f"JWT {token}"}
         res = await client.post(
             path=path, content_type="application/json", data={"query": query}, **headers
@@ -289,6 +301,7 @@ class TestBase:
 class RelayTestCase(TestBase):
     RELAY = True
 
+    # TODO: is that used anywhere?
     def make_query(self, *args, **kwargs):
         return self._relay_query(*args, **kwargs)
 
@@ -404,6 +417,7 @@ class ArgTestCase(TestBase):
 
 
 class AsyncTestCaseMixin:
+    # TODO: Why is that sync?
     def make_request(self, *args, **kwargs):
         return async_to_sync(self.amake_request)(*args, **kwargs)
 

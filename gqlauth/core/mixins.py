@@ -5,6 +5,7 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.core.utils import hide_args_kwargs, inject_arguments
+from gqlauth.user.resolvers import BaseMixin
 
 UserModel = get_user_model()
 
@@ -13,11 +14,11 @@ class ArgMixin:
     field: StrawberryField
     afield: StrawberryField
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls: BaseMixin, **kwargs):
         input_type = cls.resolve_mutation.__annotations__["input_"]
         return_type = cls.resolve_mutation.__annotations__["return"]
 
-        @strawberry.mutation(description=cls.__doc__)
+        @strawberry.mutation(description=cls.__doc__, directives=cls.directives)
         @inject_arguments(input_type.__annotations__)
         @hide_args_kwargs
         def field(info: Info, **kwargs) -> return_type:
@@ -25,7 +26,7 @@ class ArgMixin:
 
         cls.field = field
 
-        @strawberry.mutation(description=cls.__doc__)
+        @strawberry.mutation(description=cls.__doc__, directives=cls.directives)
         @inject_arguments(input_type.__annotations__)
         @hide_args_kwargs
         async def afield(info: Info, **kwargs) -> return_type:

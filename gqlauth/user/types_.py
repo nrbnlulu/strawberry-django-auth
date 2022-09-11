@@ -8,8 +8,8 @@ from strawberry.types import Info
 import strawberry_django
 
 from gqlauth.core.utils import inject_fields
+from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings
-from gqlauth.user import models
 
 USER_MODEL = get_user_model()
 # UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.
@@ -30,14 +30,14 @@ USER_FIELDS = {
 }.union(gqlauth_settings.UPDATE_MUTATION_FIELDS)
 
 
-@strawberry_django.filters.filter(models.UserStatus)
+@strawberry_django.filters.filter(UserStatus)
 class UserStatusFilter:
     verified: auto
     archived: auto
     secondary_email: auto
 
 
-@strawberry_django.type(model=models.UserStatus, filters=UserStatusFilter)
+@strawberry_django.type(model=UserStatus, filters=UserStatusFilter)
 class UserStatusType:
     verified: auto
     archived: auto
