@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 import strawberry
@@ -6,9 +6,6 @@ from strawberry.schema_directive import Location
 from strawberry.types import Info
 
 from gqlauth.core.utils import get_user
-
-from ..core.directives import IsAuthenticated
-from ..core.field_ import field
 
 # project
 from .types_ import UserFilter, UserType
@@ -23,14 +20,6 @@ class Sample:
 
 @strawberry.django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    users: Optional[List[UserType]] = field(
-        filters=UserFilter,
-        default_factory=lambda: USER_MODEL.objects.all(),
-        directives=[
-            IsAuthenticated(),
-        ],
-    )
-
     @strawberry.django.field
     def public_user(self, info: Info) -> Optional[UserType]:
         user = get_user(info)

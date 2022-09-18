@@ -50,10 +50,9 @@ email_field = StrawberryField(
 
 @dataclass
 class GqlAuthSettings:
-    # if allow logging in without verification,
-    # the register mutation will return a token
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
-    # mutation fields options
+    """
+    """
     LOGIN_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {
             username_field,
@@ -65,9 +64,12 @@ class GqlAuthSettings:
     And will return the user from one of them unless `PermissionDenied` was raised.
     You can pass any fields that would be accepted by your backends.
 
-    Note that `password field is mandatory` and cannot be removed.
+    **Note that `password field` is mandatory and cannot be removed.**
     """
     LOGIN_REQUIRE_CAPTCHA: bool = True
+    """
+    whether login will require captcha verification.
+    """
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )
@@ -76,8 +78,13 @@ class GqlAuthSettings:
     can be a dict like UPDATE_MUTATION_fieldS setting
     """
     REGISTER_REQUIRE_CAPTCHA: bool = True
+    """
+    whether register will require captcha verification.
+    """
     # captcha stuff
+    #: captcha expiration delta.
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
+    #: max number of attempts for one captcha.
     CAPTCHA_MAX_RETRIES: int = 5
     CAPTCHA_TEXT_FACTORY: Callable = default_text_factory
     """
@@ -149,7 +156,13 @@ class GqlAuthSettings:
     SEND_PASSWORD_SET_EMAIL: bool = False
     # JWT stuff
     JWT_SECRET_KEY: DjangoSetting = lambda: django_settings.SECRET_KEY
+    """
+    key used to sign the JWT token.
+    """
     JWT_ALGORITHM: str = "HS256"
+    """
+    Algorithm used for signing the token.
+    """
     JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"
     """
     A valid 'strftime' string that will be used to encode the token payload.

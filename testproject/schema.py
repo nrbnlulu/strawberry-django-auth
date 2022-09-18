@@ -51,7 +51,7 @@ class Mutation:
 
 
 @strawberry.type
-class Queries(UserQueries):
+class AuthQueries(UserQueries):
     @field(
         directives=[
             IsVerified(),
@@ -71,8 +71,8 @@ class AppleType:
 @strawberry.type
 class Query:
     @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[Queries]:
-        return AuthOutput(node=Queries())
+    def auth_entry(self) -> AuthOutput[AuthQueries]:
+        return AuthOutput(node=AuthQueries())
 
 
 @strawberry.type

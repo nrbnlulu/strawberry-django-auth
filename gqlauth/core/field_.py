@@ -25,12 +25,9 @@ class GqlAuthRootField(StrawberryDjangoField):
     def _resolve(
         self, token: TokenType, source: Any, info: Info, args: List[Any], kwargs: Dict[str, Any]
     ):
-        try:
-            user = token.get_user_instance()
-            info.context.user = user
-            return super().get_result(source, info, args, kwargs)
-        except TokenExpired:
-            return AuthOutput(error=ErrorMessage(error=GqlAuthError.EXPIRED_TOKEN))
+        user = token.get_user_instance()
+        info.context.user = user
+        return super().get_result(source, info, args, kwargs)
 
     def get_result(
         self, source: Any, info: Info, args: List[Any], kwargs: Dict[str, Any]
@@ -40,6 +37,10 @@ class GqlAuthRootField(StrawberryDjangoField):
             token_type = TokenType.from_token(token)
         except PyJWTError:  # raised by python-jwt
             return AuthOutput(error=ErrorMessage(code=GqlAuthError.INVALID_TOKEN))
+
+        except TokenExpired:
+            return AuthOutput(error=ErrorMessage(code=GqlAuthError.EXPIRED_TOKEN))
+
         if is_async():
             return sync_to_async(self._resolve)(token_type, source, info, args, kwargs)
         else:

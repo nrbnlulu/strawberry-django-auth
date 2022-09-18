@@ -1,11 +1,14 @@
 # Strawberry Graphql Auth
 ![Logo](./images/logo.png){ align=center }
-*Registration and authentication with strawberry and django.*
+*JWT Authentication / Authorization system for django and strawberry.*
 
 
-[![downloads](https://img.shields.io/pypi/dm/strawberry-django-auth)](https://pypistats.org/packages/strawberry-django-auth)
-[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg)](https://pypi.org/project/strawberry-django-auth/)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+[![Tests](https://img.shields.io/github/workflow/status/nrbnlulu/strawberry-django-auth/Run%20Tests?label=Tests&style=for-the-badge)](https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/nrbnlulu/strawberry-django-auth?style=for-the-badge)](https://app.codecov.io/gh/nrbnlulu/strawberry-django-auth)
+[![Pypi](https://img.shields.io/pypi/v/strawberry-django-auth.svg?style=for-the-badge&logo=appveyor)](https://pypi.org/project/strawberry-django-auth/)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=for-the-badge&logo=appveyor)](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+[![Pypi downloads](https://img.shields.io/pypi/dm/strawberry-django-auth?style=for-the-badge)](https://pypistats.org/packages/strawberry-django-auth)
+[![Python versions](https://img.shields.io/pypi/pyversions/strawberry-django-auth?style=social)](https://pypi.org/project/strawberry-django-auth/)
 
 ---
 
@@ -14,6 +17,7 @@
 [![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif?raw=true)](https://github.com/nrbnlulu/strawberry-django-auth#demo)
 
 ## About
+
 
 Abstract all the basic logic of handling user accounts out of your app,
 so you don't need to think about it and can ==get you up and running faster==.
@@ -46,56 +50,7 @@ your implementation^^.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
-* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay)
 
 ---
 
-## Example
-
-Handling user accounts becomes super easy.
-
-```python
-mutation {
-  register(
-    email: "new_user@email.com",
-    username: "new_user",
-    password1: "123456super",
-    password2: "123456super",
-  ) {
-    success,
-    errors,
-    token,
-    refreshToken
-  }
-}
-```
-
-Check the status of the new user:
-
-```python
-u = UserModel.objects.last()
-u.status.verified
-# False
-```
-
-During the registration, an email with a verification link was sent.
-
-```python
-mutation {
-  verifyAccount(
-    token:"<TOKEN ON EMAIL LINK>",
-  ) {
-    success,
-    errors
-  }
-}
-```
-
-Now user is verified.
-
-```python
-u.status.verified
-# True
-```
-
-Check the [installation guide](installation.md) or jump to the [quickstart](quickstart.md). Or if you prefer, browse the [api](api.md).
+You can now jump to the [Tutorial](tutorial.md).

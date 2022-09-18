@@ -3,9 +3,13 @@
 # Changelog
 ### v0.3.4.2
 #### Deprecations:
+- `users` query was removed due to security concerns.
+If you want it implement it yourself and make sure to use the appropriate auth measures
 
 - `SomeField.afield` is removed, and you can use now just `SomeField.field` for async/sync.
+
 - decorators are deprecated, and you should use directives from now on.
+
 #### New features:
 
 ### v0.3.4.1
