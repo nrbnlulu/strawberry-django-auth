@@ -81,6 +81,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 Finally, migrate:
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
