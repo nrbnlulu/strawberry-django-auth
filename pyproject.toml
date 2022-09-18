@@ -38,7 +38,7 @@ strawberry-graphql = ">=0.128,<0.132"
 strawberry-django-plus = "^1.25.2"
 
 [tool.poetry.dev-dependencies]
-cryptography = "^37.0"
+cryptography = "^38.0"
 coverage = "^6.4"
 pytest = "^7.0"
 pytest-cov = "^3.0"
