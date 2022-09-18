@@ -389,14 +389,12 @@ class RelayTestCase(TestBase):
               payload {{
                 exp
                 origIat
-                username
               }}
             }}
             user {{
               archived
               dateJoined
               firstName
-              email
               isActive
               id
               isStaff
@@ -412,7 +410,6 @@ class RelayTestCase(TestBase):
                 verified
                 secondaryEmail
               }}
-              username
               verified
             }}
           }}
@@ -447,14 +444,12 @@ class ArgTestCase(TestBase):
               payload {{
                 exp
                 origIat
-                username
               }}
             }}
             user {{
               archived
               dateJoined
               firstName
-              email
               isActive
               id
               isStaff
@@ -470,7 +465,6 @@ class ArgTestCase(TestBase):
                 verified
                 secondaryEmail
               }}
-              username
               verified
             }}
           }}

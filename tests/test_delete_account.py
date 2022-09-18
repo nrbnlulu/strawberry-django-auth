@@ -100,7 +100,9 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(db_verified_user_status)
         user = db_verified_user_status.user.obj
         assert user.is_active
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
+        executed = self.make_request(query=query, user_status=db_verified_user_status)["node"][
+            "deleteAccount"
+        ]["node"]
         assert executed["success"]
         assert not executed["errors"]
         with pytest.raises(ObjectDoesNotExist):

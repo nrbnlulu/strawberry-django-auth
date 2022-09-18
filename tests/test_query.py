@@ -87,7 +87,7 @@ class TestQueries(ArgTestCase):
             "success": True,
             "node": {
                 "publicUser": {
-                    "username": db_unverified_user_status.user.username_field,
+                    USERNAME_FIELD: db_unverified_user_status.user.username_field,
                     "verified": False,
                 }
             },
