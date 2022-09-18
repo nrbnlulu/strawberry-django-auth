@@ -10,7 +10,10 @@ If you want it implement it yourself and make sure to use the appropriate auth m
 
 - decorators are deprecated, and you should use directives from now on.
 
-#### New features:
+#### Breaking changes:
+- This version is no longer using `strawberry-django-jwt` and we are using our own jwt system.
+- from now on there are no more graphql errors instead we provide a generic `AuthWOutput` wrapper
+That you can use in conjunction with our directives for example to check permissions.
 
 ### v0.3.4.1
 #### deprecations
