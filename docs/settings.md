@@ -1,292 +1,116 @@
-# Settings
 
----
-
-## Example
-
-Configuration is made from a single Django setting named `GQL_AUTH`.
-
-```py
-# settings.py
-from gqlauth.settings_type import GqlAuthSettings
-
-GQL_AUTH = GqlAuthSettings(
-    LOGIN_ALLOWED_FIELDS = ['email', 'username'],
-)
-```
-!!! Warning
-    #### these settings can not be changed at runtime!
-    #### since the schema can not be changed at runtime.
----
-
-## Boolean Flags
-
-
-### ALLOW_LOGIN_NOT_VERIFIED
-
-Determines whether the user can log in without being verified. If it is true, the registering returns `token` and `refresh token` on the output.
-
-default: `#!python True`
-
-### ALLOW_LOGIN_WITH_SECONDARY_EMAIL
-
-If a user has a secondary email set, he can use to login.
-
-default: `#!python True`
-
-### ALLOW_PASSWORDLESS_REGISTRATION
-
-To allow registration with no password; Django `set_unusable_password()` will be used in setting the default password.
-
-- User cannot login until they set their password
-
-default: `#!python False`
-
-### ALLOW_DELETE_ACCOUNT
-
-Instead of deleting the account, make `#!python user.is_active=False`.
-
-If set to `#!python True`, will actually delete the account.
-
-default: `#!python False`
-
-### SEND_ACTIVATION_EMAIL
-
-If set to `#!python False`, no email will be sent.
-
-Note that users will still have an `#!python verified=False` status.
-
-default: `#!python True`
-
-### SEND_PASSWORD_SET_EMAIL
-
-If set to `#!python True`, user will be notified to set their password after registration - dependent on `ALLOW_PASSWORDLESS_REGISTRATION`.
-
-default: `#!python False`
-
----
-
-## Dynamic Fields
-
-Fields that you can choose.
-
-### Basics
-
-All fields should match name in the user model field.
-
-\* Can be a list of string fields or a dictionary mapping fields and [graphene base scalars](https://docs.graphene-python.org/en/latest/types/scalars/#base-scalars).
-
-Example:
+> auto generated using `pydoc_markdown`
+___
+## GqlAuthSettings
 
 ```python
-
-update_fields_list = ["first_name", "last_name"]
-
-# same as:
-
-update_fields_dict = {
-    "first_name": "String",
-    "last_name": "String",
-}
-
-# maybe you have some Int that you want on registration:
-
-REGISTER_MUTATION_FIELDS = {
-    "email": "String",
-    "username": "String",
-    "luck_number": "Int",
-}
+@dataclass
+class GqlAuthSettings()
 ```
 
-### LOGIN_ALLOWED_FIELDS
+### ALLOW\_LOGIN\_NOT\_VERIFIED
 
-default: `#!python ["email", "username"]`
+>
 
-### REGISTER_MUTATION_FIELDS
+### LOGIN\_FIELDS
 
-Required fields on registration, along with `password1` and `password2`.
+> These fields would be used to authenticate with SD-jwt `authenticate` function.
+> This function will call each of our `AUTHENTICATION_BACKENDS`,
+> And will return the user from one of them unless `PermissionDenied` was raised.
+> You can pass any fields that would be accepted by your backends.
+>
+> **Note that `password field` is mandatory and cannot be removed.**
 
-default: `#!python ["email", "username"]`
+### LOGIN\_REQUIRE\_CAPTCHA
 
-### REGISTER_MUTATION_FIELDS_OPTIONAL
+> whether login will require captcha verification.
 
-Optional fields on registration.
+### REGISTER\_MUTATION\_FIELDS
 
-default: `#!python []`
+> fields on register, plus password1 and password2,
+> can be a dict like UPDATE_MUTATION_fieldS setting
 
-### UPDATE_MUTATION_FIELDS
+### REGISTER\_REQUIRE\_CAPTCHA
 
-Optional fields on update account.
+> whether register will require captcha verification.
 
-default: `#!python ["first_name", "last_name"]`
+### CAPTCHA\_EXPIRATION\_DELTA
 
-### CUSTOM_ERROR_TYPE
+> captcha stuff
+> captcha expiration delta.
 
-Customize mutations error output by providing a Graphene type.
+### CAPTCHA\_MAX\_RETRIES
 
-default: `gqlauth.types.ExpectedErrorType`
+> max number of attempts for one captcha.
 
-example:
-```python
-class CustomErrorType(graphene.Scalar):
-    @staticmethod
-    def serialize(errors):
-        return {"my_custom_error_format"}
-```
+### CAPTCHA\_TEXT\_FACTORY
 
----
+> A callable with no arguments that returns a string.
+> This will be used to generate the captcha image.
 
-## Query
+### CAPTCHA\_TEXT\_VALIDATOR
 
-### USER_NODE_FILTER_FIELDS
+> A callable that will receive the original string vs user input and returns a boolean.
 
-Learn more on [graphene django](https://docs.graphene-python.org/projects/django/en/latest/filtering/) and [django filter](https://django-filter.readthedocs.io/en/master/guide/usage.html#the-filter).
+### FORCE\_SHOW\_CAPTCHA
 
-default:
-```python
-{
-    "email": ["exact",],
-    "username": ["exact", "icontains", "istartswith"],
-    "is_active": ["exact"],
-    "status__archived": ["exact"],
-    "status__verified": ["exact"],
-    "status__secondary_email": ["exact"],
-}
-```
+> Whether to show the captcha image after it has been created for debugging purposes.
 
-### USER_NODE_EXCLUDE_FIELDS
+### CAPTCHA\_SAVE\_IMAGE
 
-default: `#!python ["password", "is_superuser"]`
+> if True, an png representation of the captcha will be saved under
+> MEDIA_ROOT/captcha/<datetime>/<uuid>.png
 
----
+### UPDATE\_MUTATION\_FIELDS
 
-## Token expirations
+> fields on update account mutation.
 
-### EXPIRATION_ACTIVATION_TOKEN
+### ALLOW\_DELETE\_ACCOUNT
 
-default: `#!python timedelta(days=7)`
+> If True, DeleteAcount mutation will permanently delete the user.
 
-### EXPIRATION_PASSWORD_RESET_TOKEN
+### ALLOW\_PASSWORDLESS\_REGISTRATION
 
-default: `#!python timedelta(hours=1)`
+> Whether to allow registration with no password
 
-### EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN
+### JWT\_SECRET\_KEY
 
-default: `#!python timedelta(hours=1)`
+> key used to sign the JWT token.
 
-### EXPIRATION_PASSWORD_SET_TOKEN
+### JWT\_ALGORITHM
 
-default: `#!python timedelta(days=7)`
+> Algorithm used for signing the token.
 
----
+### JWT\_TIME\_FORMAT
 
-## Email
+> A valid 'strftime' string that will be used to encode the token payload.
 
-### EMAIL_FROM
+### JWT\_PAYLOAD\_HANDLER
 
-It will get the default value from your settings, but you can provide a specific email.
+> A custom function to generate the token datatype, its up to you to encode the token.
 
-default: `#!python getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com")`
+### JWT\_PAYLOAD\_PK
 
-### ACTIVATION_PATH_ON_EMAIL
+> field that will be used to generate the token from a user instance and
+> retrieve user based on the decoded token.
+> *This filed must be unique in the database*
 
-Path [variable](overriding-email-templates.md) used in activation email.
+### JWT\_EXPIRATION\_DELTA
 
-default: `#!python "activate"`
+> Timedelta added to `utcnow()` to set the expiration time.
+>
+> When this ends you will have to create a new token by logging in
+> or using the refresh token.
 
-### PASSWORD_RESET_PATH_ON_EMAIL
+### JWT\_LONG\_RUNNING\_REFRESH\_TOKEN
 
-Path [variable](overriding-email-templates.md) used in password reset email.
+> Whether to enable refresh tokens to be used as an alternative to login every time
+> the token is expired.
 
-default: `#!python "password-reset"`
+### JWT\_REFRESH\_TOKEN\_N\_BYTES
 
-### PASSWORD_SET_PATH_ON_EMAIL
+> Number of bytes for long running refresh token.
 
-Path [variable](overriding-email-templates.md) used in password set email.
+### JWT\_REFRESH\_EXPIRATION\_DELTA
 
-default: `#!python "password-set"`
-
-### ACTIVATION_SECONDARY_EMAIL_PATH_ON_EMAIL
-
-Path [variable](overriding-email-templates.md) used in secondary email activation email.
-
-default: `#!python "activate"`
-
----
-
-## Email subject templates
-
-You can override email templates as shown [here](overriding-email-templates.md), but you can also change the templates names.
-
-### EMAIL_SUBJECT_ACTIVATION
-
-default: `#!python "email/activation_subject.txt"`
-
-### EMAIL_SUBJECT_ACTIVATION_RESEND
-
-default: `#!python "email/activation_subject.txt"`
-
-### EMAIL_SUBJECT_SECONDARY_EMAIL_ACTIVATION
-
-default: `#!python "email/activation_subject.txt"`
-
-### EMAIL_SUBJECT_PASSWORD_RESET
-
-default: `#!python "email/password_reset_subject.txt"`
-
-### EMAIL_SUBJECT_PASSWORD_SET
-
-default: `#!python "email/password_set_subject.txt"`
-
-
----
-
-## Email templates
-
-You can override email templates as shown [here](overriding-email-templates.md), but you can also change the templates names.
-
-
-### EMAIL_TEMPLATE_ACTIVATION
-
-default: `#!python "email/activation_email.html"`
-
-### EMAIL_TEMPLATE_ACTIVATION_RESEND
-
-default: `#!python "email/activation_email.html"`
-
-### EMAIL_TEMPLATE_SECONDARY_EMAIL_ACTIVATION
-
-default: `#!python "email/activation_email.html"`
-
-### EMAIL_TEMPLATE_PASSWORD_RESET
-
-default: `#!python "email/password_reset_email.html"`
-
-### EMAIL_TEMPLATE_PASSWORD_SET
-
-default: `#!python "email/password_set_email.html"`
-
-### EMAIL_TEMPLATE_VARIABLES
-
-default: `#!python {}`
-
-Dictionary of key value pairs of template variables that will be injected into the templates.
-
-Example:
-
-```python
-GRAPHQL_AUTH = {
-    "EMAIL_TEMPLATE_VARIABLES": {
-        "frontend_domain": "the-frontend.com"
-    }
-}
-```
-
-Now, in the templates:
-{% raw %}
-
-```html
-<p>{{ protocol }}://{{ frontend_domain }}/{{ path }}/{{ token }}</p>
-```
-
-{% endraw %}
+> Refresh token expiration time delta.

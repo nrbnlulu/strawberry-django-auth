@@ -1,116 +1,6 @@
 
 > auto generated using `pydoc_markdown`
 ___
-## asdict
-
-## SMTPException
-
-## Union
-
-## UUID
-
-## async\_to\_sync
-
-## sync\_to\_async
-
-## get\_user\_model
-
-## PasswordChangeForm
-
-## SetPasswordForm
-
-## ObjectDoesNotExist
-
-## BadSignature
-
-## SignatureExpired
-
-## transaction
-
-## strawberry
-
-## Info
-
-## JSONWebTokenError
-
-## JSONWebTokenExpired
-
-## JwtObtainParent
-
-## RefreshParent
-
-## RevokeParent
-
-## VerifyParent
-
-## create\_user\_token
-
-## MutationNormalOutput
-
-## ObtainJSONWebTokenPayload
-
-## RefreshTokenPayload
-
-## RevokeTokenPayload
-
-## VerifyTokenPayload
-
-## Messages
-
-## TokenAction
-
-## \_password\_confirmation\_required
-
-## secondary\_email\_required
-
-## verification\_required
-
-## EmailAlreadyInUse
-
-## InvalidCredentials
-
-## PasswordAlreadySetError
-
-## TokenScopeError
-
-## UserAlreadyVerified
-
-## UserNotVerified
-
-## EmailForm
-
-## PasswordLessRegisterForm
-
-## RegisterForm
-
-## UpdateAccountForm
-
-## CaptchaModel
-
-## UserStatus
-
-## app\_settings
-
-## get\_user\_by\_email
-
-## get\_user\_to\_login
-
-## user\_registered
-
-## user\_verified
-
-## CaptchaType
-
-## g\_user
-
-## get\_payload\_from\_token
-
-## inject\_fields
-
-## revoke\_user\_refresh\_token
-
-## UserModel
-
 ## Captcha
 
 ```python
@@ -124,33 +14,10 @@ class Captcha()
 > need submit that uuid With the user input.
 > **The captcha will be invoked when the timeout expires**.
 
-### field
-
-```python
-@strawberry.mutation(description=__doc__)
-def field() -> CaptchaType
-```
-
-### afield
-
-```python
-@strawberry.mutation(description=__doc__)
-@sync_to_async
-def afield() -> CaptchaType
-```
-
-## check\_captcha
-
-```python
-def check_captcha(
-    input_: Union["RegisterMixin.RegisterInput",
-                  "ObtainJSONWebTokenMixin.ObtainJSONWebTokenInput"])
-```
-
 ## RegisterMixin
 
 ```python
-class RegisterMixin()
+class RegisterMixin(BaseMixin)
 ```
 
 > Register user with fields defined in the settings.
@@ -171,28 +38,10 @@ class RegisterMixin()
 >
 > If allowed to not verified users login, return token.
 
-### RegisterInput
-
-```python
-@strawberry.input
-
-@inject_fields(app_settings.REGISTER_MUTATION_FIELDS)
-class RegisterInput()
-```
-
-### form
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, info, input_: RegisterInput) -> MutationNormalOutput
-```
-
 ## VerifyAccountMixin
 
 ```python
-class VerifyAccountMixin()
+class VerifyAccountMixin(BaseMixin)
 ```
 
 > Verify user account.
@@ -201,27 +50,10 @@ class VerifyAccountMixin()
 > If the token is valid, make the user verified
 > by making the `user.status.verified` field true.
 
-### VerifyAccountInput
-
-```python
-@strawberry.input
-class VerifyAccountInput()
-```
-
-#### token
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, info: Info,
-                     input_: VerifyAccountInput) -> MutationNormalOutput
-```
-
 ## VerifySecondaryEmailMixin
 
 ```python
-class VerifySecondaryEmailMixin()
+class VerifySecondaryEmailMixin(BaseMixin)
 ```
 
 > Verify user secondary email.
@@ -237,27 +69,10 @@ class VerifySecondaryEmailMixin()
 > so it can still be used to create a new account.
 > After being verified, it will no longer be available.
 
-### VerifySecondaryEmailInput
-
-```python
-@strawberry.input
-class VerifySecondaryEmailInput()
-```
-
-#### token
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(
-        cls, _, input_: VerifySecondaryEmailInput) -> MutationNormalOutput
-```
-
 ## ResendActivationEmailMixin
 
 ```python
-class ResendActivationEmailMixin()
+class ResendActivationEmailMixin(BaseMixin)
 ```
 
 > Sends activation email.
@@ -269,27 +84,10 @@ class ResendActivationEmailMixin()
 > If there is no user with the requested email,
 > a successful response is returned.
 
-### ResendActivationEmailInput
-
-```python
-@strawberry.input
-class ResendActivationEmailInput()
-```
-
-#### email
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(
-        cls, info, input_: ResendActivationEmailInput) -> MutationNormalOutput
-```
-
 ## SendPasswordResetEmailMixin
 
 ```python
-class SendPasswordResetEmailMixin()
+class SendPasswordResetEmailMixin(BaseMixin)
 ```
 
 > Send password reset email.
@@ -302,28 +100,10 @@ class SendPasswordResetEmailMixin()
 > If there is no user with the requested email,
 > a successful response is returned.
 
-### SendPasswordResetEmailInput
-
-```python
-@strawberry.input
-class SendPasswordResetEmailInput()
-```
-
-#### email
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(
-        cls, info,
-        input_: SendPasswordResetEmailInput) -> MutationNormalOutput
-```
-
 ## PasswordResetMixin
 
 ```python
-class PasswordResetMixin()
+class PasswordResetMixin(BaseMixin)
 ```
 
 > Change user password without old password.
@@ -336,33 +116,10 @@ class PasswordResetMixin()
 >
 > Also, if user has not been verified yet, verify it.
 
-### PasswordResetInput
-
-```python
-@strawberry.input
-class PasswordResetInput()
-```
-
-#### token
-
-#### new\_password1
-
-#### new\_password2
-
-### form
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, _,
-                     input_: PasswordResetInput) -> MutationNormalOutput
-```
-
 ## PasswordSetMixin
 
 ```python
-class PasswordSetMixin()
+class PasswordSetMixin(BaseMixin)
 ```
 
 > Set user password - for password-less registration
@@ -375,32 +132,10 @@ class PasswordSetMixin()
 >
 > Also, if user has not been verified yet, verify it.
 
-### PasswordSetInput
-
-```python
-@strawberry.input
-class PasswordSetInput()
-```
-
-#### token
-
-#### new\_password1
-
-#### new\_password2
-
-### form
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, _, input_: PasswordSetInput) -> MutationNormalOutput
-```
-
 ## ObtainJSONWebTokenMixin
 
 ```python
-class ObtainJSONWebTokenMixin()
+class ObtainJSONWebTokenMixin(BaseMixin)
 ```
 
 > Obtain JSON web token for given user.
@@ -415,51 +150,6 @@ class ObtainJSONWebTokenMixin()
 > If user is archived, make it unarchived and
 > return `unarchiving=True` on OutputBase.
 
-### ObtainJSONWebTokenInput
-
-```python
-@strawberry.input
-
-@inject_fields(app_settings.LOGIN_FIELDS)
-class ObtainJSONWebTokenInput()
-```
-
-#### password
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(
-        cls, info,
-        input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenPayload
-```
-
-## ArchiveOrDeleteMixin
-
-```python
-class ArchiveOrDeleteMixin()
-```
-
-### ArchiveOrDeleteMixinInput
-
-```python
-@strawberry.input
-class ArchiveOrDeleteMixinInput()
-```
-
-#### password
-
-### resolve\_mutation
-
-```python
-@classmethod
-@verification_required
-@_password_confirmation_required
-def resolve_mutation(
-        cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput
-```
-
 ## ArchiveAccountMixin
 
 ```python
@@ -468,13 +158,6 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin)
 
 > Archive account and revoke refresh tokens.
 > User must be verified and confirm password.
-
-### resolve\_action
-
-```python
-@classmethod
-def resolve_action(cls, user)
-```
 
 ## DeleteAccountMixin
 
@@ -489,241 +172,83 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin)
 >
 > User must be verified and confirm password.
 
-### resolve\_action
-
-```python
-@classmethod
-def resolve_action(cls, user)
-```
-
 ## PasswordChangeMixin
 
 ```python
-class PasswordChangeMixin()
+class PasswordChangeMixin(BaseMixin)
 ```
 
 > Change account password when user knows the old password.
 >
 > A new token and refresh token are sent. User must be verified.
 
-### PasswordChangeInput
-
-```python
-@strawberry.input
-class PasswordChangeInput()
-```
-
-#### old\_password
-
-#### new\_password1
-
-#### new\_password2
-
-### form
-
-### resolve\_mutation
-
-```python
-@classmethod
-@verification_required
-@_password_confirmation_required
-def resolve_mutation(cls, info: Info,
-                     input_: PasswordChangeInput) -> ObtainJSONWebTokenPayload
-```
-
 ## UpdateAccountMixin
 
 ```python
-class UpdateAccountMixin()
+class UpdateAccountMixin(BaseMixin)
 ```
 
 > Update user model fields, defined on settings.
 >
 > User must be verified.
 
-### UpdateAccountInput
-
-```python
-@strawberry.input
-
-@inject_fields(app_settings.UPDATE_MUTATION_FIELDS)
-class UpdateAccountInput()
-```
-
-### form
-
-### resolve\_mutation
-
-```python
-@classmethod
-@verification_required
-def resolve_mutation(cls, info,
-                     input_: UpdateAccountInput) -> MutationNormalOutput
-```
-
 ## VerifyTokenMixin
 
 ```python
-class VerifyTokenMixin()
+class VerifyTokenMixin(BaseMixin)
 ```
 
-> Checks if a token is not expired and correct
-
-### VerifyTokenInput
-
-```python
-@strawberry.input
-class VerifyTokenInput()
-```
-
-#### token
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, info,
-                     input_: VerifyTokenInput) -> VerifyTokenPayload
-```
+> ### Checks if a token is not expired and correct.
+> *Note that this is not for refresh tokens.*
 
 ## RefreshTokenMixin
 
 ```python
-class RefreshTokenMixin()
+class RefreshTokenMixin(BaseMixin)
 ```
 
-> ### refreshToken to refresh your token:
+> ### refreshToken to generate a new login token:
+> *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 >
-> using the refresh token you already got during authorization.
-> this will obtain a brand-new token (and possibly a refresh token)
-> with renewed expiration time for non-expired tokens
-
-### RefreshTokenInput
-
-```python
-@strawberry.input
-class RefreshTokenInput()
-```
-
-#### refresh\_token
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, info,
-                     input_: RefreshTokenInput) -> RefreshTokenPayload
-```
+> using the refresh-token you already got during authorization, and
+> obtain a brand-new token (and possibly a new refresh token if you revoked the previous).
+> This is an alternative to log in when your token expired.
 
 ## RevokeTokenMixin
 
 ```python
-class RevokeTokenMixin()
+class RevokeTokenMixin(BaseMixin)
 ```
 
-> Suspends a refresh token
-
-### RevokeTokenInput
-
-```python
-@strawberry.input
-class RevokeTokenInput()
-```
-
-#### refresh\_token
-
-### resolve\_mutation
-
-```python
-@classmethod
-def resolve_mutation(cls, info,
-                     input_: RevokeTokenInput) -> RevokeTokenPayload
-```
+> ### Suspends a refresh token.
+> *token must exist to be revoked.*
 
 ## SendSecondaryEmailActivationMixin
 
 ```python
-class SendSecondaryEmailActivationMixin()
+class SendSecondaryEmailActivationMixin(BaseMixin)
 ```
 
 > Send activation to secondary email.
 >
 > User must be verified and confirm password.
 
-### SendSecondaryEmailActivationInput
-
-```python
-@strawberry.input
-class SendSecondaryEmailActivationInput()
-```
-
-#### password
-
-### resolve\_mutation
-
-```python
-@classmethod
-@verification_required
-@_password_confirmation_required
-def resolve_mutation(
-        cls, info,
-        input_: SendSecondaryEmailActivationInput) -> MutationNormalOutput
-```
-
 ## SwapEmailsMixin
 
 ```python
-class SwapEmailsMixin()
+class SwapEmailsMixin(BaseMixin)
 ```
 
 > Swap between primary and secondary emails.
 >
 > Require password confirmation.
 
-### SwapEmailsInput
-
-```python
-@strawberry.input
-class SwapEmailsInput()
-```
-
-#### password
-
-### resolve\_mutation
-
-```python
-@classmethod
-@secondary_email_required
-def resolve_mutation(cls, info: Info,
-                     input_: SwapEmailsInput) -> MutationNormalOutput
-```
-
 ## RemoveSecondaryEmailMixin
 
 ```python
-class RemoveSecondaryEmailMixin()
+class RemoveSecondaryEmailMixin(BaseMixin)
 ```
 
 > Remove user secondary email.
 >
 > Require password confirmation.
-
-### RemoveSecondaryEmailInput
-
-```python
-@strawberry.input
-class RemoveSecondaryEmailInput()
-```
-
-#### password
-
-### resolve\_mutation
-
-```python
-@classmethod
-@secondary_email_required
-@_password_confirmation_required
-def resolve_mutation(
-        cls, info: Info,
-        input_: RemoveSecondaryEmailInput) -> MutationNormalOutput
-```

@@ -1,35 +1,49 @@
-from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
+from .testCases import (
+    AbstractTestCase,
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+)
 
 
-class RevokeTokenTestCaseMixin:
-    def _arg_query(self, token):
+class RevokeTokenTestCaseMixin(AbstractTestCase):
+    @staticmethod
+    def _arg_query(token):
         return """
-        mutation {
-        revokeToken(refreshToken: "%s" )
-            {
-        success
-        errors
-        revokePayload{
-          revoked
+        mutation MyMutation {
+          revokeToken(refreshToken: "%s") {
+            errors
+            success
+            refreshToken {
+              created
+              expiresAt
+              isExpired
+              revoked
+              token
+            }
+          }
         }
-      }
-    }
         """ % (
             token
         )
 
-    def _relay_query(self, token):
+    @staticmethod
+    def _relay_query(token):
         return """
-        mutation {
-        revokeToken(input: {refreshToken: "%s"} )
-           {
-        success
-        errors
-        revokePayload{
-          revoked
+        mutation MyMutation {
+          revokeToken(input: {refreshToken: "%s"}) {
+            errors
+            success
+            refreshToken {
+              created
+              expiresAt
+              isExpired
+              revoked
+              token
+            }
+          }
         }
-      }
-    }
         """ % (
             token
         )
@@ -37,12 +51,13 @@ class RevokeTokenTestCaseMixin:
     def test_revoke_token(self, db_verified_user_status):
         query = self.login_query(user_status=db_verified_user_status)
         executed = self.make_request(query=query, no_login_query=True)
-        assert executed["obtainPayload"]["refreshToken"]
+        assert executed["refreshToken"]["token"]
 
-        query = self.make_query(executed["obtainPayload"]["refreshToken"])
+        query = self.make_query(executed["refreshToken"]["token"])
         executed = self.make_request(query=query)
         assert executed["success"]
-        assert executed["revokePayload"]["revoked"]
+        assert executed["refreshToken"]["revoked"]
+        assert executed["refreshToken"]["isExpired"]
         assert not executed["errors"]
 
     def test_invalid_token(self):
@@ -50,7 +65,7 @@ class RevokeTokenTestCaseMixin:
         executed = self.make_request(query=query)
         assert not executed["success"]
         assert executed["errors"]
-        assert not executed["revokePayload"]
+        assert not executed["refreshToken"]
 
 
 class TestArgRevokeToken(RevokeTokenTestCaseMixin, ArgTestCase):

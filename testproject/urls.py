@@ -18,17 +18,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-from strawberry.django.views import AsyncGraphQLView, GraphQLView
+from strawberry.django.views import GraphQLView
 
-from . import async_schema, schema
+from . import schema
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("arg_schema", csrf_exempt(GraphQLView.as_view(schema=schema.arg_schema))),
     path("relay_schema", csrf_exempt(GraphQLView.as_view(schema=schema.relay_schema))),
-    path("async_arg_schema", csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema.arg_schema))),
-    path(
-        "async_relay_schema",
-        csrf_exempt(AsyncGraphQLView.as_view(schema=async_schema.relay_schema)),
-    ),
 ] + static(settings.MEDIA_URL, document_root=str(settings.MEDIA_ROOT))

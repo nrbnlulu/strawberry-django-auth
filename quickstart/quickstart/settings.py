@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "strawberry_django",
     "users.apps.UsersConfig",
-    "strawberry_django_jwt.refresh_token",
     "gqlauth",
 ]
 
@@ -87,7 +86,6 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -110,15 +108,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 AUTHENTICATION_BACKENDS = [
-    "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-GRAPHQL_JWT = {
-    "JWT_VERIFY_EXPIRATION": True,
-    # optional
-    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-}
 
 GQL_AUTH = GqlAuthSettings(
     LOGIN_REQUIRE_CAPTCHA=False,

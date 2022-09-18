@@ -1,15 +1,15 @@
 from typing import Optional
 
 from django.contrib.auth import get_user_model
-import strawberry
 from strawberry import auto
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 from strawberry.types import Info
+import strawberry_django
 
-from gqlauth import models
+from gqlauth.core.utils import inject_fields
+from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings
-from gqlauth.utils import inject_fields
 
 USER_MODEL = get_user_model()
 # UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.
@@ -30,21 +30,21 @@ USER_FIELDS = {
 }.union(gqlauth_settings.UPDATE_MUTATION_FIELDS)
 
 
-@strawberry.django.filters.filter(models.UserStatus)
+@strawberry_django.filters.filter(UserStatus)
 class UserStatusFilter:
     verified: auto
     archived: auto
     secondary_email: auto
 
 
-@strawberry.django.type(model=models.UserStatus, filters=UserStatusFilter)
+@strawberry_django.type(model=UserStatus, filters=UserStatusFilter)
 class UserStatusType:
     verified: auto
     archived: auto
     secondary_email: auto
 
 
-@strawberry.django.filters.filter(USER_MODEL)
+@strawberry_django.filters.filter(USER_MODEL)
 @inject_fields(USER_FIELDS, annotations_only=True)
 class UserFilter:
     logentry_set: auto
@@ -56,7 +56,7 @@ class UserFilter:
     status: UserStatusFilter
 
 
-@strawberry.django.type(model=USER_MODEL, filters=UserFilter)
+@strawberry_django.type(model=USER_MODEL, filters=UserFilter)
 @inject_fields(USER_FIELDS, annotations_only=True)
 class UserType:
     logentry_set: auto
@@ -67,14 +67,14 @@ class UserType:
     date_joined: auto
     status: UserStatusType
 
-    @strawberry.django.field
+    @strawberry_django.field
     def archived(self, info: Info) -> bool:
         return self.status.archived
 
-    @strawberry.django.field
+    @strawberry_django.field
     def verified(self, info: Info) -> bool:
         return self.status.verified
 
-    @strawberry.django.field
+    @strawberry_django.field
     def secondary_email(self, info: Info) -> Optional[str]:
         return self.status.secondary_email

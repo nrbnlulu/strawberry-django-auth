@@ -67,15 +67,13 @@ dev_addr: 127.0.0.1:7000
 
 nav:
   - Start here: index.md
-  - Installation: installation.md
-  - Quickstart: quickstart.md
+  - Tutorial: tutorial.md
+  - directives: directives.md
   - Overriding email templates: overriding-email-templates.md
   - Relay: relay.md
   - Captcha: captcha.md
-  - Decorators: decorators.md
   - Settings: settings.md
   - API: api.md
   - Contributing: contributing.md
-  - Community: community.md
   - Changelog: changelog.md
   - Contributors: contributors.md

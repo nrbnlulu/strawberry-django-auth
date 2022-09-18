@@ -14,7 +14,7 @@
 ![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif)
 
 ## About
-### This Library is the strawberry version of! [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
+### This Library was inspired by [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
 
 Abstract all the basic logic of handling user accounts out of your app,
 so you don't need to think about it and can **get you up and running faster**.

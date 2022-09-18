@@ -10,15 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
-import os
 from pathlib import Path
 import sys
 
 from gqlauth.settings_type import GqlAuthSettings
-
-# WARNING: This is a workaround for an async-safety issue in strawberry_django_jwt
-#  see https://github.com/KundaPanda/strawberry-django-jwt/issues/337
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 BASE_DIR = Path(__file__).parent
 sys.path.append(str(BASE_DIR / "testproject"))
@@ -39,8 +34,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "strawberry_django",
-    "strawberry_django_jwt.refresh_token",
     "gqlauth",
+    "testproject.sample",
 ]
 
 
@@ -52,7 +47,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
 TEMPLATES = [
@@ -84,7 +78,6 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -109,14 +102,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 AUTHENTICATION_BACKENDS = [
-    "gqlauth.backends.GraphQLAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-GRAPHQL_JWT = {
-    "JWT_VERIFY_EXPIRATION": True,
-    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

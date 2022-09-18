@@ -6,10 +6,10 @@ from PIL import Image
 from django.contrib.auth import get_user_model
 import pytest
 
-from gqlauth.constants import Messages
-from gqlauth.models import Captcha
+from gqlauth.captcha.models import Captcha
+from gqlauth.core.constants import Messages
 from gqlauth.settings import gqlauth_settings
-from gqlauth.signals import user_registered
+from gqlauth.user.signals import user_registered
 
 from .testCases import AsyncRelayTestCase, RelayTestCase
 
@@ -167,13 +167,12 @@ class CaptchaTestCaseMixin:
         )
 
     @staticmethod
-    def test_captcha_saved_if_settings_is_on(cap):
+    def test_captcha_saved_if_settings_is_on(cap: Captcha):
         assert Path(cap.image.path).exists()
         # if this didn't raise we are good.
         Image.open(cap.image.path)
 
 
-# captcha is not relay or arg_mutations. this is probably redundant.
 class TestCaptchaRelay(CaptchaTestCaseMixin, RelayTestCase):
     ...
 

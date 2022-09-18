@@ -3,9 +3,10 @@ from unittest import mock
 
 import pytest
 
-from gqlauth.constants import Messages
+from gqlauth.core.constants import Messages
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -15,8 +16,9 @@ from .testCases import (
 
 
 @pytest.mark.default_user
-class SendPasswordResetEmailTestCaseMixin:
-    def _arg_query(self, user: UserType):
+class SendPasswordResetEmailTestCaseMixin(AbstractTestCase):
+    @staticmethod
+    def _arg_query(user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(email: "%s")
@@ -26,7 +28,8 @@ class SendPasswordResetEmailTestCaseMixin:
             user.email
         )
 
-    def _relay_query(self, user: UserType):
+    @staticmethod
+    def _relay_query(user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(input:{ email: "%s"})

@@ -1,4 +1,4 @@
-from gqlauth.bases.mixins import ArgMixin
+from gqlauth.core.mixins import ArgMixin
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
     Captcha,

@@ -6,6 +6,7 @@
 from pathlib import Path
 import shutil
 
+from pydoc_markdown import FilterProcessor
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
 from pydoc_markdown.interfaces import Context
@@ -45,8 +46,9 @@ if __name__ == "__main__":
 
     loader.init(context)
     renderer.init(context)
-
-    modules = loader.load()
+    modules = list(loader.load())
+    processor = FilterProcessor()
+    processor.process(modules, None)
 
     with open(docs_path / "api.md", "w") as f:
         f.write(
@@ -59,11 +61,12 @@ ___
             )
         )
 
+    # ------------------------------- Settings -----------------------------------
     context = Context(directory=str(src))
     loader = PythonLoader(
         search_path=[str(src)],
         modules=[
-            "decorators",
+            "settings_type",
         ],
     )
     renderer = MarkdownRenderer(
@@ -73,14 +76,16 @@ ___
         add_module_prefix=False,
         docstrings_as_blockquote=True,
         use_fixed_header_levels=False,
+        signature_code_block=True,
     )
 
     loader.init(context)
     renderer.init(context)
+    modules = list(loader.load())
+    processor = FilterProcessor()
+    processor.process(modules, None)
 
-    modules = loader.load()
-
-    with open(docs_path / "decorators.md", "w") as f:
+    with open(docs_path / "settings.md", "w") as f:
         f.write(
             """
 > auto generated using `pydoc_markdown`

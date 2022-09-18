@@ -1,30 +1,35 @@
-from typing import List, Optional
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 import strawberry
+from strawberry.schema_directive import Location
 from strawberry.types import Info
 
-from gqlauth.utils import g_user
+from gqlauth.core.utils import get_user
 
 # project
 from .types_ import UserFilter, UserType
 
+USER_MODEL = get_user_model()
 
-@strawberry.django.type(model=get_user_model(), filters=UserFilter)
+
+@strawberry.schema_directive(locations=[Location.FIELD_DEFINITION])
+class Sample:
+    message: str = "fdsafdsafdsfa"
+
+
+@strawberry.django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    user: Optional[UserType] = strawberry.django.field()
-    users: List[UserType] = strawberry.django.field(filters=UserFilter)
-
     @strawberry.django.field
     def public_user(self, info: Info) -> Optional[UserType]:
-        user = g_user(info)
+        user = get_user(info)
         if user.is_authenticated:
             return user
         return None
 
     @strawberry.django.field
     def me(self, info: Info) -> Optional[UserType]:
-        user = g_user(info)
+        user = get_user(info)
         if not user.is_anonymous:
             return user
         return None

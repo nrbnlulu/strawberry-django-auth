@@ -2,12 +2,15 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
 import typing
-from typing import Any, Callable, NewType, Set, Union
+from typing import Any, Callable, NewType, Optional, Set, Union
 
 from django.conf import settings as django_settings
-import strawberry
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
+from strawberry.types import Info
+
+if typing.TYPE_CHECKING:
+    from gqlauth.jwt.types_ import TokenType
 
 
 def default_text_factory():
@@ -22,6 +25,7 @@ def default_text_factory():
 
 
 DjangoSetting = NewType("DjangoSetting", Union[dict, list, str, Any])
+ImportString = NewType("ImportString", str)
 
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
@@ -32,15 +36,12 @@ password_field = StrawberryField(
 first_name_field = StrawberryField(
     python_name="first_name",
     default=None,
-    type_annotation=StrawberryAnnotation(typing.Optional[str]),
+    type_annotation=StrawberryAnnotation(Optional[str]),
 )
 last_name_field = StrawberryField(
     python_name="last_name",
     default=None,
-    type_annotation=StrawberryAnnotation(typing.Optional[str]),
-)
-email_field = StrawberryField(
-    python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
+    type_annotation=StrawberryAnnotation(Optional[str]),
 )
 email_field = StrawberryField(
     python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
@@ -49,10 +50,9 @@ email_field = StrawberryField(
 
 @dataclass
 class GqlAuthSettings:
-    # if allow logging in without verification,
-    # the register mutation will return a token
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
-    # mutation fields options
+    """
+    """
     LOGIN_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {
             username_field,
@@ -64,9 +64,12 @@ class GqlAuthSettings:
     And will return the user from one of them unless `PermissionDenied` was raised.
     You can pass any fields that would be accepted by your backends.
 
-    Note that `password field is mandatory` and cannot be removed.
+    **Note that `password field` is mandatory and cannot be removed.**
     """
     LOGIN_REQUIRE_CAPTCHA: bool = True
+    """
+    whether login will require captcha verification.
+    """
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )
@@ -75,8 +78,13 @@ class GqlAuthSettings:
     can be a dict like UPDATE_MUTATION_fieldS setting
     """
     REGISTER_REQUIRE_CAPTCHA: bool = True
+    """
+    whether register will require captcha verification.
+    """
     # captcha stuff
+    #: captcha expiration delta.
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
+    #: max number of attempts for one captcha.
     CAPTCHA_MAX_RETRIES: int = 5
     CAPTCHA_TEXT_FACTORY: Callable = default_text_factory
     """
@@ -136,18 +144,66 @@ class GqlAuthSettings:
     EMAIL_TEMPLATE_PASSWORD_SET: str = "email/password_set_email.html"
     EMAIL_TEMPLATE_PASSWORD_RESET: str = "email/password_reset_email.html"
     EMAIL_TEMPLATE_VARIABLES: dict = field(default_factory=lambda: {})
-    # query stuff
-    USER_NODE_EXCLUDE_FIELDS: Union[dict, list] = field(
-        default_factory=lambda: ["password", "is_superuser"]
-    )
     # others
-    # turn is_active to False instead
     ALLOW_DELETE_ACCOUNT: bool = False
-    # mutation error type
-    CUSTOM_ERROR_TYPE: strawberry.scalar = "gqlauth.bases.scalars.ExpectedErrorType"
-    # registration with no password
+    """
+    If True, DeleteAcount mutation will permanently delete the user.
+    """
     ALLOW_PASSWORDLESS_REGISTRATION: bool = False
+    """
+    Whether to allow registration with no password
+    """
     SEND_PASSWORD_SET_EMAIL: bool = False
+    # JWT stuff
+    JWT_SECRET_KEY: DjangoSetting = lambda: django_settings.SECRET_KEY
+    """
+    key used to sign the JWT token.
+    """
+    JWT_ALGORITHM: str = "HS256"
+    """
+    Algorithm used for signing the token.
+    """
+    JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"
+    """
+    A valid 'strftime' string that will be used to encode the token payload.
+    """
+    JWT_PAYLOAD_HANDLER: Union[
+        Callable[[Info], "TokenType"], ImportString
+    ] = "gqlauth.jwt.default_hooks.create_token_type"
+    """
+    A custom function to generate the token datatype, its up to you to encode the token.
+    """
+    JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
+    """
+    field that will be used to generate the token from a user instance and
+    retrieve user based on the decoded token.
+    *This filed must be unique in the database*
+    """
+    JWT_DECODE_HANDLER: Union[
+        Callable[[str], "TokenType"], ImportString
+    ] = "gqlauth.jwt.default_hooks.decode_jwt"
+
+    JWT_EXPIRATION_DELTA: timedelta = timedelta(minutes=5)
+    """
+    Timedelta added to `utcnow()` to set the expiration time.
+
+    When this ends you will have to create a new token by logging in
+    or using the refresh token.
+    """
+    # refresh token stuff
+    JWT_LONG_RUNNING_REFRESH_TOKEN: bool = True
+    """
+    Whether to enable refresh tokens to be used as an alternative to login every time
+    the token is expired.
+    """
+    JWT_REFRESH_TOKEN_N_BYTES: int = 20
+    """
+    Number of bytes for long running refresh token.
+    """
+    JWT_REFRESH_EXPIRATION_DELTA: timedelta = timedelta(days=7)
+    """
+    Refresh token expiration time delta.
+    """
 
     def __post_init__(self):
         # if there override the defaults
