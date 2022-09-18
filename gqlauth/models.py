@@ -15,7 +15,6 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
-import pytz
 from strawberry.types import Info
 
 from gqlauth.core.constants import TokenAction
@@ -240,7 +239,7 @@ class AbstractRefreshToken(models.Model):
         Whether the token is expired or not.
         it is up to the database query to filter out tokens without revoked date.
         """
-        return pytz.UTC.localize(datetime.now().utcnow()) > self.expires_at_()
+        return datetime.now(tz=self.created.tzinfo) > self.expires_at_() or bool(self.revoked)
 
     def revoke(self):
         self.revoked = datetime.now()

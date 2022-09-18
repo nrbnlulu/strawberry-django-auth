@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 from typing import TYPE_CHECKING
 
@@ -20,8 +19,6 @@ def create_token_type(_: Info, user: USER_MODEL) -> "TokenType":
     user_pk = app_settings.JWT_PAYLOAD_PK.python_name
     pk_field = {user_pk: getattr(user, user_pk)}
     payload = TokenPayloadType(
-        exp=datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA,
-        origIat=datetime.utcnow(),
         **pk_field,
     )
     serialized = json.dumps(payload.as_dict(), sort_keys=True, indent=1)

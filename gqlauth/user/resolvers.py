@@ -1,6 +1,7 @@
+from abc import ABC
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import List, Protocol, Union
+from typing import List
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -15,11 +16,7 @@ from strawberry.types import Info
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
-from gqlauth.core.directives import (
-    BaseAuthDirective,
-    IsVerified,
-    SecondaryEmailRequired,
-)
+from gqlauth.core.directives import BaseAuthDirective, IsVerified
 from gqlauth.core.exceptions import (
     EmailAlreadyInUse,
     PasswordAlreadySetError,
@@ -28,7 +25,7 @@ from gqlauth.core.exceptions import (
     UserNotVerified,
 )
 from gqlauth.core.shortcuts import get_user_by_email
-from gqlauth.core.types_ import MutationNormalOutput
+from gqlauth.core.types_ import AuthOutput, MutationNormalOutput
 from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
@@ -45,23 +42,23 @@ from gqlauth.jwt.types_ import (
 )
 from gqlauth.models import RefreshToken, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.decorators import _password_confirmation_required
 from gqlauth.user.forms import (
     EmailForm,
     PasswordLessRegisterForm,
     RegisterForm,
     UpdateAccountForm,
 )
+from gqlauth.user.helpers import check_captcha, check_secondary_email, confirm_password
 from gqlauth.user.signals import user_registered, user_verified
 
 UserModel = get_user_model()
 
 
-class BaseMixin(Protocol):
+class BaseMixin(ABC):
     directives: List[BaseAuthDirective] = []
 
     def resolve_mutation(self, *args, **kwargs):
-        ...
+        raise NotImplementedError
 
 
 class Captcha:
@@ -82,17 +79,6 @@ class Captcha:
     @sync_to_async
     def afield(self) -> CaptchaType:
         return CaptchaModel.create_captcha()
-
-
-def check_captcha(
-    input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenMixin.ObtainJSONWebTokenInput"]
-):
-    uuid = input_.identifier
-    try:
-        obj = CaptchaModel.objects.get(uuid=uuid)
-    except CaptchaModel.DoesNotExist:
-        return Messages.CAPTCHA_EXPIRED
-    return obj.validate(input_.userEntry)
 
 
 class RegisterMixin(BaseMixin):
@@ -449,11 +435,14 @@ class ArchiveOrDeleteMixin(BaseMixin):
     ]
 
     @classmethod
-    @_password_confirmation_required
-    def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: ArchiveOrDeleteMixinInput
+    ) -> AuthOutput[MutationNormalOutput]:
         user = get_user(info)
+        if error := confirm_password(user, input_):
+            return AuthOutput(node=error)
         cls.resolve_action(user)
-        return MutationNormalOutput(success=True)
+        return AuthOutput(node=MutationNormalOutput(success=True))
 
 
 class ArchiveAccountMixin(ArchiveOrDeleteMixin):
@@ -504,10 +493,12 @@ class PasswordChangeMixin(BaseMixin):
     ]
 
     @classmethod
-    @_password_confirmation_required
     def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
-        args = asdict(input_)
         user = get_user(info)
+        if error := confirm_password(user, input_):
+            return ObtainJSONWebTokenType(**asdict(error))
+
+        args = asdict(input_)
         f = cls.form(user, args)
         if f.is_valid():
             revoke_user_refresh_token(user)
@@ -535,7 +526,7 @@ class UpdateAccountMixin(BaseMixin):
     ]
 
     @classmethod
-    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
+    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> AuthOutput[MutationNormalOutput]:
         user = get_user(info)
         f = cls.form(
             asdict(input_),
@@ -543,9 +534,11 @@ class UpdateAccountMixin(BaseMixin):
         )
         if f.is_valid():
             f.save()
-            return MutationNormalOutput(success=True)
+            return AuthOutput(node=MutationNormalOutput(success=True))
         else:
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+            return AuthOutput(
+                node=MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+            )
 
 
 class VerifyTokenMixin(BaseMixin):
@@ -565,7 +558,7 @@ class RefreshTokenMixin(BaseMixin):
     *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 
     using the refresh-token you already got during authorization, and
-    obtain a brand-new token (and possibly a refresh token).
+    obtain a brand-new token (and possibly a new refresh token if you revoked the previous).
     This is an alternative to log in when your token expired.
     """
 
@@ -575,17 +568,25 @@ class RefreshTokenMixin(BaseMixin):
     )
     class RefreshTokenInput:
         refresh_token: str
-        revoke_refresh_token: bool = False
+        revoke_refresh_token: bool = strawberry.field(
+            description="revokes the previous refresh token, and will generate new one.",
+            default=False,
+        )
 
     @classmethod
     def resolve_mutation(cls, info, input_: RefreshTokenInput) -> ObtainJSONWebTokenType:
-        res = RefreshToken.objects.get(token=input_.refresh_token, revoked__isnull=True)
-        user = get_user(info)
-        if res.is_expired_(info):
+        try:
+            res = RefreshToken.objects.get(token=input_.refresh_token)
+        except RefreshToken.DoesNotExist:
+            return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_TOKEN)
+        user = res.user
+        if res.is_expired_():
             return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
-        ret = ObtainJSONWebTokenType(success=True, token=TokenType.from_user(info, user))
+        ret = ObtainJSONWebTokenType(
+            success=True, token=TokenType.from_user(info, user), refresh_token=res
+        )
         if input_.revoke_refresh_token:
-            res.revoked = True
+            res.revoke()
             ret.refresh_token = RefreshToken.from_user(user)
         return ret
 
@@ -602,11 +603,13 @@ class RevokeTokenMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, _: Info, input_: RevokeTokenInput) -> RevokeRefreshTokenType:
-        if refresh_token := RefreshToken.objects.get(
-            token=input_.refresh_token, revoked__isnull=True
-        ):
+        try:
+            refresh_token = RefreshToken.objects.get(
+                token=input_.refresh_token, revoked__isnull=True
+            )
+            refresh_token.revoke()
             return RevokeRefreshTokenType(success=True, refresh_token=refresh_token)
-        else:
+        except RefreshToken.DoesNotExist:
             return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)
 
 
@@ -626,15 +629,16 @@ class SendSecondaryEmailActivationMixin(BaseMixin):
         password: str
 
     @classmethod
-    @_password_confirmation_required
     def resolve_mutation(
         cls, info, input_: SendSecondaryEmailActivationInput
     ) -> MutationNormalOutput:
+        user = get_user(info)
+        if error := confirm_password(user, input_):
+            return error
         try:
             email = input_.get("email")
             f = EmailForm({"email": email})
             if f.is_valid():
-                user = get_user(info)
                 user.status.send_secondary_email_activation(info, email)
                 return MutationNormalOutput(success=True)
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
@@ -654,19 +658,18 @@ class SwapEmailsMixin(BaseMixin):
     Require password confirmation.
     """
 
-    directives = [
-        SecondaryEmailRequired(),
-    ]
-
     @strawberry.input
     class SwapEmailsInput:
         password: str
 
     @classmethod
     def resolve_mutation(cls, info: Info, input_: SwapEmailsInput) -> MutationNormalOutput:
-        if not get_user(info).check_password(input_.password):
+        user = get_user(info)
+        if not user.check_password(input_.password):
             return MutationNormalOutput(success=False, errors=Messages.INVALID_PASSWORD)
-        get_user(info).status.swap_emails()
+        if error := check_secondary_email(user):
+            return error
+        user.status.swap_emails()
         return MutationNormalOutput(success=True)
 
 
@@ -677,18 +680,21 @@ class RemoveSecondaryEmailMixin(BaseMixin):
     Require password confirmation.
     """
 
-    directives = [
-        SecondaryEmailRequired(),
-    ]
-
     @strawberry.input
     class RemoveSecondaryEmailInput:
         password: str
 
     @classmethod
-    @_password_confirmation_required
     def resolve_mutation(
         cls, info: Info, input_: RemoveSecondaryEmailInput
     ) -> MutationNormalOutput:
-        get_user(info).status.remove_secondary_email()
+        user = get_user(info)
+
+        if error := confirm_password(user, input_):
+            return error
+
+        if error := check_secondary_email(user):
+            return error
+
+        user.status.remove_secondary_email()
         return MutationNormalOutput(success=True)

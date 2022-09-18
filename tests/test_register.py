@@ -108,7 +108,7 @@ class RegisterTestCaseMixin:
         assert executed["errors"]["email"]
 
     @mock.patch(
-        "gqlauth.user.models.UserStatus.send_activation_email",
+        "gqlauth.models.UserStatus.send_activation_email",
         mock.MagicMock(side_effect=SMTPException),
     )
     @pytest.mark.default_user

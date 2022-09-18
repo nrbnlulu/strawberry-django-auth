@@ -44,10 +44,11 @@ def camelize(data):
 JWT_PREFIX = "JWT "
 
 
-def get_token_from_headers(headers: dict) -> str:
-    jwt = headers["Authorization"]
-    assert isinstance(jwt, str)
-    return jwt.strip(JWT_PREFIX)
+def get_token_from_headers(headers: dict) -> typing.Optional[str]:
+    if jwt := headers.get("Authorization", None):
+        assert isinstance(jwt, str)
+        return jwt.strip(JWT_PREFIX)
+    return None
 
 
 def list_to_dict(lst: [str]):
@@ -81,7 +82,7 @@ def get_status(user: Union[USER_MODEL, AnonymousUser]) -> typing.Optional["UserS
 
 
 def get_user(info: Info) -> Union[USER_MODEL, AnonymousUser]:
-    if user := getattr(info.context, "user"):  # noqa: B009
+    if user := getattr(info.context, "user", None):  # noqa: B009
         assert isinstance(user, USER_MODEL)
         return user
     return AnonymousUser()

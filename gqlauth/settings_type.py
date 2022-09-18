@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
 import typing
-from typing import Any, Callable, NewType, Set, Union
+from typing import Any, Callable, NewType, Optional, Set, Union
 
 from django.conf import settings as django_settings
 from strawberry.annotation import StrawberryAnnotation
@@ -36,15 +36,12 @@ password_field = StrawberryField(
 first_name_field = StrawberryField(
     python_name="first_name",
     default=None,
-    type_annotation=StrawberryAnnotation(typing.Optional[str]),
+    type_annotation=StrawberryAnnotation(Optional[str]),
 )
 last_name_field = StrawberryField(
     python_name="last_name",
     default=None,
-    type_annotation=StrawberryAnnotation(typing.Optional[str]),
-)
-email_field = StrawberryField(
-    python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
+    type_annotation=StrawberryAnnotation(Optional[str]),
 )
 email_field = StrawberryField(
     python_name="email", default=None, type_annotation=StrawberryAnnotation(str)

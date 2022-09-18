@@ -2,10 +2,16 @@ import pytest
 
 from gqlauth.core.utils import get_token
 
-from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
+from .testCases import (
+    AbstractTestCase,
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+)
 
 
-class PasswordResetTestCaseMixin:
+class PasswordResetTestCaseMixin(AbstractTestCase):
     def _arg_query(self, token, new_password1="new_password", new_password2="new_password"):
         return """
         mutation {{

@@ -8,7 +8,7 @@ from strawberry.types import Info
 from gqlauth.core.utils import get_user
 
 from ..core.directives import IsAuthenticated
-from ..core.field import GqlAuthField
+from ..core.field_ import field
 
 # project
 from .types_ import UserFilter, UserType
@@ -23,7 +23,7 @@ class Sample:
 
 @strawberry.django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    users: Optional[List[UserType]] = GqlAuthField(
+    users: Optional[List[UserType]] = field(
         filters=UserFilter,
         default_factory=lambda: USER_MODEL.objects.all(),
         directives=[

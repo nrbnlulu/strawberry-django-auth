@@ -4,6 +4,7 @@ from gqlauth.core.constants import Messages
 from gqlauth.core.utils import get_token
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -12,7 +13,7 @@ from .testCases import (
 )
 
 
-class PasswordSetTestCaseMixin:
+class PasswordSetTestCaseMixin(AbstractTestCase):
     @staticmethod
     def _arg_query(token, password=None):
         password = password or fake.password()

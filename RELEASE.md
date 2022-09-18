@@ -1,5 +1,13 @@
 
+
 # Changelog
+### v0.3.4.2
+#### Deprecations:
+
+- `SomeField.afield` is removed, and you can use now just `SomeField.field` for async/sync.
+- decorators are deprecated, and you should use directives from now on.
+#### New features:
+
 ### v0.3.4.1
 #### deprecations
 - `LOGIN_REQUIRED_FIELDS` and `LOGIN_OPTIONAL_FIELDS` are deprecated in favor of `LOGIN_FIELDS`.

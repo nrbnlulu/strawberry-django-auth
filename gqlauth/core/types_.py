@@ -1,9 +1,9 @@
-from typing import Generic, List, Optional, TypeVar
+from enum import Enum
+from typing import Generic, Optional, TypeVar
 
 from django.utils.translation import gettext as _
 import strawberry
 
-from gqlauth.core.constants import Error
 from gqlauth.core.scalars import ExpectedErrorType
 
 T = TypeVar("T")
@@ -17,7 +17,7 @@ class MutationNormalOutput:
 
 @strawberry.type
 class ErrorMessage:
-    code: Error
+    code: "GqlAuthError" = None
     message: str = None
 
     def __post_init__(self):
@@ -28,19 +28,21 @@ class ErrorMessage:
 
 
 @strawberry.type
-class FieldError(ErrorMessage):
-    field: str
+class AuthOutput(Generic[T]):
+    node: Optional[T] = None
+    error: Optional[ErrorMessage] = None
+    success: bool = False
+
+    def __post_init__(self):
+        if self.node:
+            assert not self.error
+            self.success = True
 
 
-@strawberry.type
-class AuthError:
-    non_field_errors: List[ErrorMessage] = strawberry.field(default_factory=list)
-    field_errors: List[FieldError] = strawberry.field(default_factory=list)
-
-
-@strawberry.type
-class AuthWrapper(Generic[T]):
-    success: bool = True
-    errors: Optional[AuthError] = strawberry.field(default_factory=AuthError)
-
-    data: Optional[T] = None
+@strawberry.enum
+class GqlAuthError(Enum):
+    UNAUTHENTICATED = "Unauthenticated."
+    INVALID_TOKEN = "Invalid token."
+    EXPIRED_TOKEN = "Expired token."
+    NO_SUFFICIENT_PERMISSIONS = "Permissions found could not satisfy the required permissions."
+    NOT_VERIFIED = "Please verify your account."

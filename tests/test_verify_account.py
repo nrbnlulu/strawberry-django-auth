@@ -2,10 +2,16 @@ from gqlauth.core.constants import Messages
 from gqlauth.core.utils import get_token
 from gqlauth.user.signals import user_verified
 
-from .testCases import ArgTestCase, AsyncArgTestCase, AsyncRelayTestCase, RelayTestCase
+from .testCases import (
+    AbstractTestCase,
+    ArgTestCase,
+    AsyncArgTestCase,
+    AsyncRelayTestCase,
+    RelayTestCase,
+)
 
 
-class VerifyAccountCaseMixin:
+class VerifyAccountCaseMixin(AbstractTestCase):
     def _arg_query(self, token):
         return """
         mutation {

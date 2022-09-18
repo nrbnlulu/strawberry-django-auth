@@ -1,11 +1,15 @@
+from abc import ABC
+from contextlib import contextmanager
+import dataclasses
 from dataclasses import asdict, dataclass
 import pprint
 import re
-from typing import Iterable, NewType, Union
+from typing import Any, Iterable, Protocol, Union
 
 from asgiref.sync import async_to_sync, sync_to_async
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.test import AsyncClient, Client
 from faker import Faker
 from faker.providers import BaseProvider
@@ -13,7 +17,10 @@ import pytest
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.captcha.models import Captcha
+from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings
+from gqlauth.settings_type import GqlAuthSettings
+from testproject.sample.models import Apple
 
 
 class FitProvider(BaseProvider):
@@ -23,12 +30,12 @@ class FitProvider(BaseProvider):
         return self._fake.user_name()
 
 
-Query = NewType("Query", str)
 UserModel = get_user_model()
 fake = Faker()
 fake.add_provider(FitProvider)
-
-additional_fields = UserModel.USERNAME_FIELD, UserModel.EMAIL_FIELD
+EMAIL_FIELD = UserModel.EMAIL_FIELD
+USERNAME_FIELD = UserModel.USERNAME_FIELD
+additional_fields = USERNAME_FIELD, EMAIL_FIELD
 
 
 def inject_fields(fields: Iterable[str]):
@@ -45,23 +52,30 @@ def inject_fields(fields: Iterable[str]):
     return wrapped
 
 
+class UserProto(Protocol):
+    status: UserStatus
+
+
 @dataclass
 @inject_fields(additional_fields)
 class UserType:
     password: str = fake.password()
+    obj: Union[UserProto, AbstractBaseUser] = None
+    username_field: str = None
 
     @classmethod
     def generate(cls):
-        kwargs = {field: getattr(fake, field)() for field, _ in cls.__annotations__.items()}
-        return cls(**kwargs)
+        p = fake.password()
+        u = getattr(fake, USERNAME_FIELD)()
+        kwargs = {USERNAME_FIELD: u}
+        if EMAIL_FIELD:
+            kwargs[EMAIL_FIELD] = getattr(fake, EMAIL_FIELD)()
 
-    @property
-    def USERNAME_FIELD(self):
-        return getattr(self, UserModel.USERNAME_FIELD)
+        return cls(password=p, **kwargs)
 
-    @USERNAME_FIELD.setter
-    def USERNAME_FIELD(self, value):
-        setattr(self, UserModel.USERNAME_FIELD, value)
+    def __post_init__(self):
+        if not self.username_field:
+            self.username_field = getattr(self, USERNAME_FIELD)
 
 
 @dataclass
@@ -78,7 +92,10 @@ class UserStatusType:
         with the django user inside it.
         """
         user = self.user  # caching the user type object
-        self.user = UserModel(**asdict(user))
+        kwargs = asdict(user)
+        kwargs.pop("username_field")
+        kwargs.pop("obj")
+        self.user = UserModel(**kwargs)
         # password must be set via this method.
         self.user.set_password(user.password)
         # must save for status to be created
@@ -99,40 +116,31 @@ class UserStatusType:
 class PATHS:
     RELAY = r"/relay_schema"
     ARG = r"/arg_schema"
-    ASYNC_RELAY = r"/async_relay_schema"
-    ASYNC_ARG = r"/async_arg_schema"
 
 
-@pytest.mark.django_db(transaction=True)
-class TestBase:
-    """
-    provide make_request helper to easily make
-    requests with context variables.
-    Return a shortcut of the client.execute["data"]["<query name>"].
-    example:
-        query = `
-            mutation {
-             register ...
-            }
-        `
-        return client.execute["data"]["register"]
-    """
-
+class AbstractTestCase(ABC):
     WRONG_PASSWORD = "wrong password"
     CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
     USERNAME_FIELD = UserModel.USERNAME_FIELD
 
-    def _generate_login_args(self, user_status: UserStatusType):
-        cap = self.gen_captcha()
-        user = user_status.user
-        initial = (
-            f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.USERNAME_FIELD}",'
-            f' password: "{user.password}"'
-        )
+    def make_query(self, *args, **kwargs) -> str:
+        raise NotImplementedError
 
-        if django_settings.GQL_AUTH.LOGIN_REQUIRE_CAPTCHA:
-            initial += f', identifier: "{cap.uuid}" ,userEntry: "{cap.text}"'
-        return initial
+    def login_query(self, *args, **kwargs) -> str:
+        raise NotImplementedError
+
+    def make_request(
+        self,
+        query: str,
+        user_status: UserStatusType = None,
+        raw: bool = False,
+        no_login_query: bool = False,
+        path: Union[
+            "PATHS.ARG",
+            "PATHS.RELAY",
+        ] = PATHS.ARG,
+    ) -> dict:
+        ...
 
     def verified_user_status_type(self):
         return UserStatusType(
@@ -208,22 +216,74 @@ class TestBase:
         return us
 
     @pytest.fixture()
-    def allow_login_not_verified(self):
+    def db_apple(self, db) -> Apple:
+        a = Apple(color="red", name="smith")
+        a.save()
+        return a
+
+    @pytest.fixture()
+    def allow_login_not_verified(self) -> None:
         django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = True
         yield
         django_settings.GQL_AUTH.ALLOW_LOGIN_NOT_VERIFIED = False
 
     @pytest.fixture()
-    def app_settings(self):
-        return gqlauth_settings
+    def app_settings(self, settings) -> GqlAuthSettings:
+        return settings.GQL_AUTH
+
+    @contextmanager
+    def override_gqlauth(self, default: Any = None, replace: Any = None, name: str = None) -> None:
+        if not name:
+            for field in dataclasses.fields(gqlauth_settings):
+                if getattr(gqlauth_settings, field.name) == default:
+                    name = field.name
+                    break
+            if not name:
+                raise ValueError(f"setting not found for value {default}")
+        else:
+            default = getattr(gqlauth_settings, name)
+        setattr(gqlauth_settings, name, replace)
+        yield
+        setattr(gqlauth_settings, name, default)
+
+
+@pytest.mark.django_db(transaction=True)
+class TestBase(AbstractTestCase):
+    """
+    provide make_request helper to easily make
+    requests with context variables.
+    Return a shortcut of the client.execute["data"]["<query name>"].
+    example:
+        query = `
+            mutation {
+             register ...
+            }
+        `
+        return client.execute["data"]["register"]
+    """
+
+    def _generate_login_args(self, user_status: UserStatusType):
+        cap = self.gen_captcha()
+        user = user_status.user
+        initial = (
+            f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.username_field}",'
+            f' password: "{user.password}"'
+        )
+
+        if django_settings.GQL_AUTH.LOGIN_REQUIRE_CAPTCHA:
+            initial += f', identifier: "{cap.uuid}" ,userEntry: "{cap.text}"'
+        return initial
 
     def make_request(
         self,
-        query: Query,
+        query: str,
         user_status: UserStatusType = None,
         raw: bool = False,
         no_login_query: bool = False,
-        path: Union["PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"] = PATHS.ARG,
+        path: Union[
+            "PATHS.ARG",
+            "PATHS.RELAY",
+        ] = PATHS.ARG,
     ) -> dict:
         if self.RELAY:
             path = PATHS.RELAY
@@ -259,16 +319,17 @@ class TestBase:
 
     async def amake_request(
         self,
-        query: Query = None,
+        query: str = None,
         user_status: UserStatusType = None,
         no_login_query: bool = False,
         raw: bool = False,
         path: Union[
-            "PATHS.ARG", "PATHS.ASYNC_ARG", "PATHS.RELAY", "PATHS.ASYNC_RELAY"
-        ] = PATHS.ASYNC_ARG,
+            "PATHS.ARG",
+            "PATHS.RELAY",
+        ] = PATHS.ARG,
     ) -> dict:
         if self.RELAY:
-            path = PATHS.ASYNC_RELAY
+            path = PATHS.RELAY
 
         client = AsyncClient(raise_request_exception=True)
 
@@ -309,7 +370,7 @@ class RelayTestCase(TestBase):
     def make_query(self, *args, **kwargs):
         return self._relay_query(*args, **kwargs)
 
-    def login_query(self, user_status: UserStatusType):
+    def login_query(self, user_status: UserStatusType) -> str:
         return """
           mutation {{
         tokenAuth(input:{{{}}})
@@ -367,8 +428,7 @@ class ArgTestCase(TestBase):
     def make_query(self, *args, **kwargs):
         return self._arg_query(*args, **kwargs)
 
-    def login_query(self, user_status: UserStatusType):
-
+    def login_query(self, user_status: UserStatusType) -> str:
         return """
            mutation {{
            tokenAuth({})

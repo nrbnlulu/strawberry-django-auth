@@ -1,7 +1,4 @@
-from enum import Enum
-
 from django.utils.translation import gettext as _
-import strawberry
 
 
 # TODO: delete this.
@@ -63,28 +60,3 @@ class TokenAction:
     PASSWORD_RESET = "password_reset"
     ACTIVATION_SECONDARY_EMAIL = "activation_secondary_email"
     PASSWORD_SET = "password_set"
-
-
-@strawberry.enum
-class Error(Enum):
-    INVALID_PASSWORD = "Invalid password."
-    UNAUTHENTICATED = "Unauthenticated."
-    INVALID_TOKEN = "Invalid token."
-    EXPIRED_TOKEN = "Expired token."
-    NO_SUFFICIENT_PERMISSIONS = "Permissions found could not satisfy the required permissions."
-
-    CAPTCHA_INVALID = "Captcha wrong, try again."
-    CAPTCHA_MAX_RETRIES = "Maximum tries exceeded, please refresh the captcha"
-    CAPTCHA_EXPIRED = "Expired or not Existed captcha please refresh."
-
-    ALREADY_VERIFIED = "Account already verified."
-    INVALID_CREDENTIALS = "Please, enter valid credentials."
-    NOT_VERIFIED = "Please verify your account."
-    NOT_VERIFIED_PASSWORD_RESET = "Verify your account. A new verification email was sent."
-
-    EMAIL_IN_USE = "A user with that email already exists."
-    EMAIL_FAIL = "Failed to send email."
-    SECONDARY_EMAIL_REQUIRED = "You need to setup a secondary email to proceed."
-    PASSWORD_ALREADY_SET = "Password already set for account."
-
-    DJANGO_ERROR = ""

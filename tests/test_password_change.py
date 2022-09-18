@@ -1,6 +1,7 @@
 import dataclasses
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -10,7 +11,7 @@ from .testCases import (
 )
 
 
-class PasswordChangeTestCaseMixin:
+class PasswordChangeTestCaseMixin(AbstractTestCase):
     SECURE_PASSWORD = fake.password()
 
     @dataclasses.dataclass
@@ -21,18 +22,27 @@ class PasswordChangeTestCaseMixin:
     @classmethod
     def _arg_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
         return """
-                mutation {{
-                    passwordChange(
-                        oldPassword: "{}",
-                        newPassword1: "{}",
-                        newPassword2: "{}"
-                    )
-                    {{
-            success
-            errors
-            obtainPayload{{
-              token
-              refreshToken
+        mutation MyMutation {{
+          authEntry {{
+            node {{
+              passwordChange(oldPassword: "{}", newPassword1:"{}", newPassword2:"{}"){{
+                success
+                errors
+                token{{
+                  token
+                  payload{{
+                    exp
+                    origIat
+                  }}
+                }}
+                refreshToken{{
+                  token
+                  created
+                  revoked
+                  expiresAt
+                  isExpired
+                }}
+              }}
             }}
           }}
         }}
@@ -45,19 +55,27 @@ class PasswordChangeTestCaseMixin:
     @classmethod
     def _relay_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
         return """
-                mutation {{
-                    passwordChange(
-                        input: {{
-                            oldPassword: "{}",
-                            newPassword1: "{}",
-                            newPassword2: "{}"
-                        }})
-                   {{
-            success
-            errors
-            obtainPayload{{
-              token
-              refreshToken
+        mutation MyMutation {{
+          authEntry {{
+            node {{
+              passwordChange(input:{{oldPassword: "{}", newPassword1:"{}", newPassword2:"{}"}}){{
+                success
+                errors
+                token{{
+                  token
+                  payload{{
+                    exp
+                    origIat
+                  }}
+                }}
+                refreshToken{{
+                  token
+                  created
+                  revoked
+                  expiresAt
+                  isExpired
+                }}
+              }}
             }}
           }}
         }}
@@ -75,10 +93,11 @@ class PasswordChangeTestCaseMixin:
         query = self.make_query(user_status=db_verified_user_status, password_form=form)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
         user = db_verified_user_status.user.obj
-        assert executed["success"]
-        assert not executed["errors"]
-        assert executed["obtainPayload"]["token"]
-        assert executed["obtainPayload"]["refreshToken"]
+        data = executed["node"]["passwordChange"]
+        assert data["success"]
+        assert not data["errors"]
+        assert data["token"]["token"]
+        assert data["refreshToken"]["token"]
         user.refresh_from_db()
         assert db_verified_user_status.user.password != user.password
 
@@ -91,9 +110,10 @@ class PasswordChangeTestCaseMixin:
         form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD + "mismatch")
         query = self.make_query(user_status=db_verified_user_status, password_form=form)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert not executed["success"]
-        assert executed["errors"]["newPassword2"]
-        assert not executed["obtainPayload"]
+        data = executed["node"]["passwordChange"]
+        assert not data["success"]
+        assert data["errors"]["newPassword2"]
+        assert not data["refreshToken"] or data["token"]
         user.refresh_from_db()
         assert user.password == old_password
 
@@ -104,9 +124,10 @@ class PasswordChangeTestCaseMixin:
         simple_password = self.PasswordChangeForm("123", "123")
         query = self.make_query(user_status=db_verified_user_status, password_form=simple_password)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert not executed["success"]
-        assert executed["errors"]["newPassword2"]
-        assert not executed["obtainPayload"]
+        data = executed["node"]["passwordChange"]
+        assert not data["success"]
+        assert data["errors"]
+        assert not data["refreshToken"] or data["token"]
 
     def test_revoke_refresh_tokens_on_password_change(self, db_verified_user_status):
         user = db_verified_user_status.user.obj
@@ -120,11 +141,13 @@ class PasswordChangeTestCaseMixin:
         assert refresh_tokens
         for token in refresh_tokens:
             assert not token.revoked
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
+        executed = self.make_request(query=query, user_status=db_verified_user_status)["node"][
+            "passwordChange"
+        ]
         assert executed["success"]
         assert not executed["errors"]
-        assert executed["obtainPayload"]["token"]
-        assert executed["obtainPayload"]["refreshToken"]
+        assert executed["token"]["token"]
+        assert executed["refreshToken"]["token"]
         user.refresh_from_db()
         assert old_password != user.password
         refresh_tokens = user.refresh_tokens.all()

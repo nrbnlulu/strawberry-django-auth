@@ -6,6 +6,7 @@ import pytest
 from gqlauth.core.constants import Messages
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -15,8 +16,9 @@ from .testCases import (
 
 
 @pytest.mark.default_user
-class SendPasswordResetEmailTestCaseMixin:
-    def _arg_query(self, user: UserType):
+class SendPasswordResetEmailTestCaseMixin(AbstractTestCase):
+    @staticmethod
+    def _arg_query(user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(email: "%s")
@@ -26,7 +28,8 @@ class SendPasswordResetEmailTestCaseMixin:
             user.email
         )
 
-    def _relay_query(self, user: UserType):
+    @staticmethod
+    def _relay_query(user: UserType):
         return """
         mutation {
         sendPasswordResetEmail(input:{ email: "%s"})
@@ -74,7 +77,7 @@ class SendPasswordResetEmailTestCaseMixin:
         assert not executed["errors"]
 
     @mock.patch(
-        "gqlauth.user.models.UserStatus.send_password_reset_email",
+        "gqlauth.models.UserStatus.send_password_reset_email",
         mock.MagicMock(side_effect=SMTPException),
     )
     def test_send_email_fail_to_send_email(self, db_verified_user_status):

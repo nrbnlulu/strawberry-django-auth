@@ -2,8 +2,8 @@
 import strawberry
 from strawberry.types import Info
 
-from gqlauth.core.field import GqlAuthRootField
-from gqlauth.core.types_ import AuthWrapper
+from gqlauth.core.field_ import GqlAuthRootField
+from gqlauth.core.types_ import AuthOutput
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 
@@ -31,15 +31,15 @@ class AuthMutation:
 @strawberry.type
 class Query:
     @GqlAuthRootField()
-    def auth_entry(self, info: Info) -> AuthWrapper[UserQueries]:
-        return AuthWrapper(success=True, data=UserQueries())
+    def auth_entry(self, info: Info) -> AuthOutput[UserQueries]:
+        return AuthOutput(success=True, data=UserQueries())
 
 
 @strawberry.type
 class Mutation:
     @GqlAuthRootField()
-    def auth_entry(self) -> AuthWrapper[AuthMutation]:
-        return AuthWrapper(data=AuthMutation())
+    def auth_entry(self) -> AuthOutput[AuthMutation]:
+        return AuthOutput(data=AuthMutation())
 
     token_auth = mutations.ObtainJSONWebToken.field
     register = mutations.Register.field

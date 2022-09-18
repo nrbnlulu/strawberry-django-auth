@@ -60,8 +60,14 @@ the data that was used to create the token.
     }
 )
 class TokenPayloadType:
-    exp: datetime = strawberry.field(description="when the token will be expired")
-    origIat: datetime = strawberry.field(description="when the token was created")
+    origIat: datetime = strawberry.field(
+        description="when the token was created", default_factory=datetime.utcnow
+    )
+    exp: datetime = strawberry.field(description="when the token will be expired", default=None)
+
+    def __post_init__(self):
+        if not self.exp:
+            self.exp = self.origIat + app_settings.JWT_EXPIRATION_DELTA
 
     def as_dict(self):
         ret = dataclasses.asdict(self)
@@ -89,6 +95,9 @@ class TokenType:
     payload: TokenPayloadType
     token: str = strawberry.field(description="The encoded payload, namely a token.")
 
+    def is_expired(self):
+        return self.payload.exp < (datetime.utcnow())
+
     @classmethod
     def from_user(cls, info: Info, user: USER_MODEL) -> "TokenType":
         return app_settings.JWT_PAYLOAD_HANDLER(info, user)
@@ -99,9 +108,7 @@ class TokenType:
         might raise TokenExpired
         """
         token_type: TokenType = app_settings.JWT_DECODE_HANDLER(token)
-        if token_type.payload.exp.utcnow() > (
-            datetime.utcnow() + app_settings.JWT_EXPIRATION_DELTA
-        ):
+        if token_type.is_expired():
             raise TokenExpired
         return token_type
 
@@ -152,31 +159,19 @@ class ObtainJSONWebTokenType(OutputInterface):
     def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
         """
         return `ObtainJSONWebTokenType`.
-        authenticates against django authentication backends or from JWT headers.
+        authenticates against django authentication backends.
 
-        *creates a new token and p.*
+        *creates a new token and possibly a refresh token.*
         """
         args = {
             USER_MODEL.USERNAME_FIELD: getattr(input_, USER_MODEL.USERNAME_FIELD),
             "password": input_.password,
         }
         try:
-            # TODO: move this to a separate function .
             # authenticate against django authentication backends.
             if not (user := authenticate(info.context.request, **args)):
-                # try to get user from JWT headers.
-                if not (token := info.context.request.headers.get("HTTP_AUTHORIZATION")):
-                    return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
-                # might raise TokenExpired
-                if not (token_type := TokenType.from_token(token)):
-                    return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
-                # find the user from the JWT payload.
-                try:
-                    user = token_type.get_user_instance()
-                except USER_MODEL.DoesNotExist:
-                    return ObtainJSONWebTokenType(
-                        success=False, errors=Messages.INVALID_CREDENTIALS
-                    )
+                return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+
             # gqlauth logic
             if user.status.archived is True:  # un-archive on login
                 from gqlauth.models import UserStatus
