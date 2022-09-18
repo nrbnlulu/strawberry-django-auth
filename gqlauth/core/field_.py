@@ -72,7 +72,7 @@ def field(
     default=UNSET,
     directives: List[BaseAuthDirective] = None,
     **kwargs,
-) -> Union[StrawberryField, Callable[[...], StrawberryField]]:
+) -> Union[StrawberryField, Callable[..., StrawberryField]]:
     field_ = GqlAuthField(
         python_name=None,
         graphql_name=name,
