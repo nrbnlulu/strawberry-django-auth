@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "strawberry-django-auth"
-version = "0.3.4.2"
+version = "0.3.5.0"
 description = "Graphql authentication system with Strawberry for Django."
 license = "MIT"
 authors = ["Nir.J Benlulu <nrbnlulu@gmail.com>"]

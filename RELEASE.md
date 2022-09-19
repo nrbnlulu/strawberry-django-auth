@@ -1,6 +1,11 @@
 
 
 # Changelog
+### v0.3.5.0
+#### New features:
+- new setting `GqlAuthSettings.JWT_TOKEN_FINDER` for finding the token from Info object,
+useful for integrations that provide custom info object.
+
 ### v0.3.4.2
 #### Deprecations:
 - `users` query was removed due to security concerns.

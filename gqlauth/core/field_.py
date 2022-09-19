@@ -13,8 +13,9 @@ from strawberry_django.utils import is_async
 from gqlauth.core.directives import BaseAuthDirective
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import AuthOutput, ErrorMessage, GqlAuthError
-from gqlauth.core.utils import get_token_from_headers, get_user
+from gqlauth.core.utils import get_user
 from gqlauth.jwt.types_ import TokenType
+from gqlauth.settings import gqlauth_settings as app_settings
 
 __all__ = ["GqlAuthRootField", "field"]
 
@@ -32,7 +33,7 @@ class GqlAuthRootField(StrawberryDjangoField):
     def get_result(
         self, source: Any, info: Info, args: List[Any], kwargs: Dict[str, Any]
     ) -> Union[Awaitable[Any], Any]:
-        token = get_token_from_headers(info.context.request.headers)
+        token = app_settings.JWT_TOKEN_FINDER(info)
         try:
             token_type = TokenType.from_token(token)
         except PyJWTError:  # raised by python-jwt

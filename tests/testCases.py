@@ -122,6 +122,22 @@ class AbstractTestCase(ABC):
     WRONG_PASSWORD = "wrong password"
     CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
     USERNAME_FIELD = UserModel.USERNAME_FIELD
+    AUTH_REQUIRED_QUERY = """
+        query {
+          authEntry {
+            node {
+              me {
+                verified
+              }
+            }
+            error {
+              code
+              message
+            }
+            success
+          }
+        }
+    """
 
     def make_query(self, *args, **kwargs) -> str:
         raise NotImplementedError

@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
@@ -11,6 +11,15 @@ if TYPE_CHECKING:
 
 USER_MODEL = get_user_model()
 app_settings = django_settings.GQL_AUTH
+
+JWT_PREFIX = "JWT "
+
+
+def token_finder(info: Info) -> Optional[str]:
+    if token := info.context.request.headers.get("Authorization", None):
+        assert isinstance(token, str)
+        return token.strip(JWT_PREFIX)
+    return None
 
 
 def create_token_type(_: Info, user: USER_MODEL) -> "TokenType":

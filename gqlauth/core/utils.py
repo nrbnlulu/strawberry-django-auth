@@ -41,16 +41,6 @@ def camelize(data):
     return data
 
 
-JWT_PREFIX = "JWT "
-
-
-def get_token_from_headers(headers: dict) -> typing.Optional[str]:
-    if jwt := headers.get("Authorization", None):
-        assert isinstance(jwt, str)
-        return jwt.strip(JWT_PREFIX)
-    return None
-
-
 def list_to_dict(lst: [str]):
     """takes list of string and creates a dict with str as their values"""
     new_dict = {}
