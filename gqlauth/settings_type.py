@@ -183,6 +183,13 @@ class GqlAuthSettings:
         Callable[[str], "TokenType"], ImportString
     ] = "gqlauth.jwt.default_hooks.decode_jwt"
 
+    JWT_TOKEN_FINDER: Union[
+        Callable[[Info], Optional[str]], ImportString
+    ] = "gqlauth.jwt.default_hooks.token_finder"
+    """
+    A hook called by `GqlAuthRootField` to find the token, **remember to strip the "JWT " prefix
+    if you override this.**
+    """
     JWT_EXPIRATION_DELTA: timedelta = timedelta(minutes=5)
     """
     Timedelta added to `utcnow()` to set the expiration time.
