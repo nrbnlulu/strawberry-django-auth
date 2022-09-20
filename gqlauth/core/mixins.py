@@ -27,7 +27,6 @@ class ArgMixin:
 
 class RelayMixin:
     field: StrawberryField
-    afield: StrawberryField
 
     def __init_subclass__(cls: BaseMixin, **kwargs):
         input_type = cls.resolve_mutation.__annotations__["input_"]

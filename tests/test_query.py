@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from strawberry.utils.str_converters import to_camel_case
 
-from gqlauth.core.types_ import GqlAuthError
+from gqlauth.core.types_ import GQLAuthErrors
 
 from .testCases import ArgTestCase
 
@@ -13,7 +13,11 @@ class TestQueries(ArgTestCase):
     query = """
         query MyQuery {
           authEntry {
-            node {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on AuthQueries {
               me {
                 archived
                 firstName
@@ -34,11 +38,6 @@ class TestQueries(ArgTestCase):
                 verified
               }
             }
-            success
-            error {
-              code
-              message
-            }
           }
         }
             """ % (
@@ -48,48 +47,19 @@ class TestQueries(ArgTestCase):
     def test_me_authenticated(self, db_verified_user_status):
 
         executed = self.make_request(query=self.query, user_status=db_verified_user_status)
-        assert executed["node"]["me"][USERNAME_FIELD] == db_verified_user_status.user.username_field
+        assert executed["me"][USERNAME_FIELD] == db_verified_user_status.user.username_field
 
     def test_me_anonymous(self):
         executed = self.make_request(query=self.query, no_login_query=True)
-        assert executed != {
-            "node": None,
-            "success": False,
-            "error": {
-                "code": GqlAuthError.INVALID_TOKEN,
-                "message": GqlAuthError.INVALID_TOKEN.value,
-            },
+        assert executed == {
+            "code": GQLAuthErrors.INVALID_TOKEN.name,
+            "message": GQLAuthErrors.INVALID_TOKEN.value,
         }
 
     def test_public_user_query(self, db_unverified_user_status, allow_login_not_verified):
-        query = (
-            """
-        query MyQuery {
-          authEntry {
-            success
-            node {
-              publicUser {
-                %s
-                verified
-              }
-            }
-            error {
-              code
-              message
-            }
-          }
-        }
-        """
-            % USERNAME_FIELD
-        )
+        query = self.query.replace("me {", "publicUser {")
         executed = self.make_request(query=query, user_status=db_unverified_user_status)
-        assert executed == {
-            "success": True,
-            "node": {
-                "publicUser": {
-                    USERNAME_FIELD: db_unverified_user_status.user.username_field,
-                    "verified": False,
-                }
-            },
-            "error": None,
-        }
+        assert (
+            executed["publicUser"][USERNAME_FIELD] == db_unverified_user_status.user.username_field
+        )
+        assert not executed["publicUser"]["verified"]

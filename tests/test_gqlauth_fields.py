@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from gqlauth.core.types_ import GqlAuthError
+from gqlauth.core.types_ import GQLAuthErrors
 from tests.testCases import AbstractTestCase, ArgTestCase, AsyncArgTestCase
 
 
@@ -11,12 +11,8 @@ class GqlAuthRootFieldInSchemaMixin(AbstractTestCase):
                 user_status=db_verified_user_status, query=self.AUTH_REQUIRED_QUERY
             )
             assert res == {
-                "node": None,
-                "error": {
-                    "code": GqlAuthError.EXPIRED_TOKEN.name,
-                    "message": GqlAuthError.EXPIRED_TOKEN.value,
-                },
-                "success": False,
+                "code": GQLAuthErrors.EXPIRED_TOKEN.name,
+                "message": GQLAuthErrors.EXPIRED_TOKEN.value,
             }
 
 

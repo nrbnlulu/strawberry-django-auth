@@ -20,10 +20,15 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from strawberry.django.views import GraphQLView
 
+import testproject.relay_schema
+
 from . import schema
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("arg_schema", csrf_exempt(GraphQLView.as_view(schema=schema.arg_schema))),
-    path("relay_schema", csrf_exempt(GraphQLView.as_view(schema=schema.relay_schema))),
+    path(
+        "relay_schema",
+        csrf_exempt(GraphQLView.as_view(schema=testproject.relay_schema.relay_schema)),
+    ),
 ] + static(settings.MEDIA_URL, document_root=str(settings.MEDIA_ROOT))

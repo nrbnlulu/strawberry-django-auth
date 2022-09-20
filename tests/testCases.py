@@ -123,18 +123,19 @@ class AbstractTestCase(ABC):
     CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
     USERNAME_FIELD = UserModel.USERNAME_FIELD
     AUTH_REQUIRED_QUERY = """
-        query {
+        query MyQuery {
           authEntry {
-            node {
+            ... on GQLAuthError {
+
+              code
+              message
+            }
+            ... on AuthQueries {
+
               me {
                 verified
               }
             }
-            error {
-              code
-              message
-            }
-            success
           }
         }
     """

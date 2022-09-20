@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import List
+from typing import List, Union
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -25,7 +25,7 @@ from gqlauth.core.exceptions import (
     UserNotVerified,
 )
 from gqlauth.core.shortcuts import get_user_by_email
-from gqlauth.core.types_ import AuthOutput, MutationNormalOutput
+from gqlauth.core.types_ import GQLAuthError, MutationNormalOutput
 from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
@@ -437,12 +437,12 @@ class ArchiveOrDeleteMixin(BaseMixin):
     @classmethod
     def resolve_mutation(
         cls, info, input_: ArchiveOrDeleteMixinInput
-    ) -> AuthOutput[MutationNormalOutput]:
+    ) -> Union[GQLAuthError, MutationNormalOutput]:
         user = get_user(info)
         if error := confirm_password(user, input_):
-            return AuthOutput(node=error)
+            return error
         cls.resolve_action(user)
-        return AuthOutput(node=MutationNormalOutput(success=True))
+        return MutationNormalOutput(success=True)
 
 
 class ArchiveAccountMixin(ArchiveOrDeleteMixin):
@@ -493,7 +493,9 @@ class PasswordChangeMixin(BaseMixin):
     ]
 
     @classmethod
-    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info: Info, input_: PasswordChangeInput
+    ) -> Union[GQLAuthError, ObtainJSONWebTokenType]:
         user = get_user(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
@@ -526,7 +528,9 @@ class UpdateAccountMixin(BaseMixin):
     ]
 
     @classmethod
-    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> AuthOutput[MutationNormalOutput]:
+    def resolve_mutation(
+        cls, info, input_: UpdateAccountInput
+    ) -> Union[GQLAuthError, MutationNormalOutput]:
         user = get_user(info)
         f = cls.form(
             asdict(input_),
@@ -534,11 +538,9 @@ class UpdateAccountMixin(BaseMixin):
         )
         if f.is_valid():
             f.save()
-            return AuthOutput(node=MutationNormalOutput(success=True))
+            return MutationNormalOutput(success=True)
         else:
-            return AuthOutput(
-                node=MutationNormalOutput(success=False, errors=f.errors.get_json_data())
-            )
+            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
 
 
 class VerifyTokenMixin(BaseMixin):
@@ -631,7 +633,7 @@ class SendSecondaryEmailActivationMixin(BaseMixin):
     @classmethod
     def resolve_mutation(
         cls, info, input_: SendSecondaryEmailActivationInput
-    ) -> MutationNormalOutput:
+    ) -> Union[GQLAuthError, MutationNormalOutput]:
         user = get_user(info)
         if error := confirm_password(user, input_):
             return error

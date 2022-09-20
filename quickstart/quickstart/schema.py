@@ -1,8 +1,11 @@
 # quickstart.schema.py
+from typing import Union
+
 import strawberry
 
-from gqlauth.core.field_ import GqlAuthRootField
-from gqlauth.core.types_ import AuthOutput
+from gqlauth.core.directives import TokenRequired
+from gqlauth.core.field_ import field
+from gqlauth.core.types_ import GQLAuthError
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 from gqlauth.user.resolvers import Captcha
@@ -17,9 +20,9 @@ class MyAuthorizedQueries(UserQueries):
 
 @strawberry.type
 class Query:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[MyAuthorizedQueries]:
-        return AuthOutput(success=True, node=MyAuthorizedQueries())
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[GQLAuthError, MyAuthorizedQueries]:
+        return MyAuthorizedQueries()
 
 
 @strawberry.type
@@ -36,9 +39,9 @@ class AuthMutation:
 
 @strawberry.type
 class Mutation:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[AuthMutation]:
-        return AuthOutput(node=AuthMutation())
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[GQLAuthError, AuthMutation]:
+        return AuthMutation()
 
     captcha = Captcha.field
     token_auth = mutations.ObtainJSONWebToken.field

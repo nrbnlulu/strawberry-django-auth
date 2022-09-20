@@ -15,19 +15,18 @@ from .testCases import (
 class SwapEmailsCaseMixin(AbstractTestCase):
     def _arg_query(self, user: UserType):
         return """
-        mutation {
+        mutation MyMutation {
           authEntry {
-            node {
-              swapEmails(password: "%s") {
-                errors
-                success
-              }
-            }
-            error {
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthMutation {
+              swapEmails(password: "%s") {
+                success
+                errors
+              }
+            }
           }
         }
         """ % (
@@ -36,19 +35,18 @@ class SwapEmailsCaseMixin(AbstractTestCase):
 
     def _relay_query(self, user: UserType):
         return """
-        mutation {
+        mutation MyMutation {
           authEntry {
-            node {
-              swapEmails(input: {password: "%s"}) {
-                errors
-                success
-              }
-            }
-            error {
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthMutation {
+              swapEmails(input: {password: "%s"}) {
+                success
+                errors
+              }
+            }
           }
         }
         """ % (
@@ -63,7 +61,7 @@ class SwapEmailsCaseMixin(AbstractTestCase):
         executed = self.make_request(
             query=self.make_query(user), user_status=db_verified_with_secondary_email
         )
-        assert executed["node"]["swapEmails"] == {"errors": None, "success": True}
+        assert executed["swapEmails"] == {"errors": None, "success": True}
         user_obj.refresh_from_db()
         assert user_obj.email == prev_secondary_email
         assert user_obj.status.secondary_email == user.email
@@ -73,7 +71,7 @@ class SwapEmailsCaseMixin(AbstractTestCase):
         executed = self.make_request(
             query=self.make_query(db_verified_user_status.user), user_status=db_verified_user_status
         )
-        assert executed["node"]["swapEmails"] == {
+        assert executed["swapEmails"] == {
             "errors": {"nonFieldErrors": Messages.SECONDARY_EMAIL_REQUIRED},
             "success": False,
         }

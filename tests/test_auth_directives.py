@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from gqlauth.core.directives import HasPermission, IsAuthenticated, IsVerified
-from gqlauth.core.types_ import GqlAuthError
+from gqlauth.core.types_ import GQLAuthErrors
 from tests.testCases import AbstractTestCase, ArgTestCase, AsyncArgTestCase
 
 USER_MODEL = get_user_model()
@@ -11,8 +11,8 @@ USER_MODEL = get_user_model()
 class TestAuthDirectives(ArgTestCase):
     def test_is_authenticated_fails(self):
         res = IsAuthenticated().resolve_permission(AnonymousUser(), None, None)
-        assert res.code == GqlAuthError.UNAUTHENTICATED
-        assert res.message == GqlAuthError.UNAUTHENTICATED.value
+        assert res.code == GQLAuthErrors.UNAUTHENTICATED
+        assert res.message == GQLAuthErrors.UNAUTHENTICATED.value
 
     def test_is_authenticated_success(self, db_verified_user_status):
         assert (
@@ -22,8 +22,8 @@ class TestAuthDirectives(ArgTestCase):
 
     def test_is_verified_fails(self, db_unverified_user_status):
         res = IsVerified().resolve_permission(db_unverified_user_status.user.obj, None, None)
-        assert res.code == GqlAuthError.NOT_VERIFIED
-        assert res.message == GqlAuthError.NOT_VERIFIED.value
+        assert res.code == GQLAuthErrors.NOT_VERIFIED
+        assert res.message == GQLAuthErrors.NOT_VERIFIED.value
 
     def test_is_verified_success(self, db_verified_user_status):
         assert (
@@ -49,7 +49,7 @@ class TestAuthDirectives(ArgTestCase):
 
         assert (
             perm.resolve_permission(user, None, FakeInfo).code
-            is GqlAuthError.NO_SUFFICIENT_PERMISSIONS
+            is GQLAuthErrors.NO_SUFFICIENT_PERMISSIONS
         )
 
     def test_has_permission_success(self, db_verified_user_status_can_eat):
@@ -65,27 +65,25 @@ class TestAuthDirectives(ArgTestCase):
 class IsVerifiedDirectivesInSchemaMixin(AbstractTestCase):
     def make_query(self) -> str:
         return """
-      query MyQuery {
+        query MyQuery {
           authEntry {
-            node {
-              apples {
-                node {
-                  color
-                  name
-                  isEaten
-                }
-                error{
-                  message
-                  code
-                }
-                success
-              }
-            }
-            error{
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthQueries {
+              apple {
+                ... on AppleType {
+                    color
+                    isEaten
+                    name
+                }
+                ... on GQLAuthError {
+                  message
+                  code
+                }
+              }
+            }
           }
         }
         """
@@ -94,36 +92,14 @@ class IsVerifiedDirectivesInSchemaMixin(AbstractTestCase):
         self, db_apple, db_unverified_user_status, allow_login_not_verified
     ):
         res = self.make_request(query=self.make_query(), user_status=db_unverified_user_status)
-        assert res == {
-            "error": None,
-            "node": {
-                "apples": {
-                    "error": {"code": "NOT_VERIFIED", "message": "Please verify your account."},
-                    "node": None,
-                    "success": False,
-                }
-            },
-            "success": True,
-        }
+        assert res["apple"]["message"] == GQLAuthErrors.NOT_VERIFIED.value
 
     def test_verified_success(self, db_apple, db_verified_user_status):
         res = self.make_request(query=self.make_query(), user_status=db_verified_user_status)
-        assert res == {
-            "error": None,
-            "node": {
-                "apples": {
-                    "error": None,
-                    "node": [
-                        {
-                            "color": db_apple.color,
-                            "isEaten": db_apple.is_eaten,
-                            "name": db_apple.name,
-                        }
-                    ],
-                    "success": True,
-                }
-            },
-            "success": True,
+        assert res["apple"] == {
+            "color": db_apple.color,
+            "isEaten": db_apple.is_eaten,
+            "name": db_apple.name,
         }
 
 
@@ -139,27 +115,25 @@ class HasPermissionDirectiveInSchemaMixin(AbstractTestCase):
     def make_query(self, apple_id):
         return (
             """
-             mutation MyMutation {
+            mutation MyMutation {
               authEntry {
-                node {
+                ... on AuthMutation {
                   eatApple(appleId: %s) {
-                    node {
+                    ... on AppleType {
                       color
-                      name
                       isEaten
+                      name
                     }
-                    error {
-                      code
+                    ... on GQLAuthError {
                       message
+                      code
                     }
-                    success
                   }
                 }
-                error {
-                  code
+                ... on GQLAuthError {
                   message
+                  code
                 }
-                success
               }
             }
                 """
@@ -169,36 +143,14 @@ class HasPermissionDirectiveInSchemaMixin(AbstractTestCase):
     def test_has_permission_fails(self, db_apple, db_verified_user_status):
         username = db_verified_user_status.user.username_field
         res = self.make_request(self.make_query(db_apple.id), db_verified_user_status)
-        assert res == {
-            "error": None,
-            "node": {
-                "eatApple": {
-                    "error": {
-                        "code": "NO_SUFFICIENT_PERMISSIONS",
-                        "message": f"User {username}, has not "
-                        "sufficient permissions for "
-                        "eatApple",
-                    },
-                    "node": None,
-                    "success": False,
-                }
-            },
-            "success": True,
+        assert res["eatApple"] == {
+            "code": "NO_SUFFICIENT_PERMISSIONS",
+            "message": f"User {username}, has not " "sufficient permissions for " "eatApple",
         }
 
     def test_has_permission_success(self, db_apple, db_verified_user_status_can_eat):
         res = self.make_request(self.make_query(db_apple.id), db_verified_user_status_can_eat)
-        assert res == {
-            "error": None,
-            "node": {
-                "eatApple": {
-                    "error": None,
-                    "node": {"color": db_apple.color, "isEaten": True, "name": db_apple.name},
-                    "success": True,
-                }
-            },
-            "success": True,
-        }
+        assert res["eatApple"] == {"color": db_apple.color, "isEaten": True, "name": db_apple.name}
         db_apple.refresh_from_db()
         assert db_apple.is_eaten
 
