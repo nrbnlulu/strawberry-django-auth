@@ -22,27 +22,39 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
     @classmethod
     def _arg_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
         return """
-        mutation MyMutation {{
+        mutation {{
           authEntry {{
-            node {{
-              passwordChange(oldPassword: "{}", newPassword1:"{}", newPassword2:"{}"){{
-                success
-                errors
-                token{{
-                  token
-                  payload{{
-                    exp
-                    origIat
+            ... on GQLAuthError {{
+              code
+              message
+            }}
+            ... on AuthMutation {{
+              passwordChange(
+                oldPassword: "{}", newPassword1: "{}", newPassword2: "{}"
+              ) {{
+                ... on ObtainJSONWebTokenType {{
+                  errors
+                  success
+                  token {{
+                    token
+                    payload {{
+                      origIat
+                      exp
+                    }}
+                  }}
+                  refreshToken {{
+                    token
+                    created
+                    revoked
+                    expiresAt
+                    isExpired
                   }}
                 }}
-                refreshToken{{
-                  token
-                  created
-                  revoked
-                  expiresAt
-                  isExpired
-                }}
               }}
+            }}
+            ...on GQLAuthError{{
+              code
+              message
             }}
           }}
         }}
@@ -55,27 +67,39 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
     @classmethod
     def _relay_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
         return """
-        mutation MyMutation {{
+       mutation {{
           authEntry {{
-            node {{
-              passwordChange(input:{{oldPassword: "{}", newPassword1:"{}", newPassword2:"{}"}}){{
-                success
-                errors
-                token{{
-                  token
-                  payload{{
-                    exp
-                    origIat
+            ... on GQLAuthError {{
+              code
+              message
+            }}
+            ... on AuthMutation {{
+              passwordChange(
+                input: {{oldPassword: "{}", newPassword1: "{}", newPassword2: "{}"}}
+              ) {{
+                ... on ObtainJSONWebTokenType {{
+                  errors
+                  success
+                  token {{
+                    token
+                    payload {{
+                      origIat
+                      exp
+                    }}
+                  }}
+                  refreshToken {{
+                    token
+                    created
+                    revoked
+                    expiresAt
+                    isExpired
                   }}
                 }}
-                refreshToken{{
-                  token
-                  created
-                  revoked
-                  expiresAt
-                  isExpired
-                }}
               }}
+            }}
+            ...on GQLAuthError{{
+              code
+              message
             }}
           }}
         }}
@@ -93,7 +117,7 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
         query = self.make_query(user_status=db_verified_user_status, password_form=form)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
         user = db_verified_user_status.user.obj
-        data = executed["node"]["passwordChange"]
+        data = executed["passwordChange"]
         assert data["success"]
         assert not data["errors"]
         assert data["token"]["token"]
@@ -110,7 +134,7 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
         form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD + "mismatch")
         query = self.make_query(user_status=db_verified_user_status, password_form=form)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        data = executed["node"]["passwordChange"]
+        data = executed["passwordChange"]
         assert not data["success"]
         assert data["errors"]["newPassword2"]
         assert not data["refreshToken"] or data["token"]
@@ -124,7 +148,7 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
         simple_password = self.PasswordChangeForm("123", "123")
         query = self.make_query(user_status=db_verified_user_status, password_form=simple_password)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        data = executed["node"]["passwordChange"]
+        data = executed["passwordChange"]
         assert not data["success"]
         assert data["errors"]
         assert not data["refreshToken"] or data["token"]
@@ -141,7 +165,7 @@ class PasswordChangeTestCaseMixin(AbstractTestCase):
         assert refresh_tokens
         for token in refresh_tokens:
             assert not token.revoked
-        executed = self.make_request(query=query, user_status=db_verified_user_status)["node"][
+        executed = self.make_request(query=query, user_status=db_verified_user_status)[
             "passwordChange"
         ]
         assert executed["success"]

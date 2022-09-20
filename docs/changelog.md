@@ -1,6 +1,11 @@
 
 
 # Changelog
+### v0.3.5.0
+#### New features:
+- new setting `GqlAuthSettings.JWT_TOKEN_FINDER` for finding the token from Info object,
+useful for integrations that provide custom info object.
+
 ### v0.3.4.2
 #### Deprecations:
 - `users` query was removed due to security concerns.
@@ -10,10 +15,7 @@ If you want it implement it yourself and make sure to use the appropriate auth m
 
 - decorators are deprecated, and you should use directives from now on.
 
-#### Breaking changes:
-- This version is no longer using `strawberry-django-jwt` and we are using our own jwt system.
-- from now on there are no more graphql errors instead we provide a generic `AuthWOutput` wrapper
-That you can use in conjunction with our directives for example to check permissions.
+#### New features:
 
 ### v0.3.4.1
 #### deprecations

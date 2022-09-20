@@ -1,6 +1,6 @@
 import pytest
-from strawberry.types import Info
 
+from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.settings_type import GqlAuthSettings
 from tests.testCases import ArgTestCase
 
@@ -26,11 +26,11 @@ def test_if_no_email_in_REGISTER_MUTATION_FIELDS_send_email_is_false(settings):
 
 class TestOverrideHooks(ArgTestCase):
     def test_override_find_jwt_hook(self, db_verified_user_status, app_settings):
-        def hook(info: Info):
+        def hook(info):
             return "invalid value"
 
         with self.override_gqlauth(app_settings.JWT_TOKEN_FINDER, hook):
             res = self.make_request(
                 query=self.AUTH_REQUIRED_QUERY, user_status=db_verified_user_status
             )
-            assert res["error"]
+            assert res["message"] == GQLAuthErrors.INVALID_TOKEN.value

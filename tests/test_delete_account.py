@@ -3,7 +3,7 @@ import pytest
 from pytest import mark
 
 from gqlauth.core.constants import Messages
-from gqlauth.core.types_ import GqlAuthError
+from gqlauth.core.types_ import GQLAuthErrors
 
 from .testCases import AbstractTestCase, ArgTestCase, RelayTestCase, UserStatusType
 
@@ -14,24 +14,22 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
         return """
         mutation MyMutation {
           authEntry {
-            node {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on AuthMutation {
               deleteAccount(password: "%s") {
-                error {
+                ... on GQLAuthError {
                   code
                   message
                 }
-                success
-                node {
+                ... on MutationNormalOutput {
                   errors
                   success
                 }
               }
             }
-            error {
-              code
-              message
-            }
-            success
           }
         }
         """ % (
@@ -43,24 +41,22 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
         return """
         mutation MyMutation {
           authEntry {
-            node {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on AuthMutation {
               deleteAccount(input: {password: "%s"}) {
-                error {
+                ... on GQLAuthError {
                   code
                   message
                 }
-                success
-                node {
+                ... on MutationNormalOutput {
                   errors
                   success
                 }
               }
             }
-            error {
-              code
-              message
-            }
-            success
           }
         }
         """ % (
@@ -69,11 +65,8 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
 
     def test_invalid_password(self, db_verified_user_status, wrong_pass_ver_user_status_type):
         query = self.make_query(wrong_pass_ver_user_status_type)
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert executed["node"]["deleteAccount"]["node"] == {
-            "errors": {"password": Messages.INVALID_PASSWORD},
-            "success": False,
-        }
+        res = self.make_request(query=query, user_status=db_verified_user_status)
+        assert res["deleteAccount"]["errors"]["password"] == Messages.INVALID_PASSWORD
 
     def test_not_verified_user(
         self,
@@ -84,14 +77,10 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(wrong_pass_unverified_user_status_type)
         user = db_unverified_user_status.user.obj
         assert user.is_active
-        executed = self.make_request(query=query, user_status=db_unverified_user_status)
-        assert executed["node"]["deleteAccount"] == {
-            "error": {
-                "code": GqlAuthError.NOT_VERIFIED.name,
-                "message": GqlAuthError.NOT_VERIFIED.value,
-            },
-            "success": False,
-            "node": None,
+        res = self.make_request(query=query, user_status=db_unverified_user_status)
+        assert res["deleteAccount"] == {
+            "code": GQLAuthErrors.NOT_VERIFIED.name,
+            "message": GQLAuthErrors.NOT_VERIFIED.value,
         }
         assert user.is_active
 
@@ -100,9 +89,9 @@ class DeleteAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(db_verified_user_status)
         user = db_verified_user_status.user.obj
         assert user.is_active
-        executed = self.make_request(query=query, user_status=db_verified_user_status)["node"][
+        executed = self.make_request(query=query, user_status=db_verified_user_status)[
             "deleteAccount"
-        ]["node"]
+        ]
         assert executed["success"]
         assert not executed["errors"]
         with pytest.raises(ObjectDoesNotExist):

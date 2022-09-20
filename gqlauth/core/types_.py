@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Generic, Optional, TypeVar
+from typing import Optional, TypeVar
 
 from django.utils.translation import gettext as _
 import strawberry
@@ -16,8 +16,8 @@ class MutationNormalOutput:
 
 
 @strawberry.type
-class ErrorMessage:
-    code: "GqlAuthError" = None
+class GQLAuthError:
+    code: "GQLAuthErrors" = None
     message: str = None
 
     def __post_init__(self):
@@ -27,20 +27,8 @@ class ErrorMessage:
         self.message = _(self.message)
 
 
-@strawberry.type
-class AuthOutput(Generic[T]):
-    node: Optional[T] = None
-    error: Optional[ErrorMessage] = None
-    success: bool = False
-
-    def __post_init__(self):
-        if self.node:
-            assert not self.error
-            self.success = True
-
-
 @strawberry.enum
-class GqlAuthError(Enum):
+class GQLAuthErrors(Enum):
     UNAUTHENTICATED = "Unauthenticated."
     INVALID_TOKEN = "Invalid token."
     EXPIRED_TOKEN = "Expired token."

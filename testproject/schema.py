@@ -1,12 +1,12 @@
-from typing import List
+from typing import Union
 
 import strawberry
 import strawberry_django
 
-from gqlauth.core.directives import HasPermission, IsVerified
-from gqlauth.core.field_ import GqlAuthRootField, field
-from gqlauth.core.types_ import AuthOutput
-from gqlauth.user import arg_mutations, relay
+from gqlauth.core.directives import HasPermission, IsVerified, TokenRequired
+from gqlauth.core.field_ import field
+from gqlauth.core.types_ import GQLAuthError
+from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
 from testproject.sample.models import Apple
@@ -24,18 +24,18 @@ class AuthMutation:
     send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.field
 
     @field(directives=[HasPermission(permissions=["sample.can_eat"])])
-    def eat_apple(self, apple_id: int) -> AuthOutput["AppleType"]:
+    def eat_apple(self, apple_id: int) -> Union["AppleType", GQLAuthError]:
         apple = Apple.objects.get(id=apple_id)
         apple.is_eaten = True
         apple.save()
-        return AuthOutput(node=apple)
+        return apple
 
 
 @strawberry.type
 class Mutation:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[AuthMutation]:
-        return AuthOutput(node=AuthMutation())
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
+        return AuthMutation()
 
     captcha = Captcha.field
     token_auth = arg_mutations.ObtainJSONWebToken.field
@@ -50,17 +50,6 @@ class Mutation:
     verify_secondary_email = arg_mutations.VerifySecondaryEmail.field
 
 
-@strawberry.type
-class AuthQueries(UserQueries):
-    @field(
-        directives=[
-            IsVerified(),
-        ]
-    )
-    def apples(self) -> AuthOutput[List["AppleType"]]:
-        return AuthOutput(node=Apple.objects.all())
-
-
 @strawberry_django.type(model=Apple)
 class AppleType:
     color: strawberry.auto
@@ -69,47 +58,26 @@ class AppleType:
 
 
 @strawberry.type
+class AuthQueries(UserQueries):
+    @field(
+        directives=[
+            IsVerified(),
+        ]
+    )
+    def apple(self) -> Union[GQLAuthError, AppleType]:
+        return Apple.objects.latest("pk")
+
+
+@strawberry.type
 class Query:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[AuthQueries]:
-        return AuthOutput(node=AuthQueries())
+    @field(
+        directives=[
+            TokenRequired(),
+        ]
+    )
+    def auth_entry(self) -> Union[GQLAuthError, AuthQueries]:
+        return AuthQueries()
 
-
-@strawberry.type
-class AuthRelayMutation:
-    update_account = relay.UpdateAccount.field
-    archive_account = relay.ArchiveAccount.field
-    delete_account = relay.DeleteAccount.field
-    password_change = relay.PasswordChange.field
-    swap_emails = relay.SwapEmails.field
-    remove_secondary_email = relay.RemoveSecondaryEmail.field
-    send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
-
-
-@strawberry.type
-class RelayMutation:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[AuthRelayMutation]:
-        return AuthOutput(node=AuthRelayMutation())
-
-    captcha = Captcha.field
-    token_auth = relay.ObtainJSONWebToken.field
-    register = relay.Register.field
-    verify_token = relay.VerifyToken.field
-    resend_activation_email = relay.ResendActivationEmail.field
-    send_password_reset_email = relay.SendPasswordResetEmail.field
-    password_reset = relay.PasswordReset.field
-    password_set = relay.PasswordSet.field
-    refresh_token = relay.RefreshToken.field
-    revoke_token = relay.RevokeToken.field
-    verify_account = relay.VerifyAccount.field
-    verify_secondary_email = relay.VerifySecondaryEmail.field
-
-
-relay_schema = strawberry.Schema(
-    query=Query,
-    mutation=RelayMutation,
-)
 
 arg_schema = strawberry.Schema(
     query=Query,

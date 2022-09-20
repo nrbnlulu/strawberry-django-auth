@@ -13,19 +13,18 @@ from .testCases import (
 class RemoveSecondaryEmailCaseMixin(AbstractTestCase):
     def _arg_query(self, user: UserType):
         return """
-        mutation {
+        mutation MyMutation {
           authEntry {
-            node {
-              removeSecondaryEmail(password: "%s") {
-                errors
-                success
-              }
-            }
-            error{
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthMutation {
+              removeSecondaryEmail(password: "%s") {
+                success
+                errors
+              }
+            }
           }
         }
         """ % (
@@ -34,19 +33,18 @@ class RemoveSecondaryEmailCaseMixin(AbstractTestCase):
 
     def _relay_query(self, user: UserType):
         return """
-        mutation {
+        mutation MyMutation {
           authEntry {
-            node {
-              removeSecondaryEmail(input: {password: "%s"}) {
-                errors
-                success
-              }
-            }
-            error{
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthMutation {
+              removeSecondaryEmail(input: {password: "%s"}) {
+                success
+                errors
+              }
+            }
           }
         }
                 """ % (
@@ -60,7 +58,7 @@ class RemoveSecondaryEmailCaseMixin(AbstractTestCase):
             query=self.make_query(db_verified_with_secondary_email.user),
             user_status=db_verified_with_secondary_email,
         )
-        assert executed["node"]["removeSecondaryEmail"] == {"errors": None, "success": True}
+        assert executed["removeSecondaryEmail"] == {"errors": None, "success": True}
         user.refresh_from_db()
         assert not user.status.secondary_email
 
@@ -71,7 +69,7 @@ class RemoveSecondaryEmailCaseMixin(AbstractTestCase):
             query=self.make_query(db_verified_with_secondary_email.user),
             user_status=db_verified_with_secondary_email,
         )
-        assert executed["node"]["removeSecondaryEmail"] == {
+        assert executed["removeSecondaryEmail"] == {
             "errors": {"nonFieldErrors": Messages.SECONDARY_EMAIL_REQUIRED},
             "success": False,
         }

@@ -1,4 +1,4 @@
-from gqlauth.core.types_ import GqlAuthError
+from gqlauth.core.types_ import GQLAuthErrors
 
 from .testCases import (
     AbstractTestCase,
@@ -13,28 +13,26 @@ from .testCases import (
 class ArchiveAccountTestCaseMixin(AbstractTestCase):
     def _arg_query(self, user_status_type: UserStatusType):
         return """
-            mutation MyMutation {
-              authEntry {
-                node {
-                  archiveAccount(password: \"%s\") {
-                    node{
-                      success
-                      errors
-                    }
-                    error{
-                      code
-                      message
-                    }
-                    success
-                  }
+        mutation MyMutation {
+          authEntry {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on AuthMutation {
+              archiveAccount(password: \"%s\") {
+                ... on MutationNormalOutput {
+                  success
+                  errors
                 }
-                error {
+                ... on GQLAuthError {
                   code
                   message
                 }
-                success
               }
             }
+          }
+        }
         """ % (
             user_status_type.user.password
         )
@@ -43,24 +41,22 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
         return """
         mutation MyMutation {
           authEntry {
-            node {
-              archiveAccount(input: {password: \"%s\"}) {
-                        node{
-                  success
-                  errors
-                }
-                error{
-                  code
-                  message
-                }
-                success
-              }
-            }
-            error {
+            ... on GQLAuthError {
               code
               message
             }
-            success
+            ... on AuthMutation {
+              archiveAccount(input: {password: \"%s\"}) {
+                ... on MutationNormalOutput {
+                  success
+                  errors
+                }
+                ... on GQLAuthError {
+                  code
+                  message
+                }
+              }
+            }
           }
         }
         """ % (
@@ -76,14 +72,7 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
         db_verified_user_status.user.password = self.WRONG_PASSWORD
         # execute query with bad user password.
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert executed == {
-            "node": None,
-            "error": {
-                "code": GqlAuthError.INVALID_TOKEN.name,
-                "message": GqlAuthError.INVALID_TOKEN.value,
-            },
-            "success": False,
-        }
+        assert executed["message"] == GQLAuthErrors.INVALID_TOKEN.value
 
     def test_invalid_password(self, db_verified_user_status, wrong_pass_ver_user_status_type):
         """
@@ -92,7 +81,7 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
 
         query = self.make_query(wrong_pass_ver_user_status_type)
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert executed["node"]["archiveAccount"]["node"] == {
+        assert executed["archiveAccount"] == {
             "success": False,
             "errors": {"password": [{"message": "Invalid password.", "code": "invalid_password"}]},
         }
@@ -104,7 +93,7 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(db_verified_user_status)
         assert not db_verified_user_status.user.obj.status.archived
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert executed["node"]["archiveAccount"]["node"] == {"errors": None, "success": True}
+        assert executed["archiveAccount"] == {"errors": None, "success": True}
         db_verified_user_status.user.obj.refresh_from_db()
         assert db_verified_user_status.user.obj.status.archived
 
@@ -123,7 +112,7 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(db_verified_user_status)
         assert not user.status.archived
         executed = self.make_request(query=query, user_status=db_verified_user_status)
-        assert executed["node"]["archiveAccount"]["node"] == {"errors": None, "success": True}
+        assert executed["archiveAccount"] == {"errors": None, "success": True}
         user.refresh_from_db()
         assert user.status.archived
         refresh_tokens = user.refresh_tokens.all()
@@ -144,14 +133,7 @@ class ArchiveAccountTestCaseMixin(AbstractTestCase):
         query = self.make_query(wrong_pass_unverified_user_status_type)
         assert not user.status.archived
         executed = self.make_request(query=query, user_status=db_unverified_user_status)
-        assert executed["node"]["archiveAccount"] == {
-            "node": None,
-            "error": {
-                "code": GqlAuthError.NOT_VERIFIED.name,
-                "message": GqlAuthError.NOT_VERIFIED.value,
-            },
-            "success": False,
-        }
+        assert executed["archiveAccount"]["message"] == GQLAuthErrors.NOT_VERIFIED.value
         assert not user.status.archived
 
 
