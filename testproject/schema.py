@@ -1,3 +1,4 @@
+import asyncio
 from typing import Union
 
 import strawberry
@@ -79,7 +80,27 @@ class Query:
         return AuthQueries()
 
 
-arg_schema = strawberry.Schema(
-    query=Query,
-    mutation=Mutation,
-)
+@strawberry.type
+class Integer:
+    """
+    graphql unions cannot contain scalars.
+    """
+
+    node: int
+
+
+@strawberry.type
+class Subscription:
+    @field(
+        is_subscription=True,
+        directives=[
+            TokenRequired(),
+        ],
+    )
+    async def sub(self, target: int = 2) -> Union[Integer, GQLAuthError]:
+        for i in range(target):
+            await asyncio.sleep(0.01)
+            yield Integer(node=i)
+
+
+arg_schema = strawberry.Schema(query=Query, mutation=Mutation, subscription=Subscription)

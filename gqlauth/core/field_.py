@@ -1,10 +1,12 @@
 from typing import Any, Callable, List, Union
 
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from strawberry import UNSET
 from strawberry.field import StrawberryField
 from strawberry_django import django_resolver
 from strawberry_django.fields.field import StrawberryDjangoField
+from strawberry_django.utils import is_async
 
 from gqlauth.core.directives import BaseAuthDirective
 from gqlauth.core.types_ import GQLAuthError
@@ -28,6 +30,8 @@ class GqlAuthField(StrawberryDjangoField):
         return super().get_result(source, info, args, kwargs)
 
     def get_result(self, source, info, args, kwargs):
+        if is_async():
+            return sync_to_async(self._resolve)(source, info, args, kwargs)
         return self._resolve(source, info, args, kwargs)
 
 
