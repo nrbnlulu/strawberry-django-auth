@@ -113,8 +113,7 @@ MIDDLEWARE = [
 
 
 AUTHENTICATION_BACKENDS = [
-    'strawberry_django_jwt.backends.JSONWebTokenBackend',
-    'django.contrib.auth.backends.ModelBackend',
+        "django.contrib.auth.backends.ModelBackend",
 ]
 ```
 We will disable captcha validation for now, just for ease of setup.
@@ -152,6 +151,11 @@ Add the following to code:
 
 import strawberry
 from gqlauth.user.queries import UserQueries
+from gqlauth.core.field_ import field
+from gqlauth.core.types_ import GQLAuthError
+from gqlauth.core.directives import TokenRequired
+
+from typing import Union
 ```
 === "Default"
     ```py
@@ -186,24 +190,28 @@ class MyAuthorizedQueries(UserQueries):
         public: UserType = UserQueries.public_user
         # etc...
     ```
-!!! Info "GqlAuthRootField"
-    `GqlAuthRootField` is responsible for validating the token you have in the headers and
+!!! Info "TokenRequired"
+    `TokenRequired` directive is responsible for validating the token you have in the headers and
     injecting the user instance inside `info.context.user`.
     **Any field that requires to interaction with the user (i.e check permissions) must be present
-    beneath this field, otherwise the user is not accessible.**
+    beneath this directive, otherwise the user is not accessible.**
     This is the case for both mutations, queries and subscriptions.
+    You must also use our version of `strawberry.field`
+    because normally directives doesn't do anything.
 
 ```py
 @strawberry.type
 class Query:
-    @GqlAuthRootField()  # ensures that only logged in users can access what's beneath.
-    def auth_entry(self) -> AuthOutput[MyAuthorizedQueries]:
-        return AuthOutput(success=True, node=MyAuthorizedQueries())
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[GQLAuthError, MyAuthorizedQueries]:
+        return MyAuthorizedQueries()
 ```
 !!! Warning
-    **Even though you can chose what mutations to include,
+    **Even though you can choose what mutations to include,
     you must include mutations that requires authentication
-    under a GqlAuthRootField, otherwise you will just get graphql errors instead of nice outputs.**
+    under or in a field with `TokenRequired` directive,
+    otherwise you will just get graphql errors instead of nice outputs.**
+
 ```py
 @strawberry.type
 class AuthMutation:
@@ -220,8 +228,8 @@ class AuthMutation:
 
 @strawberry.type
 class Mutation:
-    @GqlAuthRootField()
-    def auth_entry(self) -> AuthOutput[AuthMutation]:
+    @field(directives=[TokenRequired()])
+    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
         return AuthOutput(node=AuthMutation())
 
     # these are mutation that does not require authentication.
@@ -535,7 +543,7 @@ search your schema for ``verify_account``:
 should look like this:
 ![Verify-account](images/verify-acount-screen-shot.png)
 
-#### Now let's try to verify the account:
+Now let's try to verify the account:
 
 !!! gql
     === "arg_mutation"
@@ -667,19 +675,18 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
 !!! Fail "No headers supplied will give nice error message"
     === "query"
         ```graphql
-        query {
+        query MyQuery {
           authEntry {
-            node {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on  MyAuthorizedQueries{
               me {
                 username
                 verified
               }
             }
-            error {
-              code
-              message
-            }
-            success
           }
         }
         ```
@@ -688,12 +695,8 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
         {
           "data": {
             "authEntry": {
-              "node": null,
-              "error": {
-                "code": "INVALID_TOKEN",
-                "message": "Invalid token."
-              },
-              "success": false
+              "code": "INVALID_TOKEN",
+              "message": "Invalid token."
             }
           }
         }
@@ -704,19 +707,18 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
     ![img.png](images/headers_graphiql.png)
     === "query"
         ```graphql
-        query {
+        query MyQuery {
           authEntry {
-            node {
+            ... on GQLAuthError {
+              code
+              message
+            }
+            ... on  MyAuthorizedQueries{
               me {
                 username
                 verified
               }
             }
-            error {
-              code
-              message
-            }
-            success
           }
         }
         ```
@@ -725,21 +727,17 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
         {
           "data": {
             "authEntry": {
-              "node": {
-                "me": {
-                  "username": "new_user",
-                  "verified": true
-                }
-              },
-              "error": null,
-              "success": true
+              "me": {
+                "username": "new_user",
+                "verified": true
+              }
             }
           }
         }
         ```
 
 !!! tip ""
-    If it fails because of the token (in case you took some time and it has expired), make the login again and get a new token.
+    If it fails because of the token (in case you took some time, and it has expired), make the login again and get a new token.
 
 ---
 

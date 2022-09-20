@@ -95,6 +95,11 @@ class GqlAuthSettings()
 > retrieve user based on the decoded token.
 > *This filed must be unique in the database*
 
+### JWT\_TOKEN\_FINDER
+
+> A hook called by `GqlAuthRootField` to find the token, **remember to strip the "JWT " prefix
+> if you override this.**
+
 ### JWT\_EXPIRATION\_DELTA
 
 > Timedelta added to `utcnow()` to set the expiration time.
