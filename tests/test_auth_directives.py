@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+from strawberry.types import Info
 
 from gqlauth.core.directives import HasPermission, IsAuthenticated, IsVerified
 from gqlauth.core.types_ import GQLAuthErrors
@@ -8,27 +8,46 @@ from tests.testCases import AbstractTestCase, ArgTestCase, AsyncArgTestCase
 USER_MODEL = get_user_model()
 
 
+class DottedDict(dict):
+    def __getattr__(self, item):
+        return self.__getitem__(item)
+
+
+def fake_info(user) -> Info:
+    res = DottedDict(
+        {"context": DottedDict({"user": user}), "path": DottedDict({"key": "some field"})}
+    )
+    return res
+
+
 class TestAuthDirectives(ArgTestCase):
     def test_is_authenticated_fails(self):
-        res = IsAuthenticated().resolve_permission(AnonymousUser(), None, None)
+        res = IsAuthenticated().resolve_permission(None, fake_info(None), None, None)
         assert res.code == GQLAuthErrors.UNAUTHENTICATED
         assert res.message == GQLAuthErrors.UNAUTHENTICATED.value
 
     def test_is_authenticated_success(self, db_verified_user_status):
         assert (
-            IsAuthenticated().resolve_permission(db_verified_user_status.user.obj, None, None)
+            IsAuthenticated().resolve_permission(
+                None, fake_info(db_verified_user_status.user.obj), None, None
+            )
             is None
         )
 
     def test_is_verified_fails(self, db_unverified_user_status):
-        res = IsVerified().resolve_permission(db_unverified_user_status.user.obj, None, None)
+        res = IsVerified().resolve_permission(
+            None, fake_info(db_unverified_user_status.user.obj), None, None
+        )
         assert res.code == GQLAuthErrors.NOT_VERIFIED
         assert res.message == GQLAuthErrors.NOT_VERIFIED.value
 
     def test_is_verified_success(self, db_verified_user_status):
         assert (
             IsVerified().resolve_permission(
-                db_verified_user_status.user.obj, None, None, None, None
+                None,
+                fake_info(db_verified_user_status.user.obj),
+                None,
+                None,
             )
             is None
         )
@@ -41,14 +60,8 @@ class TestAuthDirectives(ArgTestCase):
             ]
         )
 
-        class FakePath:
-            key = "test"
-
-        class FakeInfo:
-            path = FakePath
-
         assert (
-            perm.resolve_permission(user, None, FakeInfo).code
+            perm.resolve_permission(None, fake_info(user), None, None).code
             is GQLAuthErrors.NO_SUFFICIENT_PERMISSIONS
         )
 
@@ -59,7 +72,7 @@ class TestAuthDirectives(ArgTestCase):
                 "sample.can_eat",
             ]
         )
-        assert perm.resolve_permission(user, None, None) is None
+        assert perm.resolve_permission(None, fake_info(user), None, None) is None
 
 
 class IsVerifiedDirectivesInSchemaMixin(AbstractTestCase):

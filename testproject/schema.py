@@ -79,6 +79,10 @@ class Query:
     def auth_entry(self) -> Union[GQLAuthError, AuthQueries]:
         return AuthQueries()
 
+    @field(directives=[TokenRequired(), IsVerified()])
+    def batched_field(self) -> Union["AppleType", GQLAuthError]:
+        return Apple.objects.latest("pk")
+
 
 @strawberry.type
 class Integer:

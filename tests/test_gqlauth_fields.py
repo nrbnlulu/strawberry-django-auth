@@ -21,6 +21,36 @@ class GqlAuthFieldInSchemaMixin(AbstractTestCase):
                 "message": GQLAuthErrors.EXPIRED_TOKEN.value,
             }
 
+    batched_field_query = """
+    query MyQuery {
+      batchedField {
+        ... on AppleType {
+          __typename
+          name
+          isEaten
+          color
+        }
+        ... on GQLAuthError {
+          __typename
+          code
+          message
+        }
+      }
+    }
+    """
+
+    def test_batched_field_fails(
+        self, db_unverified_user_status, db_apple, allow_login_not_verified
+    ):
+        res = self.make_request(
+            query=self.batched_field_query, user_status=db_unverified_user_status
+        )
+        assert res["code"] == GQLAuthErrors.NOT_VERIFIED.name
+
+    def test_batched_field_success(self, db_verified_user_status, db_apple):
+        res = self.make_request(query=self.batched_field_query, user_status=db_verified_user_status)
+        assert res["name"] == db_apple.name
+
 
 class TestGqlAuthRootFieldInSchema(GqlAuthFieldInSchemaMixin, ArgTestCase):
     ...
