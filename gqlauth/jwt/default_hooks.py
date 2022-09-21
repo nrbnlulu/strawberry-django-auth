@@ -16,7 +16,8 @@ JWT_PREFIX = "JWT "
 
 
 def token_finder(info: Info) -> Optional[str]:
-    if token := info.context.request.headers.get("Authorization", None):
+    headers = info.context.request.headers
+    if token := headers.get("authorization", None) or headers.get("Authorization", None):
         assert isinstance(token, str)
         return token.strip(JWT_PREFIX)
     return None

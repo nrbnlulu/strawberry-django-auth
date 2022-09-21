@@ -1,11 +1,11 @@
 import asyncio
-from typing import Union
+from typing import AsyncGenerator, Union
 
 import strawberry
 import strawberry_django
 
 from gqlauth.core.directives import HasPermission, IsVerified, TokenRequired
-from gqlauth.core.field_ import field
+from gqlauth.core.field_ import field, subscription
 from gqlauth.core.types_ import GQLAuthError
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
@@ -91,16 +91,16 @@ class Integer:
 
 @strawberry.type
 class Subscription:
-    @field(
-        is_subscription=True,
+    @subscription(
         directives=[
             TokenRequired(),
         ],
+        is_subscription=True,
     )
-    async def sub(self, target: int = 2) -> Union[Integer, GQLAuthError]:
+    async def count(self, target: int = 10) -> AsyncGenerator[Union[Integer, GQLAuthError], None]:
         for i in range(target):
-            await asyncio.sleep(0.01)
             yield Integer(node=i)
+            await asyncio.sleep(0.5)
 
 
 arg_schema = strawberry.Schema(query=Query, mutation=Mutation, subscription=Subscription)

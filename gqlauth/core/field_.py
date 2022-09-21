@@ -1,4 +1,5 @@
-from typing import Any, Callable, List, Union
+from functools import partial
+from typing import Any, AsyncGenerator, Callable, List, Union
 
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
@@ -21,16 +22,31 @@ class GqlAuthField(StrawberryDjangoField):
     def _resolve(self, source, info, args, kwargs) -> Union[GQLAuthError, Any]:
         user = get_user(info)
         for directive in self.directives:
-
             if isinstance(directive, BaseAuthDirective) and (
                 error := directive.resolve_permission(user, source, info, args, kwargs)
             ):
                 return error
-
         return super().get_result(source, info, args, kwargs)
 
+    async def _resolve_subscriptions(
+        self, source, info, args, kwargs
+    ) -> Union[AsyncGenerator, GQLAuthError]:
+        user = get_user(info)
+        for directive in self.directives:
+            if isinstance(directive, BaseAuthDirective) and (
+                error := await sync_to_async(directive.resolve_permission)(
+                    user, source, info, args, kwargs
+                )
+            ):
+                yield error
+                return
+        async for res in super().get_result(source, info, args, kwargs):
+            yield res
+
     def get_result(self, source, info, args, kwargs):
-        if is_async():
+        if self.is_subscription:
+            return self._resolve_subscriptions(source, info, args, kwargs)
+        elif is_async():
             return sync_to_async(self._resolve)(source, info, args, kwargs)
         return self._resolve(source, info, args, kwargs)
 
@@ -58,3 +74,6 @@ def field(
         resolver = django_resolver(resolver)
         field_ = field_(resolver)
     return field_
+
+
+subscription = partial(field, is_subscription=True)
