@@ -80,7 +80,8 @@ class Query:
         return AuthQueries()
 
     @field(directives=[TokenRequired(), IsVerified()])
-    def batched_field(self) -> Union["AppleType", GQLAuthError]:
+    @staticmethod
+    def batched_field() -> Union["AppleType", GQLAuthError]:
         return Apple.objects.latest("pk")
 
 
