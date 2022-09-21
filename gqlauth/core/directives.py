@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.utils.translation import gettext as _
 from jwt import PyJWTError
 import strawberry
@@ -11,7 +10,7 @@ from strawberry.types import Info
 
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
-from gqlauth.core.utils import get_status
+from gqlauth.core.utils import get_status, get_user
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.settings import gqlauth_settings as app_settings
 
@@ -24,7 +23,6 @@ class BaseAuthDirective(ABC):
     @abstractmethod
     def resolve_permission(
         self,
-        user: Union[USER_MODEL, AnonymousUser],
         source: Any,
         info: Info,
         args: list,
@@ -41,12 +39,7 @@ class BaseAuthDirective(ABC):
 )
 class TokenRequired(BaseAuthDirective):
     def resolve_permission(
-        self,
-        user: Union[USER_MODEL, AnonymousUser],
-        source: Any,
-        info: Info,
-        args: list,
-        kwargs: dict,
+        self, source: Any, info: Info, args: list, kwargs: dict
     ) -> Optional[GQLAuthError]:
         token = app_settings.JWT_TOKEN_FINDER(info)
         try:
@@ -68,7 +61,8 @@ class TokenRequired(BaseAuthDirective):
     description="This field requires authentication",
 )
 class IsAuthenticated(BaseAuthDirective):
-    def resolve_permission(self, user: USER_MODEL, source: Any, info: Info, *args, **kwargs):
+    def resolve_permission(self, source: Any, info: Info, args, kwargs):
+        user = get_user(info)
         if not user.is_authenticated:
             return GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
         return None
@@ -81,7 +75,8 @@ class IsAuthenticated(BaseAuthDirective):
     description="This field requires the user to be verified",
 )
 class IsVerified(BaseAuthDirective):
-    def resolve_permission(self, user: USER_MODEL, source: Any, info: Info, *args, **kwargs):
+    def resolve_permission(self, source: Any, info: Info, args, kwargs):
+        user = get_user(info)
         if (status := get_status(user)) and status.verified:
             return None
         return GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
@@ -96,7 +91,8 @@ class IsVerified(BaseAuthDirective):
 class HasPermission(BaseAuthDirective):
     permissions: strawberry.Private[List[str]]
 
-    def resolve_permission(self, user: USER_MODEL, source: Any, info: Info, *args, **kwargs):
+    def resolve_permission(self, source: Any, info: Info, args, kwargs):
+        user = get_user(info)
         for permission in self.permissions:
             if not user.has_perm(permission):
                 return GQLAuthError(

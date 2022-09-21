@@ -11,7 +11,6 @@ from strawberry_django.utils import is_async
 
 from gqlauth.core.directives import BaseAuthDirective
 from gqlauth.core.types_ import GQLAuthError
-from gqlauth.core.utils import get_user
 
 __all__ = ["field"]
 
@@ -20,10 +19,9 @@ USER_MODEL = get_user_model()
 
 class GqlAuthField(StrawberryDjangoField):
     def _resolve(self, source, info, args, kwargs) -> Union[GQLAuthError, Any]:
-        user = get_user(info)
         for directive in self.directives:
             if isinstance(directive, BaseAuthDirective) and (
-                error := directive.resolve_permission(user, source, info, args, kwargs)
+                error := directive.resolve_permission(source, info, args, kwargs)
             ):
                 return error
         return super().get_result(source, info, args, kwargs)
@@ -31,11 +29,10 @@ class GqlAuthField(StrawberryDjangoField):
     async def _resolve_subscriptions(
         self, source, info, args, kwargs
     ) -> Union[AsyncGenerator, GQLAuthError]:
-        user = get_user(info)
         for directive in self.directives:
             if isinstance(directive, BaseAuthDirective) and (
                 error := await sync_to_async(directive.resolve_permission)(
-                    user, source, info, args, kwargs
+                    source, info, args, kwargs
                 )
             ):
                 yield error
