@@ -1,10 +1,11 @@
-from typing import Union
+import asyncio
+from typing import AsyncGenerator, Union
 
 import strawberry
 import strawberry_django
 
 from gqlauth.core.directives import HasPermission, IsVerified, TokenRequired
-from gqlauth.core.field_ import field
+from gqlauth.core.field_ import field, subscription
 from gqlauth.core.types_ import GQLAuthError
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
@@ -79,7 +80,27 @@ class Query:
         return AuthQueries()
 
 
-arg_schema = strawberry.Schema(
-    query=Query,
-    mutation=Mutation,
-)
+@strawberry.type
+class Integer:
+    """
+    graphql unions cannot contain scalars.
+    """
+
+    node: int
+
+
+@strawberry.type
+class Subscription:
+    @subscription(
+        directives=[
+            TokenRequired(),
+        ],
+        is_subscription=True,
+    )
+    async def count(self, target: int = 10) -> AsyncGenerator[Union[Integer, GQLAuthError], None]:
+        for i in range(target):
+            yield Integer(node=i)
+            await asyncio.sleep(0.5)
+
+
+arg_schema = strawberry.Schema(query=Query, mutation=Mutation, subscription=Subscription)

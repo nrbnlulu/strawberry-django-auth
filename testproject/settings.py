@@ -67,6 +67,8 @@ TEMPLATES = [
     }
 ]
 
+ASGI_APPLICATION = "testproject.asgi.application"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -74,6 +76,9 @@ DATABASES = {
             "timeout": 1000000,
         },
         "NAME": str(BASE_DIR / "db.sqlite3"),
+        "TEST": {
+            "NAME": "test_database",
+        },
     }
 }
 

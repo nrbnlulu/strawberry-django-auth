@@ -116,6 +116,8 @@ class UserStatusType:
 class PATHS:
     RELAY = r"/relay_schema"
     ARG = r"/arg_schema"
+    ASYNC_ARG = r"/arg_schema_async"
+    ASYNC_RELAY = r"/relay_schema_async"
 
 
 class AbstractTestCase(ABC):
@@ -139,6 +141,9 @@ class AbstractTestCase(ABC):
           }
         }
     """
+
+    IS_RELAY = False
+    IS_ASYNC = False
 
     def make_query(self, *args, **kwargs) -> str:
         raise NotImplementedError
@@ -291,19 +296,27 @@ class TestBase(AbstractTestCase):
             initial += f', identifier: "{cap.uuid}" ,userEntry: "{cap.text}"'
         return initial
 
+    def _get_path(self):
+        if self.IS_RELAY:
+            path = PATHS.RELAY
+            if self.IS_ASYNC:
+                path = PATHS.ASYNC_RELAY
+        elif self.IS_ASYNC:
+            path = PATHS.ASYNC_ARG
+        else:
+            path = PATHS.ARG
+        return path
+
     def make_request(
         self,
         query: str,
         user_status: UserStatusType = None,
         raw: bool = False,
         no_login_query: bool = False,
-        path: Union[
-            "PATHS.ARG",
-            "PATHS.RELAY",
-        ] = PATHS.ARG,
+        path: Union["PATHS.ARG", "PATHS.RELAY", "PATHS.ASYNC_ARG", "PATHS.ASYNC_RELAY"] = None,
     ) -> dict:
-        if self.RELAY:
-            path = PATHS.RELAY
+        if not path:
+            path = self._get_path()
 
         client = Client(raise_request_exception=True)
         headers = {}
@@ -343,10 +356,10 @@ class TestBase(AbstractTestCase):
         path: Union[
             "PATHS.ARG",
             "PATHS.RELAY",
-        ] = PATHS.ARG,
+        ] = None,
     ) -> dict:
-        if self.RELAY:
-            path = PATHS.RELAY
+        if not path:
+            path = self._get_path()
 
         client = AsyncClient(raise_request_exception=True)
 
@@ -381,7 +394,7 @@ class TestBase(AbstractTestCase):
 
 
 class RelayTestCase(TestBase):
-    RELAY = True
+    IS_RELAY = True
 
     # TODO: is that used anywhere?
     def make_query(self, *args, **kwargs):
@@ -491,10 +504,11 @@ class ArgTestCase(TestBase):
         )
 
 
-class AsyncTestCaseMixin:
-    # TODO: Why is that sync?
+class AsyncTestCaseMixin(AbstractTestCase):
     def make_request(self, *args, **kwargs):
         return async_to_sync(self.amake_request)(*args, **kwargs)
+
+    IS_ASYNC = True
 
 
 class AsyncArgTestCase(AsyncTestCaseMixin, ArgTestCase):

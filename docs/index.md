@@ -1,6 +1,6 @@
 # Strawberry Graphql Auth
 ![Logo](./images/logo.png){ align=center }
-*JWT Authentication / Authorization system for django and strawberry.*
+*JWT Authentication / Authorization system for strawberry-django.*
 
 
 [![Tests](https://img.shields.io/github/workflow/status/nrbnlulu/strawberry-django-auth/Run%20Tests?label=Tests&style=for-the-badge)](https://github.com/nrbnlulu/strawberry-django-auth/actions/workflows/tests.yml)
