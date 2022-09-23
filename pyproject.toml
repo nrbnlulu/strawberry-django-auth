@@ -34,7 +34,7 @@ django-admin-display = "^1.3.0"
 packaging = ">=20.0,<30.0"
 importlib-metadata = { version = ">=1.7,<5.0", python = "<=3.7" }
 Pillow = "^9.2.0"
-strawberry-graphql = ">=0.128,<0.132"
+strawberry-graphql = ">=0.128,<0.133"
 strawberry-django-plus = "^1.25.2"
 
 [tool.poetry.dev-dependencies]
