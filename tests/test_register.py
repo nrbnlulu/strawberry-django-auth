@@ -10,6 +10,7 @@ from gqlauth.core.constants import Messages
 from gqlauth.user.signals import user_registered
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -18,7 +19,7 @@ from .testCases import (
 )
 
 
-class RegisterTestCaseMixin:
+class RegisterTestCaseMixin(AbstractTestCase):
     def _generate_register_args(self, user: UserType) -> str:
         initial = f'password1: "{user.password}",  password2: "{user.password}"'
         if settings.GQL_AUTH.REGISTER_REQUIRE_CAPTCHA:
@@ -67,7 +68,7 @@ class RegisterTestCaseMixin:
         assert not executed["success"]
         assert executed["errors"]
 
-    def test_register_twice_fails(self, current_markers):
+    def test_register_twice_fails(self, current_markers, db_verified_user_status):
         """
         Register user, fail to register same user again
         """
@@ -87,6 +88,7 @@ class RegisterTestCaseMixin:
         assert not executed["errors"]
         assert signal_received
         # try to register again
+        us.email = "some@else.com"
         executed = self.make_request(query=self.make_query(us))
         assert not executed["success"]
         assert executed["errors"][self.CC_USERNAME_FIELD]
@@ -94,7 +96,7 @@ class RegisterTestCaseMixin:
         # in setting_b we don't have email field os there is only one unique field.
         if "not settings_b" in current_markers:
             us1 = self.verified_user_status_type().user
-            us1.email = us.email
+            us1.email = db_verified_user_status.user.obj.email
             executed = self.make_request(query=self.make_query(us1))
             assert not executed["success"]
             assert executed["errors"]["email"]

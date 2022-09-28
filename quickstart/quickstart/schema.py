@@ -32,9 +32,6 @@ class AuthMutation:
     archive_account = mutations.ArchiveAccount.field
     delete_account = mutations.DeleteAccount.field
     password_change = mutations.PasswordChange.field
-    swap_emails = mutations.SwapEmails.field
-    remove_secondary_email = mutations.RemoveSecondaryEmail.field
-    send_secondary_email_activation = mutations.SendSecondaryEmailActivation.field
 
 
 @strawberry.type
@@ -53,7 +50,6 @@ class Mutation:
     password_set = mutations.PasswordSet.field
     refresh_token = mutations.RefreshToken.field
     revoke_token = mutations.RevokeToken.field
-    verify_secondary_email = mutations.VerifySecondaryEmail.field
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)

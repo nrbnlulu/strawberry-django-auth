@@ -7,7 +7,7 @@ from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Case
 from django.db.models import Value as Val
 from django.db.models import When
@@ -18,8 +18,13 @@ from django.utils.translation import gettext_lazy as _
 from strawberry.types import Info
 
 from gqlauth.core.constants import TokenAction
-from gqlauth.core.exceptions import EmailAlreadyInUse, UserAlreadyVerified, WrongUsage
-from gqlauth.core.utils import get_payload_from_token, get_request, get_token
+from gqlauth.core.exceptions import UserAlreadyVerified
+from gqlauth.core.utils import (
+    USER_UNION,
+    get_payload_from_token,
+    get_request,
+    get_token,
+)
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -38,7 +43,6 @@ class UserStatus(models.Model):
     )
     verified = models.BooleanField(default=False)
     archived = models.BooleanField(default=False)
-    secondary_email = models.EmailField(blank=True, null=True)
 
     def __str__(self):
         return "%s - status" % (self.user)
@@ -108,38 +112,6 @@ class UserStatus(models.Model):
         subject = app_settings.EMAIL_SUBJECT_PASSWORD_RESET
         return self.send(subject, template, email_context, *args, **kwargs)
 
-    def send_secondary_email_activation(self, info, email):
-        if not self.email_is_free(email):
-            raise EmailAlreadyInUse
-        email_context = self.get_email_context(
-            info,
-            app_settings.ACTIVATION_SECONDARY_EMAIL_PATH_ON_EMAIL,
-            TokenAction.ACTIVATION_SECONDARY_EMAIL,
-            secondary_email=email,
-        )
-        template = app_settings.EMAIL_TEMPLATE_SECONDARY_EMAIL_ACTIVATION
-        subject = app_settings.EMAIL_SUBJECT_SECONDARY_EMAIL_ACTIVATION
-        return self.send(subject, template, email_context, recipient_list=[email])
-
-    @classmethod
-    def email_is_free(cls, email):
-        try:
-            USER_MODEL._default_manager.get(**{USER_MODEL.EMAIL_FIELD: email})
-            return False
-        except Exception:
-            pass
-        try:
-            UserStatus._default_manager.get(secondary_email=email)
-            return False
-        except Exception:
-            pass
-        return True
-
-    @classmethod
-    def clean_email(cls, email=False):
-        if email and cls.email_is_free(email) is False:
-            raise EmailAlreadyInUse
-
     @classmethod
     def verify(cls, token):
         payload = get_payload_from_token(
@@ -155,21 +127,6 @@ class UserStatus(models.Model):
             raise UserAlreadyVerified
 
     @classmethod
-    def verify_secondary_email(cls, token):
-        payload = get_payload_from_token(
-            token,
-            TokenAction.ACTIVATION_SECONDARY_EMAIL,
-            app_settings.EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN,
-        )
-        secondary_email = payload.pop("secondary_email")
-        if not cls.email_is_free(secondary_email):
-            raise EmailAlreadyInUse
-        user = USER_MODEL._default_manager.get(**payload)
-        user_status = cls.objects.get(user=user)
-        user_status.secondary_email = secondary_email
-        user_status.save(update_fields=["secondary_email"])
-
-    @classmethod
     def unarchive(cls, user):
         user_status = cls.objects.get(user=user)
         if user_status.archived is True:
@@ -182,24 +139,6 @@ class UserStatus(models.Model):
         if user_status.archived is False:
             user_status.archived = True
             user_status.save(update_fields=["archived"])
-
-    def swap_emails(self):
-        if not self.secondary_email:
-            raise WrongUsage
-        with transaction.atomic():
-            EMAIL_FIELD = USER_MODEL.EMAIL_FIELD
-            primary = getattr(self.user, EMAIL_FIELD)
-            setattr(self.user, EMAIL_FIELD, self.secondary_email)
-            self.secondary_email = primary
-            self.user.save(update_fields=[EMAIL_FIELD])
-            self.save(update_fields=["secondary_email"])
-
-    def remove_secondary_email(self):
-        if not self.secondary_email:
-            raise WrongUsage
-        with transaction.atomic():
-            self.secondary_email = None
-            self.save(update_fields=["secondary_email"])
 
 
 class RefreshTokenQuerySet(models.QuerySet):
@@ -214,7 +153,7 @@ class RefreshTokenQuerySet(models.QuerySet):
         )
 
 
-class AbstractRefreshToken(models.Model):
+class RefreshToken(models.Model):
     """
     Refresh token is a random set of bytes decoded to a string that is referring a user.
     It can be used to retrieve a new token without the need to login again.
@@ -248,7 +187,6 @@ class AbstractRefreshToken(models.Model):
     objects = RefreshTokenQuerySet.as_manager()
 
     class Meta:
-        abstract = True
         verbose_name = _("refresh token")
         verbose_name_plural = _("refresh tokens")
         unique_together = ("token", "revoked")
@@ -257,7 +195,7 @@ class AbstractRefreshToken(models.Model):
         return self.token
 
     @classmethod
-    def from_user(cls, user: USER_MODEL) -> "AbstractRefreshToken":
+    def from_user(cls, user: USER_UNION) -> "RefreshToken":
         token = binascii.hexlify(
             os.urandom(app_settings.JWT_REFRESH_TOKEN_N_BYTES),
         ).decode()
@@ -265,7 +203,3 @@ class AbstractRefreshToken(models.Model):
         obj = cls.objects.create(user=user, token=token)
         obj.save()
         return obj
-
-
-class RefreshToken(AbstractRefreshToken):
-    """RefreshToken default model"""

@@ -29,10 +29,8 @@ class TestQueries(ArgTestCase):
                 isSuperuser
                 lastName
                 %s
-                secondaryEmail
                 status {
                   archived
-                  secondaryEmail
                   verified
                 }
                 verified

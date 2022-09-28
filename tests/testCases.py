@@ -4,7 +4,7 @@ import dataclasses
 from dataclasses import asdict, dataclass
 import pprint
 import re
-from typing import Any, Iterable, Protocol, Union
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
 from asgiref.sync import async_to_sync, sync_to_async
 from django.conf import settings as django_settings
@@ -17,10 +17,12 @@ import pytest
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.captcha.models import Captcha
-from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings
 from gqlauth.settings_type import GqlAuthSettings
 from testproject.sample.models import Apple
+
+if TYPE_CHECKING:
+    from gqlauth.core.utils import UserProto
 
 
 class FitProvider(BaseProvider):
@@ -52,15 +54,11 @@ def inject_fields(fields: Iterable[str]):
     return wrapped
 
 
-class UserProto(Protocol):
-    status: UserStatus
-
-
 @dataclass
 @inject_fields(additional_fields)
 class UserType:
     password: str = fake.password()
-    obj: Union[UserProto, AbstractBaseUser] = None
+    obj: Union["UserProto", AbstractBaseUser] = None
     username_field: str = None
 
     @classmethod
@@ -82,7 +80,6 @@ class UserType:
 class UserStatusType:
     verified: bool
     archived: bool = False
-    secondary_email: str = ""
     user: Union[UserModel, UserType] = None
 
     def create(self):
@@ -220,14 +217,6 @@ class AbstractTestCase(ABC):
         us = db_verified_user_status.user.obj
         perm = ct.permission_set.get(codename="can_eat")
         us.user_permissions.set((perm,))
-        return db_verified_user_status
-
-    @pytest.fixture()
-    def db_verified_with_secondary_email(self, db_verified_user_status) -> UserStatusType:
-        user = db_verified_user_status.user.obj
-        user.status.secondary_email = "secondary@email.com"
-        user.status.save()
-        user.refresh_from_db()
         return db_verified_user_status
 
     @pytest.fixture()
@@ -434,11 +423,9 @@ class RelayTestCase(TestBase):
               logentrySet {{
                 pk
               }}
-              secondaryEmail
               status {{
                 archived
                 verified
-                secondaryEmail
               }}
               verified
             }}
@@ -489,11 +476,9 @@ class ArgTestCase(TestBase):
               logentrySet {{
                 pk
               }}
-              secondaryEmail
               status {{
                 archived
                 verified
-                secondaryEmail
               }}
               verified
             }}

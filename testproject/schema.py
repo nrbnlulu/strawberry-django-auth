@@ -20,9 +20,6 @@ class AuthMutation:
     archive_account = arg_mutations.ArchiveAccount.field
     delete_account = arg_mutations.DeleteAccount.field
     password_change = arg_mutations.PasswordChange.field
-    swap_emails = arg_mutations.SwapEmails.field
-    remove_secondary_email = arg_mutations.RemoveSecondaryEmail.field
-    send_secondary_email_activation = arg_mutations.SendSecondaryEmailActivation.field
 
     @field(directives=[HasPermission(permissions=["sample.can_eat"])])
     def eat_apple(self, apple_id: int) -> Union["AppleType", GQLAuthError]:
@@ -48,7 +45,6 @@ class Mutation:
     password_set = arg_mutations.PasswordSet.field
     refresh_token = arg_mutations.RefreshToken.field
     revoke_token = arg_mutations.RevokeToken.field
-    verify_secondary_email = arg_mutations.VerifySecondaryEmail.field
 
 
 @strawberry_django.type(model=Apple)
