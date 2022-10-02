@@ -88,26 +88,9 @@ class RegisterTestCaseMixin(AbstractTestCase):
         assert not executed["errors"]
         assert signal_received
         # try to register again
-        us.email = "some@else.com"
         executed = self.make_request(query=self.make_query(us))
         assert not executed["success"]
         assert executed["errors"][self.CC_USERNAME_FIELD]
-        # try to register again other fields but same email
-        # in setting_b we don't have email field os there is only one unique field.
-        if "not settings_b" in current_markers:
-            us1 = self.verified_user_status_type().user
-            us1.email = db_verified_user_status.user.obj.email
-            executed = self.make_request(query=self.make_query(us1))
-            assert not executed["success"]
-            assert executed["errors"]["email"]
-
-    @pytest.mark.default_user
-    def test_register_duplicate_unique_email(self, db_verified_user_status):
-        us = db_verified_user_status.user
-        us.username = "foo_username"  # dropping duplication for username
-        executed = self.make_request(query=self.make_query(us))
-        assert not executed["success"]
-        assert executed["errors"]["email"]
 
     @mock.patch(
         "gqlauth.models.UserStatus.send_activation_email",

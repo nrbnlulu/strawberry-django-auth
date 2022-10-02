@@ -1,6 +1,13 @@
 
 
 # Changelog
+### v0.3.6
+#### Deprecations:
+- Removed secondary email support.
+#### New features
+- mypy support
+
+
 ### v0.3.5.0
 #### New features:
 - new setting `GqlAuthSettings.JWT_TOKEN_FINDER` for finding the token from Info object,
