@@ -39,7 +39,7 @@ strawberry-django-plus = "^1.25.2"
 
 [tool.poetry.dev-dependencies]
 cryptography = "^38.0"
-coverage = "^6.4"
+coverage = "^6.5"
 pytest = "^7.0"
 pytest-cov = "^3.0"
 pytest-django = "^4.0.0"
