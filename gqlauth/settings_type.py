@@ -10,7 +10,7 @@ from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.core.utils import UserProto
     from gqlauth.jwt.types_ import TokenType
 

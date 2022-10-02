@@ -7,7 +7,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 import jwt
 from strawberry.types import Info
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.jwt.types_ import TokenType
 
 USER_MODEL = get_user_model()

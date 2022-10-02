@@ -13,7 +13,7 @@ from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.core.exceptions import TokenScopeError
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.models import UserStatus
 
     class UserProto(AbstractBaseUser):

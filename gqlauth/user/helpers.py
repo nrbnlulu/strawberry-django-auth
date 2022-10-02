@@ -7,7 +7,7 @@ from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.core.constants import Messages
 from gqlauth.core.types_ import MutationNormalOutput
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.user.resolvers import ObtainJSONWebTokenInput, RegisterMixin
 
 USER_MODEL = get_user_model()

@@ -21,7 +21,7 @@ from gqlauth.settings import gqlauth_settings
 from gqlauth.settings_type import GqlAuthSettings
 from testproject.sample.models import Apple
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.core.utils import UserProto
 
 
