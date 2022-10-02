@@ -65,17 +65,6 @@ class SendPasswordResetEmailTestCaseMixin(AbstractTestCase):
         assert executed["success"]
         assert not executed["errors"]
 
-    def test_send_to_secondary_email(self, db_verified_user_status):
-        user = db_verified_user_status.user
-        user.email = "foo@bar.com"
-        user.obj.status.secondary_email = user.email
-        user.obj.status.save()
-
-        query = self.make_query(user)
-        executed = self.make_request(query=query)
-        assert executed["success"]
-        assert not executed["errors"]
-
     @mock.patch(
         "gqlauth.models.UserStatus.send_password_reset_email",
         mock.MagicMock(side_effect=SMTPException),

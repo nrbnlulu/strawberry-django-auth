@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.contrib.auth import get_user_model
 from strawberry import auto
 from strawberry.annotation import StrawberryAnnotation
@@ -15,7 +13,7 @@ USER_MODEL = get_user_model()
 # UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.
 USER_FIELDS = {
     StrawberryField(
-        python_name=USER_MODEL._meta.pk.name,
+        python_name=USER_MODEL._meta.pk.name,  # type: ignore
         default=None,
         type_annotation=StrawberryAnnotation(auto),
     ),
@@ -34,14 +32,12 @@ USER_FIELDS = {
 class UserStatusFilter:
     verified: auto
     archived: auto
-    secondary_email: auto
 
 
 @strawberry_django.type(model=UserStatus, filters=UserStatusFilter)
 class UserStatusType:
     verified: auto
     archived: auto
-    secondary_email: auto
 
 
 @strawberry_django.filters.filter(USER_MODEL)
@@ -74,7 +70,3 @@ class UserType:
     @strawberry_django.field
     def verified(self, info: Info) -> bool:
         return self.status.verified
-
-    @strawberry_django.field
-    def secondary_email(self, info: Info) -> Optional[str]:
-        return self.status.secondary_email

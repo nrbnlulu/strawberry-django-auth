@@ -223,8 +223,6 @@ class AuthMutation:
     delete_account = mutations.DeleteAccount.field
     password_change = mutations.PasswordChange.field
     swap_emails = mutations.SwapEmails.field
-    remove_secondary_email = mutations.RemoveSecondaryEmail.field
-    send_secondary_email_activation = mutations.SendSecondaryEmailActivation.field
 
 @strawberry.type
 class Mutation:
@@ -263,13 +261,12 @@ Before starting to query, let's load some users on the database. Create a new fi
     ```python
     verified=False
     archived=False
-    secondary_email=None
     ```
 
     You can access it on any user:
 
     ```bash
-    user.status.[verified | archived | secondary_email]
+    user.status.[verified | archived]
     ```
 
 ```json
@@ -311,7 +308,6 @@ Before starting to query, let's load some users on the database. Create a new fi
           "user": 2,
           "verified": true,
           "archived": false,
-          "secondary_email": null
       }
   },
   {
@@ -336,7 +332,6 @@ Before starting to query, let's load some users on the database. Create a new fi
           "user": 3,
           "verified": true,
           "archived": true,
-          "secondary_email": null
       }
   },
   {
@@ -360,8 +355,7 @@ Before starting to query, let's load some users on the database. Create a new fi
       "fields": {
           "user": 4,
           "verified": true,
-          "archived": false,
-          "secondary_email": "user4_secondary@email.com"
+          "archived": false
       }
   }
 ]

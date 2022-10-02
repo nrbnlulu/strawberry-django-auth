@@ -1,7 +1,6 @@
-from abc import ABC
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import List, Union
+from typing import Callable, List, Union, cast
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -11,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 import strawberry
+from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.captcha.models import Captcha as CaptchaModel
@@ -18,23 +18,24 @@ from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.directives import BaseAuthDirective, IsVerified
 from gqlauth.core.exceptions import (
-    EmailAlreadyInUse,
     PasswordAlreadySetError,
     TokenScopeError,
     UserAlreadyVerified,
     UserNotVerified,
 )
-from gqlauth.core.shortcuts import get_user_by_email
 from gqlauth.core.types_ import GQLAuthError, MutationNormalOutput
 from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
+    get_user_by_email,
+    get_user_safe,
     inject_fields,
     revoke_user_refresh_token,
 )
 from gqlauth.jwt.types_ import (
     ObtainJSONWebTokenInput,
     ObtainJSONWebTokenType,
+    RefreshTokenType,
     RevokeRefreshTokenType,
     TokenType,
     VerifyTokenInput,
@@ -48,17 +49,16 @@ from gqlauth.user.forms import (
     RegisterForm,
     UpdateAccountForm,
 )
-from gqlauth.user.helpers import check_captcha, check_secondary_email, confirm_password
+from gqlauth.user.helpers import check_captcha, confirm_password
 from gqlauth.user.signals import user_registered, user_verified
 
 UserModel = get_user_model()
 
 
-class BaseMixin(ABC):
+class BaseMixin:
+    field: StrawberryField
     directives: List[BaseAuthDirective] = []
-
-    def resolve_mutation(self, *args, **kwargs):
-        raise NotImplementedError
+    resolve_mutation: Callable
 
 
 class Captcha:
@@ -86,7 +86,7 @@ class RegisterMixin(BaseMixin):
     Register user with fields defined in the settings.
     If the email field of the user model is part of the
     registration fields (default), check if there is
-    no user with that email or as a secondary email.
+    no user with that email.
 
     If it exists, it does not register the user,
     even if the email field is not defined as unique
@@ -94,8 +94,7 @@ class RegisterMixin(BaseMixin):
 
     When creating the user, it also creates a `UserStatus`
     related to that user, making it possible to track
-    if the user is archived, verified and has a secondary
-    email.
+    if the user is archived / verified.
 
     Send account verification email.
 
@@ -123,13 +122,11 @@ class RegisterMixin(BaseMixin):
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
                 return MutationNormalOutput(success=False, errors={"captcha": check_res})
-
+        email = getattr(input_, "email", False)
         try:
             with transaction.atomic():
                 f = cls.form(asdict(input_))
                 if f.is_valid():
-                    email = getattr(input_, "email", False)
-                    UserStatus.clean_email(email)
                     user = f.save()
                     if email:
                         send_activation = app_settings.SEND_ACTIVATION_EMAIL is True
@@ -147,14 +144,6 @@ class RegisterMixin(BaseMixin):
                     return MutationNormalOutput(success=True)
                 else:
                     return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
-        except EmailAlreadyInUse:
-            return MutationNormalOutput(
-                success=False,
-                # if the email was set as a secondary email,
-                # the RegisterForm will not catch it,
-                # so we need to run UserStatus.clean_email(email)
-                errors={UserModel.EMAIL_FIELD: Messages.EMAIL_IN_USE},
-            )
         except SMTPException:
             return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
@@ -179,43 +168,6 @@ class VerifyAccountMixin(BaseMixin):
             return MutationNormalOutput(success=True)
         except UserAlreadyVerified:
             return MutationNormalOutput(success=False, errors=Messages.ALREADY_VERIFIED)
-        except SignatureExpired:
-            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
-        except (BadSignature, TokenScopeError):
-            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
-
-
-class VerifySecondaryEmailMixin(BaseMixin):
-    """
-    Verify user secondary email.
-
-    Receive the token that was sent by email.
-    User is already verified when using this mutation.
-
-    If the token is valid, add the secondary email
-    to `user.status.secondary_email` field.
-
-    Note that until the secondary email is verified,
-    it has not been saved anywhere beyond the token,
-    so it can still be used to create a new account.
-    After being verified, it will no longer be available.
-    """
-
-    @strawberry.input
-    class VerifySecondaryEmailInput:
-        token: str
-
-    @classmethod
-    def resolve_mutation(cls, _, input_: VerifySecondaryEmailInput) -> MutationNormalOutput:
-        try:
-            token = input_.token
-            UserStatus.verify_secondary_email(token)
-            return MutationNormalOutput(success=True)
-        except EmailAlreadyInUse:
-            # while the token was sent and the user haven't
-            # verified, the email was free. If other account
-            # was created with it, it is already in use.
-            return MutationNormalOutput(success=False, errors=Messages.EMAIL_IN_USE)
         except SignatureExpired:
             return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
         except (BadSignature, TokenScopeError):
@@ -262,8 +214,6 @@ class SendPasswordResetEmailMixin(BaseMixin):
 
     For non verified users, send an activation
     email instead.
-
-    Accepts both primary and secondary email.
 
     If there is no user with the requested email,
     a successful response is returned.
@@ -329,14 +279,14 @@ class PasswordResetMixin(BaseMixin):
                 app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-
+            status: "UserStatus" = getattr(user, "status")  # noqa: B009
             f = cls.form(user, asdict(input_))
             if f.is_valid():
                 revoke_user_refresh_token(user)
-                user = f.save()
-                if user.status.verified is False:
-                    user.status.verified = True
-                    user.status.save(update_fields=["verified"])
+                user = f.save()  # type: ignore
+                if status.verified is False:
+                    status.verified = True
+                    status.save(update_fields=["verified"])
                     user_verified.send(sender=cls, user=user)
 
                 return MutationNormalOutput(success=True)
@@ -384,11 +334,12 @@ class PasswordSetMixin(BaseMixin):
                 if user.has_usable_password():
                     raise PasswordAlreadySetError
                 revoke_user_refresh_token(user)
-                user = f.save()
+                user = f.save()  # type: ignore
+                status: "UserStatus" = getattr(user, "status")  # noqa: B009
 
-                if user.status.verified is False:
-                    user.status.verified = True
-                    user.status.save(update_fields=["verified"])
+                if status.verified is False:
+                    status.verified = True
+                    status.save(update_fields=["verified"])
 
                 return MutationNormalOutput(success=True)
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
@@ -405,8 +356,7 @@ class ObtainJSONWebTokenMixin(BaseMixin):
     Obtain JSON web token for given user.
 
     Allow to perform login with different fields,
-    and secondary email if set. The fields are
-    defined on settings.
+    The fields are defined on settings.
 
     Not verified users can log in by default. This
     can be changes on settings.
@@ -438,10 +388,10 @@ class ArchiveOrDeleteMixin(BaseMixin):
     def resolve_mutation(
         cls, info, input_: ArchiveOrDeleteMixinInput
     ) -> Union[GQLAuthError, MutationNormalOutput]:
-        user = get_user(info)
+        user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return error
-        cls.resolve_action(user)
+        cls.resolve_action(user)  # type: ignore
         return MutationNormalOutput(success=True)
 
 
@@ -496,7 +446,7 @@ class PasswordChangeMixin(BaseMixin):
     def resolve_mutation(
         cls, info: Info, input_: PasswordChangeInput
     ) -> Union[GQLAuthError, ObtainJSONWebTokenType]:
-        user = get_user(info)
+        user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
 
@@ -505,7 +455,7 @@ class PasswordChangeMixin(BaseMixin):
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            return ObtainJSONWebTokenType.from_user(info, user)
+            return ObtainJSONWebTokenType.from_user(user)
         else:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
@@ -584,12 +534,13 @@ class RefreshTokenMixin(BaseMixin):
         user = res.user
         if res.is_expired_():
             return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+        # fields that are determined by if statements are not recognized by mypy.
         ret = ObtainJSONWebTokenType(
-            success=True, token=TokenType.from_user(info, user), refresh_token=res
+            success=True, token=TokenType.from_user(user), refresh_token=res  # type: ignore
         )
         if input_.revoke_refresh_token:
             res.revoke()
-            ret.refresh_token = RefreshToken.from_user(user)
+            ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
         return ret
 
 
@@ -610,93 +561,8 @@ class RevokeTokenMixin(BaseMixin):
                 token=input_.refresh_token, revoked__isnull=True
             )
             refresh_token.revoke()
-            return RevokeRefreshTokenType(success=True, refresh_token=refresh_token)
+            return RevokeRefreshTokenType(
+                success=True, refresh_token=cast(RefreshTokenType, refresh_token)
+            )
         except RefreshToken.DoesNotExist:
             return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)
-
-
-class SendSecondaryEmailActivationMixin(BaseMixin):
-    """
-    Send activation to secondary email.
-
-    User must be verified and confirm password.
-    """
-
-    directives = [
-        IsVerified(),
-    ]
-
-    @strawberry.input
-    class SendSecondaryEmailActivationInput:
-        password: str
-
-    @classmethod
-    def resolve_mutation(
-        cls, info, input_: SendSecondaryEmailActivationInput
-    ) -> Union[GQLAuthError, MutationNormalOutput]:
-        user = get_user(info)
-        if error := confirm_password(user, input_):
-            return error
-        try:
-            email = input_.get("email")
-            f = EmailForm({"email": email})
-            if f.is_valid():
-                user.status.send_secondary_email_activation(info, email)
-                return MutationNormalOutput(success=True)
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
-        except EmailAlreadyInUse:
-            # while the token was sent and the user haven't verified,
-            # the email was free. If other account was created with if
-            # it is already in use
-            return MutationNormalOutput(success=False, errors={"email": Messages.EMAIL_IN_USE})
-        except SMTPException:
-            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
-
-
-class SwapEmailsMixin(BaseMixin):
-    """
-    Swap between primary and secondary emails.
-
-    Require password confirmation.
-    """
-
-    @strawberry.input
-    class SwapEmailsInput:
-        password: str
-
-    @classmethod
-    def resolve_mutation(cls, info: Info, input_: SwapEmailsInput) -> MutationNormalOutput:
-        user = get_user(info)
-        if not user.check_password(input_.password):
-            return MutationNormalOutput(success=False, errors=Messages.INVALID_PASSWORD)
-        if error := check_secondary_email(user):
-            return error
-        user.status.swap_emails()
-        return MutationNormalOutput(success=True)
-
-
-class RemoveSecondaryEmailMixin(BaseMixin):
-    """
-    Remove user secondary email.
-
-    Require password confirmation.
-    """
-
-    @strawberry.input
-    class RemoveSecondaryEmailInput:
-        password: str
-
-    @classmethod
-    def resolve_mutation(
-        cls, info: Info, input_: RemoveSecondaryEmailInput
-    ) -> MutationNormalOutput:
-        user = get_user(info)
-
-        if error := confirm_password(user, input_):
-            return error
-
-        if error := check_secondary_email(user):
-            return error
-
-        user.status.remove_secondary_email()
-        return MutationNormalOutput(success=True)

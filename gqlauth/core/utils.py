@@ -4,6 +4,7 @@ import typing
 from typing import Dict, Iterable, Union
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.core import signing
 from strawberry.field import StrawberryField
@@ -12,10 +13,15 @@ from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.core.exceptions import TokenScopeError
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.models import UserStatus
 
+    class UserProto(AbstractBaseUser):
+        status: UserStatus
+
+
 USER_MODEL = get_user_model()
+USER_UNION = Union[AbstractBaseUser, AnonymousUser]
 
 
 def hide_args_kwargs(field):
@@ -41,7 +47,7 @@ def camelize(data):
     return data
 
 
-def list_to_dict(lst: [str]):
+def list_to_dict(lst: typing.List[str]):
     """takes list of string and creates a dict with str as their values"""
     new_dict = {}
     for item in lst:
@@ -62,20 +68,34 @@ def get_info(args: tuple) -> typing.Optional[Info]:
     return None
 
 
-def get_status(user: Union[USER_MODEL, AnonymousUser]) -> typing.Optional["UserStatus"]:
+def get_user_with_status(info: Info) -> "UserProto":
     from gqlauth.models import UserStatus
 
+    user = get_user(info)
     if status := getattr(user, "status", False):
         assert isinstance(status, UserStatus)
-        return status
-    return None
+        return user  # type: ignore
+    else:
+        raise NameError("could not found status for user.")
 
 
-def get_user(info: Info) -> Union[USER_MODEL, AnonymousUser]:
+def get_user(info: Info) -> USER_UNION:
     if user := getattr(info.context, "user", None):  # noqa: B009
         assert isinstance(user, USER_MODEL)
-        return user
+        return user  # type: ignore
     return AnonymousUser()
+
+
+def get_user_safe(info: Info) -> AbstractBaseUser:
+    user = get_user(info)
+    assert isinstance(user, AbstractBaseUser)
+    return user
+
+
+def get_user_by_email(email: str) -> "UserProto":
+    user = USER_MODEL.objects.get(**{USER_MODEL.EMAIL_FIELD: email})
+    assert hasattr(user, "status")
+    return user  # type: ignore
 
 
 def get_token(user, action, **kwargs):
@@ -133,6 +153,7 @@ def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=Fal
                 continue
             if not annotations_only:
                 setattr(cls, field.name, field)
+            assert field.type_annotation
             cls.__annotations__[field.name] = field.type_annotation.annotation
         return cls
 

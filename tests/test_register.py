@@ -10,6 +10,7 @@ from gqlauth.core.constants import Messages
 from gqlauth.user.signals import user_registered
 
 from .testCases import (
+    AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
@@ -18,7 +19,7 @@ from .testCases import (
 )
 
 
-class RegisterTestCaseMixin:
+class RegisterTestCaseMixin(AbstractTestCase):
     def _generate_register_args(self, user: UserType) -> str:
         initial = f'password1: "{user.password}",  password2: "{user.password}"'
         if settings.GQL_AUTH.REGISTER_REQUIRE_CAPTCHA:
@@ -67,7 +68,7 @@ class RegisterTestCaseMixin:
         assert not executed["success"]
         assert executed["errors"]
 
-    def test_register_twice_fails(self, current_markers):
+    def test_register_twice_fails(self, current_markers, db_verified_user_status):
         """
         Register user, fail to register same user again
         """
@@ -90,22 +91,6 @@ class RegisterTestCaseMixin:
         executed = self.make_request(query=self.make_query(us))
         assert not executed["success"]
         assert executed["errors"][self.CC_USERNAME_FIELD]
-        # try to register again other fields but same email
-        # in setting_b we don't have email field os there is only one unique field.
-        if "not settings_b" in current_markers:
-            us1 = self.verified_user_status_type().user
-            us1.email = us.email
-            executed = self.make_request(query=self.make_query(us1))
-            assert not executed["success"]
-            assert executed["errors"]["email"]
-
-    @pytest.mark.default_user
-    def test_register_duplicate_unique_email(self, db_verified_user_status):
-        us = db_verified_user_status.user
-        us.username = "foo_username"  # dropping duplication for username
-        executed = self.make_request(query=self.make_query(us))
-        assert not executed["success"]
-        assert executed["errors"]["email"]
 
     @mock.patch(
         "gqlauth.models.UserStatus.send_activation_email",

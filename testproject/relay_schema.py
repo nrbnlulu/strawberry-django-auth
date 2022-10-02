@@ -16,9 +16,6 @@ class AuthMutation:
     archive_account = relay.ArchiveAccount.field
     delete_account = relay.DeleteAccount.field
     password_change = relay.PasswordChange.field
-    swap_emails = relay.SwapEmails.field
-    remove_secondary_email = relay.RemoveSecondaryEmail.field
-    send_secondary_email_activation = relay.SendSecondaryEmailActivation.field
 
 
 @strawberry.type
@@ -38,7 +35,6 @@ class Mutation:
     refresh_token = relay.RefreshToken.field
     revoke_token = relay.RevokeToken.field
     verify_account = relay.VerifyAccount.field
-    verify_secondary_email = relay.VerifySecondaryEmail.field
 
 
 relay_schema = strawberry.Schema(

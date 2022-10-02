@@ -2,14 +2,16 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
 import typing
-from typing import Any, Callable, NewType, Optional, Set, Union
+from typing import Callable, NewType, Optional, Set, Union
 
 from django.conf import settings as django_settings
+from django.utils.module_loading import import_string
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
+    from gqlauth.core.utils import UserProto
     from gqlauth.jwt.types_ import TokenType
 
 
@@ -24,8 +26,21 @@ def default_text_factory():
     )
 
 
-DjangoSetting = NewType("DjangoSetting", Union[dict, list, str, Any])
-ImportString = NewType("ImportString", str)
+T = typing.TypeVar("T")
+DjangoSetting = NewType("DjangoSetting", str)
+
+
+class ImportString(typing.Generic[T]):
+    def __init__(self, path: str):
+        self.path = path
+
+    def preform_import(self) -> T:
+        return import_string(self.path)
+
+    def __call__(self, *args, **kwargs):
+        # FIXME: this is not covered. and just used to fool mypy.
+        return import_string(self.path)(*args, **kwargs)
+
 
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
@@ -117,16 +132,14 @@ class GqlAuthSettings:
     # email tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
     EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1)
-    EXPIRATION_SECONDARY_EMAIL_ACTIVATION_TOKEN: timedelta = timedelta(hours=1)
     EXPIRATION_PASSWORD_SET_TOKEN: timedelta = timedelta(hours=1)
     # email stuff
-    EMAIL_FROM: DjangoSetting = lambda: getattr(
+    EMAIL_FROM: Union[DjangoSetting, Callable[[], str]] = lambda: getattr(
         django_settings, "DEFAULT_FROM_EMAIL", "test@email.com"
     )
     SEND_ACTIVATION_EMAIL: bool = True
     # client: example.com/activate/token
     ACTIVATION_PATH_ON_EMAIL: str = "activate"
-    ACTIVATION_SECONDARY_EMAIL_PATH_ON_EMAIL: str = "activate"
     # client: example.com/password-set/token
     PASSWORD_SET_PATH_ON_EMAIL: str = "password-set"
     # client: example.com/password-reset/token
@@ -134,13 +147,11 @@ class GqlAuthSettings:
     # email subjects templates
     EMAIL_SUBJECT_ACTIVATION: str = "email/activation_subject.txt"
     EMAIL_SUBJECT_ACTIVATION_RESEND: str = "email/activation_subject.txt"
-    EMAIL_SUBJECT_SECONDARY_EMAIL_ACTIVATION: str = "email/activation_subject.txt"
     EMAIL_SUBJECT_PASSWORD_SET: str = "email/password_set_subject.txt"
     EMAIL_SUBJECT_PASSWORD_RESET: str = "email/password_reset_subject.txt"
     # email templates
     EMAIL_TEMPLATE_ACTIVATION: str = "email/activation_email.html"
     EMAIL_TEMPLATE_ACTIVATION_RESEND: str = "email/activation_email.html"
-    EMAIL_TEMPLATE_SECONDARY_EMAIL_ACTIVATION: str = "email/activation_email.html"
     EMAIL_TEMPLATE_PASSWORD_SET: str = "email/password_set_email.html"
     EMAIL_TEMPLATE_PASSWORD_RESET: str = "email/password_reset_email.html"
     EMAIL_TEMPLATE_VARIABLES: dict = field(default_factory=lambda: {})
@@ -155,7 +166,7 @@ class GqlAuthSettings:
     """
     SEND_PASSWORD_SET_EMAIL: bool = False
     # JWT stuff
-    JWT_SECRET_KEY: DjangoSetting = lambda: django_settings.SECRET_KEY
+    JWT_SECRET_KEY: Union[DjangoSetting, Callable[[], str]] = lambda: django_settings.SECRET_KEY
     """
     key used to sign the JWT token.
     """
@@ -167,9 +178,9 @@ class GqlAuthSettings:
     """
     A valid 'strftime' string that will be used to encode the token payload.
     """
-    JWT_PAYLOAD_HANDLER: Union[
-        Callable[[Info], "TokenType"], ImportString
-    ] = "gqlauth.jwt.default_hooks.create_token_type"
+    JWT_PAYLOAD_HANDLER: ImportString[Callable[["UserProto"], "TokenType"]] = ImportString(
+        "gqlauth.jwt.default_hooks.create_token_type"
+    )
     """
     A custom function to generate the token datatype, its up to you to encode the token.
     """
@@ -179,13 +190,13 @@ class GqlAuthSettings:
     retrieve user based on the decoded token.
     *This filed must be unique in the database*
     """
-    JWT_DECODE_HANDLER: Union[
-        Callable[[str], "TokenType"], ImportString
-    ] = "gqlauth.jwt.default_hooks.decode_jwt"
+    JWT_DECODE_HANDLER: ImportString[Callable[[str], "TokenType"]] = ImportString(
+        "gqlauth.jwt.default_hooks.decode_jwt"
+    )
 
-    JWT_TOKEN_FINDER: Union[
-        Callable[[Info], Optional[str]], ImportString
-    ] = "gqlauth.jwt.default_hooks.token_finder"
+    JWT_TOKEN_FINDER: ImportString[Callable[[Info], Optional[str]]] = ImportString(
+        "gqlauth.jwt.default_hooks.token_finder"
+    )
     """
     A hook called by `GqlAuthRootField` to find the token, **remember to strip the "JWT " prefix
     if you override this.**

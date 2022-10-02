@@ -18,14 +18,10 @@ def serialize_excpected_error(errors):
     raise WrongUsage("`errors` must be list or dict!")
 
 
-@strawberry.scalar(
-    name="ExpectedError",
-    serialize=lambda value: serialize_excpected_error(value),
-    parse_value=lambda value: ExpectedErrorType(value),
-)
-class ExpectedErrorType:
-    """
-    Errors messages and codes mapped to
+ExpectedErrorType = strawberry.scalar(
+    typing.NewType("ExpectedError", dict),
+    description="""
+     Errors messages and codes mapped to
     fields or non fields errors.
     Example:
     {
@@ -48,8 +44,10 @@ class ExpectedErrorType:
             }
         ]
     }
-    """
-
+    """,
+    serialize=lambda value: serialize_excpected_error(value),
+    parse_value=lambda value: value,
+)
 
 image = strawberry.scalar(
     typing.NewType("image", Image),

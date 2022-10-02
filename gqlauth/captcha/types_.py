@@ -12,6 +12,6 @@ class CaptchaType:
     uuid: UUID
     image: strawberry.auto
 
-    @strawberry.django.field(description="returns the b64 encoded image.")
+    @strawberry_django.field(description="returns the b64 encoded image.")
     def pil_image(self) -> Image:
-        return self.as_bytes()
+        return self.as_bytes()  # type: ignore

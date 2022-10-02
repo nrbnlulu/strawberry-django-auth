@@ -29,10 +29,6 @@ class UserNotVerified(GraphQLAuthError):
     default_message = _("User is not verified.")
 
 
-class EmailAlreadyInUse(GraphQLAuthError):
-    default_message = _("This email is already in use.")
-
-
 class TokenScopeError(GraphQLAuthError):
     default_message = _("This token is for something else.")
 

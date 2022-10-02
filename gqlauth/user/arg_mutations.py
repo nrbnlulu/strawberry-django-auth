@@ -9,15 +9,11 @@ from gqlauth.user.resolvers import (
     PasswordSetMixin,
     RefreshTokenMixin,
     RegisterMixin,
-    RemoveSecondaryEmailMixin,
     ResendActivationEmailMixin,
     RevokeTokenMixin,
     SendPasswordResetEmailMixin,
-    SendSecondaryEmailActivationMixin,
-    SwapEmailsMixin,
     UpdateAccountMixin,
     VerifyAccountMixin,
-    VerifySecondaryEmailMixin,
     VerifyTokenMixin,
 )
 
@@ -26,9 +22,6 @@ __all__ = [
     "VerifyAccount",
     "ResendActivationEmail",
     "SendPasswordResetEmail",
-    "SendSecondaryEmailActivation",
-    "SwapEmails",
-    "RemoveSecondaryEmail",
     "PasswordSet",
     "PasswordReset",
     "ObtainJSONWebToken",
@@ -63,25 +56,6 @@ class ResendActivationEmail(
 
 class SendPasswordResetEmail(SendPasswordResetEmailMixin, ArgMixin):
     __doc__ = SendPasswordResetEmailMixin.__doc__
-
-
-class SendSecondaryEmailActivation(
-    SendSecondaryEmailActivationMixin,
-    ArgMixin,
-):
-    __doc__ = SendSecondaryEmailActivationMixin.__doc__
-
-
-class VerifySecondaryEmail(VerifySecondaryEmailMixin, ArgMixin):
-    __doc__ = VerifySecondaryEmailMixin.__doc__
-
-
-class SwapEmails(SwapEmailsMixin, ArgMixin):
-    __doc__ = SwapEmailsMixin.__doc__
-
-
-class RemoveSecondaryEmail(RemoveSecondaryEmailMixin, ArgMixin):
-    __doc__ = RemoveSecondaryEmailMixin.__doc__
 
 
 class PasswordSet(PasswordSetMixin, ArgMixin):

@@ -10,7 +10,7 @@ from strawberry.types import Info
 
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
-from gqlauth.core.utils import get_status, get_user
+from gqlauth.core.utils import get_user, get_user_with_status
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.settings import gqlauth_settings as app_settings
 
@@ -76,8 +76,7 @@ class IsAuthenticated(BaseAuthDirective):
 )
 class IsVerified(BaseAuthDirective):
     def resolve_permission(self, source: Any, info: Info, args, kwargs):
-        user = get_user(info)
-        if (status := get_status(user)) and status.verified:
+        if (user := get_user_with_status(info)) and user.status.verified:
             return None
         return GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
 
@@ -94,11 +93,11 @@ class HasPermission(BaseAuthDirective):
     def resolve_permission(self, source: Any, info: Info, args, kwargs):
         user = get_user(info)
         for permission in self.permissions:
-            if not user.has_perm(permission):
+            if not user.has_perm(permission):  # type: ignore
                 return GQLAuthError(
                     code=GQLAuthErrors.NO_SUFFICIENT_PERMISSIONS,
                     message=_(
-                        f"User {user.first_name or getattr(user, user.USERNAME_FIELD, None)}, has not sufficient permissions for {info.path.key}"
+                        f"User {getattr(user, user.USERNAME_FIELD, user.first_name)}, has not sufficient permissions for {info.path.key}"  # type: ignore
                     ),
                 )
         return None

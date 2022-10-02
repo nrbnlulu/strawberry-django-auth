@@ -17,8 +17,8 @@ class MutationNormalOutput:
 
 @strawberry.type
 class GQLAuthError:
-    code: "GQLAuthErrors" = None
-    message: str = None
+    code: "GQLAuthErrors"
+    message: Optional[str] = None
 
     def __post_init__(self):
         if not self.message:
