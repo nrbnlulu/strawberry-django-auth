@@ -41,14 +41,13 @@ This is the minimum. Check the [email templates settings](settings.md#email-temp
 - account activation
 - resend account activation email
 - password reset email
-- secondary email activation
 
 ## Email variables
 
 Both subject and email templates receive the following variables:
 
 - user
-- token --> account activation / password reset / secondary-email activation
+- token --> account activation / password reset
 - port
 - site_name --> from [django sites framework](https://docs.djangoproject.com/en/4.0/ref/contrib/sites/) <small>(optional)</small>
 - domain --> from [django sites framework](https://docs.djangoproject.com/en/4.0/ref/contrib/sites/) <small>(optional)</small>
