@@ -86,8 +86,16 @@ def get_user(info: Info) -> USER_UNION:
     return AnonymousUser()
 
 
-def get_user_by_email(email: str) -> USER_UNION:
-    return USER_MODEL.objects.get(**{USER_MODEL.EMAIL_FIELD: email})
+def get_user_safe(info: Info) -> AbstractBaseUser:
+    user = get_user(info)
+    assert isinstance(user, AbstractBaseUser)
+    return user
+
+
+def get_user_by_email(email: str) -> "UserProto":
+    user = USER_MODEL.objects.get(**{USER_MODEL.EMAIL_FIELD: email})
+    assert hasattr(user, "status")
+    return user  # type: ignore
 
 
 def get_token(user, action, **kwargs):

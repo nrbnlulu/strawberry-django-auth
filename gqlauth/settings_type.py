@@ -5,11 +5,13 @@ import typing
 from typing import Callable, NewType, Optional, Set, Union
 
 from django.conf import settings as django_settings
+from django.utils.module_loading import import_string
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 if typing.TYPE_CHECKING:
+    from gqlauth.core.utils import UserProto
     from gqlauth.jwt.types_ import TokenType
 
 
@@ -24,8 +26,20 @@ def default_text_factory():
     )
 
 
+T = typing.TypeVar("T")
 DjangoSetting = NewType("DjangoSetting", str)
-ImportString = NewType("ImportString", str)
+
+
+class ImportString(typing.Generic[T]):
+    def __init__(self, path: str):
+        self.path = path
+
+    def preform_import(self) -> T:
+        return import_string(self.path)
+
+    def __call__(self, *args, **kwargs):
+        return import_string(self.path)(*args, **kwargs)
+
 
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
@@ -163,7 +177,7 @@ class GqlAuthSettings:
     """
     A valid 'strftime' string that will be used to encode the token payload.
     """
-    JWT_PAYLOAD_HANDLER: Union[Callable[[Info], "TokenType"], ImportString] = ImportString(
+    JWT_PAYLOAD_HANDLER: ImportString[Callable[["UserProto"], "TokenType"]] = ImportString(
         "gqlauth.jwt.default_hooks.create_token_type"
     )
     """
@@ -175,11 +189,11 @@ class GqlAuthSettings:
     retrieve user based on the decoded token.
     *This filed must be unique in the database*
     """
-    JWT_DECODE_HANDLER: Union[Callable[[str], "TokenType"], ImportString] = ImportString(
+    JWT_DECODE_HANDLER: ImportString[Callable[[str], "TokenType"]] = ImportString(
         "gqlauth.jwt.default_hooks.decode_jwt"
     )
 
-    JWT_TOKEN_FINDER: Union[Callable[[Info], Optional[str]], ImportString] = ImportString(
+    JWT_TOKEN_FINDER: ImportString[Callable[[Info], Optional[str]]] = ImportString(
         "gqlauth.jwt.default_hooks.token_finder"
     )
     """

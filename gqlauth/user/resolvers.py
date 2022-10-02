@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Callable, List, Union
+from typing import Callable, List, Union, cast
 from uuid import UUID
 
 from asgiref.sync import sync_to_async
@@ -28,12 +28,14 @@ from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
     get_user_by_email,
+    get_user_safe,
     inject_fields,
     revoke_user_refresh_token,
 )
 from gqlauth.jwt.types_ import (
     ObtainJSONWebTokenInput,
     ObtainJSONWebTokenType,
+    RefreshTokenType,
     RevokeRefreshTokenType,
     TokenType,
     VerifyTokenInput,
@@ -57,9 +59,6 @@ class BaseMixin:
     field: StrawberryField
     directives: List[BaseAuthDirective] = []
     resolve_mutation: Callable
-
-    def resolve_mutation(self, *args, **kwargs):
-        raise NotImplementedError
 
 
 class Captcha:
@@ -124,15 +123,6 @@ class RegisterMixin(BaseMixin):
             if check_res != Messages.CAPTCHA_VALID:
                 return MutationNormalOutput(success=False, errors={"captcha": check_res})
         email = getattr(input_, "email", False)
-        try:
-            UserModel.objects.get(email=email)
-            # email already exists.
-            return MutationNormalOutput(
-                success=False,
-                errors={UserModel.EMAIL_FIELD: Messages.EMAIL_IN_USE},
-            )
-        except UserModel.DoesNotExist:
-            pass
         try:
             with transaction.atomic():
                 f = cls.form(asdict(input_))
@@ -289,14 +279,14 @@ class PasswordResetMixin(BaseMixin):
                 app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-
+            status: "UserStatus" = getattr(user, "status")  # noqa: B009
             f = cls.form(user, asdict(input_))
             if f.is_valid():
                 revoke_user_refresh_token(user)
-                user = f.save()
-                if user.status.verified is False:
-                    user.status.verified = True
-                    user.status.save(update_fields=["verified"])
+                user = f.save()  # type: ignore
+                if status.verified is False:
+                    status.verified = True
+                    status.save(update_fields=["verified"])
                     user_verified.send(sender=cls, user=user)
 
                 return MutationNormalOutput(success=True)
@@ -344,11 +334,12 @@ class PasswordSetMixin(BaseMixin):
                 if user.has_usable_password():
                     raise PasswordAlreadySetError
                 revoke_user_refresh_token(user)
-                user = f.save()
+                user = f.save()  # type: ignore
+                status: "UserStatus" = getattr(user, "status")  # noqa: B009
 
-                if user.status.verified is False:
-                    user.status.verified = True
-                    user.status.save(update_fields=["verified"])
+                if status.verified is False:
+                    status.verified = True
+                    status.save(update_fields=["verified"])
 
                 return MutationNormalOutput(success=True)
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
@@ -397,10 +388,10 @@ class ArchiveOrDeleteMixin(BaseMixin):
     def resolve_mutation(
         cls, info, input_: ArchiveOrDeleteMixinInput
     ) -> Union[GQLAuthError, MutationNormalOutput]:
-        user = get_user(info)
+        user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return error
-        cls.resolve_action(user)
+        cls.resolve_action(user)  # type: ignore
         return MutationNormalOutput(success=True)
 
 
@@ -455,7 +446,7 @@ class PasswordChangeMixin(BaseMixin):
     def resolve_mutation(
         cls, info: Info, input_: PasswordChangeInput
     ) -> Union[GQLAuthError, ObtainJSONWebTokenType]:
-        user = get_user(info)
+        user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
 
@@ -464,7 +455,7 @@ class PasswordChangeMixin(BaseMixin):
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            return ObtainJSONWebTokenType.from_user(info, user)
+            return ObtainJSONWebTokenType.from_user(user)
         else:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
@@ -543,12 +534,13 @@ class RefreshTokenMixin(BaseMixin):
         user = res.user
         if res.is_expired_():
             return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+        # fields that are determined by if statements are not recognized by mypy.
         ret = ObtainJSONWebTokenType(
-            success=True, token=TokenType.from_user(info, user), refresh_token=res
+            success=True, token=TokenType.from_user(user), refresh_token=res  # type: ignore
         )
         if input_.revoke_refresh_token:
             res.revoke()
-            ret.refresh_token = RefreshToken.from_user(user)
+            ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
         return ret
 
 
@@ -569,6 +561,8 @@ class RevokeTokenMixin(BaseMixin):
                 token=input_.refresh_token, revoked__isnull=True
             )
             refresh_token.revoke()
-            return RevokeRefreshTokenType(success=True, refresh_token=refresh_token)
+            return RevokeRefreshTokenType(
+                success=True, refresh_token=cast(RefreshTokenType, refresh_token)
+            )
         except RefreshToken.DoesNotExist:
             return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)

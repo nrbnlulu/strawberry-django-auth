@@ -93,11 +93,11 @@ class HasPermission(BaseAuthDirective):
     def resolve_permission(self, source: Any, info: Info, args, kwargs):
         user = get_user(info)
         for permission in self.permissions:
-            if not user.has_perm(permission):
+            if not user.has_perm(permission):  # type: ignore
                 return GQLAuthError(
                     code=GQLAuthErrors.NO_SUFFICIENT_PERMISSIONS,
                     message=_(
-                        f"User {user.first_name or getattr(user, user.USERNAME_FIELD, None)}, has not sufficient permissions for {info.path.key}"
+                        f"User {getattr(user, user.USERNAME_FIELD, user.first_name)}, has not sufficient permissions for {info.path.key}"  # type: ignore
                     ),
                 )
         return None

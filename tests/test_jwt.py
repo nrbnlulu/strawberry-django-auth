@@ -22,7 +22,7 @@ class TestRefreshTokenExp(TestBase):
 
     def test_token_expired(self, db_verified_user_status, app_settings):
         with self.override_gqlauth(app_settings.JWT_EXPIRATION_DELTA, timedelta(seconds=0.1)):
-            token: TokenType = TokenType.from_user(None, db_verified_user_status.user.obj)
+            token: TokenType = TokenType.from_user(db_verified_user_status.user.obj)
             TokenType.from_token(token.token)
             assert not token.is_expired()
             time.sleep(1)

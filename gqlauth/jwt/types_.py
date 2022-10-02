@@ -1,10 +1,11 @@
 import dataclasses
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 from uuid import UUID
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.exceptions import PermissionDenied
 import strawberry
 from strawberry import auto
@@ -41,12 +42,14 @@ class RefreshTokenType:
     revoked: auto
 
     @strawberry_django.field
-    def expires_at(self: RefreshToken) -> datetime:
-        return self.expires_at_()
+    def expires_at(self) -> datetime:
+        self: RefreshToken  # type: ignore
+        return self.expires_at_()  # type: ignore
 
     @strawberry_django.field
-    def is_expired(self: RefreshToken) -> bool:
-        return self.is_expired_()
+    def is_expired(self) -> bool:
+        self: RefreshToken  # type: ignore
+        return self.is_expired_()  # type: ignore
 
 
 @strawberry.type(
@@ -99,8 +102,8 @@ class TokenType:
         return self.payload.exp < (datetime.utcnow())
 
     @classmethod
-    def from_user(cls, info: Info, user: USER_MODEL) -> "TokenType":
-        return app_settings.JWT_PAYLOAD_HANDLER(info, user)
+    def from_user(cls, user: AbstractBaseUser) -> "TokenType":
+        return app_settings.JWT_PAYLOAD_HANDLER(user)
 
     @classmethod
     def from_token(cls, token: str) -> "TokenType":
@@ -112,7 +115,7 @@ class TokenType:
             raise TokenExpired
         return token_type
 
-    def get_user_instance(self) -> USER_MODEL:
+    def get_user_instance(self) -> AbstractBaseUser:
         """
         might raise not existed exception.
         """
@@ -145,14 +148,16 @@ class ObtainJSONWebTokenType(OutputInterface):
     errors: Optional[ExpectedErrorType] = None
 
     @classmethod
-    def from_user(cls, info: Info, user: USER_MODEL) -> "ObtainJSONWebTokenType":
+    def from_user(cls, user: AbstractBaseUser) -> "ObtainJSONWebTokenType":
         """
         creates a new token and possibly a new refresh token based on the user.
         *call this method only for trusted users.*
         """
-        ret = ObtainJSONWebTokenType(success=True, user=user, token=TokenType.from_user(info, user))
+        ret = ObtainJSONWebTokenType(
+            success=True, user=cast(UserType, user), token=TokenType.from_user(user)
+        )
         if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
-            ret.refresh_token = RefreshToken.from_user(user)
+            ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
         return ret
 
     @classmethod
@@ -171,15 +176,15 @@ class ObtainJSONWebTokenType(OutputInterface):
             # authenticate against django authentication backends.
             if not (user := authenticate(info.context.request, **args)):
                 return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+            from gqlauth.models import UserStatus
 
+            status: UserStatus = getattr(user, "status")  # noqa: B009
             # gqlauth logic
-            if user.status.archived is True:  # un-archive on login
-                from gqlauth.models import UserStatus
-
+            if status.archived is True:  # un-archive on login
                 UserStatus.unarchive(user)
-            if user.status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
+            if status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.
-                return ObtainJSONWebTokenType.from_user(info, user)
+                return ObtainJSONWebTokenType.from_user(user)
             else:
                 return ObtainJSONWebTokenType(success=False, errors=Messages.NOT_VERIFIED)
 
@@ -214,7 +219,7 @@ class VerifyTokenType(OutputInterface):
             return VerifyTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
 
         else:
-            return VerifyTokenType(token=token_type, user=user, success=True)
+            return VerifyTokenType(token=token_type, user=cast(UserType, user), success=True)
 
 
 @strawberry.type

@@ -72,7 +72,7 @@ class TestSubscriptions(ChannelsLiveServerTestCase, AbstractTestCase):
 
         user = self.verified_user_status_type()
         user.create()
-        token = TokenType.from_user(None, user.user.obj).token
+        token = TokenType.from_user(user.user.obj).token
         self.verified_ws_transport = WebsocketsTransport(
             url=self.live_server_ws_url + "/graphql",
             headers={"AUTHORIZATION": f"JWT {token}"}

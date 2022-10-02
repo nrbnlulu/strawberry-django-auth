@@ -3,7 +3,6 @@ from typing import get_args
 import warnings
 
 from django.conf import settings as django_settings
-from django.utils.module_loading import import_string
 
 from gqlauth.settings_type import DjangoSetting, GqlAuthSettings, ImportString
 
@@ -30,7 +29,8 @@ for field in dataclasses.fields(gqlauth_settings):
     value = getattr(gqlauth_settings, name)
     if DjangoSetting in get_args(field.type) and value is getattr(defaults, name):
         setattr(gqlauth_settings, name, value())
-    elif ImportString in get_args(field.type) and isinstance(value, str):
-        setattr(gqlauth_settings, name, import_string(value))
+    elif (f_type := getattr(field.type, "__origin__", None)) and f_type is ImportString:
+        assert isinstance(value, ImportString)
+        setattr(gqlauth_settings, name, value.preform_import())
 
 del defaults

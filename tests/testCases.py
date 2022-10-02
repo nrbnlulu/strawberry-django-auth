@@ -316,7 +316,8 @@ class TestBase(AbstractTestCase):
                 path=path,
                 content_type="application/json",
                 data={"query": self.login_query(user_status)},
-            ).json()["data"]["tokenAuth"]
+            ).json()
+            token = token["data"]["tokenAuth"]
             if token["success"]:
                 token = token["token"]["token"]
                 headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 import strawberry
 from strawberry.schema_directive import Location
 from strawberry.types import Info
+import strawberry_django
 
 from gqlauth.core.utils import get_user
 
@@ -18,18 +19,18 @@ class Sample:
     message: str = "fdsafdsafdsfa"
 
 
-@strawberry.django.type(model=USER_MODEL, filters=UserFilter)
+@strawberry_django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    @strawberry.django.field
+    @strawberry_django.field
     def public_user(self, info: Info) -> Optional[UserType]:
         user = get_user(info)
         if user.is_authenticated:
-            return user
+            return user  # type: ignore
         return None
 
-    @strawberry.django.field
+    @strawberry_django.field
     def me(self, info: Info) -> Optional[UserType]:
         user = get_user(info)
         if not user.is_anonymous:
-            return user
+            return user  # type: ignore
         return None

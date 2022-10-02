@@ -19,12 +19,7 @@ from strawberry.types import Info
 
 from gqlauth.core.constants import TokenAction
 from gqlauth.core.exceptions import UserAlreadyVerified
-from gqlauth.core.utils import (
-    USER_UNION,
-    get_payload_from_token,
-    get_request,
-    get_token,
-)
+from gqlauth.core.utils import get_payload_from_token, get_request, get_token
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -184,7 +179,7 @@ class RefreshToken(models.Model):
         self.revoked = datetime.now()
         self.save(update_fields=["revoked"])
 
-    objects = RefreshTokenQuerySet.as_manager()
+    objects = RefreshTokenQuerySet.as_manager()  # type: ignore
 
     class Meta:
         verbose_name = _("refresh token")
@@ -195,11 +190,11 @@ class RefreshToken(models.Model):
         return self.token
 
     @classmethod
-    def from_user(cls, user: USER_UNION) -> "RefreshToken":
+    def from_user(cls, user) -> "RefreshToken":
         token = binascii.hexlify(
             os.urandom(app_settings.JWT_REFRESH_TOKEN_N_BYTES),
         ).decode()
 
-        obj = cls.objects.create(user=user, token=token)
+        obj = RefreshToken.objects.create(user=user, token=token)
         obj.save()
         return obj

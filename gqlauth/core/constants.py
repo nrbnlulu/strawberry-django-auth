@@ -40,7 +40,6 @@ class Messages:
             "code": "not_verified",
         }
     ]
-    EMAIL_IN_USE = [{"message": _("A user with that email already exists."), "code": "unique"}]
     PASSWORD_ALREADY_SET = [
         {
             "message": _("Password already set for account."),
