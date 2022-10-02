@@ -38,6 +38,7 @@ class ImportString(typing.Generic[T]):
         return import_string(self.path)
 
     def __call__(self, *args, **kwargs):
+        # FIXME: this is not covered. and just used to fool mypy.
         return import_string(self.path)(*args, **kwargs)
 
 
