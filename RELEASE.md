@@ -1,6 +1,12 @@
 
 
 # Changelog
+### v0.3.6.0
+#### Deprecations:
+- Removed secondary email support.
+#### New features
+- mypy support
+-
 ### v0.3.5.1
 #### New features
 - Support for subscriptions, tested with channels integrations.
