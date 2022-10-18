@@ -307,7 +307,7 @@ Before starting to query, let's load some users on the database. Create a new fi
       "fields": {
           "user": 2,
           "verified": true,
-          "archived": false,
+          "archived": false
       }
   },
   {
@@ -331,7 +331,7 @@ Before starting to query, let's load some users on the database. Create a new fi
       "fields": {
           "user": 3,
           "verified": true,
-          "archived": true,
+          "archived": true
       }
   },
   {
