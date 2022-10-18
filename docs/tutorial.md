@@ -100,7 +100,7 @@ from gqlauth.settings_type import GqlAuthSettings
 INSTALLED_APPS = [
     # ...
     'django.contrib.staticfiles', # Required for GraphiQL
-    "strawberry_django"
+    "strawberry_django",
     "gqlauth",
 
 ]
