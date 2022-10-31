@@ -1289,7 +1289,7 @@ sanic = ["sanic (>=20.12.2,<22.0.0)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.7"
+version = "0.7.1"
 description = "Strawberry GraphQL Django extension"
 category = "main"
 optional = false
@@ -2451,8 +2451,8 @@ strawberry-graphql = [
     {file = "strawberry_graphql-0.137.1.tar.gz", hash = "sha256:4b36ef85654d70c22208d99577b287d805bbd9626d93906aa9021967c3d502a9"},
 ]
 strawberry-graphql-django = [
-    {file = "strawberry_graphql_django-0.7-py3-none-any.whl", hash = "sha256:ec2124c4922282155370dec5962daf9d639a1ef7508574c3c8cb806711cd1b08"},
-    {file = "strawberry_graphql_django-0.7.tar.gz", hash = "sha256:230abc20a33f9c05379b1695fa393a708ab7da63cec51689d0588babaee46d17"},
+    {file = "strawberry_graphql_django-0.7.1-py3-none-any.whl", hash = "sha256:0affd3ddcf4e64c4297ebc38315a7eb13ec005f19c409912bbf29c582e22a4de"},
+    {file = "strawberry_graphql_django-0.7.1.tar.gz", hash = "sha256:a80621421d6fa997758f43e04945c41d56def4c63e77bf68908a11b5b4d590a4"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
