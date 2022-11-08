@@ -189,18 +189,18 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "channels"
-version = "3.0.5"
-description = "Brings async, event-driven capabilities to Django. Django 2.2 and up only."
+version = "4.0.0"
+description = "Brings async, event-driven capabilities to Django 3.2 and up."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
 asgiref = ">=3.5.0,<4"
-daphne = ">=3.0,<4"
-Django = ">=2.2"
+Django = ">=3.2"
 
 [package.extras]
+daphne = ["daphne (>=4.0.0)"]
 tests = ["async-timeout", "coverage (>=4.5,<5.0)", "pytest", "pytest-asyncio", "pytest-django"]
 
 [[package]]
@@ -1557,7 +1557,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "f1faa2dcfda9880354c98d9602a8857811d172bc6792cb558683e214ff12ef58"
+content-hash = "25c810e83c0c2e09c833146bdea6c88ce66c0775d5f02290d68eae4746d92f9d"
 
 [metadata.files]
 aiohttp = [
@@ -1781,8 +1781,8 @@ cfgv = [
     {file = "cfgv-3.3.1.tar.gz", hash = "sha256:f5a830efb9ce7a445376bb66ec94c638a9787422f96264c98edc6bdeed8ab736"},
 ]
 channels = [
-    {file = "channels-3.0.5-py3-none-any.whl", hash = "sha256:3813b8025bf85509769793aca720e6c3b1c5bde1cb253a961252bf0242b60a26"},
-    {file = "channels-3.0.5.tar.gz", hash = "sha256:a3dc3339cc033e7c2afe083fb3dedf74fc5009815967e317e080e7bfdc92ea26"},
+    {file = "channels-4.0.0-py3-none-any.whl", hash = "sha256:2253334ac76f67cba68c2072273f7e0e67dbdac77eeb7e318f511d2f9a53c5e4"},
+    {file = "channels-4.0.0.tar.gz", hash = "sha256:0ce53507a7da7b148eaa454526e0e05f7da5e5d1c23440e4886cf146981d8420"},
 ]
 charset-normalizer = [
     {file = "charset-normalizer-2.1.1.tar.gz", hash = "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845"},
