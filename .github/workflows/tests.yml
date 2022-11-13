@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        django-version: ["3.2.0", "4.0.0"]
+        django-version: ["3.2.0", "4.1.3"]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
@@ -49,7 +49,6 @@ jobs:
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: mypy_checks
         run: |
-          poetry config experimental.new-installer false
           poetry install
           poetry run mypy ./gqlauth
       - name: Run tests
