@@ -14,7 +14,7 @@
 ![Demo Video](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/demo.gif)
 
 ## About
-### This Library was inspired by [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
+#### This Library was inspired by [Django-graphql-auth](https://github.com/pedrobern/django-graphql-auth/).
 
 Abstract all the basic logic of handling user accounts out of your app,
 so you don't need to think about it and can **get you up and running faster**.
@@ -32,9 +32,8 @@ your implementation*.
 * [x] Captcha validation
 * [x] Async/Sync supported!
 * [x] Works with default or custom user model
-* [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
+* [x] Builtin JWT authentication using [PyJWT](https://github.com/jpadilla/pyjwt)
 * [x] User registration with email verification
-* [x] Resend activation email
 * [x] Retrieve/Update user
 * [x] Archive user
 * [x] Permanently delete user or make it inactive
@@ -47,7 +46,6 @@ your implementation*.
 * [x] Default email templates <small>(you will customize though)</small>
 * [x] Customizable, no lock-in
 * [x] Passwordless registration
-* [ ] Currently, only mutations are compatible with [Relay](https://github.com/facebook/relay)
 
 
 ### Full schema features

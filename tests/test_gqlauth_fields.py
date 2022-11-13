@@ -4,6 +4,7 @@ from channels.testing import ChannelsLiveServerTestCase
 from django.conf import settings
 from gql import Client, gql
 from gql.transport.websockets import WebsocketsTransport
+import pytest
 
 from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.jwt.types_ import TokenType
@@ -60,10 +61,13 @@ class TestGqlAuthRootFieldInSchemaAsync(GqlAuthFieldInSchemaMixin, AsyncArgTestC
     ...
 
 
+@pytest.mark.subscription
 class TestSubscriptions(ChannelsLiveServerTestCase, AbstractTestCase):
     def setUp(self) -> None:
+        url = (self.live_server_ws_url + "/graphql",)
+        url = url[0]
         self.unverified_ws_transport = WebsocketsTransport(
-            url=self.live_server_ws_url + "/graphql",
+            url=url
             # keep_alive_timeout=5
         )
         self.unverified_ws_client = Client(
@@ -74,7 +78,7 @@ class TestSubscriptions(ChannelsLiveServerTestCase, AbstractTestCase):
         user.create()
         token = TokenType.from_user(user.user.obj).token
         self.verified_ws_transport = WebsocketsTransport(
-            url=self.live_server_ws_url + "/graphql",
+            url=url,
             headers={"AUTHORIZATION": f"JWT {token}"}
             # keep_alive_timeout=5
         )
