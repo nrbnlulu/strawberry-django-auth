@@ -496,7 +496,7 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "15.3.1"
+version = "15.3.2"
 description = "Faker is a Python package that generates fake data for you."
 category = "dev"
 optional = false
@@ -1558,7 +1558,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "382f55991e46d394b3df0d274259562ee6c9a215ada049e3c71f78f0bbdfe6a8"
+content-hash = "c94dbe759f78dd08157b90347320fa40ac4622978ed119c19439a98bcf669591"
 
 [metadata.files]
 aiohttp = [
@@ -1962,8 +1962,8 @@ exceptiongroup = [
     {file = "exceptiongroup-1.0.1.tar.gz", hash = "sha256:73866f7f842ede6cb1daa42c4af078e2035e5f7607f0e2c762cc51bb31bbe7b2"},
 ]
 faker = [
-    {file = "Faker-15.3.1-py3-none-any.whl", hash = "sha256:4a3465624515a6807e8aa7e8eeb85bdd86a2fa53de4e258892dd6be95362462e"},
-    {file = "Faker-15.3.1.tar.gz", hash = "sha256:b9dd2fd9a9ac68a4e0c5040cd9e9bfaa099fa8dd15bae5f01f224a45431818d5"},
+    {file = "Faker-15.3.2-py3-none-any.whl", hash = "sha256:43da04aae745018e8bded768e74c84423d9dc38e4c498a53439e749d90e20bc0"},
+    {file = "Faker-15.3.2.tar.gz", hash = "sha256:0094fe3340ad73c490d3ffccc59cc171b161acfccccd52925c70970ba23e6d6b"},
 ]
 filelock = [
     {file = "filelock-3.8.0-py3-none-any.whl", hash = "sha256:617eb4e5eedc82fc5f47b6d61e4d11cb837c56cb4544e39081099fa17ad109d4"},
