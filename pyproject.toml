@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "test_vs_code_ext"
+version = "0.2.1-alpha.6"
+description = "UI client for security management"
+authors = ["Nir <88795475+nrbnlulu@users.noreply.github.com>"]
+packages = [{ include = "./" }]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+gql = {extras = ["websockets", "aiohttp"], version = "^3.4.0"}
+attrs = "^22.1.0"
+QtPy = "^2.3.0"
+PySide6 = "^6.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pytest-cov = "^4.0.0"
+Faker = "^15.3.3"
+pre-commit = "^2.20.0"
+black = "^22.6.0"
+isort = "^5.10.1"
+mypy = "^0.991"
+Pillow = "^9.2.0"
+coverage = {extras = ["toml"], version = "^6.5.0"}
+strawberry-graphql = "^0.142.2"
+aiohttp = {extras = ["speedups"], version = "^3.8.3"}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.mypy]
+plugins = ['tzvui/ext/mypy_plugin.py']
+ignore_missing_imports = "True"
+
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | __pycached__
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
