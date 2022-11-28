@@ -4,7 +4,7 @@ from typing import Type
 from django.contrib.auth import get_user_model
 from strawberry.types import Info
 
-import gqlauth
+import gqlauth.core.field_
 from gqlauth.core.utils import hide_args_kwargs, inject_arguments
 from gqlauth.user.resolvers import BaseMixin
 
