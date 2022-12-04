@@ -1,6 +1,8 @@
 
 
 # Changelog
+### 0.3.7.1
+ - dependencies updates.
 ### v0.3.6.0
 #### Deprecations:
 - Removed secondary email support.
