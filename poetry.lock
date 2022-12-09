@@ -1252,7 +1252,7 @@ enum = ["django-choices-field (>=2.0)"]
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.144.2"
+version = "0.148.0"
 description = "A library for creating GraphQL APIs"
 category = "main"
 optional = false
@@ -1268,14 +1268,15 @@ aiohttp = ["aiohttp (>=3.7.4.post0,<4.0.0)"]
 asgi = ["python-multipart (>=0.0.5,<0.0.6)", "starlette (>=0.13.6)"]
 chalice = ["chalice (>=1.22,<2.0)"]
 channels = ["asgiref (>=3.2,<4.0)", "channels (>=3.0.5)"]
-cli = ["click (>=7.0,<9.0)", "pygments (>=2.3,<3.0)"]
-debug-server = ["click (>=7.0,<9.0)", "pygments (>=2.3,<3.0)", "python-multipart (>=0.0.5,<0.0.6)", "starlette (>=0.13.6)", "uvicorn (>=0.11.6,<0.21.0)"]
+cli = ["click (>=7.0,<9.0)", "libcst (>=0.4.7)", "pygments (>=2.3,<3.0)", "rich (>=12.0.0)"]
+debug = ["libcst (>=0.4.7)", "rich (>=12.0.0)"]
+debug-server = ["click (>=7.0,<9.0)", "libcst (>=0.4.7)", "pygments (>=2.3,<3.0)", "python-multipart (>=0.0.5,<0.0.6)", "rich (>=12.0.0)", "starlette (>=0.13.6)", "uvicorn (>=0.11.6,<0.21.0)"]
 django = ["Django (>=3.2)", "asgiref (>=3.2,<4.0)"]
 fastapi = ["fastapi (>=0.65.2)", "python-multipart (>=0.0.5,<0.0.6)"]
 flask = ["flask (>=1.1)"]
 opentelemetry = ["opentelemetry-api (<2)", "opentelemetry-sdk (<2)"]
 pydantic = ["pydantic (<2)"]
-sanic = ["sanic (>=20.12.2,<22.0.0)"]
+sanic = ["sanic (>=20.12.2)"]
 
 [[package]]
 name = "strawberry-graphql-django"
@@ -2481,8 +2482,8 @@ strawberry-django-plus = [
     {file = "strawberry_django_plus-1.32.tar.gz", hash = "sha256:e37eab8718546886878943a050791169ae24c2bf3a376c0fdf79453c3e73d6d7"},
 ]
 strawberry-graphql = [
-    {file = "strawberry_graphql-0.144.2-py3-none-any.whl", hash = "sha256:11aaa99bfbc0013cd8e7eb82cf6b98cbc58ec2fb91373bf1ccf26c0dd7b83f18"},
-    {file = "strawberry_graphql-0.144.2.tar.gz", hash = "sha256:06be94a6be7f104f72812110062e63f82c418f69df9db67da160d8cc816b0d42"},
+    {file = "strawberry_graphql-0.148.0-py3-none-any.whl", hash = "sha256:070206f0f5b39f9486a8eb54272b702a5c1f2abec98cd51f0e48d7551cf63c97"},
+    {file = "strawberry_graphql-0.148.0.tar.gz", hash = "sha256:9d43090480fbcd8534cfcaeb109610ab6dc2396671ebebca6e3f433c1f3bc923"},
 ]
 strawberry-graphql-django = [
     {file = "strawberry_graphql_django-0.8.2-py3-none-any.whl", hash = "sha256:cc0717bd12b4b60af043cac4a7108c0ae4625c72a45dee99bd99e8952698a4c1"},
