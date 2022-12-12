@@ -43,7 +43,7 @@ django-mock-queries = "^2.1.7"
 types-mock = "^4.0.15"
 types-jwt = "^0.1.0"
 types-pkg-resources = "^0.1.0"
-black = "^22.10.0"
+black = "^22.12.0"
 isort = "^5.10.1"
 mypy = "^0.961"
 django-stubs = {extras = ["compatible-mypy"], version = "^1.12.0"}
