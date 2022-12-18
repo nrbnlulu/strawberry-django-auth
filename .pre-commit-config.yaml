@@ -41,19 +41,30 @@ repos:
     rev: 22.6.0
     hooks:
       - id: black
-        args: ["--config", "pyproject.toml"]
+        args: ["--config", "pyproject.toml", "--target-version", "py310"]
 
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
     hooks:
       - id: flake8
-        args: ["--config=.flake8"]
+        args: # arguments to configure flake8
+          # making isort line length compatible with black
+          - "--max-line-length=100"
+          - "--max-complexity=18"
+          # these are errors that will be ignored by flake8
+          # check out their meaning here
+          # https://flake8.pycqa.org/en/latest/user/error-codes.html
+          - "--ignore=E203,E266,E501,W503,F403,F401,E402, A003, R505"
         additional_dependencies:
           [
-            "flake8-broken-line==0.4.0",
-            "flake8-bugbear==22.7.1",
-            "flake8-builtins==1.5.3",
-            "flake8-comprehensions==3.10.0",
-            "flake8-polyfill==1.0.2",
-            "flake8-return==1.1.3",
-            "flake8-simplify==0.19.2",]
+            "flake8-bugbear",
+            "flake8-builtins",
+            "flake8-comprehensions",
+            "flake8-return",
+            "flake8-simplify"
+          ]
+
+  - repo: https://github.com/python-poetry/poetry
+    rev: 1.2.2
+    hooks:
+      - id: poetry-check

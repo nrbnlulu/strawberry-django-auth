@@ -61,8 +61,7 @@ class Captcha(models.Model):
                 ...  # object is deleted
             return Messages.CAPTCHA_MAX_RETRIES
 
-        else:
-            self.tries += 1
+        self.tries += 1
 
         # check expiery
         if timezone.now() > self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA:
