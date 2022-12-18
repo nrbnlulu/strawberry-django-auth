@@ -148,7 +148,7 @@ class AbstractTestCase(ABC):
     def login_query(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
-    def make_request(
+    def make_request(  # noqa: B027
         self,
         query: str,
         user_status: UserStatusType = None,
