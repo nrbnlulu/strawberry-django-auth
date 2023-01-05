@@ -1329,7 +1329,7 @@ types-cryptography = "*"
 
 [[package]]
 name = "types-mock"
-version = "4.0.15.2"
+version = "5.0.0.0"
 description = "Typing stubs for mock"
 category = "dev"
 optional = false
@@ -1483,7 +1483,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.12"
-content-hash = "f56de870afe2502cd63ac1b1efa594509e8f1ac7fcbe806607496bcabd8681a5"
+content-hash = "7fee576f9374002abbfc5303da12fa9405bb831d892e85c12cd189e96f7dc8b9"
 
 [metadata.files]
 aiohttp = [
@@ -2427,8 +2427,8 @@ types-jwt = [
     {file = "types_jwt-0.1.3-py2.py3-none-any.whl", hash = "sha256:36a1d5f99b349428f9ca5695e5caf3378398ae31d7aaed1c668c81451ba79b08"},
 ]
 types-mock = [
-    {file = "types-mock-4.0.15.2.tar.gz", hash = "sha256:83fe479741adb92210c3c92f006fe058297d5051e93c2cec36f1a9e0bae16e9e"},
-    {file = "types_mock-4.0.15.2-py3-none-any.whl", hash = "sha256:39d489b6d9361b75448677680a3087701c0cfab61260363cfc0f646d2bf0a8b2"},
+    {file = "types-mock-5.0.0.0.tar.gz", hash = "sha256:7119b478a0824f1ae02b57e25e9e428404a58440bcd89c4ee76404afce261f7c"},
+    {file = "types_mock-5.0.0.0-py3-none-any.whl", hash = "sha256:c293a49d4e762f238a0da1f09b80c0128afacd0e608426ae42be40f5bc3eee2e"},
 ]
 types-pkg-resources = [
     {file = "types-pkg_resources-0.1.3.tar.gz", hash = "sha256:834a9b8d3dbea343562fd99d5d3359a726f6bf9d3733bccd2b4f3096fbab9dae"},
