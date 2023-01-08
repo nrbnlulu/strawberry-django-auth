@@ -9,13 +9,13 @@ from strawberry.utils.str_converters import to_camel_case
 from gqlauth.core.constants import Messages
 from gqlauth.user.signals import user_registered
 
+from .conftest import UserType
 from .testCases import (
     AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
     RelayTestCase,
-    UserType,
 )
 
 

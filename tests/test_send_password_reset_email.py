@@ -5,13 +5,13 @@ import pytest
 
 from gqlauth.core.constants import Messages
 
+from .conftest import UserType
 from .testCases import (
     AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
     RelayTestCase,
-    UserType,
 )
 
 

@@ -1,11 +1,11 @@
 # quickstart.schema.py
-from typing import Union
 
 import strawberry
+from strawberry_django_plus import gql
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+from strawberry_django_plus.permissions import IsAuthenticated
 
-from gqlauth.core.directives import TokenRequired
-from gqlauth.core.field_ import field
-from gqlauth.core.types_ import GQLAuthError
+from gqlauth.core.directives import IsVerified
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 from gqlauth.user.resolvers import Captcha
@@ -20,8 +20,8 @@ class MyAuthorizedQueries(UserQueries):
 
 @strawberry.type
 class Query:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[GQLAuthError, MyAuthorizedQueries]:
+    @gql.django.field(directives=[IsVerified()])
+    def auth_entry(self) -> MyAuthorizedQueries:
         return MyAuthorizedQueries()
 
 
@@ -36,8 +36,8 @@ class AuthMutation:
 
 @strawberry.type
 class Mutation:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[GQLAuthError, AuthMutation]:
+    @gql.django.field(directives=[IsAuthenticated()])
+    def auth_entry(self) -> AuthMutation:
         return AuthMutation()
 
     captcha = Captcha.field
@@ -52,4 +52,4 @@ class Mutation:
     revoke_token = mutations.RevokeToken.field
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[SchemaDirectiveExtension])

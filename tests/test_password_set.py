@@ -3,13 +3,13 @@ import pytest
 from gqlauth.core.constants import Messages
 from gqlauth.core.utils import get_token
 
+from .conftest import fake
 from .testCases import (
     AbstractTestCase,
     ArgTestCase,
     AsyncArgTestCase,
     AsyncRelayTestCase,
     RelayTestCase,
-    fake,
 )
 
 

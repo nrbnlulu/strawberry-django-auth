@@ -1,8 +1,6 @@
-from typing import Union
-
 import strawberry
 
-from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
+from gqlauth.core.types_ import GQLAuthErrors
 
 
 def test_basic_schema():
@@ -18,12 +16,7 @@ def test_basic_schema():
 
     @strawberry.type
     class MainQuery:
-        @strawberry.field
-        def auth_entry(self, to_fail: bool = False) -> Union[Query, GQLAuthError]:
-            if to_fail:
-                return GQLAuthError(code=GQLAuthErrors.INVALID_TOKEN)
-            else:
-                return Query()
+        ...
 
     schema = strawberry.Schema(query=MainQuery)
     query = """query testAuth($toFail: Boolean!){authEntry(toFail: $toFail){

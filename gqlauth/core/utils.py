@@ -3,9 +3,9 @@ import inspect
 import typing
 from typing import Dict, Iterable, Union
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser
 from django.core import signing
 from strawberry.field import StrawberryField
 from strawberry.types import Info
@@ -15,13 +15,15 @@ from gqlauth.core.exceptions import TokenScopeError
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.models import UserStatus
+    from gqlauth.settings_type import GqlAuthSettings
 
     class UserProto(AbstractBaseUser):
         status: UserStatus
 
 
 USER_MODEL = get_user_model()
-USER_UNION = Union[AbstractBaseUser, AnonymousUser]
+USER_UNION = "Union[UserProto, AnonymousUser]"
+app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 
 def hide_args_kwargs(field):
@@ -80,10 +82,7 @@ def get_user_with_status(info: Info) -> "UserProto":
 
 
 def get_user(info: Info) -> USER_UNION:
-    if user := getattr(info.context, "user", None):  # noqa: B009
-        assert isinstance(user, USER_MODEL)
-        return user  # type: ignore
-    return AnonymousUser()
+    return info.context.request.user  # type: ignore
 
 
 def get_user_safe(info: Info) -> AbstractBaseUser:

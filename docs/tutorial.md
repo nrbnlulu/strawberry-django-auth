@@ -146,6 +146,7 @@ python -m manage migrate
 Create a file called `schema.py` next to your `settings.py`
 
 Add the following to code:
+
 ```py
 # yourapp/users/schema.py
 
@@ -153,7 +154,7 @@ import strawberry
 from gqlauth.user.queries import UserQueries
 from gqlauth.core.field_ import field
 from gqlauth.core.types_ import GQLAuthError
-from gqlauth.core.directives import TokenRequired
+from gqlauth.core.decorators import TokenRequired
 
 from typing import Union
 ```

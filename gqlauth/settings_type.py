@@ -8,9 +8,10 @@ from django.conf import settings as django_settings
 from django.utils.module_loading import import_string
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
-from strawberry.types import Info
 
 if typing.TYPE_CHECKING:  # pragma: no cover
+    from django.http.request import HttpRequest
+
     from gqlauth.core.utils import UserProto
     from gqlauth.jwt.types_ import TokenType
 
@@ -37,7 +38,7 @@ class ImportString(typing.Generic[T]):
     def preform_import(self) -> T:
         return import_string(self.path)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):  # pragma: no cover
         # FIXME: this is not covered. and just used to fool mypy.
         return import_string(self.path)(*args, **kwargs)
 
@@ -194,11 +195,13 @@ class GqlAuthSettings:
         "gqlauth.jwt.default_hooks.decode_jwt"
     )
 
-    JWT_TOKEN_FINDER: ImportString[Callable[[Info], Optional[str]]] = ImportString(
-        "gqlauth.jwt.default_hooks.token_finder"
-    )
+    JWT_TOKEN_FINDER: ImportString[
+        Callable[[Union["HttpRequest", dict]], Optional[str]]
+    ] = ImportString("gqlauth.jwt.default_hooks.token_finder")
     """
-    A hook called by `GqlAuthRootField` to find the token, **remember to strip the "JWT " prefix
+    A hook called by `GqlAuthRootField` to find the token.
+     Accepts the request object (might be channels scope dict or django request object)
+     **remember to strip the "JWT " prefix
     if you override this.**
     """
     JWT_EXPIRATION_DELTA: timedelta = timedelta(minutes=5)

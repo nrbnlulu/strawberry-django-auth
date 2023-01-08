@@ -1,6 +1,5 @@
 import pytest
 
-from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.settings_type import GqlAuthSettings
 from tests.testCases import ArgTestCase
 
@@ -30,7 +29,4 @@ class TestOverrideHooks(ArgTestCase):
             return "invalid value"
 
         with self.override_gqlauth(app_settings.JWT_TOKEN_FINDER, hook):
-            res = self.make_request(
-                query=self.AUTH_REQUIRED_QUERY, user_status=db_verified_user_status
-            )
-            assert res["message"] == GQLAuthErrors.INVALID_TOKEN.value
+            assert app_settings.JWT_TOKEN_FINDER(None) == "invalid value"

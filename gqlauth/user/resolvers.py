@@ -1,9 +1,8 @@
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Callable, List, Union, cast
+from typing import Callable, cast
 from uuid import UUID
 
-from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,18 +11,18 @@ from django.db import transaction
 import strawberry
 from strawberry.field import StrawberryField
 from strawberry.types import Info
+from strawberry_django_plus import gql
 
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
-from gqlauth.core.directives import BaseAuthDirective, IsVerified
 from gqlauth.core.exceptions import (
     PasswordAlreadySetError,
     TokenScopeError,
     UserAlreadyVerified,
     UserNotVerified,
 )
-from gqlauth.core.types_ import GQLAuthError, MutationNormalOutput
+from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors, MutationNormalOutput
 from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
@@ -57,8 +56,17 @@ UserModel = get_user_model()
 
 class BaseMixin:
     field: StrawberryField
-    directives: List[BaseAuthDirective] = []
+    REQUIRE_VERIFICATION: bool = False
     resolve_mutation: Callable
+
+    @classmethod
+    def verification_check(cls, info: Info) -> None:
+        if cls.REQUIRE_VERIFICATION:
+            user = get_user(info)
+            if user.is_anonymous:
+                raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
+            if not user.status.verified:
+                raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
 
 
 class Captcha:
@@ -71,13 +79,8 @@ class Captcha:
     **The captcha will be invoked when the timeout expires**.
     """
 
-    @strawberry.mutation(description=__doc__)
+    @gql.django.field(description=__doc__)
     def field(self) -> CaptchaType:
-        return CaptchaModel.create_captcha()
-
-    @strawberry.mutation(description=__doc__)
-    @sync_to_async
-    def afield(self) -> CaptchaType:
         return CaptchaModel.create_captcha()
 
 
@@ -380,14 +383,10 @@ class ArchiveOrDeleteMixin(BaseMixin):
     class ArchiveOrDeleteMixinInput:
         password: str
 
-    directives = [
-        IsVerified(),
-    ]
+    REQUIRE_VERIFICATION = True
 
     @classmethod
-    def resolve_mutation(
-        cls, info, input_: ArchiveOrDeleteMixinInput
-    ) -> Union[GQLAuthError, MutationNormalOutput]:
+    def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
         user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return error
@@ -438,14 +437,10 @@ class PasswordChangeMixin(BaseMixin):
         new_password2: str
 
     form = PasswordChangeForm
-    directives = [
-        IsVerified(),
-    ]
+    REQUIRE_VERIFICATION = True
 
     @classmethod
-    def resolve_mutation(
-        cls, info: Info, input_: PasswordChangeInput
-    ) -> Union[GQLAuthError, ObtainJSONWebTokenType]:
+    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
         user = get_user_safe(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
@@ -473,14 +468,10 @@ class UpdateAccountMixin(BaseMixin):
         ...
 
     form = UpdateAccountForm
-    directives = [
-        IsVerified(),
-    ]
+    REQUIRE_VERIFICATION = True
 
     @classmethod
-    def resolve_mutation(
-        cls, info, input_: UpdateAccountInput
-    ) -> Union[GQLAuthError, MutationNormalOutput]:
+    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
         user = get_user(info)
         f = cls.form(
             asdict(input_),

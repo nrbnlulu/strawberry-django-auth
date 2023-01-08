@@ -1,12 +1,7 @@
-from django.contrib.auth import get_user_model
-from strawberry.utils.str_converters import to_camel_case
-
 from gqlauth.core.types_ import GQLAuthErrors
 
+from .conftest import USERNAME_FIELD
 from .testCases import ArgTestCase
-
-UserModel = get_user_model()
-USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
 
 
 class TestQueries(ArgTestCase):

@@ -1,5 +1,6 @@
 import dataclasses
 
+from .conftest import fake
 from .testCases import (
     AbstractTestCase,
     ArgTestCase,
@@ -7,7 +8,6 @@ from .testCases import (
     AsyncRelayTestCase,
     RelayTestCase,
     UserStatusType,
-    fake,
 )
 
 

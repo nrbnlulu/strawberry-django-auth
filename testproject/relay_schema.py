@@ -1,10 +1,8 @@
-from typing import Union
-
 import strawberry
+from strawberry_django_plus import gql
+from strawberry_django_plus.permissions import IsAuthenticated
 
-from gqlauth.core.directives import TokenRequired
-from gqlauth.core.field_ import field
-from gqlauth.core.types_ import GQLAuthError
+from gqlauth.core.token_to_user import TokenSchema
 from gqlauth.user import relay
 from gqlauth.user.resolvers import Captcha
 from testproject.schema import Query
@@ -20,8 +18,8 @@ class AuthMutation:
 
 @strawberry.type
 class Mutation:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
+    @gql.django.field(directives=[IsAuthenticated])
+    def auth_entry(self) -> AuthMutation:
         return AuthMutation()
 
     captcha = Captcha.field
@@ -37,7 +35,7 @@ class Mutation:
     verify_account = relay.VerifyAccount.field
 
 
-relay_schema = strawberry.Schema(
+relay_schema = TokenSchema(
     query=Query,
     mutation=Mutation,
 )
