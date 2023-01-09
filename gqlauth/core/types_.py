@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Optional, TypeVar
 
-from django.utils.translation import gettext as _
 import strawberry
 
 from gqlauth.core.scalars import ExpectedErrorType
@@ -15,22 +14,21 @@ class MutationNormalOutput:
     errors: Optional[ExpectedErrorType] = None
 
 
-@strawberry.type
-class GQLAuthError:
-    code: "GQLAuthErrors"
-    message: Optional[str] = None
+from graphql import GraphQLError
 
-    def __post_init__(self):
+
+class GQLAuthError(GraphQLError):
+    def __init__(self, code: "GQLAuthErrors", *args, **kwargs):
+        kwargs["message"] = ""
+        super().__init__(*args, **kwargs)
         if not self.message:
-            assert isinstance(self.code.value, str)
-            self.message = _(self.code.value)
-        self.message = _(self.message)
+            self.message = code.value
 
 
-@strawberry.enum
 class GQLAuthErrors(Enum):
     UNAUTHENTICATED = "Unauthenticated."
     INVALID_TOKEN = "Invalid token."
     EXPIRED_TOKEN = "Expired token."
     NO_SUFFICIENT_PERMISSIONS = "Permissions found could not satisfy the required permissions."
     NOT_VERIFIED = "Please verify your account."
+    MISSING_TOKEN = "No JWT found"

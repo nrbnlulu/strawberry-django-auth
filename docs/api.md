@@ -23,7 +23,7 @@ class RegisterMixin(BaseMixin)
 > Register user with fields defined in the settings.
 > If the email field of the user model is part of the
 > registration fields (default), check if there is
-> no user with that email or as a secondary email.
+> no user with that email.
 >
 > If it exists, it does not register the user,
 > even if the email field is not defined as unique
@@ -31,8 +31,7 @@ class RegisterMixin(BaseMixin)
 >
 > When creating the user, it also creates a `UserStatus`
 > related to that user, making it possible to track
-> if the user is archived, verified and has a secondary
-> email.
+> if the user is archived / verified.
 >
 > Send account verification email.
 >
@@ -49,25 +48,6 @@ class VerifyAccountMixin(BaseMixin)
 > Receive the token that was sent by email.
 > If the token is valid, make the user verified
 > by making the `user.status.verified` field true.
-
-## VerifySecondaryEmailMixin
-
-```python
-class VerifySecondaryEmailMixin(BaseMixin)
-```
-
-> Verify user secondary email.
->
-> Receive the token that was sent by email.
-> User is already verified when using this mutation.
->
-> If the token is valid, add the secondary email
-> to `user.status.secondary_email` field.
->
-> Note that until the secondary email is verified,
-> it has not been saved anywhere beyond the token,
-> so it can still be used to create a new account.
-> After being verified, it will no longer be available.
 
 ## ResendActivationEmailMixin
 
@@ -94,8 +74,6 @@ class SendPasswordResetEmailMixin(BaseMixin)
 >
 > For non verified users, send an activation
 > email instead.
->
-> Accepts both primary and secondary email.
 >
 > If there is no user with the requested email,
 > a successful response is returned.
@@ -141,8 +119,7 @@ class ObtainJSONWebTokenMixin(BaseMixin)
 > Obtain JSON web token for given user.
 >
 > Allow to perform login with different fields,
-> and secondary email if set. The fields are
-> defined on settings.
+> The fields are defined on settings.
 >
 > Not verified users can log in by default. This
 > can be changes on settings.
@@ -222,33 +199,3 @@ class RevokeTokenMixin(BaseMixin)
 
 > ### Suspends a refresh token.
 > *token must exist to be revoked.*
-
-## SendSecondaryEmailActivationMixin
-
-```python
-class SendSecondaryEmailActivationMixin(BaseMixin)
-```
-
-> Send activation to secondary email.
->
-> User must be verified and confirm password.
-
-## SwapEmailsMixin
-
-```python
-class SwapEmailsMixin(BaseMixin)
-```
-
-> Swap between primary and secondary emails.
->
-> Require password confirmation.
-
-## RemoveSecondaryEmailMixin
-
-```python
-class RemoveSecondaryEmailMixin(BaseMixin)
-```
-
-> Remove user secondary email.
->
-> Require password confirmation.

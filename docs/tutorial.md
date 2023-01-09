@@ -1,7 +1,6 @@
 ## What to expect
 
 - Fully functional API to handle user account
-- Both graphQL and Relay versions
 - Setup with custom user model
 - 20 to 30 minutes
 
@@ -99,7 +98,7 @@ from gqlauth.settings_type import GqlAuthSettings
 
 INSTALLED_APPS = [
     # ...
-    'django.contrib.staticfiles', # Required for GraphiQL
+    'django.contrib.staticfiles',  # Required for GraphiQL
     "strawberry_django",
     "gqlauth",
 
@@ -108,16 +107,18 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # ...
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'gqlauth.core.middlewares.DjangoJwtMiddleware'
     # ...
 ]
 
-
 AUTHENTICATION_BACKENDS = [
-        "django.contrib.auth.backends.ModelBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 ```
 We will disable captcha validation for now, just for ease of setup.
 ```py
+from gqlauth.settings_type import GqlAuthSettings
+
 GQL_AUTH = GqlAuthSettings(
     LOGIN_REQUIRE_CAPTCHA=False,
     REGISTER_REQUIRE_CAPTCHA=False,
@@ -146,16 +147,13 @@ python -m manage migrate
 Create a file called `schema.py` next to your `settings.py`
 
 Add the following to code:
+
 ```py
 # yourapp/users/schema.py
 
 import strawberry
 from gqlauth.user.queries import UserQueries
-from gqlauth.core.field_ import field
-from gqlauth.core.types_ import GQLAuthError
-from gqlauth.core.directives import TokenRequired
 
-from typing import Union
 ```
 === "Default"
     ```py
@@ -171,11 +169,9 @@ from typing import Union
 ```py
 
 @strawberry.type
-class MyAuthorizedQueries(UserQueries):
-    # add your queries that require authorization here.
-    @strawberry.field
-    def secured_string(self) -> str:
-        return "secure"
+class Query(UserQueries):
+    # you can add your queries here
+    ...
 ```
 ??? Note "you can choose what fields to include like this"
 
@@ -190,47 +186,21 @@ class MyAuthorizedQueries(UserQueries):
         public: UserType = UserQueries.public_user
         # etc...
     ```
-!!! Info "TokenRequired"
-    `TokenRequired` directive is responsible for validating the token you have in the headers and
-    injecting the user instance inside `info.context.user`.
-    **Any field that requires to interaction with the user (i.e check permissions) must be present
-    beneath this directive, otherwise the user is not accessible.**
-    This is the case for both mutations, queries and subscriptions.
-    You must also use our version of `strawberry.field`
-    because normally directives doesn't do anything.
+
 
 ```py
-@strawberry.type
-class Query:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[GQLAuthError, MyAuthorizedQueries]:
-        return MyAuthorizedQueries()
-```
-!!! Warning
-    **Even though you can choose what mutations to include,
-    you must include mutations that requires authentication
-    under or in a field with `TokenRequired` directive,
-    otherwise you will just get graphql errors instead of nice outputs.**
 
-```py
-@strawberry.type
-class AuthMutation:
-    # include here your mutations that interact with a user object from a token.
 
+@strawberry.type
+class Mutation:
+
+    # include what-ever mutations you want.
     verify_token = mutations.VerifyToken.field
     update_account = mutations.UpdateAccount.field
     archive_account = mutations.ArchiveAccount.field
     delete_account = mutations.DeleteAccount.field
     password_change = mutations.PasswordChange.field
     swap_emails = mutations.SwapEmails.field
-
-@strawberry.type
-class Mutation:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
-        return AuthOutput(node=AuthMutation())
-
-    # these are mutation that does not require authentication.
     captcha = Captcha.field
     token_auth = mutations.ObtainJSONWebToken.field
     register = mutations.Register.field
@@ -401,7 +371,7 @@ The quickest solution for development is to set up a [Console Email Backend](htt
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ```
 
-Now all emails are sent to the standard output, instead of an actual email and we
+Now all emails are sent to the standard output, instead of an actual email, and we
 are ready to continue this guide.
 
 
@@ -666,33 +636,34 @@ Save this `token`, we are going to use it in the request headers.
 ### MeQuery
 
 With ``MeQuery`` you can retrieve data for the currently authenticated user:
-!!! Fail "No headers supplied will give nice error message"
+!!! Fail "No headers supplied, will raise graphql error"
     === "query"
         ```graphql
-        query MyQuery {
-          authEntry {
-            ... on GQLAuthError {
-              code
-              message
-            }
-            ... on  MyAuthorizedQueries{
-              me {
+            query{
+              me{
                 username
                 verified
               }
             }
-          }
-        }
         ```
     === "response"
         ```json
         {
-          "data": {
-            "authEntry": {
-              "code": "INVALID_TOKEN",
-              "message": "Invalid token."
+          "data": null,
+          "errors": [
+            {
+              "message": "User is not authenticated.",
+              "locations": [
+                {
+                  "line": 2,
+                  "column": 3
+                }
+              ],
+              "path": [
+                "me"
+              ]
             }
-          }
+          ]
         }
         ```
 
@@ -701,30 +672,20 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
     ![img.png](images/headers_graphiql.png)
     === "query"
         ```graphql
-        query MyQuery {
-          authEntry {
-            ... on GQLAuthError {
-              code
-              message
-            }
-            ... on  MyAuthorizedQueries{
-              me {
+            query{
+              me{
                 username
                 verified
               }
             }
-          }
-        }
         ```
     === "response"
         ```json
         {
           "data": {
-            "authEntry": {
-              "me": {
-                "username": "new_user",
-                "verified": true
-              }
+            "me": {
+              "verified": true,
+              "username": "testadmin"
             }
           }
         }
@@ -738,9 +699,9 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
 ## Next steps
 
 - explore all the mutations.
+- [Support Django-Channels](channels.md).
 - Navigate through the GraphiQL Documentation Explorer.
 - Change the [settings](settings.md).
 - Explore the [api](api.md).
-- check our [directives](directives.md).
 - make sure you are familiar with our [captcha](captcha.md) system.
 - [Override email templates](overriding-email-templates.md).

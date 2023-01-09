@@ -1,6 +1,10 @@
 
 
 # Changelog
+### v0.372.0
+- Fall back to primitive graphql errors.
+The error types approach that I gave so much effort for, was yet another case of
+**'Don't Let the Perfect Be the Enemy of the Good'** and introduced more complexity than I thought.
 ### 0.3.7.1
  - dependencies updates.
 ### v0.3.6.0

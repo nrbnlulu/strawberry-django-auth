@@ -1,10 +1,12 @@
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
-from django.urls import re_path
-from strawberry.channels import GraphQLHTTPConsumer, GraphQLWSConsumer
+In order to have a user in your context from headers
+our django middleware would not suffice.
+you would need to user our `channels` middleware.
 
+Here is an example of an asgi.py file that uses our middleware to support JWT from headers:
+_**asgi.py**_
+```python
 from gqlauth.core.middlewares import ChannelsJwtMiddleware
-from testproject.schema import arg_schema
+...
 
 websocket_urlpatterns = [
     re_path("^graphql", ChannelsJwtMiddleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
@@ -22,3 +24,15 @@ application = ProtocolTypeRouter(
         "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
     }
 )
+```
+
+Now in order to have the user inside `info.context.request` we need to use a custom schema
+_**schema.py**_
+```python
+from gqlauth.core.middlewares import JwtSchema
+
+
+arg_schema = JwtSchema(
+    query=Query, mutation=Mutation, subscription=Subscription]
+)
+```

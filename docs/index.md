@@ -27,14 +27,21 @@ is not up to your expectations , it's ^^easy to extend or switch to
 your implementation^^.
 
 ---
+## Goals
+- Easy JWT authentication compatible with strawberry.
+- Some boiler-plate mutations like register, login etc.
+
+## Non-goals
+- Permission handling - out of scope for this project, we just provide you a user in `info.context.request`.
 
 ## Features
 
 * [x] Awesome docs!
 * [x] Captcha validation
 * [x] Async/Sync supported!
+* [x] django-channels asgi support.
 * [x] Works with ==default or custom== user model
-* [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
+* [x] Built-in JWT authentication.
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
 * [x] Resend activation email
@@ -52,5 +59,6 @@ your implementation^^.
 * [x] Passwordless registration
 
 ---
+
 
 You can now jump to the [Tutorial](tutorial.md).

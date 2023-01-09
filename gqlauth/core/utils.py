@@ -1,8 +1,9 @@
 import contextlib
 import inspect
 import typing
-from typing import Dict, Iterable, Union
+from typing import Dict, Iterable
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
@@ -15,13 +16,15 @@ from gqlauth.core.exceptions import TokenScopeError
 
 if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.models import UserStatus
+    from gqlauth.settings_type import GqlAuthSettings
 
     class UserProto(AbstractBaseUser):
         status: UserStatus
 
 
 USER_MODEL = get_user_model()
-USER_UNION = Union[AbstractBaseUser, AnonymousUser]
+USER_UNION = typing.Union["UserProto", AnonymousUser]
+app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 
 def hide_args_kwargs(field):
@@ -34,7 +37,7 @@ def hide_args_kwargs(field):
 def isiterable(value):
     try:
         iter(value)
-    except TypeError:
+    except TypeError:  # pragma: no cover
         return False
     return True
 
@@ -47,43 +50,8 @@ def camelize(data):
     return data
 
 
-def list_to_dict(lst: typing.List[str]):
-    """takes list of string and creates a dict with str as their values"""
-    new_dict = {}
-    for item in lst:
-        new_dict[item] = str
-    return new_dict
-
-
-def get_request(info: Info):
-    if hasattr(info.context, "user"):
-        return info.context
-    return info.context.request
-
-
-def get_info(args: tuple) -> typing.Optional[Info]:
-    for arg in args:
-        if isinstance(arg, Info):
-            return arg
-    return None
-
-
-def get_user_with_status(info: Info) -> "UserProto":
-    from gqlauth.models import UserStatus
-
-    user = get_user(info)
-    if status := getattr(user, "status", False):
-        assert isinstance(status, UserStatus)
-        return user  # type: ignore
-    else:
-        raise NameError("could not found status for user.")
-
-
 def get_user(info: Info) -> USER_UNION:
-    if user := getattr(info.context, "user", None):  # noqa: B009
-        assert isinstance(user, USER_MODEL)
-        return user  # type: ignore
-    return AnonymousUser()
+    return info.context.request.user  # type: ignore
 
 
 def get_user_safe(info: Info) -> AbstractBaseUser:
@@ -128,24 +96,10 @@ def fields_names(strawberry_fields: Iterable[StrawberryField]):
     return [field.python_name for field in strawberry_fields]
 
 
-def normalize_fields(dict_or_list, extra_list_or_dict):
-    """
-    helper merge settings defined filed
-    with default str type
-    """
-    if not isinstance(extra_list_or_dict, dict):
-        extra_list_or_dict = list_to_dict(extra_list_or_dict)
-    if not isinstance(dict_or_list, dict):
-        dict_or_list = list_to_dict(dict_or_list)
-    dict_or_list.update(extra_list_or_dict)
-
-    return dict_or_list
-
-
 def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=False):
     def wrapped(cls: type):
         # python 3.8 compat:
-        if not hasattr(cls, "__annotations__"):
+        if not hasattr(cls, "__annotations__"):  # pragma: no cover
             cls.__annotations__ = {}
 
         for field in fields:
@@ -177,10 +131,3 @@ def inject_arguments(args: Dict[str, type]):
         return fn
 
     return wrapped
-
-
-def is_optional(field):
-    """
-    whether strawberry field is optional or not
-    """
-    return typing.get_origin(field) is Union and type(None) in typing.get_args(field)

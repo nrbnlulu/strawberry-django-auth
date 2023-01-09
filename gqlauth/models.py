@@ -19,7 +19,7 @@ from strawberry.types import Info
 
 from gqlauth.core.constants import TokenAction
 from gqlauth.core.exceptions import UserAlreadyVerified
-from gqlauth.core.utils import get_payload_from_token, get_request, get_token
+from gqlauth.core.utils import get_payload_from_token, get_token
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
@@ -58,7 +58,7 @@ class UserStatus(models.Model):
 
     def get_email_context(self, info: Info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
-        request = get_request(info)
+        request = info.context.request
         site = get_current_site(request)
         return {
             "user": self.user,

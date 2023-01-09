@@ -1,39 +1,40 @@
-import asyncio
-from typing import AsyncGenerator, Union
+from typing import AsyncGenerator
 
 import strawberry
-import strawberry_django
+from strawberry.types import Info
+from strawberry_django_plus import gql
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+from strawberry_django_plus.permissions import IsAuthenticated
 
-from gqlauth.core.directives import HasPermission, IsVerified, TokenRequired
-from gqlauth.core.field_ import field, subscription
-from gqlauth.core.types_ import GQLAuthError
+from gqlauth.core.middlewares import JwtSchema
+from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
 from testproject.sample.models import Apple
 
 
-@strawberry.type
-class AuthMutation:
-    verify_token = arg_mutations.VerifyToken.field
-    update_account = arg_mutations.UpdateAccount.field
-    archive_account = arg_mutations.ArchiveAccount.field
-    delete_account = arg_mutations.DeleteAccount.field
-    password_change = arg_mutations.PasswordChange.field
+@gql.django.type(model=Apple)
+class AppleType:
+    color: strawberry.auto
+    name: strawberry.auto
+    is_eaten: strawberry.auto
 
-    @field(directives=[HasPermission(permissions=["sample.can_eat"])])
-    def eat_apple(self, apple_id: int) -> Union["AppleType", GQLAuthError]:
+
+@strawberry.type
+class Mutation:
+    @gql.django.field(directives=[IsAuthenticated])
+    def eat_apple(self, apple_id: int) -> "AppleType":
         apple = Apple.objects.get(id=apple_id)
         apple.is_eaten = True
         apple.save()
         return apple
 
-
-@strawberry.type
-class Mutation:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
-        return AuthMutation()
+    verify_token = arg_mutations.VerifyToken.field
+    update_account = arg_mutations.UpdateAccount.field
+    archive_account = arg_mutations.ArchiveAccount.field
+    delete_account = arg_mutations.DeleteAccount.field
+    password_change = arg_mutations.PasswordChange.field
 
     captcha = Captcha.field
     token_auth = arg_mutations.ObtainJSONWebToken.field
@@ -47,61 +48,33 @@ class Mutation:
     revoke_token = arg_mutations.RevokeToken.field
 
 
-@strawberry_django.type(model=Apple)
-class AppleType:
-    color: strawberry.auto
-    name: strawberry.auto
-    is_eaten: strawberry.auto
-
-
 @strawberry.type
-class AuthQueries(UserQueries):
-    @field(
+class Query(UserQueries):
+    @gql.django.field(
         directives=[
-            IsVerified(),
+            IsAuthenticated(),
         ]
     )
-    def apple(self) -> Union[GQLAuthError, AppleType]:
-        return Apple.objects.latest("pk")
+    def whatsMyUserName(self, info: Info) -> str:
+        return get_user(info).username
 
-
-@strawberry.type
-class Query:
-    @field(
-        directives=[
-            TokenRequired(),
-        ]
-    )
-    def auth_entry(self) -> Union[GQLAuthError, AuthQueries]:
-        return AuthQueries()
-
-    @field(directives=[TokenRequired(), IsVerified()])
-    @staticmethod
-    def batched_field() -> Union["AppleType", GQLAuthError]:
-        return Apple.objects.latest("pk")
-
-
-@strawberry.type
-class Integer:
-    """
-    graphql unions cannot contain scalars.
-    """
-
-    node: int
+    @strawberry.field()
+    def amIAnonymous(self, info: Info) -> bool:
+        user = get_user(info)
+        return not user.is_authenticated
 
 
 @strawberry.type
 class Subscription:
-    @subscription(
-        directives=[
-            TokenRequired(),
-        ],
-        is_subscription=True,
-    )
-    async def count(self, target: int = 10) -> AsyncGenerator[Union[Integer, GQLAuthError], None]:
-        for i in range(target):
-            yield Integer(node=i)
-            await asyncio.sleep(0.5)
+    @strawberry.subscription()
+    async def whatsMyName(self, info: Info, target: int = 10) -> AsyncGenerator[str, None]:
+        user = get_user(info)
+        assert user.is_authenticated
+        assert user.last_login
+        for _ in range(target):
+            yield get_user(info).username
 
 
-arg_schema = strawberry.Schema(query=Query, mutation=Mutation, subscription=Subscription)
+arg_schema = JwtSchema(
+    query=Query, mutation=Mutation, subscription=Subscription, extensions=[SchemaDirectiveExtension]
+)

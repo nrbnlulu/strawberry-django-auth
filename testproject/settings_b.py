@@ -19,6 +19,7 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
     SEND_ACTIVATION_EMAIL=False,
     ALLOW_DELETE_ACCOUNT=True,
     ALLOW_LOGIN_NOT_VERIFIED=False,
+    ALLOW_PASSWORDLESS_REGISTRATION=True,
     LOGIN_FIELDS={
         phone_number_field,
         password_field,
