@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import pytest
 
 from gqlauth.core.constants import Messages
@@ -25,7 +27,7 @@ def _arg_query(token, password=None):
 
 
 @pytest.fixture()
-def set_token_with_unverified_user(db_unverified_user_status) -> tuple[UserStatusType, str]:
+def set_token_with_unverified_user(db_unverified_user_status) -> Tuple[UserStatusType, str]:
     db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
     return (
         db_unverified_user_status,
