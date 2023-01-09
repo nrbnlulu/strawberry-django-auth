@@ -2,11 +2,13 @@ from typing import AsyncGenerator
 
 import strawberry
 from strawberry_django_plus import gql
+from strawberry_django_plus.directives import SchemaDirectiveExtension
 from strawberry_django_plus.permissions import IsAuthenticated
 
 from gqlauth.core.token_to_user import TokenSchema
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
+from gqlauth.user.queries import UserQueries
 from testproject.sample.models import Apple
 
 
@@ -45,7 +47,7 @@ class Mutation:
 
 
 @strawberry.type
-class Query:
+class Query(UserQueries):
     @gql.django.field(
         directives=[
             IsAuthenticated(),
@@ -63,4 +65,6 @@ class Subscription:
             yield i
 
 
-arg_schema = TokenSchema(query=Query, mutation=Mutation, subscription=Subscription)
+arg_schema = TokenSchema(
+    query=Query, mutation=Mutation, subscription=Subscription, extensions=[SchemaDirectiveExtension]
+)

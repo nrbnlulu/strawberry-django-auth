@@ -90,6 +90,7 @@ class TokenSchema(Schema):
     @staticmethod
     def _inject_user_and_errors(kwargs: dict) -> UserOrError:
         context = kwargs["context_value"]
+        # channels compat
         if ws := getattr(context, "ws", None):
             user_or_error: UserOrError = ws.scope[USER_OR_ERROR_KEY]
         else:

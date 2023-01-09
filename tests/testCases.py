@@ -1,18 +1,12 @@
 from abc import ABC
-from contextlib import contextmanager
-import dataclasses
 import pprint
 import re
-from typing import Any, Union
+from typing import Union
 
 from asgiref.sync import async_to_sync, sync_to_async
-from django.conf import settings as django_settings
 import pytest
-from strawberry.utils.str_converters import to_camel_case
 
-from gqlauth.captcha.models import Captcha
-from gqlauth.settings import gqlauth_settings
-from tests.conftest import UserModel, UserStatusType
+from tests.conftest import UserStatusType
 
 from .conftest import WRONG_PASSWORD
 
@@ -47,25 +41,6 @@ class AbstractTestCase(ABC):
     IS_RELAY = False
     IS_ASYNC = False
 
-    @staticmethod
-    def gen_captcha():
-        return Captcha.create_captcha()
-
-    @contextmanager
-    def override_gqlauth(self, default: Any = None, replace: Any = None, name: str = None) -> None:
-        if not name:
-            for field in dataclasses.fields(gqlauth_settings):
-                if getattr(gqlauth_settings, field.name) == default:
-                    name = field.name
-                    break
-            if not name:
-                raise ValueError(f"setting not found for value {default}")
-        else:
-            default = getattr(gqlauth_settings, name)
-        setattr(gqlauth_settings, name, replace)
-        yield
-        setattr(gqlauth_settings, name, default)
-
 
 @pytest.mark.django_db(transaction=True)
 class TestBase(AbstractTestCase):
@@ -81,18 +56,6 @@ class TestBase(AbstractTestCase):
         `
         return client.execute["data"]["register"]
     """
-
-    def _generate_login_args(self, user_status: UserStatusType):
-        cap = self.gen_captcha()
-        user = user_status.user
-        initial = (
-            f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.username_field}",'
-            f' password: "{user.password}"'
-        )
-
-        if django_settings.GQL_AUTH.LOGIN_REQUIRE_CAPTCHA:
-            initial += f', identifier: "{cap.uuid}" ,userEntry: "{cap.text}"'
-        return initial
 
     def _get_path(self):
         if self.IS_RELAY:

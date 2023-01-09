@@ -1,198 +1,117 @@
 import dataclasses
 
 from .conftest import fake
-from .testCases import (
-    AbstractTestCase,
-    ArgTestCase,
-    AsyncArgTestCase,
-    AsyncRelayTestCase,
-    RelayTestCase,
-    UserStatusType,
-)
+from .testCases import UserStatusType
 
 
-class PasswordChangeTestCaseMixin(AbstractTestCase):
-    SECURE_PASSWORD = fake.password()
-
-    @dataclasses.dataclass
-    class PasswordChangeForm:
-        password_1: str
-        password_2: str
-
-    @classmethod
-    def _arg_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
-        return """
-        mutation {{
-          authEntry {{
-            ... on GQLAuthError {{
-              code
-              message
-            }}
-            ... on AuthMutation {{
-              passwordChange(
-                oldPassword: "{}", newPassword1: "{}", newPassword2: "{}"
-              ) {{
-                ... on ObtainJSONWebTokenType {{
-                  errors
-                  success
-                  token {{
-                    token
-                    payload {{
-                      origIat
-                      exp
-                    }}
-                  }}
-                  refreshToken {{
-                    token
-                    created
-                    revoked
-                    expiresAt
-                    isExpired
-                  }}
-                }}
-              }}
-            }}
-            ...on GQLAuthError{{
-              code
-              message
-            }}
-          }}
-        }}
-        """.format(
-            user_status.user.password,
-            password_form.password_1,
-            password_form.password_2,
-        )
-
-    @classmethod
-    def _relay_query(cls, user_status: UserStatusType, password_form: PasswordChangeForm):
-        return """
-       mutation {{
-          authEntry {{
-            ... on GQLAuthError {{
-              code
-              message
-            }}
-            ... on AuthMutation {{
-              passwordChange(
-                input: {{oldPassword: "{}", newPassword1: "{}", newPassword2: "{}"}}
-              ) {{
-                ... on ObtainJSONWebTokenType {{
-                  errors
-                  success
-                  token {{
-                    token
-                    payload {{
-                      origIat
-                      exp
-                    }}
-                  }}
-                  refreshToken {{
-                    token
-                    created
-                    revoked
-                    expiresAt
-                    isExpired
-                  }}
-                }}
-              }}
-            }}
-            ...on GQLAuthError{{
-              code
-              message
-            }}
-          }}
-        }}
-        """.format(
-            user_status.user.password,
-            password_form.password_1,
-            password_form.password_2,
-        )
-
-    def test_password_change(self, db_verified_user_status):
-        """
-        change password
-        """
-        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD)
-        query = self.make_query(user_status=db_verified_user_status, password_form=form)
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
-        user = db_verified_user_status.user.obj
-        data = executed["passwordChange"]
-        assert data["success"]
-        assert not data["errors"]
-        assert data["token"]["token"]
-        assert data["refreshToken"]["token"]
-        user.refresh_from_db()
-        assert db_verified_user_status.user.password != user.password
-
-    def test_mismatch_passwords(self, db_verified_user_status):
-        """
-        wrong inputs
-        """
-        user = db_verified_user_status.user.obj
-        old_password = user.password
-        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD + "mismatch")
-        query = self.make_query(user_status=db_verified_user_status, password_form=form)
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
-        data = executed["passwordChange"]
-        assert not data["success"]
-        assert data["errors"]["newPassword2"]
-        assert not data["refreshToken"] or data["token"]
-        user.refresh_from_db()
-        assert user.password == old_password
-
-    def test_passwords_validation(self, db_verified_user_status):
-        """
-        easy password
-        """
-        simple_password = self.PasswordChangeForm("123", "123")
-        query = self.make_query(user_status=db_verified_user_status, password_form=simple_password)
-        executed = self.make_request(query=query, user_status=db_verified_user_status)
-        data = executed["passwordChange"]
-        assert not data["success"]
-        assert data["errors"]
-        assert not data["refreshToken"] or data["token"]
-
-    def test_revoke_refresh_tokens_on_password_change(self, db_verified_user_status):
-        user = db_verified_user_status.user.obj
-        old_password = user.password
-        form = self.PasswordChangeForm(self.SECURE_PASSWORD, self.SECURE_PASSWORD)
-        query = self.make_query(user_status=db_verified_user_status, password_form=form)
-        # creating token and verify that it is valid.
-        self.get_tokens(db_verified_user_status)
-        user.refresh_from_db()
-        refresh_tokens = user.refresh_tokens.all()
-        assert refresh_tokens
-        for token in refresh_tokens:
-            assert not token.revoked
-        executed = self.make_request(query=query, user_status=db_verified_user_status)[
-            "passwordChange"
-        ]
-        assert executed["success"]
-        assert not executed["errors"]
-        assert executed["token"]["token"]
-        assert executed["refreshToken"]["token"]
-        user.refresh_from_db()
-        assert old_password != user.password
-        refresh_tokens = user.refresh_tokens.all()
-        assert refresh_tokens
-        # the last token is not revoked
-        # since it is returned by the password change mutation.
-        for token in list(refresh_tokens)[:-1]:
-            assert token.revoked
+@dataclasses.dataclass
+class PasswordChangeForm:
+    password_1: str
+    password_2: str
 
 
-class TestArgPasswordChange(PasswordChangeTestCaseMixin, ArgTestCase):
-    ...
+def _arg_query(user_status: UserStatusType, password_form: PasswordChangeForm):
+    return """
+mutation {{
+  passwordChange(oldPassword: "{}", newPassword1: "{}", newPassword2: "{}") {{
+    errors
+    success
+    token {{
+      token
+      payload {{
+        origIat
+        exp
+      }}
+    }}
+    refreshToken {{
+      token
+      created
+      revoked
+      expiresAt
+      isExpired
+    }}
+  }}
+}}
+    """.format(
+        user_status.user.password,
+        password_form.password_1,
+        password_form.password_2,
+    )
 
 
-class TestRelayPasswordChange(PasswordChangeTestCaseMixin, RelayTestCase):
-    ...
+SECURE_PASSWORD = fake.password()
 
 
-class TestAsyncArgPasswordChange(PasswordChangeTestCaseMixin, AsyncArgTestCase):
-    ...
+def test_password_change(db_verified_user_status, verified_schema):
+    """
+    change password
+    """
+    form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD)
+    query = _arg_query(user_status=db_verified_user_status, password_form=form)
+    res = verified_schema.execute(query=query)
+    user = db_verified_user_status.user.obj
+    data = res.data["passwordChange"]
+    assert data["success"]
+    assert not data["errors"]
+    assert data["token"]["token"]
+    assert data["refreshToken"]["token"]
+    user.refresh_from_db()
+    assert db_verified_user_status.user.password != user.password
 
 
-class TestAsyncRelayPasswordChange(PasswordChangeTestCaseMixin, AsyncRelayTestCase):
-    ...
+def test_mismatch_passwords(db_verified_user_status, verified_schema):
+    """
+    wrong inputs
+    """
+    user = db_verified_user_status.user.obj
+    old_password = user.password
+    form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD + "mismatch")
+    query = _arg_query(user_status=db_verified_user_status, password_form=form)
+    res = verified_schema.execute(query=query)
+    data = res.data["passwordChange"]
+    assert not data["success"]
+    assert data["errors"]["newPassword2"]
+    assert not data["refreshToken"] or data["token"]
+    user.refresh_from_db()
+    assert user.password == old_password
+
+
+def test_passwords_validation(db_verified_user_status, verified_schema):
+    """
+    easy password
+    """
+    simple_password = PasswordChangeForm("123", "123")
+    query = _arg_query(user_status=db_verified_user_status, password_form=simple_password)
+    res = verified_schema.execute(query=query)
+    assert not res.errors
+    data = res.data["passwordChange"]
+    assert not data["success"]
+    assert data["errors"]
+    assert not data["refreshToken"] or data["token"]
+
+
+def test_revoke_refresh_tokens_on_password_change(db_verified_user_status, verified_schema):
+    user = db_verified_user_status.user.obj
+    old_password = user.password
+    form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD)
+    query = _arg_query(user_status=db_verified_user_status, password_form=form)
+    # creating token and verify that it is valid.
+    db_verified_user_status.generate_refresh_token()
+    user.refresh_from_db()
+    refresh_tokens = user.refresh_tokens.all()
+    assert refresh_tokens
+    for token in refresh_tokens:
+        assert not token.revoked
+    executed = verified_schema.execute(query=query).data["passwordChange"]
+    assert executed["success"]
+    assert not executed["errors"]
+    assert executed["token"]["token"]
+    assert executed["refreshToken"]["token"]
+    user.refresh_from_db()
+    assert old_password != user.password
+    refresh_tokens = user.refresh_tokens.all()
+    assert refresh_tokens
+    # the last token is not revoked
+    # since it is returned by the password change mutation.
+    for token in list(refresh_tokens)[:-1]:
+        assert token.revoked

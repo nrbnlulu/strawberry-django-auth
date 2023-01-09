@@ -1,6 +1,7 @@
+from contextlib import contextmanager
 import dataclasses
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Iterable, NamedTuple, Union
+from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Union
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -9,10 +10,16 @@ import faker
 from faker.providers import BaseProvider
 import pytest
 from strawberry import Schema
+from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
 
-from gqlauth.core.token_to_user import USER_OR_ERROR_KEY, UserOrError
+from gqlauth.captcha.models import Captcha
+from gqlauth.core.constants import JWT_PREFIX
+from gqlauth.core.token_to_user import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
+from gqlauth.jwt.types_ import TokenType
+from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings
+from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
 from tests.channelsliveserver import ChannelsLiveServer
@@ -120,8 +127,16 @@ class UserStatusType:
         else:
             assert not db_status.verified
 
+    def generate_refresh_token(self) -> RefreshToken:
+        user = self.user.obj
+        assert user, "must have a created user instance"
+        return RefreshToken.from_user(user)
 
-@pytest.fixture(scope="session")
+    def generate_fresh_token(self) -> str:
+        return JWT_PREFIX + " " + [TokenType.from_user(self.user.obj)]
+
+
+@pytest.fixture()
 def verified_user_status_type():
     return UserStatusType(
         verified=True,
@@ -129,7 +144,7 @@ def verified_user_status_type():
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def unverified_user_status_type():
     return UserStatusType(
         verified=False,
@@ -153,7 +168,7 @@ def db_verified_user_status(transactional_db, verified_user_status_type) -> User
 
 @pytest.fixture()
 def db_archived_user_status(db, verified_user_status_type) -> UserStatusType:
-    us = verified_user_status_type()
+    us = verified_user_status_type
     us.archived = True
     us.create()
     return us
@@ -168,9 +183,14 @@ def wrong_pass_ver_user_status_type():
 
 @pytest.fixture()
 def wrong_pass_unverified_user_status_type(unverified_user_status_type):
-    us = unverified_user_status_type()
+    us = unverified_user_status_type
     us.user.password = WRONG_PASSWORD
     return us
+
+
+@pytest.fixture()
+def captcha(db):
+    return Captcha.create_captcha()
 
 
 @pytest.fixture()
@@ -188,6 +208,26 @@ def allow_login_not_verified(settings) -> None:
 @pytest.fixture()
 def app_settings(settings) -> GqlAuthSettings:
     return settings.GQL_AUTH
+
+
+@pytest.fixture
+def override_gqlauth(app_settings):
+    @contextmanager
+    def inner(default: Any = None, replace: Any = None, name: str = None) -> None:
+        if not name:
+            for field in dataclasses.fields(app_settings):
+                if getattr(app_settings, field.name) == default:
+                    name = field.name
+                    break
+            if not name:
+                raise ValueError(f"setting not found for value {default}")
+        else:
+            default = getattr(app_settings, name)
+        setattr(app_settings, name, replace)
+        yield
+        setattr(app_settings, name, default)
+
+    return inner
 
 
 @dataclasses.dataclass
@@ -208,8 +248,18 @@ class SchemaHelper(NamedTuple):
         setattr(context.request, USER_OR_ERROR_KEY, UserOrError(user=user))
         return SchemaHelper(context=context, schema=schema, us_type=us_type)
 
-    def execute(self, query: str):
+    def execute(self, query: str, relay: bool = False) -> ExecutionResult:
+        if relay:
+            return relay_schema.execute_sync(query=query, context_value=self.context)
         return self.schema.execute_sync(query=query, context_value=self.context)
+
+
+@pytest.fixture()
+def anonymous_schema(rf) -> SchemaHelper:
+    req = rf.post(path="/fake")
+    setattr(req, USER_OR_ERROR_KEY, get_user_or_error(req))
+    context = FakeContext(request=req)
+    return SchemaHelper(schema=arg_schema, context=context, us_type=None)
 
 
 @pytest.fixture()

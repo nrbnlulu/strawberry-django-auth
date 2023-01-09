@@ -1,7 +1,6 @@
 import pytest
 
 from gqlauth.settings_type import GqlAuthSettings
-from tests.testCases import ArgTestCase
 
 defaults = GqlAuthSettings()
 
@@ -23,10 +22,9 @@ def test_if_no_email_in_REGISTER_MUTATION_FIELDS_send_email_is_false(settings):
     assert not settings.GQL_AUTH.SEND_ACTIVATION_EMAIL
 
 
-class TestOverrideHooks(ArgTestCase):
-    def test_override_find_jwt_hook(self, db_verified_user_status, app_settings):
-        def hook(info):
-            return "invalid value"
+def test_override_find_jwt_hook(db_verified_user_status, app_settings, override_gqlauth):
+    def hook(info):
+        return "invalid value"
 
-        with self.override_gqlauth(app_settings.JWT_TOKEN_FINDER, hook):
-            assert app_settings.JWT_TOKEN_FINDER(None) == "invalid value"
+    with override_gqlauth(app_settings.JWT_TOKEN_FINDER, hook):
+        assert app_settings.JWT_TOKEN_FINDER(None) == "invalid value"

@@ -36,7 +36,7 @@ def hide_args_kwargs(field):
 def isiterable(value):
     try:
         iter(value)
-    except TypeError:
+    except TypeError:  # pragma: no cover
         return False
     return True
 
