@@ -70,7 +70,7 @@ make install-local v=<CURRENT VERSION IN gqlauth.__init__>
 
 ## Opening Pull Requests
 
-Please fork the project and open a pull request against the master branch.
+Please fork the project and open a pull request against the main branch.
 
 This will trigger a series of tests and lint checks.
 
