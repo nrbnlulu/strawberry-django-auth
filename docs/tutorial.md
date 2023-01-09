@@ -672,30 +672,20 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
     ![img.png](images/headers_graphiql.png)
     === "query"
         ```graphql
-        query MyQuery {
-          authEntry {
-            ... on GQLAuthError {
-              code
-              message
-            }
-            ... on  MyAuthorizedQueries{
-              me {
+            query{
+              me{
                 username
                 verified
               }
             }
-          }
-        }
         ```
     === "response"
         ```json
         {
           "data": {
-            "authEntry": {
-              "me": {
-                "username": "new_user",
-                "verified": true
-              }
+            "me": {
+              "verified": true,
+              "username": "testadmin"
             }
           }
         }
@@ -709,9 +699,9 @@ With ``MeQuery`` you can retrieve data for the currently authenticated user:
 ## Next steps
 
 - explore all the mutations.
+- [Support Django-Channels](channels.md).
 - Navigate through the GraphiQL Documentation Explorer.
 - Change the [settings](settings.md).
 - Explore the [api](api.md).
-- check our [directives](directives.md).
 - make sure you are familiar with our [captcha](captcha.md) system.
 - [Override email templates](overriding-email-templates.md).

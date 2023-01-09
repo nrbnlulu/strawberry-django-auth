@@ -6,7 +6,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 from strawberry_django_plus.permissions import IsAuthenticated
 
-from gqlauth.core.middlewares import TokenSchema
+from gqlauth.core.middlewares import JwtSchema
 from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
@@ -75,6 +75,6 @@ class Subscription:
             yield get_user(info).username
 
 
-arg_schema = TokenSchema(
+arg_schema = JwtSchema(
     query=Query, mutation=Mutation, subscription=Subscription, extensions=[SchemaDirectiveExtension]
 )

@@ -96,7 +96,7 @@ class DjangoJwtMiddleware:
 from strawberry import Schema
 
 
-class TokenSchema(Schema):
+class JwtSchema(Schema):
     """
     injects token to context.
     """
