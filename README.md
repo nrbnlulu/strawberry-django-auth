@@ -89,4 +89,4 @@ schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/nrbnlulu/strawberry-django-auth/blob/master/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/nrbnlulu/strawberry-django-auth/blob/main/CONTRIBUTING.md)
