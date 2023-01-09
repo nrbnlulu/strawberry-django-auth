@@ -8,15 +8,19 @@ from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
+from gqlauth.settings_type import GqlAuthSettings
 from gqlauth.user.signals import user_registered
 
 from .conftest import CC_USERNAME_FIELD, UserType
 
 
 def _generate_register_args(user: UserType, captcha: Captcha) -> str:
-    initial = f'password1: "{user.password}",  password2: "{user.password}"'
+    initial = ""
+    app_settings: GqlAuthSettings = settings.GQL_AUTH
+    if not app_settings.ALLOW_PASSWORDLESS_REGISTRATION:
+        initial = f'password1: "{user.password}",  password2: "{user.password}", '
     if settings.GQL_AUTH.REGISTER_REQUIRE_CAPTCHA:
-        initial += f',  identifier: "{captcha.uuid}", userEntry:"{captcha.text}"'
+        initial += f'identifier: "{captcha.uuid}", userEntry:"{captcha.text}"'
     for field in [field.name for field in settings.GQL_AUTH.REGISTER_MUTATION_FIELDS]:
         if "password" not in field:
             initial += f', {to_camel_case(field)}: "{getattr(user, field)}"'
@@ -36,6 +40,7 @@ def _arg_query(user: UserType, captcha: Captcha):
     )
 
 
+@pytest.mark.default_user  # settings_b has passwordless registration
 def test_register_invalid_password_validation(verified_user_status_type, anonymous_schema, captcha):
     """
     fail to register same user with bad password
@@ -65,7 +70,9 @@ def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
         return _arg_query(verified_user_status_type.user, Captcha.create_captcha())
 
     # register
-    executed = anonymous_schema.execute(query=get_query()).data["register"]
+    executed = anonymous_schema.execute(query=get_query())
+    assert not executed.errors
+    executed = executed.data["register"]
     assert executed["success"]
     assert not executed["errors"]
     assert signal_received

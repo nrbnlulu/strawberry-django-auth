@@ -189,7 +189,7 @@ def wrong_pass_unverified_user_status_type(unverified_user_status_type):
 
 
 @pytest.fixture()
-def captcha(db):
+def captcha(db) -> Captcha:
     return Captcha.create_captcha()
 
 

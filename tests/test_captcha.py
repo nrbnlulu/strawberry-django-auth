@@ -27,6 +27,14 @@ def test_captcha_text_validation(captcha):
     assert obj.validate(user_entry=text)
 
 
+def test_str(captcha):
+    assert str(captcha)
+
+
+def test_bytes(captcha):
+    captcha.as_bytes()
+
+
 def test_register_user_require_captcha_validation(unverified_schema):
     res = unverified_schema.execute(
         query=register_query_without_cap_fields(username="fdsafsdfgv"), relay=True
@@ -154,3 +162,26 @@ def register_query(password="fake", username="username", uuid="fake", input_="wr
         uuid,
         input_,
     )
+
+
+def test_captcha_mutation(anonymous_schema, db):
+    query = """
+        mutation MyMutation {
+            captcha{
+            uuid
+            image{
+              name
+              path
+              size
+              url
+              width
+              height
+            }
+            pilImage
+          }
+        }
+    """
+    res = anonymous_schema.execute(query=query)
+    assert not res.errors
+    uuid = res.data["captcha"]["uuid"]
+    assert Captcha.objects.get(uuid=uuid)

@@ -13,5 +13,5 @@ class CaptchaType:
     image: strawberry.auto
 
     @strawberry_django.field(description="returns the b64 encoded image.")
-    def pil_image(self) -> Image:
+    def pil_image(self: models.Captcha) -> Image:
         return self.as_bytes()  # type: ignore
