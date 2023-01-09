@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 
 
 USER_MODEL = get_user_model()
-USER_UNION = typing.Annotated[typing.Union["UserProto", AnonymousUser], None]
+USER_UNION = typing.Union["UserProto", AnonymousUser]
 app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 
