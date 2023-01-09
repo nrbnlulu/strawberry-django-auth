@@ -3,7 +3,6 @@ from typing import Any, final
 
 import strawberry
 from strawberry.schema_directive import Location
-from strawberry.types import Info
 from strawberry_django_plus.permissions import ConditionDirective
 
 from gqlauth.core.utils import USER_UNION
@@ -19,5 +18,5 @@ class IsVerified(ConditionDirective):
 
     message: strawberry.Private[str] = dataclasses.field(default="User is not authenticated.")
 
-    def check_condition(self, root: Any, info: Info, user: USER_UNION, **kwargs) -> bool:
+    def check_condition(self, root: Any, info, user: USER_UNION, **kwargs) -> bool:  # type: ignore
         return user.is_authenticated and user.status.verified

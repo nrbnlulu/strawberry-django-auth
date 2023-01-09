@@ -20,8 +20,9 @@ def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> Optional[str]:
         headers = request_or_scope.headers
         token = headers.get("authorization", None) or headers.get("Authorization", None)
     else:
-        headers = request_or_scope["headers"]
-        for k, v in headers:
+        request_or_scope = cast(dict, request_or_scope)
+        raw_headers: list[tuple[bytes, bytes]] = request_or_scope["headers"]
+        for k, v in raw_headers:
             if k == b"authorization":
                 token = v.decode()
                 break

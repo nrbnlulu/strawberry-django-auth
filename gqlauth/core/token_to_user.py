@@ -121,6 +121,6 @@ class TokenSchema(Schema):
         if ws := getattr(context, "ws", None):
             user_or_error: UserOrError = ws.scope[USER_OR_ERROR_KEY]
         else:
-            user_or_error = getattr(context.request, USER_OR_ERROR_KEY)
-        context.request.user = user_or_error.user
+            user_or_error: UserOrError = getattr(context.request, USER_OR_ERROR_KEY)  # type: ignore
+        context.request.user = user_or_error.user  # type: ignore
         return user_or_error

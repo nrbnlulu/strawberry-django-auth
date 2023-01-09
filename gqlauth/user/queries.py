@@ -31,4 +31,4 @@ class UserQueries:
 
     @gql.django.field(directives=[IsAuthenticated()])
     def me(self, info: Info) -> UserType:
-        return get_user(info)
+        return get_user(info)  # type: ignore

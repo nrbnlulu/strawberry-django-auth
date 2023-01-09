@@ -18,10 +18,8 @@ from graphql import GraphQLError
 
 
 class GQLAuthError(GraphQLError):
-    message: Optional[str] = None
-
     def __init__(self, code: "GQLAuthErrors", *args, **kwargs):
-        super().__init__(message=self.message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         if not self.message:
             self.message = code.value
 
