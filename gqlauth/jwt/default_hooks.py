@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -21,7 +21,7 @@ def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> Optional[str]:
         token = headers.get("authorization", None) or headers.get("Authorization", None)
     else:
         request_or_scope = cast(dict, request_or_scope)
-        raw_headers: list[tuple[bytes, bytes]] = request_or_scope["headers"]
+        raw_headers: List[Tuple[bytes, bytes]] = request_or_scope["headers"]
         for k, v in raw_headers:
             if k == b"authorization":
                 token = v.decode()

@@ -33,8 +33,9 @@ your implementation^^.
 * [x] Awesome docs!
 * [x] Captcha validation
 * [x] Async/Sync supported!
+* [x] django-channels asgi support.
 * [x] Works with ==default or custom== user model
-* [x] JWT authentication <small>(with [Strawberry Django JWT](https://github.com/KundaPanda/strawberry-django-jwt))</small>
+* [x] Built-in JWT authentication.
 * [x] User registration with email verification
 * [x] Add secondary email, with email verification too
 * [x] Resend activation email
