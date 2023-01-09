@@ -4,8 +4,7 @@ from pytest import mark
 
 from gqlauth.core.constants import Messages
 from gqlauth.core.types_ import GQLAuthErrors
-
-from .testCases import UserStatusType
+from tests.conftest import UserStatusType
 
 
 def _arg_query(user_status: UserStatusType):

@@ -1,7 +1,6 @@
 from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.models import RefreshToken
-
-from .testCases import UserStatusType
+from tests.conftest import UserStatusType
 
 
 def make_query(user_status_type: UserStatusType) -> str:

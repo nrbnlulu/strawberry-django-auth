@@ -1,7 +1,6 @@
 import dataclasses
 
-from .conftest import fake
-from .testCases import UserStatusType
+from .conftest import UserStatusType, fake
 
 
 @dataclasses.dataclass
