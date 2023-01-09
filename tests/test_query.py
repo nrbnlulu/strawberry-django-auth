@@ -39,7 +39,7 @@ def test_me_authenticated_success(query, db_verified_user_status, verified_schem
 
 def test_me_anonymous_fail(query, anonymous_schema):
     executed = anonymous_schema.execute(query=query)
-    assert "User is not authenticated" in executed.errors[0].message
+    assert "Unauthenticated" in executed.errors[0].message
 
 
 def test_public_user_query_return_none(query, anonymous_schema):

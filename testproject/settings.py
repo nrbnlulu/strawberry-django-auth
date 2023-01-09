@@ -47,7 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "gqlauth.core.token_to_user.DjangoJwtMiddleware",
+    "gqlauth.core.middlewares.DjangoJwtMiddleware",
 ]
 
 TEMPLATES = [

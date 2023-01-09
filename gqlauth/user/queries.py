@@ -5,8 +5,8 @@ import strawberry
 from strawberry.schema_directive import Location
 from strawberry.types import Info
 from strawberry_django_plus import gql
-from strawberry_django_plus.permissions import IsAuthenticated
 
+from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
 from gqlauth.core.utils import get_user
 
 # project
@@ -29,6 +29,9 @@ class UserQueries:
             return user  # type: ignore
         return None
 
-    @gql.django.field(directives=[IsAuthenticated()])
+    @gql.django.field()
     def me(self, info: Info) -> UserType:
-        return get_user(info)  # type: ignore
+        user = get_user(info)
+        if not user.is_authenticated:
+            raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
+        return user  # type: ignore

@@ -15,7 +15,7 @@ from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import JWT_PREFIX
-from gqlauth.core.token_to_user import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
+from gqlauth.core.middlewares import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings

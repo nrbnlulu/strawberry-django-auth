@@ -2,7 +2,7 @@ import strawberry
 from strawberry_django_plus import gql
 from strawberry_django_plus.permissions import IsAuthenticated
 
-from gqlauth.core.token_to_user import TokenSchema
+from gqlauth.core.middlewares import TokenSchema
 from gqlauth.user import relay
 from gqlauth.user.resolvers import Captcha
 from testproject.schema import Query
