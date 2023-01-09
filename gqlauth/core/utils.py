@@ -6,6 +6,7 @@ from typing import Dict, Iterable
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser
 from django.core import signing
 from strawberry.field import StrawberryField
 from strawberry.types import Info
@@ -22,7 +23,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
 
 
 USER_MODEL = get_user_model()
-USER_UNION = "Union[UserProto, AnonymousUser]"
+USER_UNION = typing.Annotated[typing.Union["UserProto", AnonymousUser], None]
 app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 

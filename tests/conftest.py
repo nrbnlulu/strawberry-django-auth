@@ -133,7 +133,7 @@ class UserStatusType:
         return RefreshToken.from_user(user)
 
     def generate_fresh_token(self) -> str:
-        return JWT_PREFIX + " " + [TokenType.from_user(self.user.obj)]
+        return JWT_PREFIX + " " + TokenType.from_user(self.user.obj).token
 
 
 @pytest.fixture()
@@ -277,3 +277,15 @@ def channels_live_server(request):
     server = ChannelsLiveServer()
     request.addfinalizer(server.stop)
     return server
+
+
+@pytest.fixture()
+def ws_verified_client(channels_live_server, db_verified_user_status):
+    from gql.client import Client
+    from gql.transport.websockets import WebsocketsTransport
+
+    transport = WebsocketsTransport(
+        url=channels_live_server.url,
+        headers={"authorization": db_verified_user_status.generate_fresh_token()},
+    )
+    return Client(transport=transport)
