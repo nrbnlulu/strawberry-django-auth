@@ -30,7 +30,7 @@ your implementation^^.
 ## Goals
 - Easy JWT authentication compatible with strawberry.
 - Some boiler-plate mutations like register, login etc.
--
+
 ## Non-goals
 - Permission handling - out of scope for this project, we just provide you a user in `info.context.request`.
 

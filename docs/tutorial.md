@@ -1,7 +1,6 @@
 ## What to expect
 
 - Fully functional API to handle user account
-- Both graphQL and Relay versions
 - Setup with custom user model
 - 20 to 30 minutes
 
