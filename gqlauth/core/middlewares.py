@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Callable, Optional, Union
 
 from asgiref.sync import sync_to_async
 from django.contrib.auth import login
@@ -63,21 +63,24 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
 get_user_or_error_async = sync_to_async(get_user_or_error)
 
 
-class ChannelsJwtMiddleware:
-    def __init__(self, inner: type):
-        self.inner = inner
+def channels_jwt_middleware(inner: Callable):
+    from channels.auth import (
+        login as channels_login,  # deferred import for users that don't use channels.
+    )
 
-    async def __acall__(self, scope, receive, send):
-        from channels.auth import (
-            login as channels_login,  # deferred import for users that don't use channels.
-        )
+    if asyncio.iscoroutinefunction(inner):
 
-        if not scope.get(USER_OR_ERROR_KEY, None):
-            user_or_error: UserOrError = await get_user_or_error_async(scope)
-            scope[USER_OR_ERROR_KEY] = user_or_error
-            if user := user_or_error.authorized_user():
-                await channels_login(scope, user)
-        return await self.inner(scope, receive, send)
+        async def middleware(scope, receive, send):
+            if not scope.get(USER_OR_ERROR_KEY, None):
+                user_or_error: UserOrError = await get_user_or_error_async(scope)
+                scope[USER_OR_ERROR_KEY] = user_or_error
+                if user := user_or_error.authorized_user():
+                    await channels_login(scope, user)
+            return await inner(scope, receive, send)
+
+    else:  # pragma: no cover.
+        raise NotImplementedError("sync channels middleware is not supported yet.")
+    return middleware
 
 
 def django_jwt_middleware(get_response):

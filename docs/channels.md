@@ -4,15 +4,17 @@ you would need to user our `channels` middleware.
 
 Here is an example of an asgi.py file that uses our middleware to support JWT from headers:
 _**asgi.py**_
+
 ```python
-from gqlauth.core.middlewares import ChannelsJwtMiddleware
+from gqlauth.core.middlewares import channels_jwt_middleware
+
 ...
 
 websocket_urlpatterns = [
-    re_path("^graphql", ChannelsJwtMiddleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
+    re_path("^graphql", channels_jwt_middleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
 ]
 gql_http_consumer = AuthMiddlewareStack(
-    ChannelsJwtMiddleware(GraphQLHTTPConsumer.as_asgi(schema=arg_schema))
+    channels_jwt_middleware(GraphQLHTTPConsumer.as_asgi(schema=arg_schema))
 )
 application = ProtocolTypeRouter(
     {

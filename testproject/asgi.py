@@ -1,16 +1,16 @@
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.urls import re_path
-from gqlauth.core.middlewares import ChannelsJwtMiddleware
+from gqlauth.core.middlewares import channels_jwt_middleware
 from strawberry.channels import GraphQLHTTPConsumer, GraphQLWSConsumer
 
 from testproject.schema import arg_schema
 
 websocket_urlpatterns = [
-    re_path("^graphql", ChannelsJwtMiddleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
+    re_path("^graphql", channels_jwt_middleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
 ]
 gql_http_consumer = AuthMiddlewareStack(
-    ChannelsJwtMiddleware(GraphQLHTTPConsumer.as_asgi(schema=arg_schema))
+    channels_jwt_middleware(GraphQLHTTPConsumer.as_asgi(schema=arg_schema))
 )
 application = ProtocolTypeRouter(
     {
