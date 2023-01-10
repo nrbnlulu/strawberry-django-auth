@@ -59,3 +59,12 @@ def test_django_middleware_no_user_has_anonymous_user(client):
         content_type="application/json",
     )
     assert res.json()["data"]["amIAnonymous"] is True
+
+
+async def test_async_middleware(async_client):
+    res = await async_client.post(
+        path="/arg_schema",
+        data={"query": "query { amIAnonymous }"},
+        content_type="application/json",
+    )
+    assert res.json()["data"]["amIAnonymous"] is True

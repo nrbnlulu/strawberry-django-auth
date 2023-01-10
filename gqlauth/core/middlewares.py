@@ -5,7 +5,7 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from django.utils.decorators import sync_only_middleware
+from django.utils.decorators import sync_and_async_middleware
 from strawberry import Schema
 
 from gqlauth.core.exceptions import TokenExpired
@@ -81,15 +81,27 @@ def channels_jwt_middleware(inner: Callable):
     return middleware
 
 
-@sync_only_middleware
+@sync_and_async_middleware
 def django_jwt_middleware(get_response):
-    def middleware(request: HttpRequest):  # type: ignore
+    def logic(request: HttpRequest) -> None:
         if not hasattr(request, USER_OR_ERROR_KEY):
             user_or_error: UserOrError = get_user_or_error(request)
             setattr(request, USER_OR_ERROR_KEY, user_or_error)
             if user := user_or_error.authorized_user():
                 login(request, user)  # type: ignore
-        return get_response(request)
+
+    if asyncio.iscoroutinefunction(get_response):
+        async_logic = sync_to_async(logic)
+
+        async def middleware(request: HttpRequest):
+            await async_logic(request)
+            return await get_response(request)
+
+    else:
+
+        def middleware(request: HttpRequest):  # type: ignore
+            logic(request)
+            return get_response(request)
 
     return middleware
 
