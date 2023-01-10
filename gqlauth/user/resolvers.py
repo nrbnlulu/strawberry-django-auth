@@ -24,10 +24,10 @@ from gqlauth.core.exceptions import (
 )
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors, MutationNormalOutput
 from gqlauth.core.utils import (
+    cast_to_status_user,
     get_payload_from_token,
     get_user,
     get_user_by_email,
-    get_user_safe,
     inject_fields,
     revoke_user_refresh_token,
 )
@@ -58,10 +58,12 @@ class BaseMixin:
     def verification_check(cls, info: Info) -> None:
         if cls.REQUIRE_VERIFICATION:
             user = get_user(info)
-            if user.is_anonymous:
-                raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
-            if not user.status.verified:
-                raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
+            try:
+                if not user.status.verified:  # type: ignore
+                    raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
+            except AttributeError:  # anonymous user has no status.
+                if user.is_anonymous:
+                    raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
 
 
 class Captcha:
@@ -374,7 +376,7 @@ class ArchiveOrDeleteMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
-        user = get_user_safe(info)
+        user = get_user(info)
         if error := confirm_password(user, input_):
             return error
         cls.resolve_action(user)  # type: ignore
@@ -426,16 +428,17 @@ class PasswordChangeMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
-        user = get_user_safe(info)
+        user = get_user(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
 
         args = asdict(input_)
-        f = cls.form(user, args)
+        f = cls.form(user, args)  # type: ignore
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            return ObtainJSONWebTokenType.from_user(user)
+            user_with_status = cast_to_status_user(user)
+            return ObtainJSONWebTokenType.from_user(user_with_status)
         else:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 

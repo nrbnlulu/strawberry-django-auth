@@ -1,13 +1,11 @@
 import dataclasses
 from datetime import datetime
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 from uuid import UUID
 
 import strawberry
 import strawberry_django
-from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
 from strawberry import auto
 from strawberry.types import Info
@@ -16,13 +14,12 @@ from gqlauth.core.constants import Messages
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.interfaces import OutputInterface
 from gqlauth.core.scalars import ExpectedErrorType
-from gqlauth.core.utils import inject_fields
+from gqlauth.core.utils import USER_MODEL, app_settings, inject_fields
 from gqlauth.models import RefreshToken
 from gqlauth.user.types_ import UserType
 
-app_settings = settings.GQL_AUTH
-
-USER_MODEL = get_user_model()
+if TYPE_CHECKING:
+    from gqlauth.core.utils import UserProto
 
 
 @strawberry_django.type(
@@ -102,7 +99,7 @@ class TokenType:
         return self.payload.exp < (datetime.utcnow())
 
     @classmethod
-    def from_user(cls, user: AbstractBaseUser) -> "TokenType":
+    def from_user(cls, user: "UserProto") -> "TokenType":
         return app_settings.JWT_PAYLOAD_HANDLER(user)
 
     @classmethod
@@ -113,11 +110,11 @@ class TokenType:
             raise TokenExpired
         return token_type
 
-    def get_user_instance(self) -> AbstractBaseUser:
+    def get_user_instance(self) -> "UserProto":
         """might raise not existed exception."""
         pk_name = app_settings.JWT_PAYLOAD_PK.python_name
         query = {pk_name: getattr(self.payload, pk_name)}
-        return USER_MODEL.objects.get(**query)
+        return USER_MODEL.objects.get(**query)  # type: ignore
 
 
 @strawberry.input
@@ -144,7 +141,7 @@ class ObtainJSONWebTokenType(OutputInterface):
     errors: Optional[ExpectedErrorType] = None
 
     @classmethod
-    def from_user(cls, user: AbstractBaseUser) -> "ObtainJSONWebTokenType":
+    def from_user(cls, user: "UserProto") -> "ObtainJSONWebTokenType":
         """creates a new token and possibly a new refresh token based on the
         user.
 
@@ -170,7 +167,8 @@ class ObtainJSONWebTokenType(OutputInterface):
         }
         try:
             # authenticate against django authentication backends.
-            if not (user := authenticate(info.context.request, **args)):
+            user: Optional["UserProto"]
+            if not (user := authenticate(info.context.request, **args)):  # type: ignore
                 return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
             from gqlauth.models import UserStatus
 

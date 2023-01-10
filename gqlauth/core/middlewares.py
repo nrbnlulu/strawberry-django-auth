@@ -37,9 +37,9 @@ USER_OR_ERROR_KEY = UserOrError.__name__
 
 def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError:
     user_or_error = UserOrError()
-    if token := app_settings.JWT_TOKEN_FINDER(scope_or_request):
+    if token_str := app_settings.JWT_TOKEN_FINDER(scope_or_request):
         try:
-            token = TokenType.from_token(token=token)
+            token = TokenType.from_token(token=token_str)
             user = token.get_user_instance()
             user_or_error.user = user
 
@@ -60,15 +60,13 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
     return user_or_error
 
 
-get_user_or_error_async = sync_to_async(get_user_or_error)
-
-
 def channels_jwt_middleware(inner: Callable):
     from channels.auth import (
         login as channels_login,  # deferred import for users that don't use channels.
     )
 
     if asyncio.iscoroutinefunction(inner):
+        get_user_or_error_async = sync_to_async(get_user_or_error)
 
         async def middleware(scope, receive, send):
             if not scope.get(USER_OR_ERROR_KEY, None):
@@ -84,25 +82,24 @@ def channels_jwt_middleware(inner: Callable):
 
 
 def django_jwt_middleware(get_response):
+    def common_logic(request: HttpRequest) -> None:
+        if not hasattr(request, USER_OR_ERROR_KEY):
+            user_or_error: UserOrError = get_user_or_error(request)
+            setattr(request, USER_OR_ERROR_KEY, user_or_error)
+            if user := user_or_error.authorized_user():
+                login(request, user)  # type: ignore
+
     if asyncio.iscoroutinefunction(get_response):
-        login_async = sync_to_async(login)
+        common_logic_async = sync_to_async(common_logic)
 
         async def middleware(request: ASGIRequest):
-            if not hasattr(request, USER_OR_ERROR_KEY):
-                user_or_error: UserOrError = await get_user_or_error_async(request)
-                setattr(request, USER_OR_ERROR_KEY, user_or_error)
-                if user := user_or_error.authorized_user():
-                    await login_async(request, user)
+            await common_logic_async(request)
             return await get_response(request)
 
     else:
 
-        def middleware(request: HttpRequest):
-            if not hasattr(request, USER_OR_ERROR_KEY):
-                user_or_error: UserOrError = get_user_or_error(request)
-                setattr(request, USER_OR_ERROR_KEY, user_or_error)
-                if user := user_or_error.authorized_user():
-                    login(request, user)
+        def middleware(request: HttpRequest):  # type: ignore
+            common_logic(request)
             return get_response(request)
 
     return middleware

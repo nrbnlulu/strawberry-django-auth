@@ -116,7 +116,7 @@ class DjangoSetting(Generic[T]):
         for attr in self.setting.split("."):
             final = getattr(final, attr)
 
-        return final
+        return final  # type: ignore
 
     @classmethod
     def override(cls, value: T) -> "DjangoSetting":

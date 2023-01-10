@@ -5,7 +5,7 @@ import strawberry
 from strawberry.schema_directive import Location
 from strawberry_django_plus.permissions import ConditionDirective
 
-from gqlauth.core.utils import USER_UNION
+from gqlauth.core.utils import UserProto
 
 
 @strawberry.schema_directive(
@@ -18,5 +18,5 @@ class IsVerified(ConditionDirective):
 
     message: strawberry.Private[str] = dataclasses.field(default="User is not authenticated.")
 
-    def check_condition(self, root: Any, info, user: USER_UNION, **kwargs) -> bool:  # type: ignore
+    def check_condition(self, root: Any, info, user: UserProto, **kwargs) -> bool:  # type: ignore
         return user.is_authenticated and user.status.verified
