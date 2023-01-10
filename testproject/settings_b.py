@@ -1,5 +1,6 @@
 from typing import Optional
 
+from gqlauth.settings_type import DjangoSetting
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 
@@ -37,7 +38,7 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
     REGISTER_MUTATION_FIELDS={
         phone_number_field,
     },
-    EMAIL_FROM="SomeDiffrentEmail@thanInDjango.settings",
+    EMAIL_FROM=DjangoSetting.override("SomeDiffrentEmail@thanInDjango.settings"),
     JWT_PAYLOAD_PK=phone_number_field,
 )
 

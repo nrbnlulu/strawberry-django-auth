@@ -41,9 +41,7 @@ class UpdateAccountForm(UserChangeForm):
 
 
 class PasswordLessRegisterForm(UserCreationForm):
-    """
-    A RegisterForm with optional password inputs.
-    """
+    """A RegisterForm with optional password inputs."""
 
     class Meta:
         model = get_user_model()

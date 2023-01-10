@@ -1,5 +1,6 @@
 from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.models import RefreshToken
+
 from tests.conftest import UserStatusType
 
 
@@ -18,17 +19,13 @@ def make_query(user_status_type: UserStatusType) -> str:
 
 
 def test_not_verified(unverified_schema):
-    """
-    try to archive not verified user
-    """
+    """Try to archive not verified user."""
     res = unverified_schema.execute(make_query(unverified_schema.us_type))
     assert res.errors[0].message == GQLAuthErrors.NOT_VERIFIED.value
 
 
 def test_invalid_password(verified_schema, wrong_pass_ver_user_status_type):
-    """
-    try to archive account with invalid password
-    """
+    """Try to archive account with invalid password."""
 
     res = verified_schema.execute(make_query(wrong_pass_ver_user_status_type))
     assert res.data["archiveAccount"] == {
@@ -38,9 +35,7 @@ def test_invalid_password(verified_schema, wrong_pass_ver_user_status_type):
 
 
 def test_valid_password(verified_schema):
-    """
-    try to archive account
-    """
+    """Try to archive account."""
     user = verified_schema.us_type.user.obj
     assert not user.status.archived
     res = verified_schema.execute(make_query(verified_schema.us_type))
@@ -50,9 +45,7 @@ def test_valid_password(verified_schema):
 
 
 def test_revoke_refresh_tokens_on_archive_account(verified_schema):
-    """
-    when archive account, all refresh tokens should be revoked
-    """
+    """When archive account, all refresh tokens should be revoked."""
     user = verified_schema.us_type.user.obj
     user.refresh_from_db()
     RefreshToken.from_user(user)

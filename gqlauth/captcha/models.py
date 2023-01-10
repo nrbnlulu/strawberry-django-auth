@@ -47,8 +47,8 @@ class Captcha(models.Model):
         super().save(*args, **kwargs)
 
     def validate(self, user_entry: str):
-        """
-        validates input_.
+        """validates input_.
+
         - if tried to validate more than 3 times obj will be deleted in the database
         - else increments by one
         - if reaches expiery date deletes the obj
@@ -82,8 +82,8 @@ class Captcha(models.Model):
         return Messages.CAPTCHA_INVALID
 
     def as_bytes(self):
-        """
-        Stores the image on a bytes_array.
+        """Stores the image on a bytes_array.
+
         The scalar will further convert it to b64 string representation.
         """
         bytes_array = io.BytesIO()

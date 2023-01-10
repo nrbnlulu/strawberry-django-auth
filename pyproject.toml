@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "strawberry-django-auth"
-version = "0.372.0"
+version = "0.373.0"
 description = "Graphql authentication system with Strawberry for Django."
 license = "MIT"
 authors = ["Nir.J Benlulu <nrbnlulu@gmail.com>"]
@@ -114,3 +114,18 @@ django_settings_module = "testproject.settings"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.autopub]
+git-username = "nrbnlulu"
+git-email = "nrbnlulu@gmail.com"
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "ERA", "I"]
+ignore = [
+    "TID252",
+    "E501",  # line too long, handled by black
+]
+fix = true
+
+src = ["gqlauth", "tests", "testproject"]

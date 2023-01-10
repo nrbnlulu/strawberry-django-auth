@@ -10,9 +10,7 @@ class GraphQLAuthError(Exception):
 
 
 class WrongUsage(GraphQLAuthError):
-    """
-    internal exception
-    """
+    """Internal exception."""
 
     default_message = _("Wrong usage, check your code!.")
 

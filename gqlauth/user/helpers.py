@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING, Optional, Union
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
 
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.core.constants import Messages
 from gqlauth.core.types_ import MutationNormalOutput
+from gqlauth.core.utils import USER_UNION
 
 if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.user.resolvers import ObtainJSONWebTokenInput, RegisterMixin
@@ -13,7 +13,7 @@ if TYPE_CHECKING:  # pragma: no cover
 USER_MODEL = get_user_model()
 
 
-def confirm_password(user: AbstractBaseUser, input_) -> Optional[MutationNormalOutput]:
+def confirm_password(user: USER_UNION, input_) -> Optional[MutationNormalOutput]:
     if password := getattr(input_, "password", False):
         password_arg = "password"
     else:

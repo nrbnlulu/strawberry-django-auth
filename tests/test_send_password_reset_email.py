@@ -2,7 +2,6 @@ from smtplib import SMTPException
 from unittest import mock
 
 import pytest
-
 from gqlauth.core.constants import Messages
 
 from .conftest import UserType
@@ -22,8 +21,8 @@ def _arg_query(user: UserType):
 
 
 def test_send_email_invalid_email(db_verified_user_status, anonymous_schema):
-    """
-    invalid email should be successful request.
+    """invalid email should be successful request.
+
     (due to security measures)
     """
     user = db_verified_user_status.user

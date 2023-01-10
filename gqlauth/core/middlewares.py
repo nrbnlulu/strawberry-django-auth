@@ -1,13 +1,18 @@
-from typing import TYPE_CHECKING, Optional, Union
+import asyncio
+from typing import TYPE_CHECKING, Callable, Optional, Union
 
+from asgiref.sync import sync_to_async
+from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from jwt import PyJWTError
+from django.utils.decorators import sync_only_middleware
+from strawberry import Schema
 
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
 from gqlauth.core.utils import USER_UNION, app_settings
 from gqlauth.jwt.types_ import TokenType
+from jwt import PyJWTError
 
 anon_user = AnonymousUser()
 if TYPE_CHECKING:
@@ -32,9 +37,9 @@ USER_OR_ERROR_KEY = UserOrError.__name__
 
 def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError:
     user_or_error = UserOrError()
-    if token := app_settings.JWT_TOKEN_FINDER(scope_or_request):
+    if token_str := app_settings.JWT_TOKEN_FINDER(scope_or_request):
         try:
-            token = TokenType.from_token(token=token)
+            token = TokenType.from_token(token=token_str)
             user = token.get_user_instance()
             user_or_error.user = user
 
@@ -55,51 +60,42 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
     return user_or_error
 
 
-from channels.auth import login as channels_login
-from channels.db import database_sync_to_async
+def channels_jwt_middleware(inner: Callable):
+    from channels.auth import (
+        login as channels_login,  # deferred import for users that don't use channels.
+    )
+
+    if asyncio.iscoroutinefunction(inner):
+        get_user_or_error_async = sync_to_async(get_user_or_error)
+
+        async def middleware(scope, receive, send):
+            if not scope.get(USER_OR_ERROR_KEY, None):
+                user_or_error: UserOrError = await get_user_or_error_async(scope)
+                scope[USER_OR_ERROR_KEY] = user_or_error
+                if user := user_or_error.authorized_user():
+                    await channels_login(scope, user)
+            return await inner(scope, receive, send)
+
+    else:  # pragma: no cover
+        raise NotImplementedError("sync channels middleware is not supported yet.")
+    return middleware
 
 
-class ChannelsJwtMiddleware:
-    def __init__(self, inner: type):
-        self.inner = inner
-
-    async def __call__(self, scope, receive, send):
-        if not scope.get(USER_OR_ERROR_KEY, None):
-            user_or_error: UserOrError = await self._get_user_or_error(scope)
-            scope[USER_OR_ERROR_KEY] = user_or_error
-            if user := user_or_error.authorized_user():
-                await channels_login(scope, user)
-        return await self.inner(scope, receive, send)
-
-    @database_sync_to_async
-    def _get_user_or_error(self, scope) -> UserOrError:
-        return get_user_or_error(scope)
-
-
-from django.contrib.auth import login
-
-
-class DjangoJwtMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
+@sync_only_middleware
+def django_jwt_middleware(get_response):
+    def middleware(request: HttpRequest):  # type: ignore
         if not hasattr(request, USER_OR_ERROR_KEY):
             user_or_error: UserOrError = get_user_or_error(request)
             setattr(request, USER_OR_ERROR_KEY, user_or_error)
             if user := user_or_error.authorized_user():
-                login(request, user)
+                login(request, user)  # type: ignore
+        return get_response(request)
 
-        return self.get_response(request)
-
-
-from strawberry import Schema
+    return middleware
 
 
 class JwtSchema(Schema):
-    """
-    injects token to context.
-    """
+    """injects token to context."""
 
     def execute_sync(self, *args, **kwargs):
         self._inject_user_and_errors(kwargs)

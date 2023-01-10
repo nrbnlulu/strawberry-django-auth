@@ -1,8 +1,8 @@
-from base64 import b64decode, b64encode
 import typing
+from base64 import b64decode, b64encode
 
-from PIL.Image import Image
 import strawberry
+from PIL.Image import Image
 
 from gqlauth.core.exceptions import WrongUsage
 from gqlauth.core.utils import camelize

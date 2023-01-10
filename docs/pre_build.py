@@ -3,8 +3,8 @@
 - copy [CONTRIBUTORS, CHANGES, CONTRIBUTING] files to the docs dir
 """
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 from pydoc_markdown import FilterProcessor
 from pydoc_markdown.contrib.loaders.python import PythonLoader

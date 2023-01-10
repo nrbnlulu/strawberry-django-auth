@@ -107,7 +107,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # ...
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'gqlauth.core.middlewares.DjangoJwtMiddleware'
+    'gqlauth.core.middlewares.django_jwt_middleware'
     # ...
 ]
 

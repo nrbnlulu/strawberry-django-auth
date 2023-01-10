@@ -1,16 +1,15 @@
 import binascii
-from datetime import datetime
 import os
 import time
+from datetime import datetime
 
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import Case
+from django.db.models import Case, When
 from django.db.models import Value as Val
-from django.db.models import When
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -29,9 +28,7 @@ USER_MODEL = get_user_model()
 
 
 class UserStatus(models.Model):
-    """
-    A helper model that handles user account stuff.
-    """
+    """A helper model that handles user account stuff."""
 
     user = models.OneToOneField(
         django_settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="status"
@@ -149,9 +146,11 @@ class RefreshTokenQuerySet(models.QuerySet):
 
 
 class RefreshToken(models.Model):
-    """
-    Refresh token is a random set of bytes decoded to a string that is referring a user.
-    It can be used to retrieve a new token without the need to login again.
+    """Refresh token is a random set of bytes decoded to a string that is
+    referring a user.
+
+    It can be used to retrieve a new token without the need to login
+    again.
     """
 
     id = models.BigAutoField(primary_key=True)  # noqa A003
@@ -169,9 +168,10 @@ class RefreshToken(models.Model):
         return self.created + app_settings.JWT_REFRESH_EXPIRATION_DELTA
 
     def is_expired_(self) -> bool:
-        """
-        Whether the token is expired or not.
-        it is up to the database query to filter out tokens without revoked date.
+        """Whether the token is expired or not.
+
+        it is up to the database query to filter out tokens without
+        revoked date.
         """
         return datetime.now(tz=self.created.tzinfo) > self.expires_at_() or bool(self.revoked)
 

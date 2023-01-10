@@ -22,8 +22,10 @@ if typing.TYPE_CHECKING:  # pragma: no cover
         status: UserStatus
 
 
+UserProto: "UserProto" = "UserProto"  # type: ignore  # noqa: F811
+
 USER_MODEL = get_user_model()
-USER_UNION = typing.Union["UserProto", AnonymousUser]
+USER_UNION = typing.Union["UserProto", AnonymousUser, AbstractBaseUser]
 app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 
@@ -54,10 +56,9 @@ def get_user(info: Info) -> USER_UNION:
     return info.context.request.user  # type: ignore
 
 
-def get_user_safe(info: Info) -> AbstractBaseUser:
-    user = get_user(info)
-    assert isinstance(user, AbstractBaseUser)
-    return user
+def cast_to_status_user(user: USER_UNION) -> UserProto:
+    user.status  # type: ignore  # raise attribute error
+    return user  # type: ignore
 
 
 def get_user_by_email(email: str) -> "UserProto":
@@ -115,8 +116,8 @@ def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=Fal
 
 
 def inject_arguments(args: Dict[str, type]):
-    """
-    injects arguments to the decorated resolver.
+    """injects arguments to the decorated resolver.
+
     :param args: `dict[name, type]` of arguments to be injected.,
     """
 

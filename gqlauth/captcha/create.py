@@ -1,5 +1,5 @@
-from io import BytesIO
 import random
+from io import BytesIO
 
 from PIL import Image, ImageFilter
 from PIL.ImageDraw import Draw
@@ -95,8 +95,8 @@ class ImageCaptcha(_Captcha):
         return image
 
     def create_captcha_image(self, chars, color, background):
-        """
-        Create the CAPTCHA image itself.
+        """Create the CAPTCHA image itself.
+
         :param chars: text to be generated.
         :param color: color of the text.
         :param background: color of the background.

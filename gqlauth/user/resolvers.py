@@ -3,12 +3,12 @@ from smtplib import SMTPException
 from typing import Callable, cast
 from uuid import UUID
 
+import strawberry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
-import strawberry
 from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry_django_plus import gql
@@ -24,10 +24,10 @@ from gqlauth.core.exceptions import (
 )
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors, MutationNormalOutput
 from gqlauth.core.utils import (
+    cast_to_status_user,
     get_payload_from_token,
     get_user,
     get_user_by_email,
-    get_user_safe,
     inject_fields,
     revoke_user_refresh_token,
 )
@@ -42,12 +42,7 @@ from gqlauth.jwt.types_ import (
 )
 from gqlauth.models import RefreshToken, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.forms import (
-    EmailForm,
-    PasswordLessRegisterForm,
-    RegisterForm,
-    UpdateAccountForm,
-)
+from gqlauth.user.forms import EmailForm, PasswordLessRegisterForm, RegisterForm, UpdateAccountForm
 from gqlauth.user.helpers import check_captcha, confirm_password
 from gqlauth.user.signals import user_registered, user_verified
 
@@ -63,19 +58,20 @@ class BaseMixin:
     def verification_check(cls, info: Info) -> None:
         if cls.REQUIRE_VERIFICATION:
             user = get_user(info)
-            if user.is_anonymous:
-                raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
-            if not user.status.verified:
-                raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
+            try:
+                if not user.status.verified:  # type: ignore
+                    raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
+            except AttributeError:  # anonymous user has no status.
+                if user.is_anonymous:
+                    raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
 
 
 class Captcha:
-    """
-    Creates a brand-new captcha.
-    Returns a base64 encoded string of the captcha.
-    And uuid representing the captcha id in the database.
-    When you will try to log in or register You will
-    need submit that uuid With the user input.
+    """Creates a brand-new captcha. Returns a base64 encoded string of the
+    captcha. And uuid representing the captcha id in the database. When you
+    will try to log in or register You will need submit that uuid With the user
+    input.
+
     **The captcha will be invoked when the timeout expires**.
     """
 
@@ -85,11 +81,9 @@ class Captcha:
 
 
 class RegisterMixin(BaseMixin):
-    """
-    Register user with fields defined in the settings.
-    If the email field of the user model is part of the
-    registration fields (default), check if there is
-    no user with that email.
+    """Register user with fields defined in the settings. If the email field of
+    the user model is part of the registration fields (default), check if there
+    is no user with that email.
 
     If it exists, it does not register the user,
     even if the email field is not defined as unique
@@ -152,12 +146,11 @@ class RegisterMixin(BaseMixin):
 
 
 class VerifyAccountMixin(BaseMixin):
-    """
-    Verify user account.
+    """Verify user account.
 
-    Receive the token that was sent by email.
-    If the token is valid, make the user verified
-    by making the `user.status.verified` field true.
+    Receive the token that was sent by email. If the token is valid,
+    make the user verified by making the `user.status.verified` field
+    true.
     """
 
     @strawberry.input
@@ -178,8 +171,7 @@ class VerifyAccountMixin(BaseMixin):
 
 
 class ResendActivationEmailMixin(BaseMixin):
-    """
-    Sends activation email.
+    """Sends activation email.
 
     It is called resend because theoretically
     the first activation email was sent when
@@ -212,8 +204,7 @@ class ResendActivationEmailMixin(BaseMixin):
 
 
 class SendPasswordResetEmailMixin(BaseMixin):
-    """
-    Send password reset email.
+    """Send password reset email.
 
     For non verified users, send an activation
     email instead.
@@ -253,8 +244,7 @@ class SendPasswordResetEmailMixin(BaseMixin):
 
 
 class PasswordResetMixin(BaseMixin):
-    """
-    Change user password without old password.
+    """Change user password without old password.
 
     Receive the token that was sent by email.
 
@@ -355,8 +345,7 @@ class PasswordSetMixin(BaseMixin):
 
 
 class ObtainJSONWebTokenMixin(BaseMixin):
-    """
-    Obtain JSON web token for given user.
+    """Obtain JSON web token for given user.
 
     Allow to perform login with different fields,
     The fields are defined on settings.
@@ -387,7 +376,7 @@ class ArchiveOrDeleteMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
-        user = get_user_safe(info)
+        user = get_user(info)
         if error := confirm_password(user, input_):
             return error
         cls.resolve_action(user)  # type: ignore
@@ -395,8 +384,8 @@ class ArchiveOrDeleteMixin(BaseMixin):
 
 
 class ArchiveAccountMixin(ArchiveOrDeleteMixin):
-    """
-    Archive account and revoke refresh tokens.
+    """Archive account and revoke refresh tokens.
+
     User must be verified and confirm password.
     """
 
@@ -407,8 +396,7 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin):
 
 
 class DeleteAccountMixin(ArchiveOrDeleteMixin):
-    """
-    Delete account permanently or make `user.is_active=False`.
+    """Delete account permanently or make `user.is_active=False`.
 
     The behavior is defined on settings.
     Anyway user refresh tokens are revoked.
@@ -424,8 +412,7 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin):
 
 
 class PasswordChangeMixin(BaseMixin):
-    """
-    Change account password when user knows the old password.
+    """Change account password when user knows the old password.
 
     A new token and refresh token are sent. User must be verified.
     """
@@ -441,23 +428,23 @@ class PasswordChangeMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
-        user = get_user_safe(info)
+        user = get_user(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))
 
         args = asdict(input_)
-        f = cls.form(user, args)
+        f = cls.form(user, args)  # type: ignore
         if f.is_valid():
             revoke_user_refresh_token(user)
             user = f.save()
-            return ObtainJSONWebTokenType.from_user(user)
+            user_with_status = cast_to_status_user(user)
+            return ObtainJSONWebTokenType.from_user(user_with_status)
         else:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
 
 class UpdateAccountMixin(BaseMixin):
-    """
-    Update user model fields, defined on settings.
+    """Update user model fields, defined on settings.
 
     User must be verified.
     """
@@ -485,8 +472,8 @@ class UpdateAccountMixin(BaseMixin):
 
 
 class VerifyTokenMixin(BaseMixin):
-    """
-    ### Checks if a token is not expired and correct.
+    """### Checks if a token is not expired and correct.
+
     *Note that this is not for refresh tokens.*
     """
 
@@ -496,8 +483,8 @@ class VerifyTokenMixin(BaseMixin):
 
 
 class RefreshTokenMixin(BaseMixin):
-    """
-    ### refreshToken to generate a new login token:
+    """### refreshToken to generate a new login token:
+
     *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 
     using the refresh-token you already got during authorization, and
@@ -536,8 +523,8 @@ class RefreshTokenMixin(BaseMixin):
 
 
 class RevokeTokenMixin(BaseMixin):
-    """
-    ### Suspends a refresh token.
+    """### Suspends a refresh token.
+
     *token must exist to be revoked.*
     """
 
