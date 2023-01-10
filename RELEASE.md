@@ -1,6 +1,8 @@
 
 
 # Changelog
+### v0.373.1
+- real fix for [#255](https://github.com/nrbnlulu/strawberry-django-auth/issues/255)
 ### v0.373.0
 #### Changes:
 - In order to change a setting that relies on a django setting you would need to use, `DjangoSetting.override(v)`.
