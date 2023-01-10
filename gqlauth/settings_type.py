@@ -2,9 +2,8 @@ import typing
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
-from typing import Callable, NewType, Optional, Set, Union
+from typing import Callable, Optional, Set, Union
 
-from django.conf import settings as django_settings
 from django.utils.module_loading import import_string
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
@@ -28,7 +27,6 @@ def default_text_factory():
 
 
 T = typing.TypeVar("T")
-DjangoSetting = NewType("DjangoSetting", str)
 
 
 class ImportString(typing.Generic[T]):
@@ -41,6 +39,22 @@ class ImportString(typing.Generic[T]):
     def __call__(self, *args, **kwargs):  # pragma: no cover
         # FIXME: this is not covered. and just used to fool mypy.
         return import_string(self.path)(*args, **kwargs)
+
+
+class DjangoSetting(ImportString[T]):
+    def preform_import(self) -> T:
+        from django.conf import settings
+
+        final = settings
+        for attr in self.path.split("."):
+            final = getattr(final, attr)
+
+        return final
+
+
+if typing.TYPE_CHECKING:
+
+    DjangoSetting = typing.Generic[T]  # noqa: F811
 
 
 username_field = StrawberryField(
@@ -62,6 +76,10 @@ last_name_field = StrawberryField(
 email_field = StrawberryField(
     python_name="email", default=None, type_annotation=StrawberryAnnotation(str)
 )
+
+
+def default_captcha_text_validator(original: str, received: str) -> bool:
+    return original == received
 
 
 @dataclass
@@ -99,13 +117,9 @@ class GqlAuthSettings:
 
     This will be used to generate the captcha image.
     """
-
-    def CAPTCHA_TEXT_VALIDATOR(original, received):
-        return original == received
-
-    """
-    A callable that will receive the original string vs user input and returns a boolean.
-    """
+    CAPTCHA_TEXT_VALIDATOR: Callable[[str, str], bool] = default_captcha_text_validator
+    """A callable that will receive the original string vs user input and
+    returns a boolean."""
     FORCE_SHOW_CAPTCHA: bool = False
     """Whether to show the captcha image after it has been created for
     debugging purposes."""
@@ -123,9 +137,8 @@ class GqlAuthSettings:
     EXPIRATION_PASSWORD_RESET_TOKEN: timedelta = timedelta(hours=1)
     EXPIRATION_PASSWORD_SET_TOKEN: timedelta = timedelta(hours=1)
     # email stuff
-    def EMAIL_FROM():
-        return getattr(django_settings, "DEFAULT_FROM_EMAIL", "test@email.com")
 
+    EMAIL_FROM: DjangoSetting[str] = DjangoSetting("DEFAULT_FROM_EMAIL")
     SEND_ACTIVATION_EMAIL: bool = True
     ACTIVATION_PATH_ON_EMAIL: str = "activate"
     PASSWORD_SET_PATH_ON_EMAIL: str = "password-set"
@@ -148,12 +161,9 @@ class GqlAuthSettings:
     """Whether to allow registration with no password."""
     SEND_PASSWORD_SET_EMAIL: bool = False
     # JWT stuff
-    def JWT_SECRET_KEY():
-        return django_settings.SECRET_KEY
+    JWT_SECRET_KEY: DjangoSetting[str] = DjangoSetting("SECRET_KEY")
+    """key used to sign the JWT token."""
 
-    """
-    key used to sign the JWT token.
-    """
     JWT_ALGORITHM: str = "HS256"
     """Algorithm used for signing the token."""
     JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"

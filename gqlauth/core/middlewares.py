@@ -1,9 +1,10 @@
+import asyncio
 from typing import TYPE_CHECKING, Optional, Union
 
-from channels.auth import login as channels_login
-from channels.db import database_sync_to_async
+from asgiref.sync import sync_to_async
 from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
+from django.core.handlers.asgi import ASGIRequest
 from django.http import HttpRequest
 from strawberry import Schema
 
@@ -59,35 +60,49 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
     return user_or_error
 
 
+get_user_or_error_async = sync_to_async(get_user_or_error)
+
+
 class ChannelsJwtMiddleware:
     def __init__(self, inner: type):
         self.inner = inner
 
-    async def __call__(self, scope, receive, send):
+    async def __acall__(self, scope, receive, send):
+        from channels.auth import (
+            login as channels_login,  # deferred import for users that don't use channels.
+        )
+
         if not scope.get(USER_OR_ERROR_KEY, None):
-            user_or_error: UserOrError = await self._get_user_or_error(scope)
+            user_or_error: UserOrError = await get_user_or_error_async(scope)
             scope[USER_OR_ERROR_KEY] = user_or_error
             if user := user_or_error.authorized_user():
                 await channels_login(scope, user)
         return await self.inner(scope, receive, send)
 
-    @database_sync_to_async
-    def _get_user_or_error(self, scope) -> UserOrError:
-        return get_user_or_error(scope)
 
+def django_jwt_middleware(get_response):
+    if asyncio.iscoroutinefunction(get_response):
+        login_async = sync_to_async(login)
 
-class DjangoJwtMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+        async def middleware(request: ASGIRequest):
+            if not hasattr(request, USER_OR_ERROR_KEY):
+                user_or_error: UserOrError = await get_user_or_error_async(request)
+                setattr(request, USER_OR_ERROR_KEY, user_or_error)
+                if user := user_or_error.authorized_user():
+                    await login_async(request, user)
+            return await get_response(request)
 
-    def __call__(self, request):
-        if not hasattr(request, USER_OR_ERROR_KEY):
-            user_or_error: UserOrError = get_user_or_error(request)
-            setattr(request, USER_OR_ERROR_KEY, user_or_error)
-            if user := user_or_error.authorized_user():
-                login(request, user)
+    else:
 
-        return self.get_response(request)
+        def middleware(request: HttpRequest):
+            if not hasattr(request, USER_OR_ERROR_KEY):
+                user_or_error: UserOrError = get_user_or_error(request)
+                setattr(request, USER_OR_ERROR_KEY, user_or_error)
+                if user := user_or_error.authorized_user():
+                    login(request, user)
+            return get_response(request)
+
+    return middleware
 
 
 class JwtSchema(Schema):

@@ -1,6 +1,5 @@
 import dataclasses
 import warnings
-from typing import get_args
 
 from django.conf import settings as django_settings
 
@@ -27,10 +26,11 @@ defaults = GqlAuthSettings()
 for field in dataclasses.fields(gqlauth_settings):
     name = field.name
     value = getattr(gqlauth_settings, name)
-    if DjangoSetting in get_args(field.type) and value is getattr(defaults, name):
-        setattr(gqlauth_settings, name, value())
-    elif (f_type := getattr(field.type, "__origin__", None)) and f_type is ImportString:
-        assert isinstance(value, ImportString)
-        setattr(gqlauth_settings, name, value.preform_import())
+    # if DjangoSetting in get_args(field.type) and value is getattr(defaults, name):
+    if f_type := getattr(field.type, "__origin__", None):  # field is generic
+        if f_type in (ImportString, DjangoSetting):
+            assert isinstance(value, ImportString)
+            setattr(gqlauth_settings, name, value.preform_import())
+
 
 del defaults
