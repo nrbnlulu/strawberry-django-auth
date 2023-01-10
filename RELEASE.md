@@ -14,7 +14,7 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
     EMAIL_FROM=DjangoSetting.override("SomeDiffrentEmail@thanInDjango.settings"),
 )
 ```
-
+- fix issue [#255](https://github.com/nrbnlulu/strawberry-django-auth/issues/255)
 ### v0.372.0
 - Fall back to primitive graphql errors.
 The error types approach that I gave so much effort for, was yet another case of
