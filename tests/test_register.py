@@ -1,15 +1,14 @@
 from smtplib import SMTPException
 from unittest import mock
 
+import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
-import pytest
-from strawberry.utils.str_converters import to_camel_case
-
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from gqlauth.user.signals import user_registered
+from strawberry.utils.str_converters import to_camel_case
 
 from .conftest import CC_USERNAME_FIELD, UserType
 
@@ -42,9 +41,7 @@ def _arg_query(user: UserType, captcha: Captcha):
 
 @pytest.mark.default_user  # settings_b has passwordless registration
 def test_register_invalid_password_validation(verified_user_status_type, anonymous_schema, captcha):
-    """
-    fail to register same user with bad password
-    """
+    """Fail to register same user with bad password."""
     # register
     us = verified_user_status_type
     us.user.password = "123"  # invalid password
@@ -54,9 +51,7 @@ def test_register_invalid_password_validation(verified_user_status_type, anonymo
 
 
 def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
-    """
-    Register user, fail to register same user again
-    """
+    """Register user, fail to register same user again."""
     signal_received = False
 
     def receive_signal(sender, user, signal):

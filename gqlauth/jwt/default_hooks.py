@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, List, Optional, Tuple, Union, cast
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.http.request import HttpRequest
-import jwt
 
+import jwt
 from gqlauth.core.constants import JWT_PREFIX
 from gqlauth.core.utils import app_settings
 

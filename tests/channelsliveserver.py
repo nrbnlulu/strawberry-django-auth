@@ -1,6 +1,6 @@
-from functools import partial
 import threading
 import time
+from functools import partial
 
 from daphne.endpoints import build_endpoint_description_strings
 from daphne.server import Server as DaphneServer
@@ -31,7 +31,6 @@ def make_application(*, static_wrapper):
 
 
 class ChannelsLiveServer:
-
     host = "localhost"
     static_wrapper = ASGIStaticFilesHandler
     serve_static = True

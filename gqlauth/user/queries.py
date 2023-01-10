@@ -1,7 +1,7 @@
 from typing import Optional
 
-from django.contrib.auth import get_user_model
 import strawberry
+from django.contrib.auth import get_user_model
 from strawberry.schema_directive import Location
 from strawberry.types import Info
 from strawberry_django_plus import gql

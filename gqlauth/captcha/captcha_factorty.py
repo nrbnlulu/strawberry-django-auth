@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 import io
-from pathlib import Path
 import sys
+from dataclasses import dataclass
+from pathlib import Path
 
-from PIL.Image import Image
 from django.core.files.base import ContentFile
+from PIL.Image import Image
 
 from gqlauth.settings import gqlauth_settings as app_settings
 

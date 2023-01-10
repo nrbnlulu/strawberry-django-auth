@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, TypeVar
 
 import strawberry
+from graphql import GraphQLError
 
 from gqlauth.core.scalars import ExpectedErrorType
 
@@ -12,9 +13,6 @@ T = TypeVar("T")
 class MutationNormalOutput:
     success: bool
     errors: Optional[ExpectedErrorType] = None
-
-
-from graphql import GraphQLError
 
 
 class GQLAuthError(GraphQLError):

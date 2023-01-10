@@ -1,5 +1,4 @@
 import pytest
-
 from gqlauth.core.types_ import GQLAuthErrors
 
 

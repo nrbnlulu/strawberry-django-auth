@@ -1,5 +1,4 @@
 import pytest
-
 from gqlauth.settings_type import GqlAuthSettings
 
 defaults = GqlAuthSettings()

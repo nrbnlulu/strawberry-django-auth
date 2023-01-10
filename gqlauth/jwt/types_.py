@@ -3,14 +3,14 @@ from datetime import datetime
 from typing import Optional, cast
 from uuid import UUID
 
+import strawberry
+import strawberry_django
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.exceptions import PermissionDenied
-import strawberry
 from strawberry import auto
 from strawberry.types import Info
-import strawberry_django
 
 from gqlauth.core.constants import Messages
 from gqlauth.core.exceptions import TokenExpired
@@ -107,18 +107,14 @@ class TokenType:
 
     @classmethod
     def from_token(cls, token: str) -> "TokenType":
-        """
-        might raise TokenExpired
-        """
+        """Might raise TokenExpired."""
         token_type: TokenType = app_settings.JWT_DECODE_HANDLER(token)
         if token_type.is_expired():
             raise TokenExpired
         return token_type
 
     def get_user_instance(self) -> AbstractBaseUser:
-        """
-        might raise not existed exception.
-        """
+        """might raise not existed exception."""
         pk_name = app_settings.JWT_PAYLOAD_PK.python_name
         query = {pk_name: getattr(self.payload, pk_name)}
         return USER_MODEL.objects.get(**query)
@@ -149,8 +145,9 @@ class ObtainJSONWebTokenType(OutputInterface):
 
     @classmethod
     def from_user(cls, user: AbstractBaseUser) -> "ObtainJSONWebTokenType":
-        """
-        creates a new token and possibly a new refresh token based on the user.
+        """creates a new token and possibly a new refresh token based on the
+        user.
+
         *call this method only for trusted users.*
         """
         ret = ObtainJSONWebTokenType(
@@ -162,9 +159,8 @@ class ObtainJSONWebTokenType(OutputInterface):
 
     @classmethod
     def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
-        """
-        return `ObtainJSONWebTokenType`.
-        authenticates against django authentication backends.
+        """return `ObtainJSONWebTokenType`. authenticates against django
+        authentication backends.
 
         *creates a new token and possibly a refresh token.*
         """

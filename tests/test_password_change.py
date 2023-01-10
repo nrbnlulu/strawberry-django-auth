@@ -42,9 +42,7 @@ SECURE_PASSWORD = fake.password()
 
 
 def test_password_change(db_verified_user_status, verified_schema):
-    """
-    change password
-    """
+    """Change password."""
     form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD)
     query = _arg_query(user_status=db_verified_user_status, password_form=form)
     res = verified_schema.execute(query=query)
@@ -59,9 +57,7 @@ def test_password_change(db_verified_user_status, verified_schema):
 
 
 def test_mismatch_passwords(db_verified_user_status, verified_schema):
-    """
-    wrong inputs
-    """
+    """Wrong inputs."""
     user = db_verified_user_status.user.obj
     old_password = user.password
     form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD + "mismatch")
@@ -76,9 +72,7 @@ def test_mismatch_passwords(db_verified_user_status, verified_schema):
 
 
 def test_passwords_validation(db_verified_user_status, verified_schema):
-    """
-    easy password
-    """
+    """Easy password."""
     simple_password = PasswordChangeForm("123", "123")
     query = _arg_query(user_status=db_verified_user_status, password_form=simple_password)
     res = verified_schema.execute(query=query)

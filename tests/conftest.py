@@ -1,27 +1,27 @@
-from contextlib import contextmanager
 import dataclasses
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Union
 
+import faker
+import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.http import HttpRequest
-import faker
 from faker.providers import BaseProvider
-import pytest
-from strawberry import Schema
-from strawberry.types import ExecutionResult
-from strawberry.utils.str_converters import to_camel_case
-
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import JWT_PREFIX
 from gqlauth.core.middlewares import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings
+from strawberry import Schema
+from strawberry.types import ExecutionResult
+from strawberry.utils.str_converters import to_camel_case
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
+
 from tests.channelsliveserver import ChannelsLiveServer
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -101,11 +101,9 @@ class UserStatusType:
     user: Union[UserModel, UserType] = None
 
     def create(self):
-        """
-        This will create a new user with user status
-        from the user_status_type class and will return the same object
-        with the django user inside it.
-        """
+        """This will create a new user with user status from the
+        user_status_type class and will return the same object with the django
+        user inside it."""
         user = self.user  # caching the user type object
         kwargs = asdict(user)
         kwargs.pop("username_field")

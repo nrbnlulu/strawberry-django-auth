@@ -115,8 +115,8 @@ def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=Fal
 
 
 def inject_arguments(args: Dict[str, type]):
-    """
-    injects arguments to the decorated resolver.
+    """injects arguments to the decorated resolver.
+
     :param args: `dict[name, type]` of arguments to be injected.,
     """
 

@@ -1,16 +1,16 @@
 from typing import AsyncGenerator
 
 import strawberry
-from strawberry.types import Info
-from strawberry_django_plus import gql
-from strawberry_django_plus.directives import SchemaDirectiveExtension
-from strawberry_django_plus.permissions import IsAuthenticated
-
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
+from strawberry.types import Info
+from strawberry_django_plus import gql
+from strawberry_django_plus.directives import SchemaDirectiveExtension
+from strawberry_django_plus.permissions import IsAuthenticated
+
 from testproject.sample.models import Apple
 
 

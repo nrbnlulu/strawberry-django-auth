@@ -1,13 +1,17 @@
 from typing import TYPE_CHECKING, Optional, Union
 
+from channels.auth import login as channels_login
+from channels.db import database_sync_to_async
+from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
-from jwt import PyJWTError
+from strawberry import Schema
 
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
 from gqlauth.core.utils import USER_UNION, app_settings
 from gqlauth.jwt.types_ import TokenType
+from jwt import PyJWTError
 
 anon_user = AnonymousUser()
 if TYPE_CHECKING:
@@ -55,10 +59,6 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
     return user_or_error
 
 
-from channels.auth import login as channels_login
-from channels.db import database_sync_to_async
-
-
 class ChannelsJwtMiddleware:
     def __init__(self, inner: type):
         self.inner = inner
@@ -76,9 +76,6 @@ class ChannelsJwtMiddleware:
         return get_user_or_error(scope)
 
 
-from django.contrib.auth import login
-
-
 class DjangoJwtMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -93,13 +90,8 @@ class DjangoJwtMiddleware:
         return self.get_response(request)
 
 
-from strawberry import Schema
-
-
 class JwtSchema(Schema):
-    """
-    injects token to context.
-    """
+    """injects token to context."""
 
     def execute_sync(self, *args, **kwargs):
         self._inject_user_and_errors(kwargs)

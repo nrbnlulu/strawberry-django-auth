@@ -1,8 +1,7 @@
-from datetime import timedelta
 import time
+from datetime import timedelta
 
 import pytest
-
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.models import RefreshToken

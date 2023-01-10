@@ -1,9 +1,9 @@
 import pytest
-from strawberry.utils.str_converters import to_camel_case
-
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings_type import GqlAuthSettings
+from strawberry.types import ExecutionResult
+from strawberry.utils.str_converters import to_camel_case
 
 from .conftest import SchemaHelper, UserModel, UserStatusType
 
@@ -74,9 +74,6 @@ def login_query(request):
 @pytest.fixture()
 def archived_schema(db_archived_user_status, rf) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_archived_user_status)
-
-
-from strawberry.types import ExecutionResult
 
 
 def default_test(res: ExecutionResult):

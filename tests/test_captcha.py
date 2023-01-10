@@ -2,14 +2,13 @@ from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
 
-from PIL import Image
-from django.contrib.auth import get_user_model
 import pytest
-
+from django.contrib.auth import get_user_model
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings import gqlauth_settings
 from gqlauth.user.signals import user_registered
+from PIL import Image
 
 pytestmark = pytest.mark.skipif(
     not gqlauth_settings.LOGIN_REQUIRE_CAPTCHA or not gqlauth_settings.REGISTER_REQUIRE_CAPTCHA,

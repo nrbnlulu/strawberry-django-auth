@@ -114,3 +114,18 @@ django_settings_module = "testproject.settings"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.autopub]
+git-username = "nrbnlulu"
+git-email = "nrbnlulu@gmail.com"
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "ERA", "I"]
+ignore = [
+    "TID252",
+    "E501",  # line too long, handled by black
+]
+fix = true
+
+src = ["gqlauth", "tests", "testproject"]

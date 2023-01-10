@@ -1,6 +1,6 @@
+import pytest
 from gql import Client, gql
 from gql.transport.aiohttp import AIOHTTPTransport
-import pytest
 
 pytestmark = pytest.mark.default_user
 

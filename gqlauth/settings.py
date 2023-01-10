@@ -1,6 +1,6 @@
 import dataclasses
-from typing import get_args
 import warnings
+from typing import get_args
 
 from django.conf import settings as django_settings
 
