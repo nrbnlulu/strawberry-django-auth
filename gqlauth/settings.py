@@ -16,6 +16,6 @@ if user_settings := getattr(django_settings, "GQL_AUTH", False):
             f"{GqlAuthSettings}, but you provided {type(user_settings)}"
         )
 
-else:
+else:  # pragma: no cover
     warnings.warn("You have not provided any custom gql auth settings falling back to defaults")
     gqlauth_settings = GqlAuthSettings()

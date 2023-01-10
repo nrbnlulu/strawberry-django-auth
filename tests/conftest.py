@@ -270,7 +270,7 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def channels_live_server(request):
     server = ChannelsLiveServer()
     request.addfinalizer(server.stop)

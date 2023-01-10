@@ -63,6 +63,7 @@ class ChannelsLiveServer:
 
     def stop(self) -> None:
         self._server.stop()
+        self._server.create_application
         self._live_server_modified_settings.disable()
 
     @property
