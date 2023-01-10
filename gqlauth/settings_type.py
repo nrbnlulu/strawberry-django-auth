@@ -1,18 +1,88 @@
-import typing
+import json
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
-from typing import Callable, Optional, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
-from django.utils.module_loading import import_string
+from django.http.request import HttpRequest
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 
-if typing.TYPE_CHECKING:  # pragma: no cover
-    from django.http.request import HttpRequest
+import jwt
+
+if TYPE_CHECKING:  # pragma: no cover
+    from django.contrib.auth.base_user import AbstractBaseUser
 
     from gqlauth.core.utils import UserProto
     from gqlauth.jwt.types_ import TokenType
+
+
+def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> Optional[str]:
+    from gqlauth.core.constants import JWT_PREFIX
+
+    token: Optional[str] = None
+    if isinstance(request_or_scope, HttpRequest):  # django
+        headers = request_or_scope.headers
+        token = headers.get("authorization", None) or headers.get("Authorization", None)
+    else:  # channels
+        request_or_scope = cast(dict, request_or_scope)
+        raw_headers: List[Tuple[bytes, bytes]] = request_or_scope["headers"]
+        for k, v in raw_headers:
+            if k == b"authorization":
+                token = v.decode()
+                break
+    if token:
+        return token.strip(JWT_PREFIX)
+    return None
+
+
+def create_token_type(user: "AbstractBaseUser") -> "TokenType":
+    from gqlauth.core.utils import app_settings
+    from gqlauth.jwt.types_ import TokenPayloadType, TokenType
+
+    user_pk = app_settings.JWT_PAYLOAD_PK.python_name
+    pk_field = {user_pk: getattr(user, user_pk)}
+    payload = TokenPayloadType(
+        **pk_field,
+    )
+    serialized = json.dumps(payload.as_dict(), sort_keys=True, indent=1)
+    return TokenType(
+        token=str(
+            jwt.encode(
+                payload={"payload": serialized},
+                key=cast(str, app_settings.JWT_SECRET_KEY.value),
+                algorithm=app_settings.JWT_ALGORITHM,
+            )
+        ),
+        payload=payload,
+    )
+
+
+def decode_jwt(token: str) -> "TokenType":
+    from gqlauth.core.utils import app_settings
+    from gqlauth.jwt.types_ import TokenPayloadType, TokenType
+
+    decoded = json.loads(
+        jwt.decode(
+            token,
+            key=cast(str, app_settings.JWT_SECRET_KEY.value),
+            algorithms=[
+                app_settings.JWT_ALGORITHM,
+            ],
+        )["payload"]
+    )
+    return TokenType(token=token, payload=TokenPayloadType.from_dict(decoded))
 
 
 def default_text_factory():
@@ -26,35 +96,31 @@ def default_text_factory():
     )
 
 
-T = typing.TypeVar("T")
+T = TypeVar("T")
 
 
-class ImportString(typing.Generic[T]):
-    def __init__(self, path: str):
-        self.path = path
+class DjangoSetting(Generic[T]):
+    __slots__ = ("setting", "cached")
 
-    def preform_import(self) -> T:
-        return import_string(self.path)
+    def __init__(self, setting: str, value: Optional[T] = None):
+        self.setting = setting
+        self.cached: Optional[T] = value
 
-    def __call__(self, *args, **kwargs):  # pragma: no cover
-        # FIXME: this is not covered. and just used to fool mypy.
-        return import_string(self.path)(*args, **kwargs)
-
-
-class DjangoSetting(ImportString[T]):
-    def preform_import(self) -> T:
+    @property
+    def value(self) -> T:
+        if self.cached:  # slotted classes can't use cached property (without __dict__)
+            return self.cached
         from django.conf import settings
 
         final = settings
-        for attr in self.path.split("."):
+        for attr in self.setting.split("."):
             final = getattr(final, attr)
 
         return final
 
-
-if typing.TYPE_CHECKING:
-
-    DjangoSetting = typing.Generic[T]  # noqa: F811
+    @classmethod
+    def override(cls, value: T) -> "DjangoSetting":
+        return DjangoSetting(setting="", value=value)
 
 
 username_field = StrawberryField(
@@ -169,9 +235,7 @@ class GqlAuthSettings:
     JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"
     """A valid 'strftime' string that will be used to encode the token
     payload."""
-    JWT_PAYLOAD_HANDLER: ImportString[Callable[["UserProto"], "TokenType"]] = ImportString(
-        "gqlauth.jwt.default_hooks.create_token_type"
-    )
+    JWT_PAYLOAD_HANDLER: Callable[["UserProto"], "TokenType"] = create_token_type
     """A custom function to generate the token datatype, its up to you to
     encode the token."""
     JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
@@ -180,13 +244,9 @@ class GqlAuthSettings:
 
     *This filed must be unique in the database*
     """
-    JWT_DECODE_HANDLER: ImportString[Callable[[str], "TokenType"]] = ImportString(
-        "gqlauth.jwt.default_hooks.decode_jwt"
-    )
+    JWT_DECODE_HANDLER: Callable[[str], "TokenType"] = decode_jwt
 
-    JWT_TOKEN_FINDER: ImportString[
-        Callable[[Union["HttpRequest", dict]], Optional[str]]
-    ] = ImportString("gqlauth.jwt.default_hooks.token_finder")
+    JWT_TOKEN_FINDER: Callable[[Union["HttpRequest", dict]], Optional[str]] = token_finder
     """A hook called by `GqlAuthRootField` to find the token. Accepts the
     request object (might be channels scope dict or django request object)
 
