@@ -30,7 +30,7 @@ PyJWT = ">=2.6.0,<3.0"
 strawberry-graphql-django = { version = ">=0.2.5,<4.0", allow-prereleases = true }
 Pillow = "^9.2.0"
 strawberry-graphql = ">=0.128,<0.171.0"
-strawberry-django-plus = "^1.25.2"
+strawberry-django-plus = ">=1.25.2,<3.0.0"
 
 [tool.poetry.dev-dependencies]
 cryptography = "^39.0"

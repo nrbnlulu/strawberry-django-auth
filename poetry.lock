@@ -2084,14 +2084,14 @@ files = [
 
 [[package]]
 name = "strawberry-django-plus"
-version = "1.35"
+version = "2.0.1"
 description = "Enhanced Strawberry GraphQL integration with Django"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "strawberry_django_plus-1.35-py3-none-any.whl", hash = "sha256:ab10a1a5e5507c3fee874de30824b9e856129b1ce8b23efd9594eb8911cc9afb"},
-    {file = "strawberry_django_plus-1.35.tar.gz", hash = "sha256:9e801785316d2b70336980410175fa31236ba95c9ce470e9bfbf109eb6893bd5"},
+    {file = "strawberry_django_plus-2.0.1-py3-none-any.whl", hash = "sha256:d37033f19f6a3dd3e2fa37b37595a89041b649e12128ca9745746b14f50ebab7"},
+    {file = "strawberry_django_plus-2.0.1.tar.gz", hash = "sha256:08c11f874233a19d38aed7902b04451754048522c23782817b30cd5a95b8a6f8"},
 ]
 
 [package.dependencies]
@@ -2760,4 +2760,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "68d2077d8cb704b98be0b153ec6ee24e9159be92ba6a1d7b1602991a6327a579"
+content-hash = "9a1011464aa1da0be5619658e56fae6c7d7fad293f38f1788d18fa857b1dd266"
