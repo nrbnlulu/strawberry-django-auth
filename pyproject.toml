@@ -57,7 +57,7 @@ pre-commit = "^2.21.0"
 pytest-asyncio = "^0.20.3"
 pydoc-markdown = {extras = ["novella"], version = "^4.6.3"}
 gql = {extras = ["all"], version = "^3.4.0"}
-setuptools = "^66.0.0"
+setuptools = "^67.0.0"
 channels = {extras = ["daphne"], version = "^4.0.0"}
 
 
