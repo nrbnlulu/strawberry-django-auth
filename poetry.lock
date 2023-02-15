@@ -2287,14 +2287,14 @@ types-cryptography = "*"
 
 [[package]]
 name = "types-mock"
-version = "5.0.0.0"
+version = "5.0.0.3"
 description = "Typing stubs for mock"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-mock-5.0.0.0.tar.gz", hash = "sha256:7119b478a0824f1ae02b57e25e9e428404a58440bcd89c4ee76404afce261f7c"},
-    {file = "types_mock-5.0.0.0-py3-none-any.whl", hash = "sha256:c293a49d4e762f238a0da1f09b80c0128afacd0e608426ae42be40f5bc3eee2e"},
+    {file = "types-mock-5.0.0.3.tar.gz", hash = "sha256:cb1d201e0fa81d368d7f75560561b2215505964f522cf487c21a6cbdd3efe05e"},
+    {file = "types_mock-5.0.0.3-py3-none-any.whl", hash = "sha256:752916030b9b59875d033d9bf39434f99d346dda01e825b31737a37c271ab905"},
 ]
 
 [[package]]
