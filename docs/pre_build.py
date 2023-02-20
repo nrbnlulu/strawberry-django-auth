@@ -12,7 +12,6 @@ from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
 from pydoc_markdown.interfaces import Context
 
 if __name__ == "__main__":
-
     # copy resolvers file from .py to .yml
     root_dir = Path(__file__).parent.parent
     src = root_dir / "gqlauth"
