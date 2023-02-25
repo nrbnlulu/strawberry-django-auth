@@ -2086,14 +2086,14 @@ files = [
 
 [[package]]
 name = "strawberry-django-plus"
-version = "2.0.4"
+version = "2.0.5"
 description = "Enhanced Strawberry GraphQL integration with Django"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "strawberry_django_plus-2.0.4-py3-none-any.whl", hash = "sha256:4dff8265dcd209cb50bf2d430e295dbd96eb8b58ddb9809a4ab8e3a1c7289015"},
-    {file = "strawberry_django_plus-2.0.4.tar.gz", hash = "sha256:576c5a149b444e8a2b3561afb4006f293966ec89b8b7a66cfce36b85e9e66f6f"},
+    {file = "strawberry_django_plus-2.0.5-py3-none-any.whl", hash = "sha256:e469a138e763d1058e4a3883c23c07653567fca23d368feb83cb3a4e23a7d8ce"},
+    {file = "strawberry_django_plus-2.0.5.tar.gz", hash = "sha256:a055f5fde2101f4513b08de9725480119420a8fc60e397b04c48ff1c6aa2b905"},
 ]
 
 [package.dependencies]
