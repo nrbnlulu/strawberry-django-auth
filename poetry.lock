@@ -839,14 +839,14 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "faker"
-version = "17.0.0"
+version = "17.4.0"
 description = "Faker is a Python package that generates fake data for you."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "Faker-17.0.0-py3-none-any.whl", hash = "sha256:21c3c6c45183308151c14f62afe59bf54ace68f663e0180973698ba2a9a3b2c4"},
-    {file = "Faker-17.0.0.tar.gz", hash = "sha256:17cf85aeb0363a3384ccd4c1f52b52ec8f414c7afaab74ae1f4c3e09a06e14de"},
+    {file = "Faker-17.4.0-py3-none-any.whl", hash = "sha256:fdd9cc16cd7e0d8dfcd2bb19d80c1bca5ce52d79690f93bfbb13916d7ed1cb2e"},
+    {file = "Faker-17.4.0.tar.gz", hash = "sha256:7b225dd6bc33405188f33f77c990bd08057f5c512042f7e0966e026c633ec646"},
 ]
 
 [package.dependencies]
@@ -2762,4 +2762,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "fd2586a0f7eb15642667259e5c8f04aadcf87dc912e3e2f012ce09db09d1ae3d"
+content-hash = "2c2fd09186a901112e355c300ed3d96ae756e991869cf57b3540efcc3d5de11a"
