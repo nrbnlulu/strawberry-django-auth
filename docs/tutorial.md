@@ -4,7 +4,7 @@
 - Setup with custom user model
 - 20 to 30 minutes
 
-[Final code on github](https://github.com/nrbnlulu/strawberry-django-auth/tree/master/quickstart).
+[Final code on github](https://github.com/nrbnlulu/strawberry-django-auth/tree/main/quickstart).
 
 ## Requirements
 
