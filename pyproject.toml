@@ -52,7 +52,7 @@ mkdocs-material = "^8.5.3"
 mkdocs-minify-plugin = "^0.5.0"
 pymdown-extensions = "^9.9"
 Markdown = "^3.4.1"
-Faker = "^17.5.0"
+Faker = "^18.2.0"
 pre-commit = "^2.21.0"
 pytest-asyncio = "^0.20.3"
 pydoc-markdown = {extras = ["novella"], version = "^4.6.4"}
