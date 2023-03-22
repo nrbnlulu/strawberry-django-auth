@@ -54,7 +54,7 @@ pymdown-extensions = "^9.9"
 Markdown = "^3.4.1"
 Faker = "^18.2.0"
 pre-commit = "^2.21.0"
-pytest-asyncio = "^0.20.3"
+pytest-asyncio = "^0.21.0"
 pydoc-markdown = {extras = ["novella"], version = "^4.6.4"}
 gql = {extras = ["all"], version = "^3.4.0"}
 setuptools = "^67.6.0"
