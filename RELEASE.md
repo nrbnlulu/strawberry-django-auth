@@ -1,3 +1,3 @@
 Release type: patch
 
-This is a release just updates dependencies.
+This release just updates dependencies.
