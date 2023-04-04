@@ -5,7 +5,7 @@ import strawberry
 from strawberry.schema_directive import Location
 from strawberry_django_plus.permissions import ConditionDirective
 
-from gqlauth.core.utils import UserProto
+from gqlauth.backends.basebackend import UserProto
 
 
 @strawberry.schema_directive(

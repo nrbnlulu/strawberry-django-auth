@@ -1,11 +1,9 @@
 import binascii
 import os
-import time
 from datetime import datetime
 
-from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Case, When
@@ -14,30 +12,41 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
-from strawberry.types import Info
 
+from gqlauth.backends.django.backend import StatusChoices
 from gqlauth.core.constants import TokenAction
 from gqlauth.core.exceptions import UserAlreadyVerified
-from gqlauth.core.utils import get_payload_from_token, get_token
 
 # gqlauth imports
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.signals import user_verified
 
 USER_MODEL = get_user_model()
 
 
-class UserStatus(models.Model):
-    """A helper model that handles user account stuff."""
+class AbstractGqlAuthUser(AbstractBaseUser):
+    """To Be extended by types implementing."""
 
-    user = models.OneToOneField(
-        django_settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="status"
+    class Meta:
+        abstract = True
+
+    status = models.CharField(
+        max_length=2,
+        choices=StatusChoices.choices,
+        default=StatusChoices.UNVERIFIED,
     )
-    verified = models.BooleanField(default=False)
-    archived = models.BooleanField(default=False)
+    archived = models.BooleanField(default=False, verbose_name=_("Is the user archived?"))
 
     def __str__(self):
-        return "%s - status" % (self.user)
+        return f"Status - {self.status}"
+
+    def is_verified(self) -> bool:
+        return self.status is StatusChoices.VERIFIED
+
+    def is_unverified(self) -> bool:
+        return self.status is StatusChoices.UNVERIFIED
+
+    def is_archived(self) -> bool:
+        return self.archived
 
     def send(self, subject, template, context, recipient_list=None):
         _subject = render_to_string(subject, context).replace("\n", " ").strip()
@@ -49,26 +58,9 @@ class UserStatus(models.Model):
             from_email=app_settings.EMAIL_FROM,
             message=message,
             html_message=html_message,
-            recipient_list=(recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]),
+            recipient_list=(recipient_list or [getattr(self, USER_MODEL.EMAIL_FIELD)]),
             fail_silently=False,
         )
-
-    def get_email_context(self, info: Info, path, action, **kwargs):
-        token = get_token(self.user, action, **kwargs)
-        request = info.context.request
-        site = get_current_site(request)
-        return {
-            "user": self.user,
-            "request": request,
-            "token": token,
-            "port": request.get_port(),
-            "site_name": site.name,
-            "domain": site.domain,
-            "protocol": "https" if request.is_secure() else "http",
-            "path": path,
-            "timestamp": time.time(),
-            **app_settings.EMAIL_TEMPLATE_VARIABLES,
-        }
 
     def send_activation_email(self, info, *args, **kwargs):
         email_context = self.get_email_context(
@@ -79,7 +71,7 @@ class UserStatus(models.Model):
         return self.send(subject, template, email_context, *args, **kwargs)
 
     def resend_activation_email(self, info, *args, **kwargs):
-        if self.verified is True:
+        if self.is_verified():
             raise UserAlreadyVerified
         email_context = self.get_email_context(
             info, app_settings.ACTIVATION_PATH_ON_EMAIL, TokenAction.ACTIVATION
@@ -103,34 +95,6 @@ class UserStatus(models.Model):
         template = app_settings.EMAIL_TEMPLATE_PASSWORD_RESET
         subject = app_settings.EMAIL_SUBJECT_PASSWORD_RESET
         return self.send(subject, template, email_context, *args, **kwargs)
-
-    @classmethod
-    def verify(cls, token):
-        payload = get_payload_from_token(
-            token, TokenAction.ACTIVATION, app_settings.EXPIRATION_ACTIVATION_TOKEN
-        )
-        user = USER_MODEL._default_manager.get(**payload)
-        user_status = cls.objects.get(user=user)
-        if user_status.verified is False:
-            user_status.verified = True
-            user_status.save(update_fields=["verified"])
-            user_verified.send(sender=cls, user=user)
-        else:
-            raise UserAlreadyVerified
-
-    @classmethod
-    def unarchive(cls, user):
-        user_status = cls.objects.get(user=user)
-        if user_status.archived is True:
-            user_status.archived = False
-            user_status.save(update_fields=["archived"])
-
-    @classmethod
-    def archive(cls, user):
-        user_status = cls.objects.get(user=user)
-        if user_status.archived is False:
-            user_status.archived = True
-            user_status.save(update_fields=["archived"])
 
 
 class RefreshTokenQuerySet(models.QuerySet):
@@ -198,3 +162,6 @@ class RefreshToken(models.Model):
         obj = RefreshToken.objects.create(user=user, token=token)
         obj.save()
         return obj
+
+
+__all__ = ["AbstractGqlAuthUser", "RefreshToken", "RefreshTokenQuerySet", "UserAlreadyVerified"]

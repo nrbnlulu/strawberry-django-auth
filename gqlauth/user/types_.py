@@ -6,10 +6,10 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.core.utils import inject_fields
-from gqlauth.models import UserStatus
 from gqlauth.settings import gqlauth_settings
 
 USER_MODEL = get_user_model()
+
 # UPDATE_MUTATION_FIELDS are here because they are most likely to be in the model.
 USER_FIELDS = {
     StrawberryField(
@@ -28,18 +28,6 @@ USER_FIELDS = {
 }.union(gqlauth_settings.UPDATE_MUTATION_FIELDS)
 
 
-@strawberry_django.filters.filter(UserStatus)
-class UserStatusFilter:
-    verified: auto
-    archived: auto
-
-
-@strawberry_django.type(model=UserStatus, filters=UserStatusFilter)
-class UserStatusType:
-    verified: auto
-    archived: auto
-
-
 @strawberry_django.filters.filter(USER_MODEL)
 @inject_fields(USER_FIELDS, annotations_only=True)
 class UserFilter:
@@ -49,7 +37,8 @@ class UserFilter:
     is_staff: auto
     is_active: auto
     date_joined: auto
-    status: UserStatusFilter
+    status: auto
+    archived: auto
 
 
 @strawberry_django.type(model=USER_MODEL, filters=UserFilter)
@@ -61,7 +50,8 @@ class UserType:
     is_staff: auto
     is_active: auto
     date_joined: auto
-    status: UserStatusType
+    status: auto
+    archived: auto
 
     @strawberry_django.field
     def archived(self, info: Info) -> bool:

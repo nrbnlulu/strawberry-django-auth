@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import sys
 from pathlib import Path
 
+from gqlauth.backends.django.backend import DjangoGqlAuthBackend
 from gqlauth.settings_type import GqlAuthSettings
 
 BASE_DIR = Path(__file__).parent
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "strawberry_django",
     "gqlauth",
+    "customuser",
     "testproject.sample",
 ]
 
@@ -112,8 +114,10 @@ AUTHENTICATION_BACKENDS = [
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+AUTH_USER_MODEL = "customuser.SimpleCustomUser"
 
 GQL_AUTH = GqlAuthSettings(
+    BACKEND=DjangoGqlAuthBackend(),
     LOGIN_REQUIRE_CAPTCHA=True,
     REGISTER_REQUIRE_CAPTCHA=True,
     CAPTCHA_SAVE_IMAGE=True,

@@ -25,7 +25,7 @@ from testproject.schema import arg_schema
 from tests.channelsliveserver import ChannelsLiveServer
 
 if TYPE_CHECKING:  # pragma: no cover
-    from gqlauth.core.utils import UserProto
+    from gqlauth.backends.basebackend import UserProto
 UserModel = get_user_model()
 WRONG_PASSWORD = "wrong password"
 CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)

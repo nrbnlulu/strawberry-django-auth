@@ -42,6 +42,5 @@ GQL_AUTH = GqlAuthSettings(  # noqa F405
     JWT_PAYLOAD_PK=phone_number_field,
 )
 
-INSTALLED_APPS += ["customuser"]  # noqa F405
 
 AUTH_USER_MODEL = "customuser.CustomPhoneNumberUser"
