@@ -7,11 +7,11 @@ ___
 class Captcha()
 ```
 
-> Creates a brand-new captcha.
-> Returns a base64 encoded string of the captcha.
-> And uuid representing the captcha id in the database.
-> When you will try to log in or register You will
-> need submit that uuid With the user input.
+> Creates a brand-new captcha. Returns a base64 encoded string of the
+> captcha. And uuid representing the captcha id in the database. When you
+> will try to log in or register You will need submit that uuid With the user
+> input.
+>
 > **The captcha will be invoked when the timeout expires**.
 
 ## RegisterMixin
@@ -20,10 +20,9 @@ class Captcha()
 class RegisterMixin(BaseMixin)
 ```
 
-> Register user with fields defined in the settings.
-> If the email field of the user model is part of the
-> registration fields (default), check if there is
-> no user with that email.
+> Register user with fields defined in the settings. If the email field of
+> the user model is part of the registration fields (default), check if there
+> is no user with that email.
 >
 > If it exists, it does not register the user,
 > even if the email field is not defined as unique
@@ -45,9 +44,9 @@ class VerifyAccountMixin(BaseMixin)
 
 > Verify user account.
 >
-> Receive the token that was sent by email.
-> If the token is valid, make the user verified
-> by making the `user.status.verified` field true.
+> Receive the token that was sent by email. If the token is valid,
+> make the user verified by making the `user.status.verified` field
+> true.
 
 ## ResendActivationEmailMixin
 
@@ -134,6 +133,7 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin)
 ```
 
 > Archive account and revoke refresh tokens.
+>
 > User must be verified and confirm password.
 
 ## DeleteAccountMixin
@@ -176,6 +176,7 @@ class VerifyTokenMixin(BaseMixin)
 ```
 
 > ### Checks if a token is not expired and correct.
+>
 > *Note that this is not for refresh tokens.*
 
 ## RefreshTokenMixin
@@ -185,6 +186,7 @@ class RefreshTokenMixin(BaseMixin)
 ```
 
 > ### refreshToken to generate a new login token:
+>
 > *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 >
 > using the refresh-token you already got during authorization, and
@@ -198,4 +200,5 @@ class RevokeTokenMixin(BaseMixin)
 ```
 
 > ### Suspends a refresh token.
+>
 > *token must exist to be revoked.*

@@ -24,7 +24,7 @@ import jwt
 if TYPE_CHECKING:  # pragma: no cover
     from django.contrib.auth.base_user import AbstractBaseUser
 
-    from gqlauth.core.utils import UserProto
+    from gqlauth.backends.basebackend import GqlAuthBackendABC, UserProto
     from gqlauth.jwt.types_ import TokenType
 
 
@@ -150,6 +150,7 @@ def default_captcha_text_validator(original: str, received: str) -> bool:
 
 @dataclass
 class GqlAuthSettings:
+    BACKEND: "GqlAuthBackendABC"
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     """"""
     LOGIN_FIELDS: Set[StrawberryField] = field(

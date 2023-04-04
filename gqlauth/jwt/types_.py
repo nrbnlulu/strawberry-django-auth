@@ -10,16 +10,16 @@ from django.core.exceptions import PermissionDenied
 from strawberry import auto
 from strawberry.types import Info
 
+from gqlauth.backends.django.models import RefreshToken
 from gqlauth.core.constants import Messages
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.interfaces import OutputInterface
 from gqlauth.core.scalars import ExpectedErrorType
 from gqlauth.core.utils import USER_MODEL, app_settings, inject_fields
-from gqlauth.models import RefreshToken
 from gqlauth.user.types_ import UserType
 
 if TYPE_CHECKING:
-    from gqlauth.core.utils import UserProto
+    from gqlauth.backends.basebackend import UserProto
 
 
 @strawberry_django.type(
@@ -170,13 +170,11 @@ class ObtainJSONWebTokenType(OutputInterface):
             user: Optional["UserProto"]
             if not (user := authenticate(info.context.request, **args)):  # type: ignore
                 return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
-            from gqlauth.models import UserStatus
 
-            status: UserStatus = getattr(user, "status")  # noqa: B009
             # gqlauth logic
-            if status.archived is True:  # un-archive on login
-                UserStatus.unarchive(user)
-            if status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
+            if user.is_archived():  # un-archive on login
+                app_settings.BACKEND.unarchived(user)
+            if user.is_verified() or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.
                 return ObtainJSONWebTokenType.from_user(user)
             else:

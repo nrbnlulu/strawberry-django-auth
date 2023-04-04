@@ -1,8 +1,9 @@
-from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from gqlauth.backends.django.models import AbstractGqlAuthUser
 
 # The following setup is adopted from Aria Moradi in issue #45
 # Hopefully this will provide more real world custom user.
@@ -39,7 +40,7 @@ class PhoneNumberUserManager(BaseUserManager):
         return self._create_user(phone_number, password, **extra_fields)
 
 
-class CustomPhoneNumberUser(AbstractBaseUser, PermissionsMixin):
+class CustomPhoneNumberUser(AbstractGqlAuthUser, PermissionsMixin):
     phone_number = models.CharField(default=False, max_length=255, unique=True)
     is_registered = models.BooleanField(default=False)
     first_name = models.CharField(max_length=255, blank=True)
@@ -68,6 +69,12 @@ class CustomPhoneNumberUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {str(self.phone_number)}"
 
+    class Meta:
+        verbose_name = "user"
+        verbose_name_plural = "users"
+
+
+class SimpleCustomUser(AbstractGqlAuthUser):
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
