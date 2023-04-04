@@ -29,9 +29,9 @@ USER_MODEL = get_user_model()
 
 class UserStatus(models.Model):
     """A helper model that handles user account stuff."""
-    
+
     class Meta:
-        verbose_name_plural = 'User statuses'
+        verbose_name_plural = "User statuses"
 
     user = models.OneToOneField(
         django_settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="status"
