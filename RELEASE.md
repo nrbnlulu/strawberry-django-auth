@@ -1,4 +1,4 @@
-Release type: patch 
+Release type: patch
 
 
 Correctly pluralizes the "UserStatus" model as "User statuses" in Django Admin.
