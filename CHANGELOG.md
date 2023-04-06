@@ -1,6 +1,18 @@
 CHANGELOG
 =========
 
+0.374.3 - 2023-04-06
+--------------------
+
+Correctly pluralizes the "UserStatus" model as "User statuses" in Django Admin.
+
+Without this change, Django Admin automatically uses the string "User statuss" as the verbose plural name.
+
+Achieved by overriding the `Meta` (Django model subclass) attribute `verbose_name_plural`.
+
+Contributed by [Justin Masayda](https://github.com/keysmusician) via [PR #368](https://github.com/nrbnlulu/strawberry-django-auth/pull/368/)
+
+
 0.374.2 - 2023-03-25
 --------------------
 
