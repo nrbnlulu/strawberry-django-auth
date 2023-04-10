@@ -50,6 +50,8 @@ your implementation*.
 ### Full schema features
 
 ```python
+import gqlauth.backends.django.models
+
 
 @strawberry.type
 class AuthMutation:
@@ -61,6 +63,7 @@ class AuthMutation:
     delete_account = mutations.DeleteAccount.field
     password_change = mutations.PasswordChange.field
     swap_emails = mutations.SwapEmails.field
+
 
 @strawberry.type
 class Mutation:
@@ -77,7 +80,7 @@ class Mutation:
     send_password_reset_email = mutations.SendPasswordResetEmail.field
     password_reset = mutations.PasswordReset.field
     password_set = mutations.PasswordSet.field
-    refresh_token = mutations.RefreshToken.field
+    refresh_token = gqlauth.backends.django.models.RefreshToken.field
     revoke_token = mutations.RevokeToken.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
 

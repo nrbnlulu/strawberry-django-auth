@@ -1,8 +1,8 @@
 from django.db import models
-from gqlauth.backends.django.models import AbstractGqlAuthUser
+from gqlauth.backends.django.models import StatusMixin
 
 
-class CustomUser(AbstractGqlAuthUser):
+class CustomUser(StatusMixin):
     email = models.EmailField(blank=False, max_length=254, verbose_name="email address")
 
     USERNAME_FIELD = "username"  # e.g: "username", "email"

@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from gqlauth.captcha.captcha_factorty import CaptchaInstanceType, generate_captcha_text
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.settings import gqlauth_settings as app_settings
 
 

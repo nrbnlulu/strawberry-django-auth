@@ -2,7 +2,7 @@ from smtplib import SMTPException
 from unittest import mock
 
 import pytest
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 
 from .conftest import UserType
 

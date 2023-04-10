@@ -1,4 +1,3 @@
-import contextlib
 import inspect
 import typing
 from typing import Dict, Iterable
@@ -51,11 +50,6 @@ def get_user(info: Info) -> USER_UNION:
     return info.context.request.user  # type: ignore
 
 
-def cast_to_status_user(user: USER_UNION) -> UserProto:
-    user.status  # type: ignore  # raise attribute error
-    return user  # type: ignore
-
-
 def get_user_by_email(email: str) -> "UserProto":
     user = USER_MODEL.objects.get(**{USER_MODEL.EMAIL_FIELD: email})
     assert hasattr(user, "status")
@@ -79,13 +73,6 @@ def get_payload_from_token(token, action, exp=None):
     if _action != action:
         raise TokenScopeError
     return payload
-
-
-def revoke_user_refresh_token(user):
-    refresh_tokens = user.refresh_tokens.all()
-    for refresh_token in refresh_tokens:
-        with contextlib.suppress(Exception):
-            refresh_token.revoke()
 
 
 def fields_names(strawberry_fields: Iterable[StrawberryField]):

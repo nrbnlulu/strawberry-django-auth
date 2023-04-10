@@ -1,6 +1,6 @@
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.core.types_ import GQLAuthErrors
 from pytest import mark
 

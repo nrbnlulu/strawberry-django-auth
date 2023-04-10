@@ -5,7 +5,7 @@ import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from gqlauth.captcha.models import Captcha
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from gqlauth.user.signals import user_registered
 from strawberry.utils.str_converters import to_camel_case

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from django.contrib.auth import get_user_model
 
 from gqlauth.captcha.models import Captcha as CaptchaModel
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.core.types_ import MutationNormalOutput
 from gqlauth.core.utils import USER_UNION
 

@@ -2,9 +2,9 @@ import time
 from datetime import timedelta
 
 import pytest
+from gqlauth.backends.django.models import RefreshToken
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.jwt.types_ import TokenType
-from gqlauth.models import RefreshToken
 
 
 def test_expired_refresh_token(db_verified_user_status, app_settings, override_gqlauth):

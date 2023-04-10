@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import pytest
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.core.utils import get_token
 
 from .conftest import UserStatusType, fake

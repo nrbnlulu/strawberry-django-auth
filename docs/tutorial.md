@@ -187,13 +187,13 @@ class Query(UserQueries):
         # etc...
     ```
 
-
 ```py
+
+import gqlauth.backends.django.models
 
 
 @strawberry.type
 class Mutation:
-
     # include what-ever mutations you want.
     verify_token = mutations.VerifyToken.field
     update_account = mutations.UpdateAccount.field
@@ -209,7 +209,7 @@ class Mutation:
     send_password_reset_email = mutations.SendPasswordResetEmail.field
     password_reset = mutations.PasswordReset.field
     password_set = mutations.PasswordSet.field
-    refresh_token = mutations.RefreshToken.field
+    refresh_token = gqlauth.backends.django.models.RefreshToken.field
     revoke_token = mutations.RevokeToken.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
 

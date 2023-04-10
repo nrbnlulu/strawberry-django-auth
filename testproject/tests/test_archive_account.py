@@ -1,5 +1,5 @@
+from gqlauth.backends.django.models import RefreshToken
 from gqlauth.core.types_ import GQLAuthErrors
-from gqlauth.models import RefreshToken
 
 from tests.conftest import UserStatusType
 

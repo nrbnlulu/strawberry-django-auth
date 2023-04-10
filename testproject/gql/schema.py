@@ -11,7 +11,7 @@ from strawberry_django_plus import gql
 from strawberry_django_plus.directives import SchemaDirectiveExtension
 from strawberry_django_plus.permissions import IsAuthenticated
 
-from testproject.sample.models import Apple
+from sample.models import Apple
 
 
 @gql.django.type(model=Apple)

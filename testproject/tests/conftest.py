@@ -1,31 +1,37 @@
 import dataclasses
+import sys
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Optional, Union
 
 import faker
 import pytest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.http import HttpRequest
 from faker.providers import BaseProvider
+from gqlauth.backends.django.backend import DjangoUserProto
+from gqlauth.backends.django.models import RefreshToken
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import JWT_PREFIX
 from gqlauth.core.middlewares import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
 from gqlauth.jwt.types_ import TokenType
-from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings
 from strawberry import Schema
+from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
-from testproject.relay_schema import relay_schema
-from testproject.sample.models import Apple
-from testproject.schema import arg_schema
 
-from tests.channelsliveserver import ChannelsLiveServer
+from gql.relay_schema import relay_schema
+from gql.schema import arg_schema
+from sample.models import Apple
+from testproject.asgi import application as testproject_application
+
+sys.path.append(str(Path(__file__).parent.parent))
+
 
 if TYPE_CHECKING:  # pragma: no cover
-    from gqlauth.backends.basebackend import UserProto
+    pass
 UserModel = get_user_model()
 WRONG_PASSWORD = "wrong password"
 CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
@@ -76,7 +82,7 @@ fake.add_provider(UserFieldFakeProvider)
 @inject_fields(additional_fields)
 class UserType:
     password: str = fake.password()
-    obj: Union["UserProto", AbstractBaseUser] = None
+    obj: Optional[DjangoUserProto] = None
     username_field: str = None
 
     @classmethod
@@ -270,20 +276,20 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def channels_live_server(request):
-    server = ChannelsLiveServer()
-    request.addfinalizer(server.stop)
-    return server
+@pytest.fixture()
+def ws_verified_client(db_verified_user_status) -> GraphQLWebsocketCommunicator:
+    with GraphQLWebsocketCommunicator(
+        application=testproject_application,
+        path="graphql",
+        headers=[(b"authorization", db_verified_user_status.generate_fresh_token().encode())],
+    ) as communicator:
+        yield communicator
 
 
 @pytest.fixture()
-def ws_verified_client(channels_live_server, db_verified_user_status):
-    from gql.client import Client
-    from gql.transport.websockets import WebsocketsTransport
-
-    transport = WebsocketsTransport(
-        url=channels_live_server.url,
-        headers={"authorization": db_verified_user_status.generate_fresh_token()},
-    )
-    return Client(transport=transport)
+def ws_client_no_headers() -> GraphQLWebsocketCommunicator:
+    with GraphQLWebsocketCommunicator(
+        application=testproject_application,
+        path="graphql",
+    ) as communicator:
+        yield communicator

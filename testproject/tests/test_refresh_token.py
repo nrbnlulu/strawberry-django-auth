@@ -1,4 +1,4 @@
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 
 
 def _arg_query(token: str, revoke="false"):

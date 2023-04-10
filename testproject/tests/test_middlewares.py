@@ -1,6 +1,4 @@
 import pytest
-from gql import Client, gql
-from gql.transport.aiohttp import AIOHTTPTransport
 
 pytestmark = pytest.mark.default_user
 
@@ -17,27 +15,20 @@ def test_channels_middleware_authorized_user(db_verified_user_status, ws_verifie
       whatsMyName
     }
     """
-    for res in ws_verified_client.subscribe(document=gql(query)):
+    for res in ws_verified_client.subscribe(query):
         assert res["whatsMyName"] == db_verified_user_status.user.username_field
 
 
-def test_channel_middleware_authorized_on_query(
-    auth_headers, db_verified_user_status, channels_live_server
+async def test_channel_middleware_authorized_on_query(
+    auth_headers, db_verified_user_status, ws_verified_client
 ):
-    transport = AIOHTTPTransport(
-        url=channels_live_server.http_url,
-        headers=auth_headers,
-    )
-    client = Client(transport=transport, fetch_schema_from_transport=False)
-    res = client.execute(document=gql("query { whatsMyUserName }"))
-    assert res["whatsMyUserName"] == db_verified_user_status.user.username_field
+    async for res in ws_verified_client.subscribe(query="query { whatsMyUserName }"):
+        assert res.data["whatsMyUserName"] == db_verified_user_status.user.username_field
 
 
-def test_channels_middleware_no_user_has_anonymous_user(channels_live_server):
-    transport = AIOHTTPTransport(url=channels_live_server.http_url)
-    client = Client(transport=transport)
-    res = client.execute(document=gql("query { amIAnonymous }"))
-    assert res["amIAnonymous"]
+async def test_channels_middleware_no_user_has_anonymous_user(ws_client_no_headers):
+    async for res in ws_client_no_headers.subscribe("query { amIAnonymous }"):
+        assert res.data["amIAnonymous"]
 
 
 def test_django_middleware_authorized_user(client, db_verified_user_status, auth_headers):

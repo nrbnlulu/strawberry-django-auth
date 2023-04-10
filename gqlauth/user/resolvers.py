@@ -13,23 +13,24 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry_django_plus import gql
 
+from gqlauth.backends.basebackend import UserProto
+from gqlauth.backends.django.models import RefreshToken
 from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.captcha.types_ import CaptchaType
-from gqlauth.core.constants import Messages, TokenAction
+from gqlauth.core.constants import TokenAction
 from gqlauth.core.exceptions import (
     PasswordAlreadySetError,
     TokenScopeError,
     UserAlreadyVerified,
     UserNotVerified,
 )
+from gqlauth.core.messages import Messages
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors, MutationNormalOutput
 from gqlauth.core.utils import (
-    cast_to_status_user,
     get_payload_from_token,
     get_user,
     get_user_by_email,
     inject_fields,
-    revoke_user_refresh_token,
 )
 from gqlauth.jwt.types_ import (
     ObtainJSONWebTokenInput,
@@ -40,7 +41,6 @@ from gqlauth.jwt.types_ import (
     VerifyTokenInput,
     VerifyTokenType,
 )
-from gqlauth.models import RefreshToken, UserStatus
 from gqlauth.settings import gqlauth_settings as app_settings
 from gqlauth.user.forms import EmailForm, PasswordLessRegisterForm, RegisterForm, UpdateAccountForm
 from gqlauth.user.helpers import check_captcha, confirm_password
@@ -160,7 +160,7 @@ class VerifyAccountMixin(BaseMixin):
     @classmethod
     def resolve_mutation(cls, info: Info, input_: VerifyAccountInput) -> MutationNormalOutput:
         try:
-            UserStatus.verify(input_.token)
+            app_settings.BACKEND.verify(input_.token)
             return MutationNormalOutput(success=True)
         except UserAlreadyVerified:
             return MutationNormalOutput(success=False, errors=Messages.ALREADY_VERIFIED)
@@ -271,15 +271,13 @@ class PasswordResetMixin(BaseMixin):
                 TokenAction.PASSWORD_RESET,
                 app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
             )
-            user = UserModel._default_manager.get(**payload)
-            status: "UserStatus" = getattr(user, "status")  # noqa: B009
+            user = app_settings.BACKEND.get_user_from_payload(payload)
             f = cls.form(user, asdict(input_))
             if f.is_valid():
-                revoke_user_refresh_token(user)
-                user = f.save()  # type: ignore
-                if status.verified is False:
-                    status.verified = True
-                    status.save(update_fields=["verified"])
+                app_settings.BACKEND.revoke_user_refresh_token(user)
+                f.save()  # type: ignore
+                if not user.is_verified():
+                    user.set_verified(True)
                     user_verified.send(sender=cls, user=user)
 
                 return MutationNormalOutput(success=True)
@@ -326,14 +324,10 @@ class PasswordSetMixin(BaseMixin):
                 # Check if user has already set a password
                 if user.has_usable_password():
                     raise PasswordAlreadySetError
-                revoke_user_refresh_token(user)
-                user = f.save()  # type: ignore
-                status: "UserStatus" = getattr(user, "status")  # noqa: B009
-
-                if status.verified is False:
-                    status.verified = True
-                    status.save(update_fields=["verified"])
-
+                app_settings.BACKEND.revoke_user_refresh_token(user)
+                user: UserProto = f.save()  # type: ignore
+                if not user.is_verified():
+                    user.set_verified(True)
                 return MutationNormalOutput(success=True)
             return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
         except SignatureExpired:
@@ -390,9 +384,9 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin):
     """
 
     @classmethod
-    def resolve_action(cls, user):
-        UserStatus.archive(user)
-        revoke_user_refresh_token(user=user)
+    def resolve_action(cls, user: UserProto):
+        user.set_archived(True)
+        app_settings.BACKEND.revoke_user_refresh_token(user)
 
 
 class DeleteAccountMixin(ArchiveOrDeleteMixin):
@@ -405,9 +399,9 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin):
     """
 
     @classmethod
-    def resolve_action(cls, user):
+    def resolve_action(cls, user: UserProto):
         if app_settings.ALLOW_DELETE_ACCOUNT:
-            revoke_user_refresh_token(user=user)
+            app_settings.BACKEND.revoke_user_refresh_token(user)
             user.delete()
 
 
@@ -435,10 +429,9 @@ class PasswordChangeMixin(BaseMixin):
         args = asdict(input_)
         f = cls.form(user, args)  # type: ignore
         if f.is_valid():
-            revoke_user_refresh_token(user)
-            user = f.save()
-            user_with_status = cast_to_status_user(user)
-            return ObtainJSONWebTokenType.from_user(user_with_status)
+            app_settings.BACKEND.revoke_user_refresh_token(user)
+            user: UserProto = f.save()  # type: ignore
+            return ObtainJSONWebTokenType.from_user(user)
         else:
             return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
 
@@ -459,10 +452,9 @@ class UpdateAccountMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
-        user = get_user(info)
         f = cls.form(
             asdict(input_),
-            instance=user,
+            instance=get_user(info),
         )
         if f.is_valid():
             f.save()

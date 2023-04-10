@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from django.contrib.auth import get_user_model
 from gqlauth.captcha.models import Captcha
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.settings import gqlauth_settings
 from gqlauth.user.signals import user_registered
 from PIL import Image

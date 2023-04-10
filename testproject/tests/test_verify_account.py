@@ -1,4 +1,4 @@
-from gqlauth.core.constants import Messages
+from gqlauth.core.messages import Messages
 from gqlauth.core.utils import get_token
 from gqlauth.user.signals import user_verified
 
