@@ -1,9 +1,11 @@
+import os
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from gqlauth.backends.django.mixins import StatusMixin
+from gqlauth.backends.strawberry_django_auth.mixins import StatusMixin
 
 # The following setup is adopted from Aria Moradi in issue #45
 # Hopefully this will provide more real world custom user.
@@ -40,45 +42,48 @@ class PhoneNumberUserManager(BaseUserManager):
         return self._create_user(phone_number, password, **extra_fields)
 
 
-class CustomPhoneNumberUser(AbstractUser, StatusMixin, PermissionsMixin):
-    phone_number = models.CharField(default=False, max_length=255, unique=True)
-    is_registered = models.BooleanField(default=False)
-    first_name = models.CharField(max_length=255, blank=True)
-    last_name = models.CharField(max_length=255, blank=True)
-    is_staff = models.BooleanField(
-        _("staff status"),
-        default=False,
-        help_text=_("Designates whether the user can log into this admin site."),
-    )
-    is_active = models.BooleanField(
-        _("active"),
-        default=True,
-        help_text=_(
-            "Designates whether this user should be treated as active. "
-            "Unselect this instead of deleting accounts."
-        ),
-    )
-    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
+if os.getenv("settings_b", None):
 
-    objects = PhoneNumberUserManager()
+    class CustomPhoneNumberUser(AbstractUser, StatusMixin, PermissionsMixin):
+        phone_number = models.CharField(default=False, max_length=255, unique=True)
+        is_registered = models.BooleanField(default=False)
+        first_name = models.CharField(max_length=255, blank=True)
+        last_name = models.CharField(max_length=255, blank=True)
+        is_staff = models.BooleanField(
+            _("staff status"),
+            default=False,
+            help_text=_("Designates whether the user can log into this admin site."),
+        )
+        is_active = models.BooleanField(
+            _("active"),
+            default=True,
+            help_text=_(
+                "Designates whether this user should be treated as active. "
+                "Unselect this instead of deleting accounts."
+            ),
+        )
+        date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
-    EMAIL_FIELD = ""
-    USERNAME_FIELD = "phone_number"
-    REQUIRED_FIELDS = []
+        objects = PhoneNumberUserManager()
 
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} - {str(self.phone_number)}"
+        EMAIL_FIELD = ""
+        USERNAME_FIELD = "phone_number"
+        REQUIRED_FIELDS = []
 
-    class Meta:
-        verbose_name = "user"
-        verbose_name_plural = "users"
+        def __str__(self):
+            return f"{self.first_name} {self.last_name} - {str(self.phone_number)}"
 
+        class Meta:
+            verbose_name = "user"
+            verbose_name_plural = "users"
 
-class SimpleCustomUser(AbstractUser, StatusMixin):
-    class Meta:
-        verbose_name = "user"
-        verbose_name_plural = "users"
+else:
 
-    username = models.CharField(null=False, blank=False, max_length=255, unique=True)
+    class SimpleCustomUser(AbstractUser, StatusMixin):
+        class Meta:
+            verbose_name = "user"
+            verbose_name_plural = "users"
 
-    USERNAME_FIELD = "username"
+        username = models.CharField(null=False, blank=False, max_length=255, unique=True)
+
+        USERNAME_FIELD = "username"

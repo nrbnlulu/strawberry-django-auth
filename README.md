@@ -50,7 +50,7 @@ your implementation*.
 ### Full schema features
 
 ```python
-import gqlauth.backends.django.models
+import gqlauth.backends.strawberry_django_auth.models
 
 
 @strawberry.type

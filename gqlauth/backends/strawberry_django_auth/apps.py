@@ -3,8 +3,5 @@ from django.apps import AppConfig
 
 class GqlAuthConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "gqlauth"
-    verbose_name = "GraphQL Auth"
-
-    def ready(self):
-        pass
+    name = "gqlauth.backends.strawberry_django_auth"
+    verbose_name = "GraphQL Authentication"

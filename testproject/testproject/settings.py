@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
-from gqlauth.backends.django.backend import DjangoGqlAuthBackend
+from gqlauth.backends.strawberry_django_auth.backend import DjangoGqlAuthBackend
 from gqlauth.settings_type import GqlAuthSettings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,7 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,8 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "gqlauth.backends.strawberry_django_auth",
     "customeuser",
-    "gqlauth",
     "sample",
 ]
 

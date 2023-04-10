@@ -16,7 +16,7 @@ def _arg_query(user: UserType):
         { success, errors }
     }
     """ % (
-        user.email
+        user.email_field
     )
 
 
@@ -59,8 +59,9 @@ def test_send_email_valid_email_verified_user(db_verified_user_status, anonymous
     "gqlauth.models.UserStatus.send_password_reset_email",
     mock.MagicMock(side_effect=SMTPException),
 )
-def test_send_email_fail_to_send_email(db_verified_user_status, anonymous_schema):
-    query = _arg_query(db_verified_user_status.user)
+def test_send_email_fail_to_send_email(verified_user_type, anonymous_schema):
+    user = verified_user_type.create()
+    query = _arg_query(user)
     executed = anonymous_schema.execute(query=query)
     assert not executed.errors
     executed = executed.data["sendPasswordResetEmail"]

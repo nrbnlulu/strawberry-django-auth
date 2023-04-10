@@ -2,7 +2,7 @@ import time
 from datetime import timedelta
 
 import pytest
-from gqlauth.backends.django.models import RefreshToken
+from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.jwt.types_ import TokenType
 

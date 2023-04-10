@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 from strawberry import auto
 from strawberry.types import Info
 
-from gqlauth.backends.django.models import RefreshToken
+from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.interfaces import OutputInterface
 from gqlauth.core.messages import Messages

@@ -1,11 +1,11 @@
 import pytest
-from gqlauth.captcha.models import Captcha
+from gqlauth.backends.strawberry_django_auth.models import Captcha
 from gqlauth.core.messages import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
 
-from .conftest import SchemaHelper, UserModel, UserStatusType
+from .conftest import SchemaHelper, UserModel, UserType
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def login_query(request):
     app_settings: GqlAuthSettings = request.getfixturevalue("app_settings")
     captcha: Captcha = request.getfixturevalue("captcha")
 
-    def inner(user_status: UserStatusType) -> str:
+    def inner(user_status: UserType) -> str:
         user = user_status.user
         arguments = (
             f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.username_field}",'

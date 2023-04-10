@@ -1,6 +1,6 @@
 import dataclasses
 
-from .conftest import UserStatusType, fake
+from .conftest import UserType, fake
 
 
 @dataclasses.dataclass
@@ -9,7 +9,7 @@ class PasswordChangeForm:
     password_2: str
 
 
-def _arg_query(user_status: UserStatusType, password_form: PasswordChangeForm):
+def _arg_query(user_status: UserType, password_form: PasswordChangeForm):
     return """
 mutation {{
   passwordChange(oldPassword: "{}", newPassword1: "{}", newPassword2: "{}") {{

@@ -12,8 +12,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from gqlauth.backends.basebackend import GqlAuthBackendABC, UserProto
+from gqlauth.backends.strawberry_django_auth.signals import user_verified
 from gqlauth.core.constants import TokenAction
-from gqlauth.user.signals import user_verified
 
 
 # avoid import errors
@@ -24,8 +24,8 @@ class DjangoUserProto:
 if TYPE_CHECKING:
     from django.contrib.auth.models import AbstractUser
 
-    from gqlauth.backends.django.mixins import StatusMixin
-    from gqlauth.backends.django.models import RefreshToken
+    from gqlauth.backends.strawberry_django_auth.mixins import StatusMixin
+    from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 
     class DjangoUserProto(UserProto, AbstractUser, StatusMixin):  # noqa: F811
         ...
@@ -54,7 +54,7 @@ class DjangoGqlAuthBackend(GqlAuthBackendABC):
 
     @cached_property
     def refresh_token_model(self) -> type[RefreshToken]:
-        from gqlauth.backends.django.models import RefreshToken
+        from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 
         return RefreshToken
 

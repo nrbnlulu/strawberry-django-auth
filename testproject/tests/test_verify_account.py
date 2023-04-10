@@ -1,6 +1,6 @@
+from gqlauth.backends.strawberry_django_auth.signals import user_verified
 from gqlauth.core.messages import Messages
 from gqlauth.core.utils import get_token
-from gqlauth.user.signals import user_verified
 
 
 def _arg_query(token):

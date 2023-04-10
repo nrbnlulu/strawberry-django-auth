@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
-from gqlauth.backends.django.backend import DjangoGqlAuthBackend
+from gqlauth.backends.strawberry_django_auth.backend import DjangoGqlAuthBackend
 from gqlauth.settings_type import GqlAuthSettings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

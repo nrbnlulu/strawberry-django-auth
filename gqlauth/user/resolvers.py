@@ -14,8 +14,15 @@ from strawberry.types import Info
 from strawberry_django_plus import gql
 
 from gqlauth.backends.basebackend import UserProto
-from gqlauth.backends.django.models import RefreshToken
-from gqlauth.captcha.models import Captcha as CaptchaModel
+from gqlauth.backends.strawberry_django_auth.forms import (
+    EmailForm,
+    PasswordLessRegisterForm,
+    RegisterForm,
+    UpdateAccountForm,
+)
+from gqlauth.backends.strawberry_django_auth.models import Captcha as CaptchaModel
+from gqlauth.backends.strawberry_django_auth.models import RefreshToken
+from gqlauth.backends.strawberry_django_auth.signals import user_registered, user_verified
 from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import TokenAction
 from gqlauth.core.exceptions import (
@@ -42,9 +49,7 @@ from gqlauth.jwt.types_ import (
     VerifyTokenType,
 )
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.forms import EmailForm, PasswordLessRegisterForm, RegisterForm, UpdateAccountForm
 from gqlauth.user.helpers import check_captcha, confirm_password
-from gqlauth.user.signals import user_registered, user_verified
 
 UserModel = get_user_model()
 

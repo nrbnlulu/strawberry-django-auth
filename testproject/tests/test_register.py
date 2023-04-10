@@ -4,10 +4,10 @@ from unittest import mock
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from gqlauth.captcha.models import Captcha
+from gqlauth.backends.strawberry_django_auth.models import Captcha
+from gqlauth.backends.strawberry_django_auth.signals import user_registered
 from gqlauth.core.messages import Messages
 from gqlauth.settings_type import GqlAuthSettings
-from gqlauth.user.signals import user_registered
 from strawberry.utils.str_converters import to_camel_case
 
 from .conftest import CC_USERNAME_FIELD, UserType
@@ -40,17 +40,17 @@ def _arg_query(user: UserType, captcha: Captcha):
 
 
 @pytest.mark.default_user  # settings_b has passwordless registration
-def test_register_invalid_password_validation(verified_user_status_type, anonymous_schema, captcha):
+def test_register_invalid_password_validation(verified_user_type, anonymous_schema, captcha):
     """Fail to register same user with bad password."""
     # register
-    us = verified_user_status_type
+    us = verified_user_type
     us.user.password = "123"  # invalid password
     executed = anonymous_schema.execute(query=_arg_query(us.user, captcha)).data["register"]
     assert not executed["success"]
     assert executed["errors"]
 
 
-def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
+def test_register_twice_fails(verified_user_type, anonymous_schema, db):
     """Register user, fail to register same user again."""
     signal_received = False
 
@@ -62,7 +62,7 @@ def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
     user_registered.connect(receive_signal)
 
     def get_query() -> str:
-        return _arg_query(verified_user_status_type.user, Captcha.create_captcha())
+        return _arg_query(verified_user_type.user, Captcha.create_captcha())
 
     # register
     executed = anonymous_schema.execute(query=get_query())
@@ -82,10 +82,10 @@ def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
     mock.MagicMock(side_effect=SMTPException),
 )
 @pytest.mark.default_user
-def test_register_email_send_fail(verified_user_status_type, captcha, anonymous_schema):
+def test_register_email_send_fail(verified_user_type, captcha, anonymous_schema):
     from gqlauth.settings import gqlauth_settings as app_settings
 
-    us = verified_user_status_type.user
+    us = verified_user_type.user
     app_settings.SEND_ACTIVATION_EMAIL = True
     executed = anonymous_schema.execute(query=_arg_query(us, captcha)).data["register"]
     assert not executed["success"]

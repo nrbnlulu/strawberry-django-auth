@@ -1,10 +1,10 @@
-from gqlauth.backends.django.models import RefreshToken
+from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 from gqlauth.core.types_ import GQLAuthErrors
 
-from tests.conftest import UserStatusType
+from tests.conftest import UserType
 
 
-def make_query(user_status_type: UserStatusType) -> str:
+def make_query(user_status_type: UserType) -> str:
     return """
             mutation {
               archiveAccount(password: "%s"){

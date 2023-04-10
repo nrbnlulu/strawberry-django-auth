@@ -4,10 +4,10 @@ from gqlauth.core.messages import Messages
 from gqlauth.core.types_ import GQLAuthErrors
 from pytest import mark
 
-from tests.conftest import UserStatusType
+from tests.conftest import UserType
 
 
-def _arg_query(user_status: UserStatusType):
+def _arg_query(user_status: UserType):
     return """
     mutation MyMutation {
       deleteAccount(password: "%s") {
