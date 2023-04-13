@@ -6,7 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from gqlauth.backends.strawberry_django_auth.models import Captcha
 from gqlauth.backends.strawberry_django_auth.signals import user_registered
-from gqlauth.core.messages import Messages
+from gqlauth.core.types_ import Messages
 from gqlauth.settings import gqlauth_settings
 from PIL import Image
 
@@ -34,36 +34,38 @@ def test_bytes(captcha):
     captcha.as_bytes()
 
 
-def test_register_user_require_captcha_validation(unverified_schema):
-    res = unverified_schema.execute(
+def test_register_user_require_captcha_validation(default_testcase):
+    res = default_testcase.unverified_schema.execute(
         query=register_query_without_cap_fields(username="fdsafsdfgv"), relay=True
     )
     assert "identifier' of required type 'UUID!' was not provided." in res.errors[0].message
     assert "userEntry' of required type 'String!' was not provided" in res.errors[1].message
 
 
-def test_login_require_captcha_validation(unverified_schema):
-    res = unverified_schema.execute(
+def test_login_require_captcha_validation(default_testcase):
+    res = default_testcase.unverified_schema.execute(
         query=login_query_without_cap_fields(username="fake"), relay=True
     )
     assert "identifier' of required type 'UUID!' was not provided." in res.errors[0].message
     assert "userEntry' of required type 'String!' was not provided" in res.errors[1].message
 
 
-def test_register_wrong_captcha_validation(captcha, unverified_schema):
-    res = unverified_schema.execute(query=register_query(uuid=captcha.uuid), relay=True)
+def test_register_wrong_captcha_validation(captcha, default_testcase):
+    res = default_testcase.unverified_schema.execute(
+        query=register_query(uuid=captcha.uuid), relay=True
+    )
     assert res.data["register"]["errors"]["captcha"] == Messages.CAPTCHA_INVALID
 
 
-def test_register_wrong_uuid(captcha, unverified_schema):
-    res = unverified_schema.execute(query=register_query(uuid=uuid4()), relay=True)
+def test_register_wrong_uuid(captcha, default_testcase):
+    res = default_testcase.unverified_schema.execute(query=register_query(uuid=uuid4()), relay=True)
     assert res.data["register"]["errors"]["captcha"] == Messages.CAPTCHA_EXPIRED
 
 
-def test_register_correct_captcha_create_user(captcha, unverified_schema, username="test_captcha"):
+def test_register_correct_captcha_create_user(captcha, default_testcase, username="test_captcha"):
     handler = MagicMock()
     user_registered.connect(handler)
-    unverified_schema.execute(
+    default_testcase.unverified_schema.execute(
         query=register_query(
             username=username,
             password="SuperSecureP@ssw0rd",
@@ -163,7 +165,7 @@ def register_query(password="fake", username="username", uuid="fake", input_="wr
     )
 
 
-def test_captcha_mutation(anonymous_schema, db):
+def test_captcha_mutation(default_testcase, db):
     query = """
         mutation MyMutation {
             captcha{
@@ -180,7 +182,7 @@ def test_captcha_mutation(anonymous_schema, db):
           }
         }
     """
-    res = anonymous_schema.execute(query=query)
+    res = default_testcase.anonymous_schema.execute(query=query)
     assert not res.errors
     uuid = res.data["captcha"]["uuid"]
     assert Captcha.objects.get(uuid=uuid)

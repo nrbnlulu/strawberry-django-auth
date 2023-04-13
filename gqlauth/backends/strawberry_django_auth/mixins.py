@@ -8,24 +8,18 @@ class StatusMixin(models.Model):
     class Meta:
         abstract = True
 
-    verified = models.BooleanField(default=False, verbose_name=_("Is the user verified?"))
-    archived = models.BooleanField(default=False, verbose_name=_("Is the user archived?"))
+    is_verified = models.BooleanField(default=False, verbose_name=_("Is the user verified?"))
+    is_archived = models.BooleanField(default=False, verbose_name=_("Is the user archived?"))
 
     def __str__(self):
-        return f"Status[vreified={self.verified}, archived={self.archived}]"
-
-    def is_verified(self) -> bool:
-        return self.verified
+        return f"Status[vreified={self.is_verified}, archived={self.is_archived}]"
 
     def set_verified(self, v: bool) -> None:
-        self.verified = v
+        self.is_verified = v
         self.save(update_fields=["verified"])
 
-    def is_archived(self) -> bool:
-        return self.archived
-
     def set_archived(self, v: bool) -> None:
-        self.verified = v
+        self.is_archived = v
         self.save(update_fields=["archived"])
 
 

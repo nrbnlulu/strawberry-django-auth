@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from gqlauth.backends.strawberry_django_auth.models import Captcha
 from gqlauth.backends.strawberry_django_auth.signals import user_registered
-from gqlauth.core.messages import Messages
+from gqlauth.core.types_ import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from strawberry.utils.str_converters import to_camel_case
 
@@ -50,7 +50,7 @@ def test_register_invalid_password_validation(verified_user_type, anonymous_sche
     assert executed["errors"]
 
 
-def test_register_twice_fails(verified_user_type, anonymous_schema, db):
+def test_register_twice_fails(default_testcase, db):
     """Register user, fail to register same user again."""
     signal_received = False
 
@@ -60,34 +60,35 @@ def test_register_twice_fails(verified_user_type, anonymous_schema, db):
         signal_received = True
 
     user_registered.connect(receive_signal)
+    ut = UserType(verified=True)
 
     def get_query() -> str:
-        return _arg_query(verified_user_type.user, Captcha.create_captcha())
+        return _arg_query(ut, Captcha.create_captcha())
 
     # register
-    executed = anonymous_schema.execute(query=get_query())
+    executed = default_testcase.anonymous_schema.execute(query=get_query())
     assert not executed.errors
     executed = executed.data["register"]
     assert executed["success"]
     assert not executed["errors"]
     assert signal_received
     # try to register again
-    executed = anonymous_schema.execute(query=get_query()).data["register"]
+    executed = default_testcase.anonymous_schema.execute(query=get_query()).data["register"]
     assert not executed["success"]
     assert executed["errors"][CC_USERNAME_FIELD]
 
 
 @mock.patch(
-    "gqlauth.models.UserStatus.send_activation_email",
+    "gqlauth.backends.strawberry_django_auth.backend.DjangoGqlAuthBackend.send_activation_email",
     mock.MagicMock(side_effect=SMTPException),
 )
 @pytest.mark.default_user
-def test_register_email_send_fail(verified_user_type, captcha, anonymous_schema):
-    from gqlauth.settings import gqlauth_settings as app_settings
-
-    us = verified_user_type.user
+def test_register_email_send_fail(default_testcase, captcha, app_settings, verified_user_type):
     app_settings.SEND_ACTIVATION_EMAIL = True
-    executed = anonymous_schema.execute(query=_arg_query(us, captcha)).data["register"]
+    executed = default_testcase.anonymous_schema.execute(
+        query=_arg_query(verified_user_type, captcha)
+    )
+    executed = executed.data["register"]
     assert not executed["success"]
     assert executed["errors"]["nonFieldErrors"] == Messages.EMAIL_FAIL
     assert not get_user_model().objects.all()

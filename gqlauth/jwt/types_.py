@@ -1,20 +1,17 @@
 import dataclasses
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, cast
-from uuid import UUID
+from typing import TYPE_CHECKING, Optional, TypeVar, cast
 
 import strawberry
 import strawberry_django
-from django.contrib.auth import authenticate
-from django.core.exceptions import PermissionDenied
 from strawberry import auto
-from strawberry.types import Info
 
 from gqlauth.backends.strawberry_django_auth.models import RefreshToken
 from gqlauth.core.exceptions import TokenExpired
-from gqlauth.core.interfaces import OutputInterface
-from gqlauth.core.messages import Messages
-from gqlauth.core.scalars import ExpectedErrorType
+from gqlauth.core.types_ import (
+    ErrorCodes,
+    MutationNormalOutput,
+)
 from gqlauth.core.utils import USER_MODEL, app_settings, inject_fields
 from gqlauth.user.types_ import UserType
 
@@ -117,13 +114,7 @@ class TokenType:
         return USER_MODEL.objects.get(**query)  # type: ignore
 
 
-@strawberry.input
-@inject_fields(app_settings.LOGIN_FIELDS)
-class ObtainJSONWebTokenInput:
-    password: str
-    if app_settings.LOGIN_REQUIRE_CAPTCHA:
-        identifier: UUID
-        userEntry: str
+T = TypeVar("T")
 
 
 @strawberry.type(
@@ -132,60 +123,23 @@ class ObtainJSONWebTokenInput:
     with an output interface.
     """
 )
-class ObtainJSONWebTokenType(OutputInterface):
-    success: bool
+class ObtainJSONWebTokenOutput(MutationNormalOutput[T]):
     user: Optional[UserType] = None
     token: Optional[TokenType] = None
     if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
         refresh_token: Optional[RefreshTokenType] = None
-    errors: Optional[ExpectedErrorType] = None
 
     @classmethod
-    def from_user(cls, user: "UserProto") -> "ObtainJSONWebTokenType":
+    def from_user(cls, user: "UserProto") -> "ObtainJSONWebTokenOutput":
         """creates a new token and possibly a new refresh token based on the
         user.
 
         *call this method only for trusted users.*
         """
-        ret = ObtainJSONWebTokenType(
-            success=True, user=cast(UserType, user), token=TokenType.from_user(user)
-        )
+        ret = cls(success=True, user=user, token=TokenType.from_user(user))
         if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
             ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
         return ret
-
-    @classmethod
-    def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
-        """return `ObtainJSONWebTokenType`. authenticates against django
-        authentication backends.
-
-        *creates a new token and possibly a refresh token.*
-        """
-        args = {
-            USER_MODEL.USERNAME_FIELD: getattr(input_, USER_MODEL.USERNAME_FIELD),
-            "password": input_.password,
-        }
-        try:
-            # authenticate against django authentication backends.
-            user: Optional["UserProto"]
-            if not (user := authenticate(info.context.request, **args)):  # type: ignore
-                return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
-
-            # gqlauth logic
-            if user.is_archived():  # un-archive on login
-                app_settings.BACKEND.unarchived(user)
-            if user.is_verified() or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
-                # successful login.
-                return ObtainJSONWebTokenType.from_user(user)
-            else:
-                return ObtainJSONWebTokenType(success=False, errors=Messages.NOT_VERIFIED)
-
-        except PermissionDenied:
-            # one of the authentication backends rejected the user.
-            return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
-
-        except TokenExpired:
-            return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
 
 
 @strawberry.input
@@ -194,11 +148,9 @@ class VerifyTokenInput:
 
 
 @strawberry.type
-class VerifyTokenType(OutputInterface):
-    success: bool
+class VerifyTokenType(MutationNormalOutput[T]):
     token: Optional[TokenType] = None
     user: Optional[UserType] = None
-    errors: Optional[ExpectedErrorType] = None
 
     @classmethod
     def from_token(cls, token_input: VerifyTokenInput) -> "VerifyTokenType":
@@ -206,16 +158,14 @@ class VerifyTokenType(OutputInterface):
             token_type = TokenType.from_token(token_input.token)
             user = token_type.get_user_instance()
         except USER_MODEL.DoesNotExist:
-            return VerifyTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+            return VerifyTokenType(success=False, errors=ErrorCodes.INVALID_CREDENTIALS)
         except TokenExpired:
-            return VerifyTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+            return VerifyTokenType(success=False, errors=ErrorCodes.TOKEN_EXPIRED)
 
         else:
             return VerifyTokenType(token=token_type, user=cast(UserType, user), success=True)
 
 
 @strawberry.type
-class RevokeRefreshTokenType:
-    success: bool
+class RevokeRefreshTokenType(MutationNormalOutput[T]):
     refresh_token: Optional[RefreshTokenType] = None
-    errors: Optional[ExpectedErrorType] = None

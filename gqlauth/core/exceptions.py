@@ -9,18 +9,8 @@ class GraphQLAuthError(Exception):
         super().__init__(message)
 
 
-class WrongUsage(GraphQLAuthError):
-    """Internal exception."""
-
-    default_message = _("Wrong usage, check your code!.")
-
-
 class UserAlreadyVerified(GraphQLAuthError):
     default_message = _("User already verified.")
-
-
-class InvalidCredentials(GraphQLAuthError):
-    default_message = _("Invalid credentials.")
 
 
 class UserNotVerified(GraphQLAuthError):
@@ -39,5 +29,5 @@ class PasswordAlreadySetError(GraphQLAuthError):
     default_message = _("Password already set for account.")
 
 
-class PermissionDenied(GraphQLAuthError):
-    default_message = _("User is not allowed for this content")
+class CaptchaExpired(GraphQLAuthError):
+    default_message = _("Captcha is expired or not exists")

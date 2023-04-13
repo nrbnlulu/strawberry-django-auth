@@ -4,7 +4,6 @@ from typing import Dict, Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.core import signing
 from strawberry.field import StrawberryField
 from strawberry.types import Info
@@ -14,12 +13,9 @@ from gqlauth.backends.basebackend import UserProto
 from gqlauth.core.exceptions import TokenScopeError
 
 if typing.TYPE_CHECKING:  # pragma: no cover
-    from django.contrib.auth.models import AnonymousUser
-
     from gqlauth.settings_type import GqlAuthSettings
 
 USER_MODEL = get_user_model()
-USER_UNION = typing.Union["UserProto", "AnonymousUser", AbstractBaseUser]
 app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 
@@ -46,14 +42,8 @@ def camelize(data):
     return data
 
 
-def get_user(info: Info) -> USER_UNION:
+def get_user(info: Info) -> UserProto:
     return info.context.request.user  # type: ignore
-
-
-def get_user_by_email(email: str) -> "UserProto":
-    user = USER_MODEL.objects.get(**{USER_MODEL.EMAIL_FIELD: email})
-    assert hasattr(user, "status")
-    return user  # type: ignore
 
 
 def get_token(user, action, **kwargs):

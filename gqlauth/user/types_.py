@@ -38,8 +38,8 @@ if ef_name:
 class UserFilter:
     last_login: auto
     date_joined: auto
-    verified: auto
-    archived: auto
+    is_verified: auto
+    is_archived: auto
 
 
 @strawberry_django.type(model=USER_MODEL, filters=UserFilter)
@@ -47,5 +47,5 @@ class UserFilter:
 class UserType:
     last_login: auto
     date_joined: auto
-    verified: auto
-    archived: auto
+    is_verified: auto
+    is_archived: auto

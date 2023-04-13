@@ -1,6 +1,6 @@
 import pytest
 from gqlauth.backends.strawberry_django_auth.models import Captcha
-from gqlauth.core.messages import Messages
+from gqlauth.core.types_ import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case

@@ -1,7 +1,6 @@
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
-from gqlauth.core.messages import Messages
-from gqlauth.core.types_ import GQLAuthErrors
+from gqlauth.core.types_ import GQLAuthErrors, Messages
 from pytest import mark
 
 from tests.conftest import UserType

@@ -1,19 +1,17 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.auth import get_user_model
 
-from gqlauth.backends.strawberry_django_auth.models import Captcha as CaptchaModel
-from gqlauth.core.messages import Messages
-from gqlauth.core.types_ import MutationNormalOutput
-from gqlauth.core.utils import USER_UNION
+from gqlauth.core.types_ import ErrorCodes, MutationNormalOutput
+from gqlauth.core.utils import UserProto
 
 if TYPE_CHECKING:  # pragma: no cover
-    from gqlauth.user.resolvers import ObtainJSONWebTokenInput, RegisterMixin
+    pass
 
 USER_MODEL = get_user_model()
 
 
-def confirm_password(user: USER_UNION, input_) -> Optional[MutationNormalOutput]:
+def confirm_password(user: UserProto, input_) -> Optional[MutationNormalOutput]:
     if password := getattr(input_, "password", False):
         password_arg = "password"
     else:
@@ -22,14 +20,5 @@ def confirm_password(user: USER_UNION, input_) -> Optional[MutationNormalOutput]
     assert isinstance(password, str)
     if user.check_password(password):
         return None
-    errors = {password_arg: Messages.INVALID_PASSWORD}
+    errors = {password_arg: ErrorCodes.INVALID_PASSWORD}
     return MutationNormalOutput(success=False, errors=errors)
-
-
-def check_captcha(input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenInput"]):
-    uuid = input_.identifier
-    try:
-        obj = CaptchaModel.objects.get(uuid=uuid)
-    except CaptchaModel.DoesNotExist:
-        return Messages.CAPTCHA_EXPIRED
-    return obj.validate(input_.userEntry)

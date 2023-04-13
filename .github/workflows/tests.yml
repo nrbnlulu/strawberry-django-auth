@@ -43,7 +43,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: mypy_checks
         run: |
-          poetry install
+          poetry install --all-extras
           poetry run mypy ./gqlauth
       - name: Run tests
         run: |

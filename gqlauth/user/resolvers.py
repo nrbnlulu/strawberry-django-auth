@@ -1,12 +1,13 @@
+import functools
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Callable, cast
+from typing import Callable, Optional, Type, cast
 from uuid import UUID
 
 import strawberry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 from strawberry.field import StrawberryField
@@ -31,17 +32,27 @@ from gqlauth.core.exceptions import (
     UserAlreadyVerified,
     UserNotVerified,
 )
-from gqlauth.core.messages import Messages
-from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors, MutationNormalOutput
+from gqlauth.core.types_ import (
+    CaptchaErrorCodes,
+    EmailErrorCodes,
+    EmailErrorsInterface,
+    ErrorCodes,
+    ErrorMessage,
+    GQLAuthError,
+    MutationNormalOutput,
+    OperationErrorCodes,
+    OperationErrorsInterface,
+    RawErrorsInterface,
+    TokenErrorCodes,
+    TokenErrorsInterface,
+)
 from gqlauth.core.utils import (
     get_payload_from_token,
     get_user,
-    get_user_by_email,
     inject_fields,
 )
 from gqlauth.jwt.types_ import (
-    ObtainJSONWebTokenInput,
-    ObtainJSONWebTokenType,
+    ObtainJSONWebTokenOutput,
     RefreshTokenType,
     RevokeRefreshTokenType,
     TokenType,
@@ -49,9 +60,33 @@ from gqlauth.jwt.types_ import (
     VerifyTokenType,
 )
 from gqlauth.settings import gqlauth_settings as app_settings
-from gqlauth.user.helpers import check_captcha, confirm_password
+from gqlauth.user.helpers import confirm_password
 
 UserModel = get_user_model()
+
+
+def wrap_token_errors(ret_type: Type):
+    """Catch token errors and return expected error."""
+
+    def wrapper(fn):
+        @functools.wraps(fn)
+        def inner(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except SignatureExpired:
+                return MutationNormalOutput(
+                    success=False,
+                    errors=ret_type(token=ErrorMessage.from_code(TokenErrorCodes.TOKEN_EXPIRED)),
+                )
+            except (BadSignature, TokenScopeError):
+                return MutationNormalOutput(
+                    success=False,
+                    errors=ret_type(token=ErrorMessage.from_code(TokenErrorCodes.INVALID_TOKEN)),
+                )
+
+        return inner
+
+    return wrapper
 
 
 class BaseMixin:
@@ -63,12 +98,10 @@ class BaseMixin:
     def verification_check(cls, info: Info) -> None:
         if cls.REQUIRE_VERIFICATION:
             user = get_user(info)
-            try:
-                if not user.status.verified:  # type: ignore
-                    raise GQLAuthError(code=GQLAuthErrors.NOT_VERIFIED)
-            except AttributeError:  # anonymous user has no status.
-                if user.is_anonymous:
-                    raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
+            if user.is_anonymous:
+                raise GQLAuthError(code=ErrorCodes.UNAUTHENTICATED)
+            elif not user.is_verified:
+                raise GQLAuthError(code=ErrorCodes.NOT_VERIFIED)
 
 
 class Captcha:
@@ -114,16 +147,30 @@ class RegisterMixin(BaseMixin):
             identifier: UUID
             userEntry: str
 
+    @strawberry.type()
+    class RegisterMutationErrors(EmailErrorsInterface, RawErrorsInterface):
+        if app_settings.REGISTER_REQUIRE_CAPTCHA:
+            captcha: Optional[ErrorMessage[CaptchaErrorCodes]] = None
+
     form = (
         PasswordLessRegisterForm if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else RegisterForm
     )
 
     @classmethod
-    def resolve_mutation(cls, info, input_: RegisterInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: RegisterInput
+    ) -> MutationNormalOutput[RegisterMutationErrors]:
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            check_res = check_captcha(input_)
-            if check_res != Messages.CAPTCHA_VALID:
-                return MutationNormalOutput(success=False, errors={"captcha": check_res})
+            if captcha_error := app_settings.BACKEND.validate_captcha(
+                input_.identifier, user_input=input_.userEntry
+            ):
+                return MutationNormalOutput(
+                    success=False,
+                    errors=cls.RegisterMutationErrors(
+                        captcha=ErrorMessage.from_code(captcha_error)
+                    ),
+                )
+
         email = getattr(input_, "email", False)
         try:
             with transaction.atomic():
@@ -137,42 +184,57 @@ class RegisterMixin(BaseMixin):
                             and app_settings.SEND_PASSWORD_SET_EMAIL is True
                         )
                         if send_activation:
-                            user.status.send_activation_email(info)
+                            app_settings.BACKEND.send_activation_email(user, info)
 
                         if send_password_set:
-                            user.status.send_password_set_email(info)
+                            app_settings.BACKEND.send_password_set_email(user, info)
 
                     user_registered.send(sender=cls, user=user)
                     return MutationNormalOutput(success=True)
                 else:
-                    return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+                    return MutationNormalOutput(
+                        success=False,
+                        errors=cls.RegisterMutationErrors(raw_errors=f.errors.get_json_data()),
+                    )
         except SMTPException:
-            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.RegisterMutationErrors(
+                    email=ErrorMessage.from_code(EmailErrorCodes.EMAIL_FAILED)
+                ),
+            )
 
 
 class VerifyAccountMixin(BaseMixin):
     """Verify user account.
 
     Receive the token that was sent by email. If the token is valid,
-    make the user verified by making the `user.status.verified` field
-    true.
+    make the user verified.
     """
 
     @strawberry.input
     class VerifyAccountInput:
         token: str
 
+    @strawberry.type()
+    class VerifyAccountErrors(TokenErrorsInterface, OperationErrorsInterface):
+        ...
+
+    @wrap_token_errors(VerifyAccountErrors)
     @classmethod
-    def resolve_mutation(cls, info: Info, input_: VerifyAccountInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info: Info, input_: VerifyAccountInput
+    ) -> MutationNormalOutput[VerifyAccountErrors]:
         try:
             app_settings.BACKEND.verify(input_.token)
             return MutationNormalOutput(success=True)
         except UserAlreadyVerified:
-            return MutationNormalOutput(success=False, errors=Messages.ALREADY_VERIFIED)
-        except SignatureExpired:
-            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
-        except (BadSignature, TokenScopeError):
-            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.VerifyAccountErrors(
+                    operation_error=ErrorMessage.from_code(OperationErrorCodes.ALREADY_VERIFIED)
+                ),
+            )
 
 
 class ResendActivationEmailMixin(BaseMixin):
@@ -190,22 +252,45 @@ class ResendActivationEmailMixin(BaseMixin):
     class ResendActivationEmailInput:
         email: str
 
+    @strawberry.type()
+    class ResendActivationEmailErrors(
+        EmailErrorsInterface, RawErrorsInterface, OperationErrorsInterface
+    ):
+        ...
+
     @classmethod
-    def resolve_mutation(cls, info, input_: ResendActivationEmailInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info: Info, input_: ResendActivationEmailInput
+    ) -> MutationNormalOutput:
         try:
             email = input_.email
             f = EmailForm({"email": email})
             if f.is_valid():
-                user = get_user_by_email(email)
-                user.status.resend_activation_email(info)
+                user = app_settings.BACKEND.get_user_by_email(email)
+                app_settings.BACKEND.resend_activation_email(info, user)
                 return MutationNormalOutput(success=True)
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.ResendActivationEmailErrors(
+                    raw_errors=f.errors.get_json_data(),
+                ),
+            )
         except ObjectDoesNotExist:
             return MutationNormalOutput(success=True)  # even if user is not registered
         except SMTPException:
-            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.ResendActivationEmailErrors(
+                    email=ErrorMessage.from_code(EmailErrorCodes.EMAIL_FAILED)
+                ),
+            )
         except UserAlreadyVerified:
-            return MutationNormalOutput(success=False, errors={"email": Messages.ALREADY_VERIFIED})
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.ResendActivationEmailErrors(
+                    operation_errror=ErrorMessage.from_code(OperationErrorCodes.ALREADY_VERIFIED)
+                ),
+            )
 
 
 class SendPasswordResetEmailMixin(BaseMixin):
@@ -222,30 +307,52 @@ class SendPasswordResetEmailMixin(BaseMixin):
     class SendPasswordResetEmailInput:
         email: str
 
+    @strawberry.type()
+    class SendPasswordResetEmailErrors(RawErrorsInterface, EmailErrorsInterface):
+        ...
+
     @classmethod
-    def resolve_mutation(cls, info, input_: SendPasswordResetEmailInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: SendPasswordResetEmailInput
+    ) -> MutationNormalOutput[SendPasswordResetEmailErrors]:
         try:
             email = input_.email
             f = EmailForm({"email": email})
             if f.is_valid():
-                user = get_user_by_email(email)
-                user.status.send_password_reset_email(info, [email])
+                app_settings.BACKEND.send_password_reset_email(get_user(info), info, [email])
                 return MutationNormalOutput(success=True)
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.SendPasswordResetEmailErrors(
+                    raw_error=f.errors.get_json_data(),
+                ),
+            )
         except ObjectDoesNotExist:
             return MutationNormalOutput(success=True)  # even if user is not registered
         except SMTPException:
-            return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
-        except UserNotVerified:
-            user = get_user_by_email(input_.email)
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.SendPasswordResetEmailErrors(
+                    email=ErrorMessage.from_code(EmailErrorCodes.EMAIL_FAILED)
+                ),
+            )
+        except UserNotVerified:  # FIXME: This is not raised anywhere?
+            user = app_settings.BACKEND.get_user_by_email(input_.email)
             try:
-                user.status.resend_activation_email(info)
+                app_settings.BACKEND.resend_activation_email(info, user)
                 return MutationNormalOutput(
                     success=False,
-                    errors={"email": Messages.NOT_VERIFIED_PASSWORD_RESET},
+                    errors=cls.SendPasswordResetEmailErrors(
+                        operation_errror=ErrorMessage.from_code(OperationErrorCodes.UNVERIFIED)
+                    ),
                 )
             except SMTPException:
-                return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
+                return MutationNormalOutput(
+                    success=False,
+                    errors=cls.SendPasswordResetEmailErrors(
+                        email=ErrorMessage.from_code(EmailErrorCodes.EMAIL_FAILED)
+                    ),
+                )
 
 
 class PasswordResetMixin(BaseMixin):
@@ -268,29 +375,33 @@ class PasswordResetMixin(BaseMixin):
 
     form = SetPasswordForm
 
-    @classmethod
-    def resolve_mutation(cls, _, input_: PasswordResetInput) -> MutationNormalOutput:
-        try:
-            payload = get_payload_from_token(
-                input_.token,
-                TokenAction.PASSWORD_RESET,
-                app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
-            )
-            user = app_settings.BACKEND.get_user_from_payload(payload)
-            f = cls.form(user, asdict(input_))
-            if f.is_valid():
-                app_settings.BACKEND.revoke_user_refresh_token(user)
-                f.save()  # type: ignore
-                if not user.is_verified():
-                    user.set_verified(True)
-                    user_verified.send(sender=cls, user=user)
+    @strawberry.type()
+    class PasswordResetErrors(TokenErrorsInterface, RawErrorsInterface):
+        ...
 
-                return MutationNormalOutput(success=True)
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
-        except SignatureExpired:
-            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
-        except (BadSignature, TokenScopeError):
-            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
+    @wrap_token_errors(PasswordResetErrors)
+    @classmethod
+    def resolve_mutation(
+        cls, _, input_: PasswordResetInput
+    ) -> MutationNormalOutput[PasswordResetErrors]:
+        payload = get_payload_from_token(
+            input_.token,
+            TokenAction.PASSWORD_RESET,
+            app_settings.EXPIRATION_PASSWORD_RESET_TOKEN,
+        )
+        user = app_settings.BACKEND.get_user_from_payload(payload)
+        f = cls.form(user, asdict(input_))
+        if f.is_valid():
+            app_settings.BACKEND.revoke_user_refresh_token(user)
+            f.save()  # type: ignore
+            if not user.is_verified:
+                user.set_verified(True)
+                user_verified.send(sender=cls, user=user)
+
+            return MutationNormalOutput(success=True)
+        return MutationNormalOutput(
+            success=False, errors=cls.PasswordResetErrors(raw_error=f.errors.get_json_data())
+        )
 
 
 class PasswordSetMixin(BaseMixin):
@@ -314,8 +425,15 @@ class PasswordSetMixin(BaseMixin):
 
     form = SetPasswordForm
 
+    @strawberry.type()
+    class PasswordSetErrors(RawErrorsInterface, TokenErrorsInterface, OperationErrorsInterface):
+        ...
+
+    @wrap_token_errors(PasswordSetErrors)
     @classmethod
-    def resolve_mutation(cls, _, input_: PasswordSetInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, _, input_: PasswordSetInput
+    ) -> MutationNormalOutput[PasswordSetErrors]:
         try:
             token = input_.token
             payload = get_payload_from_token(
@@ -331,16 +449,19 @@ class PasswordSetMixin(BaseMixin):
                     raise PasswordAlreadySetError
                 app_settings.BACKEND.revoke_user_refresh_token(user)
                 user: UserProto = f.save()  # type: ignore
-                if not user.is_verified():
+                if not user.is_verified:
                     user.set_verified(True)
                 return MutationNormalOutput(success=True)
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
-        except SignatureExpired:
-            return MutationNormalOutput(success=False, errors=Messages.EXPIRED_TOKEN)
-        except (BadSignature, TokenScopeError):
-            return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
+            return MutationNormalOutput(
+                success=False, errors=cls.PasswordSetErrors(raw_error=f.errors.get_json_data())
+            )
         except PasswordAlreadySetError:
-            return MutationNormalOutput(success=False, errors=Messages.PASSWORD_ALREADY_SET)
+            return MutationNormalOutput(
+                success=False,
+                errors=cls.PasswordSetErrors(
+                    operation_error=ErrorMessage.from_code(OperationErrorCodes.PASSWORD_ALREADY_SET)
+                ),
+            )
 
 
 class ObtainJSONWebTokenMixin(BaseMixin):
@@ -356,14 +477,75 @@ class ObtainJSONWebTokenMixin(BaseMixin):
     return `unarchiving=True` on OutputBase.
     """
 
-    @classmethod
-    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenType:
+    @strawberry.type()
+    class ObtainJSONWebTokenErrors(TokenErrorsInterface, OperationErrorsInterface):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            check_res = check_captcha(input_)
-            if check_res != Messages.CAPTCHA_VALID:
-                return ObtainJSONWebTokenType(success=False, errors={"captcha": check_res})
+            captcha: Optional[ErrorMessage[CaptchaErrorCodes]] = None
 
-        return ObtainJSONWebTokenType.authenticate(info, input_)
+    if not app_settings.BACKEND.LOGIN_INPUT_TYPE:
+
+        @strawberry.input
+        @inject_fields(app_settings.LOGIN_FIELDS)
+        class ObtainJSONWebTokenInput:
+            password: str
+            if app_settings.LOGIN_REQUIRE_CAPTCHA:
+                identifier: UUID
+                userEntry: str
+
+        app_settings.BACKEND.LOGIN_INPUT_TYPE = ObtainJSONWebTokenInput
+
+        if app_settings.REGISTER_REQUIRE_CAPTCHA:
+            captcha: Optional[ErrorMessage[CaptchaErrorCodes]] = None
+
+    @wrap_token_errors(ObtainJSONWebTokenErrors)
+    @classmethod
+    def resolve_mutation(
+        cls, info, input_: app_settings.BACKEND.LOGIN_INPUT_TYPE
+    ) -> ObtainJSONWebTokenOutput[ObtainJSONWebTokenErrors]:
+        if app_settings.LOGIN_REQUIRE_CAPTCHA:
+            if captcha_error := app_settings.BACKEND.validate_captcha(
+                input_.identifier, input_.userEntry
+            ):
+                return ObtainJSONWebTokenOutput(
+                    success=False,
+                    errors=cls.ObtainJSONWebTokenErrors(
+                        captcha=ErrorMessage.from_code(captcha_error)
+                    ),
+                )
+        try:
+            # authenticate against django authentication backends.
+            user = app_settings.BACKEND.login(info, input_)
+            if not user:
+                return ObtainJSONWebTokenOutput(
+                    success=False,
+                    errors=cls.ObtainJSONWebTokenErrors(
+                        operation_error=ErrorMessage.from_code(
+                            OperationErrorCodes.INVALID_CREDENTIALS
+                        )
+                    ),
+                )
+
+            # gqlauth logic
+            if user.is_archived:  # un-archive on login
+                app_settings.BACKEND.unarchived(user)
+            if user.is_verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
+                # successful login.
+                return ObtainJSONWebTokenOutput.from_user(user)
+            else:
+                return ObtainJSONWebTokenOutput(
+                    success=False,
+                    errors=cls.ObtainJSONWebTokenErrors(
+                        operation_error=ErrorMessage.from_code(OperationErrorCodes.UNVERIFIED)
+                    ),
+                )
+        except PermissionDenied:
+            # one of the authentication backends rejected the user.
+            return ObtainJSONWebTokenOutput(
+                success=False,
+                errors=cls.ObtainJSONWebTokenErrors(
+                    operation_error=ErrorMessage.from_code(OperationErrorCodes.UNAUTHENTICATED)
+                ),
+            )
 
 
 class ArchiveOrDeleteMixin(BaseMixin):
@@ -425,20 +607,27 @@ class PasswordChangeMixin(BaseMixin):
     form = PasswordChangeForm
     REQUIRE_VERIFICATION = True
 
+    class PasswordChangeErrors(RawErrorsInterface):
+        ...
+
     @classmethod
-    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info: Info, input_: PasswordChangeInput
+    ) -> ObtainJSONWebTokenOutput[PasswordChangeErrors]:
         user = get_user(info)
         if error := confirm_password(user, input_):
-            return ObtainJSONWebTokenType(**asdict(error))
+            return ObtainJSONWebTokenOutput(**asdict(error))
 
         args = asdict(input_)
         f = cls.form(user, args)  # type: ignore
         if f.is_valid():
             app_settings.BACKEND.revoke_user_refresh_token(user)
             user: UserProto = f.save()  # type: ignore
-            return ObtainJSONWebTokenType.from_user(user)
+            return ObtainJSONWebTokenOutput.from_user(user)
         else:
-            return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
+            return ObtainJSONWebTokenOutput(
+                success=False, errors=cls.PasswordChangeErrors(raw_error=f.errors.get_json_data())
+            )
 
 
 class UpdateAccountMixin(BaseMixin):
@@ -455,8 +644,14 @@ class UpdateAccountMixin(BaseMixin):
     form = UpdateAccountForm
     REQUIRE_VERIFICATION = True
 
+    @strawberry.type()
+    class UpdateAccountErrors(RawErrorsInterface):
+        ...
+
     @classmethod
-    def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: UpdateAccountInput
+    ) -> MutationNormalOutput[UpdateAccountErrors]:
         f = cls.form(
             asdict(input_),
             instance=get_user(info),
@@ -465,7 +660,9 @@ class UpdateAccountMixin(BaseMixin):
             f.save()
             return MutationNormalOutput(success=True)
         else:
-            return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+            return MutationNormalOutput(
+                success=False, errors=cls.UpdateAccountErrors(raw_error=f.errors.get_json_data())
+            )
 
 
 class VerifyTokenMixin(BaseMixin):
@@ -485,37 +682,45 @@ class RefreshTokenMixin(BaseMixin):
     *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 
     using the refresh-token you already got during authorization, and
-    obtain a brand-new token (and possibly a new refresh token if you revoked the previous).
+    obtain a brand-new re/fresh-token
     This is an alternative to log in when your token expired.
     """
 
-    @strawberry.input(
-        description="If `revoke_refresh_token` is true,"
-        " revokes to refresh token an creates a new one."
-    )
+    @strawberry.type()
+    class RefreshTokenErrors(TokenErrorsInterface):
+        ...
+
+    @strawberry.input()
     class RefreshTokenInput:
         refresh_token: str
-        revoke_refresh_token: bool = strawberry.field(
-            description="revokes the previous refresh token, and will generate new one.",
-            default=False,
-        )
 
     @classmethod
-    def resolve_mutation(cls, info, input_: RefreshTokenInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info, input_: RefreshTokenInput
+    ) -> ObtainJSONWebTokenOutput[RefreshTokenErrors]:
         try:
             res = RefreshToken.objects.get(token=input_.refresh_token)
         except RefreshToken.DoesNotExist:
-            return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_TOKEN)
+            return ObtainJSONWebTokenOutput(
+                success=False,
+                errors=cls.RefreshTokenErrors(
+                    token=ErrorMessage.from_code(TokenErrorCodes.INVALID_TOKEN)
+                ),
+            )
         user = res.user
         if res.is_expired_():
-            return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
+            return ObtainJSONWebTokenOutput(
+                success=False,
+                errors=cls.RefreshTokenErrors(
+                    token=ErrorMessage.from_code(TokenErrorCodes.TOKEN_EXPIRED)
+                ),
+            )
+        res.revoke()
         # fields that are determined by if statements are not recognized by mypy.
-        ret = ObtainJSONWebTokenType(
+        ret = ObtainJSONWebTokenOutput(
             success=True, token=TokenType.from_user(user), refresh_token=res  # type: ignore
         )
-        if input_.revoke_refresh_token:
-            res.revoke()
-            ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
+        ret.refresh_token = cast(RefreshTokenType, RefreshToken.from_user(user))
         return ret
 
 
@@ -529,8 +734,13 @@ class RevokeTokenMixin(BaseMixin):
     class RevokeTokenInput:
         refresh_token: str
 
+    class RevokeTokenErrors(TokenErrorsInterface):
+        ...
+
     @classmethod
-    def resolve_mutation(cls, _: Info, input_: RevokeTokenInput) -> RevokeRefreshTokenType:
+    def resolve_mutation(
+        cls, _: Info, input_: RevokeTokenInput
+    ) -> RevokeRefreshTokenType[RevokeTokenErrors]:
         try:
             refresh_token = RefreshToken.objects.get(
                 token=input_.refresh_token, revoked__isnull=True
@@ -540,4 +750,9 @@ class RevokeTokenMixin(BaseMixin):
                 success=True, refresh_token=cast(RefreshTokenType, refresh_token)
             )
         except RefreshToken.DoesNotExist:
-            return RevokeRefreshTokenType(success=False, errors=Messages.INVALID_TOKEN)
+            return RevokeRefreshTokenType(
+                success=False,
+                errors=cls.RevokeTokenErrors(
+                    token=ErrorMessage.from_code(TokenErrorCodes.INVALID_TOKEN)
+                ),
+            )

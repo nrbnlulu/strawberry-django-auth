@@ -1,4 +1,4 @@
-from gqlauth.core.messages import Messages
+from gqlauth.core.types_ import Messages
 
 
 def _arg_query(token: str, revoke="false"):
@@ -35,9 +35,9 @@ def test_refresh_token(db_verified_user_status, anonymous_schema):
     assert not executed["errors"]
 
 
-def test_invalid_token(anonymous_schema, db):
+def test_invalid_token(default_testcase, db):
     query = _arg_query("invalid_token")
-    res = anonymous_schema.execute(query=query)
+    res = default_testcase.execute(query=query)
     assert not res.errors
     res = res.data["refreshToken"]
     assert not res["success"]
@@ -45,11 +45,11 @@ def test_invalid_token(anonymous_schema, db):
     assert res["errors"]
 
 
-def test_revoke_refresh_token(anonymous_schema, db_verified_user_status):
+def test_revoke_refresh_token(default_testcase, db_verified_user_status):
     refresh = db_verified_user_status.generate_refresh_token()
     assert not refresh.is_expired_()
     query = _arg_query(refresh.token, "true")
-    executed = anonymous_schema.execute(query=query)
+    executed = default_testcase.anonymous_schema.execute(query=query)
     assert not executed.errors
     executed = executed.data["refreshToken"]
     assert executed["success"]
@@ -61,5 +61,5 @@ def test_revoke_refresh_token(anonymous_schema, db_verified_user_status):
     assert refresh.revoked
     assert refresh.is_expired_()
     # try to get a new token with the revoked token
-    executed = anonymous_schema.execute(query=query)
+    executed = default_testcase.anonymous_schema.execute(query=query)
     assert executed.data["refreshToken"]["errors"]["nonFieldErrors"] == Messages.EXPIRED_TOKEN

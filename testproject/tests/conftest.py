@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import dataclasses
 import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Union
+from typing import TYPE_CHECKING, Any, Iterable, NamedTuple
 
 import faker
 import pytest
@@ -80,11 +83,23 @@ fake.add_provider(UserFieldFakeProvider)
 
 @dataclass
 class UserType:
-    verified: bool
-    archived: bool = False
+    is_verified: bool
+    is_archived: bool = False
     password: str = dataclasses.field(default_factory=lambda: fake.password())
     email_field: str = dataclasses.field(default_factory=lambda: fake.email())
     username_field: str = dataclasses.field(default_factory=lambda: fake.user_name())
+
+    @classmethod
+    def verified(cls) -> UserType:
+        return UserType(is_verified=False)
+
+    @classmethod
+    def unverified(cls) -> UserType:
+        return UserType(is_verified=False)
+
+    def __post_init__(self):
+        setattr(self, EMAIL_FIELD, self.email_field)
+        setattr(self, USERNAME_FIELD, self.username_field)
 
     def create(self) -> UserProto:
         flex_fields = {
@@ -94,11 +109,11 @@ class UserType:
         user: UserProto = UserModel(**flex_fields)
 
         # password must be set via this method.
-        self.user.set_password(self.password)
-
-        user.set_verified(self.verified)
-        user.set_archived(self.archived)
+        user.set_password(self.password)
         user.save()
+
+        user.set_verified(self.is_verified)
+        user.set_archived(self.is_archived)
         return user
 
     def generate_refresh_token(self, user: DjangoUserProto) -> RefreshToken:
@@ -107,26 +122,22 @@ class UserType:
 
 @pytest.fixture()
 def verified_user_type():
-    return UserType(
-        verified=True,
-    ).create()
+    return UserType.verified()
 
 
 @pytest.fixture()
 def unverified_user_type():
-    return UserType(
-        verified=False,
-    )
+    return UserType.unverified()
 
 
 @pytest.fixture()
 def wrong_pass_ver_user_status_type():
-    return UserType(password=WRONG_PASSWORD, verified=True)
+    return UserType(password=WRONG_PASSWORD, is_verified=True)
 
 
 @pytest.fixture()
 def wrong_pass_unverified_user_status_type(unverified_user_type):
-    return UserType(verified=False, password=WRONG_PASSWORD)
+    return UserType(is_verified=False, password=WRONG_PASSWORD)
 
 
 @pytest.fixture()
@@ -173,7 +184,7 @@ def override_gqlauth(app_settings):
 
 @dataclasses.dataclass
 class FakeContext:
-    request: Union[HttpRequest, dict]
+    request: HttpRequest | dict
 
 
 class SchemaHelper(NamedTuple):
@@ -194,7 +205,17 @@ class SchemaHelper(NamedTuple):
 
 
 class GqlAuthTestCase:
-    user: UserType
+    @cached_property
+    def verified_user(self) -> UserProto:
+        return UserType.verified().create()
+
+    @cached_property
+    def unverified_user(self) -> UserProto:
+        return UserType.unverified().create()
+
+    @cached_property
+    def archived_user(self) -> UserProto:
+        return UserType(is_archived=True, is_verified=True).create()
 
     @contextmanager
     def ws_client_no_headers(self, user: UserProto):
@@ -216,6 +237,7 @@ class GqlAuthTestCase:
     def generate_fresh_token(self, user: UserProto) -> str:
         return JWT_PREFIX + " " + TokenType.from_user(user).token
 
+    @property
     def anonymous_schema(self) -> SchemaHelper:
         req = self.request()
         setattr(req, USER_OR_ERROR_KEY, get_user_or_error(req))
@@ -225,11 +247,15 @@ class GqlAuthTestCase:
     def request(self):
         return RequestFactory().post("/fake")
 
-    @pytest.fixture()
+    @property
     def verified_schema(self) -> SchemaHelper:
-        user = UserType(verified=True).create()
-        return SchemaHelper.create(req=self.request(), user=user)
+        return SchemaHelper.create(req=self.request(), user=self.verified_user)
 
+    @property
     def unverified_schema(self) -> SchemaHelper:
-        user = UserType(verified=False).create()
-        return SchemaHelper.create(req=self.request(), user=user)
+        return SchemaHelper.create(req=self.request(), user=self.unverified_user)
+
+
+@pytest.fixture()
+def default_testcase(db):
+    return GqlAuthTestCase()

@@ -8,9 +8,10 @@ from django.http import HttpRequest
 from django.utils.decorators import sync_and_async_middleware
 from strawberry import Schema
 
+from gqlauth.backends.basebackend import UserProto
 from gqlauth.core.exceptions import TokenExpired
-from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
-from gqlauth.core.utils import USER_UNION, app_settings
+from gqlauth.core.types_ import ErrorCodes, GQLAuthError
+from gqlauth.core.utils import app_settings
 from gqlauth.jwt.types_ import TokenType
 from jwt import PyJWTError
 
@@ -22,12 +23,12 @@ if TYPE_CHECKING:
 class UserOrError:
     __slots__ = ("user", "error")
 
-    def __init__(self, user: USER_UNION = anon_user, error: Exception = None):
+    def __init__(self, user: UserProto = anon_user, error: Exception = None):
         self.user = user
         self.error = error
 
-    def authorized_user(self) -> Optional[USER_UNION]:
-        if self.user.is_authenticated:  # real django user model always returns true.
+    def authorized_user(self) -> Optional[UserProto]:
+        if not self.user.is_anonymous:  # real django user model always returns true.
             return self.user
         return None
 
@@ -44,10 +45,10 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
             user_or_error.user = user
 
         except PyJWTError:  # raised by python-jwt
-            user_or_error.error = GQLAuthError(code=GQLAuthErrors.INVALID_TOKEN)
+            user_or_error.error = GQLAuthError(code=ErrorCodes.INVALID_TOKEN)
 
         except TokenExpired:
-            user_or_error.error = GQLAuthError(code=GQLAuthErrors.EXPIRED_TOKEN)
+            user_or_error.error = GQLAuthError(code=ErrorCodes.TOKEN_EXPIRED)
         except Exception as exc:  # pragma: no cover
             import traceback
 
@@ -55,7 +56,7 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
             print(exc)
             raise exc
     else:
-        user_or_error.error = GQLAuthError(code=GQLAuthErrors.MISSING_TOKEN)
+        user_or_error.error = GQLAuthError(code=ErrorCodes.MISSING_TOKEN)
 
     return user_or_error
 

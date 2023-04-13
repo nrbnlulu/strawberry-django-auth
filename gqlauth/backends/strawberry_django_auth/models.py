@@ -14,12 +14,13 @@ from django.db.models import Value as Val
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from gqlauth.backends.basebackend import UserProto
 from gqlauth.captcha.captcha_factorty import CaptchaInstanceType, generate_captcha_text
-from gqlauth.core.messages import Messages
+from gqlauth.core.types_ import CaptchaErrorCodes
 from gqlauth.settings import gqlauth_settings as app_settings
 
 if TYPE_CHECKING:
-    from gqlauth.backends.strawberry_django_auth.backend import DjangoUserProto
+    pass
 
 USER_MODEL = get_user_model()
 
@@ -81,7 +82,7 @@ class RefreshToken(models.Model):
         return self.token
 
     @classmethod
-    def from_user(cls, user: DjangoUserProto) -> RefreshToken:
+    def from_user(cls, user: UserProto) -> RefreshToken:
         token = binascii.hexlify(
             os.urandom(app_settings.JWT_REFRESH_TOKEN_N_BYTES),
         ).decode()
@@ -128,7 +129,7 @@ class Captcha(models.Model):
         self.text = self._format(self.text)
         super().save(*args, **kwargs)
 
-    def validate(self, user_entry: str):
+    def validate(self, user_entry: str) -> CaptchaErrorCodes | None:
         """validates input_.
 
         - if tried to validate more than 3 times obj will be deleted in the database
@@ -141,7 +142,7 @@ class Captcha(models.Model):
                 self.delete()
             except ValueError:
                 ...  # object is deleted
-            return Messages.CAPTCHA_MAX_RETRIES
+            return CaptchaErrorCodes.CAPTCHA_MAX_RETRIES
 
         self.tries += 1
 
@@ -151,7 +152,7 @@ class Captcha(models.Model):
                 self.delete()
             except ValueError:
                 ...  # object is deleted
-            return Messages.CAPTCHA_EXPIRED
+            return CaptchaErrorCodes.CAPTCHA_EXPIRED
 
         # validate
         if app_settings.CAPTCHA_TEXT_VALIDATOR(
@@ -159,9 +160,9 @@ class Captcha(models.Model):
         ):
             # delete captcha if valid
             self.delete()
-            return Messages.CAPTCHA_VALID
+            return
 
-        return Messages.CAPTCHA_INVALID
+        return CaptchaErrorCodes.CAPTCHA_INVALID
 
     def as_bytes(self):
         """Stores the image on a bytes_array.
