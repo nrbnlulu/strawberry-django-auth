@@ -55,7 +55,7 @@ Faker = "^18.2.0"
 pytest-asyncio = "^0.21.0"
 pydoc-markdown = {extras = ["novella"], version = "^4.6.4"}
 gql = {extras = ["all"], version = "^3.4.0"}
-setuptools = "^67.6.0"
+setuptools = "^67.7.1"
 channels = {extras = ["daphne"], version = "^4.0.0"}
 
 
