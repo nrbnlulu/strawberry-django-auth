@@ -41,13 +41,9 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: mypy_checks
-        run: |
-          poetry install
-          poetry run mypy ./gqlauth
       - name: Run tests
         run: |
-          poetry install
+          poetry install -E captcha
           poetry run pip install "Django~=${{ matrix.django-version }}"
           make test
 

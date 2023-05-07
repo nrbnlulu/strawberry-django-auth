@@ -1,3 +1,4 @@
+import contextlib
 from dataclasses import asdict
 from smtplib import SMTPException
 from typing import Callable, cast
@@ -13,8 +14,6 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry_django_plus import gql
 
-from gqlauth.captcha.models import Captcha as CaptchaModel
-from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.exceptions import (
     PasswordAlreadySetError,
@@ -66,18 +65,32 @@ class BaseMixin:
                     raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
 
 
-class Captcha:
-    """Creates a brand-new captcha. Returns a base64 encoded string of the
-    captcha. And uuid representing the captcha id in the database. When you
-    will try to log in or register You will need submit that uuid With the user
-    input.
+class __CaptchaNotifyImportError:
+    @property
+    def field(self):
+        raise ImportError(
+            "you probably don't have pillow installed you'll need to add the [captcha] extra."
+        )
 
-    **The captcha will be invoked when the timeout expires**.
-    """
 
-    @gql.django.field(description=__doc__)
-    def field(self) -> CaptchaType:
-        return CaptchaModel.create_captcha()
+Captcha = __CaptchaNotifyImportError()
+
+with contextlib.suppress(ImportError):
+    from gqlauth.captcha.models import Captcha as CaptchaModel
+    from gqlauth.captcha.types_ import CaptchaType
+
+    class Captcha:  # type: ignore[no-redef]
+        """Creates a brand-new captcha. Returns a base64 encoded string of the
+        captcha. And uuid representing the captcha id in the database. When you
+        will try to log in or register You will need submit that uuid With the
+        user input.
+
+        **The captcha will be invoked when the timeout expires**.
+        """
+
+        @gql.django.field(description=__doc__)
+        def field(self) -> CaptchaType:
+            return CaptchaModel.create_captcha()
 
 
 class RegisterMixin(BaseMixin):
@@ -85,13 +98,12 @@ class RegisterMixin(BaseMixin):
     the user model is part of the registration fields (default), check if there
     is no user with that email.
 
-    If it exists, it does not register the user,
-    even if the email field is not defined as unique
-    (default of the default django user model).
+    If it exists, it does not register the user, even if the email field
+    is not defined as unique (default of the default django user model).
 
-    When creating the user, it also creates a `UserStatus`
-    related to that user, making it possible to track
-    if the user is archived / verified.
+    When creating the user, it also creates a `UserStatus` related to
+    that user, making it possible to track if the user is archived /
+    verified.
 
     Send account verification email.
 
@@ -122,7 +134,7 @@ class RegisterMixin(BaseMixin):
         email = getattr(input_, "email", False)
         try:
             with transaction.atomic():
-                f = cls.form(asdict(input_))
+                f = cls.form(asdict(input_))  # type: ignore
                 if f.is_valid():
                     user = f.save()
                     if email:
@@ -173,12 +185,11 @@ class VerifyAccountMixin(BaseMixin):
 class ResendActivationEmailMixin(BaseMixin):
     """Sends activation email.
 
-    It is called resend because theoretically
-    the first activation email was sent when
-    the user registered.
+    It is called resend because theoretically the first activation email
+    was sent when the user registered.
 
-    If there is no user with the requested email,
-    a successful response is returned.
+    If there is no user with the requested email, a successful response
+    is returned.
     """
 
     @strawberry.input
@@ -206,11 +217,10 @@ class ResendActivationEmailMixin(BaseMixin):
 class SendPasswordResetEmailMixin(BaseMixin):
     """Send password reset email.
 
-    For non verified users, send an activation
-    email instead.
+    For non verified users, send an activation email instead.
 
-    If there is no user with the requested email,
-    a successful response is returned.
+    If there is no user with the requested email, a successful response
+    is returned.
     """
 
     @strawberry.input
@@ -248,9 +258,8 @@ class PasswordResetMixin(BaseMixin):
 
     Receive the token that was sent by email.
 
-    If token and new passwords are valid, update
-    user password and in case of using refresh
-    tokens, revoke all of them.
+    If token and new passwords are valid, update user password and in
+    case of using refresh tokens, revoke all of them.
 
     Also, if user has not been verified yet, verify it.
     """
@@ -273,7 +282,7 @@ class PasswordResetMixin(BaseMixin):
             )
             user = UserModel._default_manager.get(**payload)
             status: "UserStatus" = getattr(user, "status")  # noqa: B009
-            f = cls.form(user, asdict(input_))
+            f = cls.form(user, asdict(input_))  # type: ignore
             if f.is_valid():
                 revoke_user_refresh_token(user)
                 user = f.save()  # type: ignore
@@ -321,7 +330,7 @@ class PasswordSetMixin(BaseMixin):
                 app_settings.EXPIRATION_PASSWORD_SET_TOKEN,
             )
             user = UserModel._default_manager.get(**payload)
-            f = cls.form(user, asdict(input_))
+            f = cls.form(user, asdict(input_))  # type: ignore
             if f.is_valid():
                 # Check if user has already set a password
                 if user.has_usable_password():
@@ -347,14 +356,14 @@ class PasswordSetMixin(BaseMixin):
 class ObtainJSONWebTokenMixin(BaseMixin):
     """Obtain JSON web token for given user.
 
-    Allow to perform login with different fields,
-    The fields are defined on settings.
+    Allow to perform login with different fields, The fields are defined
+    on settings.
 
-    Not verified users can log in by default. This
-    can be changes on settings.
+    Not verified users can log in by default. This can be changes on
+    settings.
 
-    If user is archived, make it unarchived and
-    return `unarchiving=True` on OutputBase.
+    If user is archived, make it unarchived and return
+    `unarchiving=True` on OutputBase.
     """
 
     @classmethod
@@ -398,8 +407,8 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin):
 class DeleteAccountMixin(ArchiveOrDeleteMixin):
     """Delete account permanently or make `user.is_active=False`.
 
-    The behavior is defined on settings.
-    Anyway user refresh tokens are revoked.
+    The behavior is defined on settings. Anyway user refresh tokens are
+    revoked.
 
     User must be verified and confirm password.
     """
@@ -430,9 +439,9 @@ class PasswordChangeMixin(BaseMixin):
     def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
         user = get_user(info)
         if error := confirm_password(user, input_):
-            return ObtainJSONWebTokenType(**asdict(error))
+            return ObtainJSONWebTokenType(**asdict(error))  # type: ignore
 
-        args = asdict(input_)
+        args = asdict(input_)  # type: ignore
         f = cls.form(user, args)  # type: ignore
         if f.is_valid():
             revoke_user_refresh_token(user)
@@ -461,7 +470,7 @@ class UpdateAccountMixin(BaseMixin):
     def resolve_mutation(cls, info, input_: UpdateAccountInput) -> MutationNormalOutput:
         user = get_user(info)
         f = cls.form(
-            asdict(input_),
+            asdict(input_),  # type: ignore
             instance=user,
         )
         if f.is_valid():

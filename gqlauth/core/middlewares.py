@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class UserOrError:
     __slots__ = ("user", "error")
 
-    def __init__(self, user: USER_UNION = anon_user, error: Exception = None):
+    def __init__(self, user: USER_UNION = anon_user, error: Optional[Exception] = None):
         self.user = user
         self.error = error
 
@@ -107,7 +107,7 @@ def django_jwt_middleware(get_response):
 
 
 class JwtSchema(Schema):
-    """injects token to context."""
+    """Injects token to context."""
 
     def execute_sync(self, *args, **kwargs):
         self._inject_user_and_errors(kwargs)

@@ -1,8 +1,8 @@
+import contextlib
 from typing import TYPE_CHECKING, Optional, Union
 
 from django.contrib.auth import get_user_model
 
-from gqlauth.captcha.models import Captcha as CaptchaModel
 from gqlauth.core.constants import Messages
 from gqlauth.core.types_ import MutationNormalOutput
 from gqlauth.core.utils import USER_UNION
@@ -24,6 +24,10 @@ def confirm_password(user: USER_UNION, input_) -> Optional[MutationNormalOutput]
         return None
     errors = {password_arg: Messages.INVALID_PASSWORD}
     return MutationNormalOutput(success=False, errors=errors)
+
+
+with contextlib.suppress(ImportError):
+    from gqlauth.captcha.models import Captcha as CaptchaModel
 
 
 def check_captcha(input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenInput"]):

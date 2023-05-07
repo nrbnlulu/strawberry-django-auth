@@ -28,7 +28,7 @@ your implementation*.
 ## Features
 
 * [x] Awesome docs!
-* [x] Captcha validation
+* [x] Captcha validation (with extra `strawberry-django-auth[captcha]`)
 * [x] Async/Sync supported!
 * [x] Works with default or custom user model
 * [x] Builtin JWT authentication using [PyJWT](https://github.com/jpadilla/pyjwt)
@@ -51,22 +51,15 @@ your implementation*.
 
 ```python
 
-@strawberry.type
-class AuthMutation:
-    # include here your mutations that interact with a user object from a token.
 
+@strawberry.type
+class Mutation:
     verify_token = mutations.VerifyToken.field
     update_account = mutations.UpdateAccount.field
     archive_account = mutations.ArchiveAccount.field
     delete_account = mutations.DeleteAccount.field
     password_change = mutations.PasswordChange.field
     swap_emails = mutations.SwapEmails.field
-
-@strawberry.type
-class Mutation:
-    @field(directives=[TokenRequired()])
-    def auth_entry(self) -> Union[AuthMutation, GQLAuthError]:
-        return AuthOutput(node=AuthMutation())
 
     # these are mutation that does not require authentication.
     captcha = Captcha.field

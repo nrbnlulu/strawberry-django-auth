@@ -165,14 +165,14 @@ class GqlAuthSettings:
     **Note that `password field` is mandatory and cannot be removed.**
     """
     LOGIN_REQUIRE_CAPTCHA: bool = True
-    """whether login will require captcha verification."""
+    """Whether login will require captcha verification."""
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )
     """Fields on register, plus password1 and password2, can be a dict like
     UPDATE_MUTATION_fieldS setting."""
     REGISTER_REQUIRE_CAPTCHA: bool = True
-    """whether register will require captcha verification."""
+    """Whether register will require captcha verification."""
     # captcha stuff
     #: captcha expiration delta.
     CAPTCHA_EXPIRATION_DELTA: timedelta = timedelta(seconds=120)
@@ -196,7 +196,7 @@ class GqlAuthSettings:
     UPDATE_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {first_name_field, last_name_field}
     )
-    """fields on update account mutation."""
+    """Fields on update account mutation."""
 
     # email tokens
     EXPIRATION_ACTIVATION_TOKEN: timedelta = timedelta(days=7)
@@ -228,7 +228,7 @@ class GqlAuthSettings:
     SEND_PASSWORD_SET_EMAIL: bool = False
     # JWT stuff
     JWT_SECRET_KEY: DjangoSetting[str] = DjangoSetting("SECRET_KEY")
-    """key used to sign the JWT token."""
+    """Key used to sign the JWT token."""
 
     JWT_ALGORITHM: str = "HS256"
     """Algorithm used for signing the token."""
@@ -239,7 +239,7 @@ class GqlAuthSettings:
     """A custom function to generate the token datatype, its up to you to
     encode the token."""
     JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
-    """field that will be used to generate the token from a user instance and
+    """Field that will be used to generate the token from a user instance and
     retrieve user based on the decoded token.
 
     *This filed must be unique in the database*

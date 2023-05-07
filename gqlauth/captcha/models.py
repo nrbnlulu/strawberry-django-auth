@@ -47,7 +47,7 @@ class Captcha(models.Model):
         super().save(*args, **kwargs)
 
     def validate(self, user_entry: str):
-        """validates input_.
+        """Validates input_.
 
         - if tried to validate more than 3 times obj will be deleted in the database
         - else increments by one
