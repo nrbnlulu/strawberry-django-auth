@@ -1,3 +1,4 @@
+import contextlib
 from dataclasses import asdict
 from smtplib import SMTPException
 from typing import Callable, cast
@@ -13,8 +14,6 @@ from strawberry.field import StrawberryField
 from strawberry.types import Info
 from strawberry_django_plus import gql
 
-from gqlauth.captcha.models import Captcha as CaptchaModel
-from gqlauth.captcha.types_ import CaptchaType
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.exceptions import (
     PasswordAlreadySetError,
@@ -66,18 +65,32 @@ class BaseMixin:
                     raise GQLAuthError(code=GQLAuthErrors.UNAUTHENTICATED)
 
 
-class Captcha:
-    """Creates a brand-new captcha. Returns a base64 encoded string of the
-    captcha. And uuid representing the captcha id in the database. When you
-    will try to log in or register You will need submit that uuid With the user
-    input.
+class __CaptchaNotifyImportError:
+    @property
+    def field(self):
+        raise ImportError(
+            "you probably don't have pillow installed you'll need to add the [captcha] extra."
+        )
 
-    **The captcha will be invoked when the timeout expires**.
-    """
 
-    @gql.django.field(description=__doc__)
-    def field(self) -> CaptchaType:
-        return CaptchaModel.create_captcha()
+Captcha = __CaptchaNotifyImportError()
+
+with contextlib.suppress(ImportError):
+    from gqlauth.captcha.models import Captcha as CaptchaModel
+    from gqlauth.captcha.types_ import CaptchaType
+
+    class Captcha:
+        """Creates a brand-new captcha. Returns a base64 encoded string of the
+        captcha. And uuid representing the captcha id in the database. When you
+        will try to log in or register You will need submit that uuid With the
+        user input.
+
+        **The captcha will be invoked when the timeout expires**.
+        """
+
+        @gql.django.field(description=__doc__)
+        def field(self) -> CaptchaType:
+            return CaptchaModel.create_captcha()
 
 
 class RegisterMixin(BaseMixin):

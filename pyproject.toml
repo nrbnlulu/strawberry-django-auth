@@ -27,10 +27,11 @@ packages = [
 python = ">=3.8,<3.12"
 Django = ">=3.2,<4.2"
 PyJWT = ">=2.6.0,<3.0"
-strawberry-graphql-django = { version = ">=0.2.5,<4.0", allow-prereleases = true }
-Pillow = "^9.2.0"
-strawberry-graphql = ">=0.128,<0.171.0"
 strawberry-django-plus = ">=1.25.2,<3.0.0"
+pillow = {version = "^9.5.0", extras = ["captcha"]}
+
+[tool.poetry.extras]
+captcha = ["pillow"]
 
 [tool.poetry.dev-dependencies]
 coverage = "^7.2"

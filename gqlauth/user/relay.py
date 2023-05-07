@@ -1,7 +1,8 @@
+import contextlib
+
 from gqlauth.core.mixins import RelayMixin
 from gqlauth.user.resolvers import (
     ArchiveAccountMixin,
-    Captcha,
     DeleteAccountMixin,
     ObtainJSONWebTokenMixin,
     PasswordChangeMixin,
@@ -17,6 +18,8 @@ from gqlauth.user.resolvers import (
     VerifyTokenMixin,
 )
 
+with contextlib.suppress(ImportError):
+    from gqlauth.user.resolvers import Captcha
 __all__ = [
     "Register",
     "VerifyAccount",

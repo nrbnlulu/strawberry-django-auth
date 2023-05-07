@@ -47,7 +47,7 @@ jobs:
           poetry run mypy ./gqlauth
       - name: Run tests
         run: |
-          poetry install
+          poetry install -E captcha
           poetry run pip install "Django~=${{ matrix.django-version }}"
           make test
 

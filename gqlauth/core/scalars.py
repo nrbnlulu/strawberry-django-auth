@@ -1,8 +1,8 @@
+import contextlib
 import typing
 from base64 import b64decode, b64encode
 
 import strawberry
-from PIL.Image import Image
 
 from gqlauth.core.exceptions import WrongUsage
 from gqlauth.core.utils import camelize
@@ -49,8 +49,11 @@ ExpectedErrorType = strawberry.scalar(
     parse_value=lambda value: value,
 )
 
-image = strawberry.scalar(
-    typing.NewType("image", Image),
-    serialize=lambda v: b64encode(v).decode("ascii"),
-    parse_value=lambda v: b64decode(v),
-)
+with contextlib.suppress(ImportError):
+    from PIL.Image import Image
+
+    image = strawberry.scalar(
+        typing.NewType("image", Image),
+        serialize=lambda v: b64encode(v).decode("ascii"),
+        parse_value=lambda v: b64decode(v),
+    )
