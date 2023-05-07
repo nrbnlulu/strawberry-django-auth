@@ -21,7 +21,7 @@ def _arg_query(user: UserType):
 
 
 def test_send_email_invalid_email(db_verified_user_status, anonymous_schema):
-    """invalid email should be successful request.
+    """Invalid email should be successful request.
 
     (due to security measures)
     """

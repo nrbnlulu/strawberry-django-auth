@@ -18,10 +18,10 @@ from gqlauth.settings_type import GqlAuthSettings
 from strawberry import Schema
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
+
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
-
 from tests.channelsliveserver import ChannelsLiveServer
 
 if TYPE_CHECKING:  # pragma: no cover

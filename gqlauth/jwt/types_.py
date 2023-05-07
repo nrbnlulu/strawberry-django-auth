@@ -79,7 +79,7 @@ class TokenPayloadType:
 
     @classmethod
     def from_dict(cls, data: dict) -> "TokenPayloadType":
-        for field in dataclasses.fields(cls):
+        for field in dataclasses.fields(cls):  # type: ignore
             value = data[field.name]
             if isinstance(value, str) and field.type is datetime:
                 data[field.name] = datetime.strptime(value, app_settings.JWT_TIME_FORMAT)
@@ -111,7 +111,7 @@ class TokenType:
         return token_type
 
     def get_user_instance(self) -> "UserProto":
-        """might raise not existed exception."""
+        """Might raise not existed exception."""
         pk_name = app_settings.JWT_PAYLOAD_PK.python_name
         query = {pk_name: getattr(self.payload, pk_name)}
         return USER_MODEL.objects.get(**query)  # type: ignore
@@ -142,7 +142,7 @@ class ObtainJSONWebTokenType(OutputInterface):
 
     @classmethod
     def from_user(cls, user: "UserProto") -> "ObtainJSONWebTokenType":
-        """creates a new token and possibly a new refresh token based on the
+        """Creates a new token and possibly a new refresh token based on the
         user.
 
         *call this method only for trusted users.*
@@ -156,7 +156,7 @@ class ObtainJSONWebTokenType(OutputInterface):
 
     @classmethod
     def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
-        """return `ObtainJSONWebTokenType`. authenticates against django
+        """Return `ObtainJSONWebTokenType`. authenticates against django
         authentication backends.
 
         *creates a new token and possibly a refresh token.*
