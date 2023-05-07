@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+0.374.4 - 2023-05-07
+--------------------
+
+This is a dependencies update release.
+
+If you use captcha validation you will need to
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #377](https://github.com/nrbnlulu/strawberry-django-auth/pull/377/)
+
+
 0.374.3 - 2023-04-06
 --------------------
 
