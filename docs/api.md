@@ -1,37 +1,22 @@
 
 > auto generated using `pydoc_markdown`
 ___
-## Captcha
-
-```python
-class Captcha()
-```
-
-> Creates a brand-new captcha.
-> Returns a base64 encoded string of the captcha.
-> And uuid representing the captcha id in the database.
-> When you will try to log in or register You will
-> need submit that uuid With the user input.
-> **The captcha will be invoked when the timeout expires**.
-
 ## RegisterMixin
 
 ```python
 class RegisterMixin(BaseMixin)
 ```
 
-> Register user with fields defined in the settings.
-> If the email field of the user model is part of the
-> registration fields (default), check if there is
-> no user with that email.
+> Register user with fields defined in the settings. If the email field of
+> the user model is part of the registration fields (default), check if there
+> is no user with that email.
 >
-> If it exists, it does not register the user,
-> even if the email field is not defined as unique
-> (default of the default django user model).
+> If it exists, it does not register the user, even if the email field
+> is not defined as unique (default of the default django user model).
 >
-> When creating the user, it also creates a `UserStatus`
-> related to that user, making it possible to track
-> if the user is archived / verified.
+> When creating the user, it also creates a `UserStatus` related to
+> that user, making it possible to track if the user is archived /
+> verified.
 >
 > Send account verification email.
 >
@@ -45,9 +30,9 @@ class VerifyAccountMixin(BaseMixin)
 
 > Verify user account.
 >
-> Receive the token that was sent by email.
-> If the token is valid, make the user verified
-> by making the `user.status.verified` field true.
+> Receive the token that was sent by email. If the token is valid,
+> make the user verified by making the `user.status.verified` field
+> true.
 
 ## ResendActivationEmailMixin
 
@@ -57,12 +42,11 @@ class ResendActivationEmailMixin(BaseMixin)
 
 > Sends activation email.
 >
-> It is called resend because theoretically
-> the first activation email was sent when
-> the user registered.
+> It is called resend because theoretically the first activation email
+> was sent when the user registered.
 >
-> If there is no user with the requested email,
-> a successful response is returned.
+> If there is no user with the requested email, a successful response
+> is returned.
 
 ## SendPasswordResetEmailMixin
 
@@ -72,11 +56,10 @@ class SendPasswordResetEmailMixin(BaseMixin)
 
 > Send password reset email.
 >
-> For non verified users, send an activation
-> email instead.
+> For non verified users, send an activation email instead.
 >
-> If there is no user with the requested email,
-> a successful response is returned.
+> If there is no user with the requested email, a successful response
+> is returned.
 
 ## PasswordResetMixin
 
@@ -88,9 +71,8 @@ class PasswordResetMixin(BaseMixin)
 >
 > Receive the token that was sent by email.
 >
-> If token and new passwords are valid, update
-> user password and in case of using refresh
-> tokens, revoke all of them.
+> If token and new passwords are valid, update user password and in
+> case of using refresh tokens, revoke all of them.
 >
 > Also, if user has not been verified yet, verify it.
 
@@ -118,14 +100,14 @@ class ObtainJSONWebTokenMixin(BaseMixin)
 
 > Obtain JSON web token for given user.
 >
-> Allow to perform login with different fields,
-> The fields are defined on settings.
+> Allow to perform login with different fields, The fields are defined
+> on settings.
 >
-> Not verified users can log in by default. This
-> can be changes on settings.
+> Not verified users can log in by default. This can be changes on
+> settings.
 >
-> If user is archived, make it unarchived and
-> return `unarchiving=True` on OutputBase.
+> If user is archived, make it unarchived and return
+> `unarchiving=True` on OutputBase.
 
 ## ArchiveAccountMixin
 
@@ -134,6 +116,7 @@ class ArchiveAccountMixin(ArchiveOrDeleteMixin)
 ```
 
 > Archive account and revoke refresh tokens.
+>
 > User must be verified and confirm password.
 
 ## DeleteAccountMixin
@@ -144,8 +127,8 @@ class DeleteAccountMixin(ArchiveOrDeleteMixin)
 
 > Delete account permanently or make `user.is_active=False`.
 >
-> The behavior is defined on settings.
-> Anyway user refresh tokens are revoked.
+> The behavior is defined on settings. Anyway user refresh tokens are
+> revoked.
 >
 > User must be verified and confirm password.
 
@@ -176,6 +159,7 @@ class VerifyTokenMixin(BaseMixin)
 ```
 
 > ### Checks if a token is not expired and correct.
+>
 > *Note that this is not for refresh tokens.*
 
 ## RefreshTokenMixin
@@ -185,6 +169,7 @@ class RefreshTokenMixin(BaseMixin)
 ```
 
 > ### refreshToken to generate a new login token:
+>
 > *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 >
 > using the refresh-token you already got during authorization, and
@@ -198,4 +183,5 @@ class RevokeTokenMixin(BaseMixin)
 ```
 
 > ### Suspends a refresh token.
+>
 > *token must exist to be revoked.*

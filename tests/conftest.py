@@ -16,13 +16,12 @@ from gqlauth.jwt.types_ import TokenType
 from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings
 from strawberry import Schema
+from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
-
-from tests.channelsliveserver import ChannelsLiveServer
 
 if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.core.utils import UserProto
@@ -270,20 +269,21 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def channels_live_server(request):
-    server = ChannelsLiveServer()
-    request.addfinalizer(server.stop)
-    return server
+@pytest.fixture()
+async def verified_channels_app_communicator(db_verified_user_status):
+    from testproject.asgi import application
+
+    async with GraphQLWebsocketCommunicator(
+        application,
+        path="graphql",
+        headers=[(b"authorization", db_verified_user_status.generate_fresh_token().encode())],
+    ) as comm:
+        yield comm
 
 
 @pytest.fixture()
-def ws_verified_client(channels_live_server, db_verified_user_status):
-    from gql.client import Client
-    from gql.transport.websockets import WebsocketsTransport
+async def unverified_channels_app_communicator(db_verified_user_status):
+    from testproject.asgi import application
 
-    transport = WebsocketsTransport(
-        url=channels_live_server.url,
-        headers={"authorization": db_verified_user_status.generate_fresh_token()},
-    )
-    return Client(transport=transport)
+    async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:
+        yield comm
