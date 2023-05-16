@@ -1,3 +1,3 @@
-Release type: prepatch
+Release type: patch
 
 Dependencies update
