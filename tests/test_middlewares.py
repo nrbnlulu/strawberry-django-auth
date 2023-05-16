@@ -1,6 +1,4 @@
 import pytest
-from gql import Client, gql
-from gql.transport.aiohttp import AIOHTTPTransport
 
 pytestmark = pytest.mark.default_user
 
@@ -11,33 +9,30 @@ def auth_headers(db_verified_user_status) -> dict:
     return {"authorization": token, "HTTP_AUTHORIZATION": token}
 
 
-def test_channels_middleware_authorized_user(db_verified_user_status, ws_verified_client):
+async def test_channels_middleware_authorized_user(
+    db_verified_user_status, verified_channels_app_communicator
+):
     query = """
     subscription {
       whatsMyName
     }
     """
-    for res in ws_verified_client.subscribe(document=gql(query)):
-        assert res["whatsMyName"] == db_verified_user_status.user.username_field
+    async for res in verified_channels_app_communicator.subscribe(query):
+        assert res.data["whatsMyName"] == db_verified_user_status.user.username_field
 
 
-def test_channel_middleware_authorized_on_query(
-    auth_headers, db_verified_user_status, channels_live_server
+async def test_channel_middleware_authorized_on_query(
+    db_verified_user_status, verified_channels_app_communicator
 ):
-    transport = AIOHTTPTransport(
-        url=channels_live_server.http_url,
-        headers=auth_headers,
-    )
-    client = Client(transport=transport, fetch_schema_from_transport=False)
-    res = client.execute(document=gql("query { whatsMyUserName }"))
-    assert res["whatsMyUserName"] == db_verified_user_status.user.username_field
+    query = "query { whatsMyUserName }"
+    async for res in verified_channels_app_communicator.subscribe(query):
+        assert res.data["whatsMyUserName"] == db_verified_user_status.user.username_field
 
 
-def test_channels_middleware_no_user_has_anonymous_user(channels_live_server):
-    transport = AIOHTTPTransport(url=channels_live_server.http_url)
-    client = Client(transport=transport)
-    res = client.execute(document=gql("query { amIAnonymous }"))
-    assert res["amIAnonymous"]
+async def test_channels_middleware_no_user_has_anonymous_user(unverified_channels_app_communicator):
+    query = "query { amIAnonymous }"
+    async for res in unverified_channels_app_communicator.subscribe(query):
+        assert res.data["amIAnonymous"]
 
 
 def test_django_middleware_authorized_user(client, db_verified_user_status, auth_headers):
