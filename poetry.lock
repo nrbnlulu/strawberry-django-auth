@@ -1755,14 +1755,14 @@ test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "strawberry-django-plus"
-version = "2.4.0"
+version = "2.4.1"
 description = "Enhanced Strawberry GraphQL integration with Django"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "strawberry_django_plus-2.4.0-py3-none-any.whl", hash = "sha256:39757cad0a48a2866599114b028c5d892b8f2679f442643587a2943493eadd1e"},
-    {file = "strawberry_django_plus-2.4.0.tar.gz", hash = "sha256:8c1cfa31f5feaf1e115608185b2659fc5df8234b48d8a89ad74c494c746a2d6e"},
+    {file = "strawberry_django_plus-2.4.1-py3-none-any.whl", hash = "sha256:25ecf472dde2a4d29e8dbd0983e954d1c57a80b1ed955ba69f930e78d6103a30"},
+    {file = "strawberry_django_plus-2.4.1.tar.gz", hash = "sha256:230f51fed39107758ab7ab25d1799e9ff63edf373a0dd05e41e1bcf61cd0968a"},
 ]
 
 [package.dependencies]
