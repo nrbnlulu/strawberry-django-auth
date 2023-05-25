@@ -37,7 +37,7 @@ captcha = ["pillow"]
 [tool.poetry.dev-dependencies]
 coverage = "^7.2"
 pytest = "^7.2"
-pytest-cov = "^4.0"
+pytest-cov = "^4.1"
 pytest-django = "^4.0.0"
 types-cryptography = "^3.3.23"
 django-mock-queries = "^2.1.7"
