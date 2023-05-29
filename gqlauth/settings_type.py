@@ -105,6 +105,9 @@ class DjangoSetting(Generic[T]):
     def __init__(self, setting: str, value: Optional[T] = None):
         self.setting = setting
         self.cached: Optional[T] = value
+            
+    def __str__(self):
+        return self.value
 
     @property
     def value(self) -> T:
