@@ -49,7 +49,7 @@ class UserStatus(models.Model):
 
         return send_mail(
             subject=_subject,
-            from_email=app_settings.EMAIL_FROM,
+            from_email=app_settings.EMAIL_FROM.value,
             message=message,
             html_message=html_message,
             recipient_list=(recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]),
