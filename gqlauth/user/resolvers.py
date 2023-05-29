@@ -497,8 +497,9 @@ class RefreshTokenMixin(BaseMixin):
     *Use this only if `JWT_LONG_RUNNING_REFRESH_TOKEN` is True*
 
     using the refresh-token you already got during authorization, and
-    obtain a brand-new token (and possibly a new refresh token if you revoked the previous).
-    This is an alternative to log in when your token expired.
+    obtain a brand-new token (and possibly a new refresh token if you
+    revoked the previous). This is an alternative to log in when your
+    token expired.
     """
 
     @strawberry.input(
