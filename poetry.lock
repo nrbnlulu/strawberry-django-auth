@@ -552,53 +552,40 @@ twisted = {version = ">=22.4", extras = ["tls"]}
 tests = ["django", "hypothesis", "pytest", "pytest-asyncio"]
 
 [[package]]
-name = "databind"
-version = "1.5.3"
-description = "Databind is a library inspired by jackson-databind to de-/serialize Python dataclasses. The `databind` package will install the full suite of databind packages. Compatible with Python 3.7 and newer."
-category = "dev"
-optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "databind-1.5.3-py3-none-any.whl", hash = "sha256:43d76e3b931ed9d986b5e35df60e37ccb0bcb2b3b57d6f44cce085c48abe7016"},
-    {file = "databind-1.5.3.tar.gz", hash = "sha256:a1986c1a2054d28d064cf7900c2d3f03850ace124331fa026e6049f390742122"},
-]
-
-[package.dependencies]
-"databind.core" = ">=1.5.3,<2.0.0"
-"databind.json" = ">=1.5.3,<2.0.0"
-
-[[package]]
 name = "databind-core"
-version = "1.5.3"
+version = "4.3.0"
 description = "Databind is a library inspired by jackson-databind to de-/serialize Python dataclasses. Compatible with Python 3.7 and newer."
 category = "dev"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = ">=3.6.3,<4.0.0"
 files = [
-    {file = "databind.core-1.5.3-py3-none-any.whl", hash = "sha256:105665947e0b0b4709b6dab99cd3cea31d16f5c0d68fe867e4dc2f47585669fb"},
-    {file = "databind.core-1.5.3.tar.gz", hash = "sha256:663dd0ccfd1b181cbcfb8315226ec8df78bcd65c1b43875ba18d89702d15efbe"},
+    {file = "databind.core-4.3.0-py3-none-any.whl", hash = "sha256:302ffb0c40a2046668e976993e6bb02849b7703dc30ede45a7702a08f860398e"},
+    {file = "databind.core-4.3.0.tar.gz", hash = "sha256:9dc86f6f3364c2a9ee4702965d4f2da3140d1fcb93d32a7515624b6bc16f3fa3"},
 ]
 
 [package.dependencies]
 Deprecated = ">=1.2.12,<2.0.0"
-"nr.util" = ">=0.8.3,<1.0.0"
+nr-date = ">=2.0.0,<3.0.0"
+nr-stream = ">=1.0.0,<2.0.0"
+typeapi = ">=1.4.2,<2.0.0"
 typing-extensions = ">=3.10.0"
 
 [[package]]
 name = "databind-json"
-version = "1.5.3"
+version = "4.3.0"
 description = "De-/serialize Python dataclasses to or from JSON payloads. Compatible with Python 3.7 and newer."
 category = "dev"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = ">=3.6.3,<4.0.0"
 files = [
-    {file = "databind.json-1.5.3-py3-none-any.whl", hash = "sha256:fd6702ca9f67b15414e573935bf4a5ccb221f3f810553a054b832393c057df3d"},
-    {file = "databind.json-1.5.3.tar.gz", hash = "sha256:b8785ad9689b98d524d4c96e0756bc41166da0de44cc9d14ed2fa8aea5674507"},
+    {file = "databind.json-4.3.0-py3-none-any.whl", hash = "sha256:b47eead6b1325ed548f26cdad6038abb3d543b22db49ea5ff5885a01ebbb8244"},
+    {file = "databind.json-4.3.0.tar.gz", hash = "sha256:051a6e78c8bee98c7272f73e1e3241448e92992cd15de975ba25fe62c6853645"},
 ]
 
 [package.dependencies]
-"databind.core" = ">=1.5.3,<2.0.0"
-"nr.util" = ">=0.8.3,<1.0.0"
+"databind.core" = ">=4.3.0,<5.0.0"
+nr-date = ">=2.0.0,<3.0.0"
+typeapi = ">=1.4.2,<2.0.0"
 typing-extensions = ">=3.10.0"
 
 [[package]]
@@ -719,35 +706,36 @@ pytz = "*"
 
 [[package]]
 name = "docspec"
-version = "2.1.2"
+version = "2.2.1"
 description = "Docspec is a JSON object specification for representing API documentation of programming languages."
 category = "dev"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "docspec-2.1.2-py3-none-any.whl", hash = "sha256:19168242b1e6ca39553feba91b6284479e2bfdf6500949ce63e10c49354d00d7"},
-    {file = "docspec-2.1.2.tar.gz", hash = "sha256:0edb90f4c54edbd43170875dece7a50750a21e95a4c5faf3f7e655d01d483fa7"},
+    {file = "docspec-2.2.1-py3-none-any.whl", hash = "sha256:7538f750095a9688c6980ff9a4e029a823a500f64bd00b6b4bdb27951feb31cb"},
+    {file = "docspec-2.2.1.tar.gz", hash = "sha256:4854e77edc0e2de40e785e57e95880f7095a05fe978f8b54cef7a269586e15ff"},
 ]
 
 [package.dependencies]
-databind = ">=1.5.0,<2.0.0"
+"databind.core" = ">=4.2.6,<5.0.0"
+"databind.json" = ">=4.2.6,<5.0.0"
 Deprecated = ">=1.2.12,<2.0.0"
 
 [[package]]
 name = "docspec-python"
-version = "2.1.2"
+version = "2.2.1"
 description = "A parser based on lib2to3 producing docspec data from Python source code."
 category = "dev"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "docspec_python-2.1.2-py3-none-any.whl", hash = "sha256:ad32f73ef1caca36d81171f19e86861932f53a589040c5deb4d9b85b79be8d3d"},
-    {file = "docspec_python-2.1.2.tar.gz", hash = "sha256:a7f884de3559bab8fd4dd89cc0017dc2ec05e09ff122ba30f142a315b107bdec"},
+    {file = "docspec_python-2.2.1-py3-none-any.whl", hash = "sha256:76ac41d35a8face35b2d766c2e8a416fb8832359785d396f0d53bcb00f178e54"},
+    {file = "docspec_python-2.2.1.tar.gz", hash = "sha256:c41b850b4d6f4de30999ea6f82c9cdb9183d9bcba45559ee9173d3dab7281559"},
 ]
 
 [package.dependencies]
 black = ">=23.1.0,<24.0.0"
-docspec = ">=2.1.2,<3.0.0"
+docspec = ">=2.2.1,<3.0.0"
 "nr.util" = ">=0.7.0"
 
 [[package]]
@@ -1214,6 +1202,30 @@ files = [
 ]
 
 [[package]]
+name = "nr-date"
+version = "2.0.0"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "nr_date-2.0.0-py3-none-any.whl", hash = "sha256:bbc2baa8ce5343ad702e59ce0442a9b17e3b4c5c195f10f51e6b4947a4845bf8"},
+    {file = "nr_date-2.0.0.tar.gz", hash = "sha256:377f88db72c636499f3be9a5980946619a147202715df0b94403e04dba04c179"},
+]
+
+[[package]]
+name = "nr-stream"
+version = "1.1.5"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "nr_stream-1.1.5-py3-none-any.whl", hash = "sha256:47e12150b331ad2cb729cfd9d2abd281c9949809729ba461c6aa87dd9927b2d4"},
+    {file = "nr_stream-1.1.5.tar.gz", hash = "sha256:eb0216c6bfc61a46d4568dba3b588502c610ec8ddef4ac98f3932a2bd7264f65"},
+]
+
+[[package]]
 name = "nr-util"
 version = "0.8.12"
 description = "General purpose Python utility library."
@@ -1406,25 +1418,26 @@ files = [
 
 [[package]]
 name = "pydoc-markdown"
-version = "4.6.4"
+version = "4.8.0"
 description = "Create Python API documentation in Markdown format."
 category = "dev"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "pydoc_markdown-4.6.4-py3-none-any.whl", hash = "sha256:166d384478065f62a0114017fbefdc7fe1fac1d9dc7fa901afed8b1e674328c7"},
-    {file = "pydoc_markdown-4.6.4.tar.gz", hash = "sha256:c3feab1240d397e38b132340dd2310b58a8538eaea78c939e1ca4df9ce098561"},
+    {file = "pydoc_markdown-4.8.0-py3-none-any.whl", hash = "sha256:8bd177719b112eaf8e74759aea99110cdd72e9f6ae2858fccce721ae2212d157"},
+    {file = "pydoc_markdown-4.8.0.tar.gz", hash = "sha256:b9e0804a8d7611be24919e4852ba54b049594f4936051a0c522ecce0cd91db9c"},
 ]
 
 [package.dependencies]
 click = ">=7.1,<9.0"
-databind = ">=1.5.0,<2.0.0"
-docspec = ">=2.0.0a1,<3.0.0"
-docspec-python = ">=2.0.0a1,<3.0.0"
+"databind.core" = ">=4.3.0,<5.0.0"
+"databind.json" = ">=4.3.0,<5.0.0"
+docspec = ">=2.2.1,<3.0.0"
+docspec-python = ">=2.2.1,<3.0.0"
 docstring-parser = ">=0.11,<0.12"
 jinja2 = ">=3.0.0,<4.0.0"
 "nr.util" = ">=0.7.5,<1.0.0"
-PyYAML = ">=5.3,<6.0"
+PyYAML = ">=5.0,<7.0"
 requests = ">=2.23.0,<3.0.0"
 tomli = ">=2.0.0,<3.0.0"
 tomli_w = ">=1.0.0,<2.0.0"
@@ -1937,6 +1950,21 @@ files = [
 all = ["twisted (>=20.3.0)", "zope.interface (>=5.2.0)"]
 dev = ["pep8 (>=1.6.2)", "pyenchant (>=1.6.6)", "pytest (>=2.6.4)", "pytest-cov (>=1.8.1)", "sphinx (>=1.2.3)", "sphinx-rtd-theme (>=0.1.9)", "sphinxcontrib-spelling (>=2.1.2)", "tox (>=2.1.1)", "tox-gh-actions (>=2.2.0)", "twine (>=1.6.5)", "wheel"]
 twisted = ["twisted (>=20.3.0)", "zope.interface (>=5.2.0)"]
+
+[[package]]
+name = "typeapi"
+version = "1.4.3"
+description = ""
+category = "dev"
+optional = false
+python-versions = ">=3.6.3,<4.0.0"
+files = [
+    {file = "typeapi-1.4.3-py3-none-any.whl", hash = "sha256:c8c0b45912ebb65946d192556b20a0552143a8ca95b9246d4eb9ebdddda44035"},
+    {file = "typeapi-1.4.3.tar.gz", hash = "sha256:e293417bd04e7d690112b91665a6523d1685ef3f2b9a37a085079bbefe952750"},
+]
+
+[package.dependencies]
+typing-extensions = ">=3.0.0"
 
 [[package]]
 name = "types-cryptography"
