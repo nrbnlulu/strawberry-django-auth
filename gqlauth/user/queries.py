@@ -1,10 +1,10 @@
 from typing import Optional
 
 import strawberry
+import strawberry_django
 from django.contrib.auth import get_user_model
 from strawberry.schema_directive import Location
 from strawberry.types import Info
-from strawberry_django_plus import gql
 
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
 from gqlauth.core.utils import get_user
@@ -20,16 +20,16 @@ class Sample:
     message: str = "fdsafdsafdsfa"
 
 
-@gql.django.type(model=USER_MODEL, filters=UserFilter)
+@strawberry_django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    @gql.django.field(description="Returns the current user if he is not anonymous.")
+    @strawberry_django.field(description="Returns the current user if he is not anonymous.")
     def public_user(self, info: Info) -> Optional[UserType]:
         user = get_user(info)
         if not user.is_anonymous:
             return user  # type: ignore
         return None
 
-    @gql.django.field()
+    @strawberry_django.field()
     def me(self, info: Info) -> UserType:
         user = get_user(info)
         if not user.is_authenticated:

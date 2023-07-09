@@ -1,12 +1,19 @@
+import pytest
 from django.contrib.auth import get_user_model
 from gqlauth.core.directives import IsVerified
+from strawberry_django.permissions import DjangoNoPermission
 
 USER_MODEL = get_user_model()
 
 
 def test_is_verified_fails(db_unverified_user_status):
-    assert not IsVerified().check_condition(None, None, db_unverified_user_status.user.obj)
+    with pytest.raises(DjangoNoPermission):
+        IsVerified().resolve_for_user(
+            lambda: True, db_unverified_user_status.user.obj, info=None, source=None
+        )
 
 
 def test_is_verified_success(db_verified_user_status):
-    assert IsVerified().check_condition(None, None, db_verified_user_status.user.obj)
+    assert IsVerified().resolve_for_user(
+        lambda: True, db_verified_user_status.user.obj, info=None, source=None
+    )

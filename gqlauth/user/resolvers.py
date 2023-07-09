@@ -5,6 +5,7 @@ from typing import Callable, cast
 from uuid import UUID
 
 import strawberry
+import strawberry_django
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,7 +13,6 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
 from strawberry.field import StrawberryField
 from strawberry.types import Info
-from strawberry_django_plus import gql
 
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.exceptions import (
@@ -88,7 +88,7 @@ with contextlib.suppress(ImportError):
         **The captcha will be invoked when the timeout expires**.
         """
 
-        @gql.django.field(description=__doc__)
+        @strawberry_django.field(description=__doc__)
         def field(self) -> CaptchaType:
             return CaptchaModel.create_captcha()
 

@@ -19,6 +19,7 @@ from strawberry import Schema
 from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
+
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
@@ -282,7 +283,9 @@ async def verified_channels_app_communicator(db_verified_user_status):
 
 
 @pytest.fixture()
-async def unverified_channels_app_communicator(db_verified_user_status):
+async def unverified_channels_app_communicator(
+    db_verified_user_status,
+) -> GraphQLWebsocketCommunicator:
     from testproject.asgi import application
 
     async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:
