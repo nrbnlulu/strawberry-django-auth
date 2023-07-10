@@ -27,7 +27,7 @@ packages = [
 python = ">=3.8,<3.12"
 Django = ">=3.2,<4.3"
 PyJWT = ">=2.6.0,<3.0"
-pillow = {version = "^9.5.0", extras = ["captcha"]}
+pillow = {version = ">=9.5,<11.0", extras = ["captcha"]}
 django-stubs = {extras = ["compatible-mypy"], version = "^4.2.0"}
 strawberry-graphql-django = ">=0.10.5"
 
