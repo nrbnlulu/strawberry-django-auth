@@ -19,6 +19,7 @@ from strawberry import Schema
 from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
+
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema

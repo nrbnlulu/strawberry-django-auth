@@ -9,18 +9,18 @@ repos:
         args: ["--maxkb=1024"]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.4
+    rev: v2.2.5
     hooks:
       - id: codespell
         args: ["--skip=*.json"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.4.0
+    rev: v3.9.0
     hooks:
       - id: pyupgrade
         args: ["--py38-plus"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.270
+    rev: v0.0.277
     hooks:
       - id: ruff
 
@@ -38,6 +38,6 @@ repos:
       - id: poetry-check
 
   - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.1
+    rev: v1.7.3
     hooks:
       - id: docformatter
