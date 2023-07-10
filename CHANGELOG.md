@@ -1,6 +1,22 @@
 CHANGELOG
 =========
 
+0.375.0 - 2023-07-10
+--------------------
+
+This release updates to the latest version of strawberry
+and removes dependencies with strawberry-django-plus.
+
+- The directive `IsVerified` is migrated to the new field
+extensions API and extends the django base permission
+extension.
+
+- The Channels middleware will inject the user in `request.user`
+or `request.scope["UserOrError"]`
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #403](https://github.com/nrbnlulu/strawberry-django-auth/pull/403/)
+
+
 0.374.6 - 2023-05-29
 --------------------
 
