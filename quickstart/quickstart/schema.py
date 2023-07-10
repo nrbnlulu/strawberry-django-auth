@@ -4,7 +4,7 @@ import strawberry
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 from gqlauth.user.resolvers import Captcha
-from strawberry_django_plus.directives import SchemaDirectiveExtension
+from strawberry_django.directives import SchemaDirectiveExtension
 
 
 @strawberry.type

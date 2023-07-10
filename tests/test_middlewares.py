@@ -32,6 +32,7 @@ async def test_channel_middleware_authorized_on_query(
 async def test_channels_middleware_no_user_has_anonymous_user(unverified_channels_app_communicator):
     query = "query { amIAnonymous }"
     async for res in unverified_channels_app_communicator.subscribe(query):
+        print(res.errors)
         assert res.data["amIAnonymous"]
 
 

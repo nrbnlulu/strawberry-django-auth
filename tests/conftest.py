@@ -282,7 +282,9 @@ async def verified_channels_app_communicator(db_verified_user_status):
 
 
 @pytest.fixture()
-async def unverified_channels_app_communicator(db_verified_user_status):
+async def unverified_channels_app_communicator(
+    db_verified_user_status,
+) -> GraphQLWebsocketCommunicator:
     from testproject.asgi import application
 
     async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:

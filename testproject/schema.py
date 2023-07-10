@@ -1,20 +1,19 @@
 from typing import AsyncGenerator
 
 import strawberry
+import strawberry_django
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
 from strawberry.types import Info
-from strawberry_django_plus import gql
-from strawberry_django_plus.directives import SchemaDirectiveExtension
-from strawberry_django_plus.permissions import IsAuthenticated
+from strawberry_django.permissions import IsAuthenticated
 
 from testproject.sample.models import Apple
 
 
-@gql.django.type(model=Apple)
+@strawberry_django.type(model=Apple)
 class AppleType:
     color: strawberry.auto
     name: strawberry.auto
@@ -23,7 +22,7 @@ class AppleType:
 
 @strawberry.type
 class Mutation:
-    @gql.django.field(directives=[IsAuthenticated])
+    @strawberry_django.field(directives=[IsAuthenticated])
     def eat_apple(self, apple_id: int) -> "AppleType":
         apple = Apple.objects.get(id=apple_id)
         apple.is_eaten = True
@@ -50,7 +49,7 @@ class Mutation:
 
 @strawberry.type
 class Query(UserQueries):
-    @gql.django.field(
+    @strawberry_django.field(
         directives=[
             IsAuthenticated(),
         ]
@@ -75,6 +74,4 @@ class Subscription:
             yield get_user(info).username
 
 
-arg_schema = JwtSchema(
-    query=Query, mutation=Mutation, subscription=Subscription, extensions=[SchemaDirectiveExtension]
-)
+arg_schema = JwtSchema(query=Query, mutation=Mutation, subscription=Subscription)
