@@ -99,8 +99,8 @@ class ImageCaptcha(_Captcha):
 
         :param chars: text to be generated.
         :param color: color of the text.
-        :param background: color of the background.         The color
-                should be a tuple of 3 numbers, such as (0, 255, 255).
+        :param background: color of the background. The color should be
+            a tuple of 3 numbers, such as (0, 255, 255).
         """
         image = Image.new("RGB", (self._width, self._height), background)
         draw = Draw(image)
