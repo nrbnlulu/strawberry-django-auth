@@ -92,6 +92,9 @@ python manage.py migrate
 
 ## Install strawberry-django-auth
 
+```bash
+pip install gqlauth
+```
 ```python
 # quickstart.settings.py
 from gqlauth.settings_type import GqlAuthSettings
