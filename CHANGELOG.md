@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+0.376.0 - 2023-08-07
+--------------------
+
+This release removes the call for `authenticate()` on basic JWT authorization in order
+to support multiple authorization backends see issue #268.
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #420](https://github.com/nrbnlulu/strawberry-django-auth/pull/420/)
+
+
 0.375.0 - 2023-07-10
 --------------------
 
