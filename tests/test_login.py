@@ -83,6 +83,7 @@ def default_test(res: ExecutionResult):
     assert not res["errors"]
     assert res["refreshToken"]["token"]
     assert res["token"]["token"]
+    assert res["user"]["lastLogin"]
 
 
 def test_archived_user_becomes_active_on_login(

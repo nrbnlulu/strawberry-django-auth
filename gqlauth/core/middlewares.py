@@ -112,10 +112,9 @@ class JwtSchema(Schema):
         self._inject_user_and_errors(kwargs)
         return await super().execute(*args, **kwargs)
 
-    def subscribe(self, *args, **kwargs):
+    async def subscribe(self, *args, **kwargs):
         self._inject_user_and_errors(kwargs)
-        res = super().subscribe(*args, **kwargs)
-        return res
+        return await super().subscribe(*args, **kwargs)
 
     @staticmethod
     def _inject_user_and_errors(kwargs: dict) -> UserOrError:

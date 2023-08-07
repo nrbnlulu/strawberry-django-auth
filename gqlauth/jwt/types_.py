@@ -7,6 +7,7 @@ import strawberry
 import strawberry_django
 from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
+from django.utils.timezone import localtime
 from strawberry import auto
 from strawberry.types import Info
 
@@ -170,6 +171,7 @@ class ObtainJSONWebTokenType(OutputInterface):
             user: Optional["UserProto"]
             if not (user := authenticate(info.context.request, **args)):  # type: ignore
                 return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+
             from gqlauth.models import UserStatus
 
             status: UserStatus = getattr(user, "status")  # noqa: B009
@@ -178,6 +180,8 @@ class ObtainJSONWebTokenType(OutputInterface):
                 UserStatus.unarchive(user)
             if status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.
+                user.last_login = localtime()
+                user.save(update_fields=("last_login",))
                 return ObtainJSONWebTokenType.from_user(user)
             else:
                 return ObtainJSONWebTokenType(success=False, errors=Messages.NOT_VERIFIED)
