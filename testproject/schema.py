@@ -2,13 +2,13 @@ from typing import AsyncGenerator
 
 import strawberry
 import strawberry_django
+from gqlauth.core.directives import IsVerified
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
 from strawberry.types import Info
-from strawberry_django.permissions import IsAuthenticated
 
 from testproject.sample.models import Apple
 
@@ -22,7 +22,7 @@ class AppleType:
 
 @strawberry.type
 class Mutation:
-    @strawberry_django.field(directives=[IsAuthenticated])
+    @strawberry_django.field(extensions=[IsVerified()])
     def eat_apple(self, apple_id: int) -> "AppleType":
         apple = Apple.objects.get(id=apple_id)
         apple.is_eaten = True
@@ -50,8 +50,8 @@ class Mutation:
 @strawberry.type
 class Query(UserQueries):
     @strawberry_django.field(
-        directives=[
-            IsAuthenticated(),
+        extensions=[
+            IsVerified(),
         ]
     )
     def whatsMyUserName(self, info: Info) -> str:
