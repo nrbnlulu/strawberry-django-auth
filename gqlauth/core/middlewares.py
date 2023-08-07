@@ -48,12 +48,7 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
 
         except TokenExpired:
             user_or_error.error = GQLAuthError(code=GQLAuthErrors.EXPIRED_TOKEN)
-        except Exception as exc:  # pragma: no cover
-            import traceback
 
-            traceback.print_tb(exc.__traceback__)
-            print(exc)
-            raise exc
     else:
         user_or_error.error = GQLAuthError(code=GQLAuthErrors.MISSING_TOKEN)
 
@@ -61,19 +56,17 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
 
 
 def channels_jwt_middleware(inner: Callable):
-    from channels.auth import (
-        login as channels_login,  # deferred import for users that don't use channels.
-    )
 
     if asyncio.iscoroutinefunction(inner):
         get_user_or_error_async = sync_to_async(get_user_or_error)
 
         async def middleware(scope, receive, send):
             if not scope.get(USER_OR_ERROR_KEY, None):
-                user_or_error: UserOrError = await get_user_or_error_async(scope)
+                try:
+                    user_or_error: UserOrError = get_user_or_error(scope)
+                except BaseException as exc:
+                    ...
                 scope[USER_OR_ERROR_KEY] = user_or_error
-                if user := user_or_error.authorized_user():
-                    await channels_login(scope, user)
             return await inner(scope, receive, send)
 
     else:  # pragma: no cover
@@ -87,8 +80,6 @@ def django_jwt_middleware(get_response):
         if not hasattr(request, USER_OR_ERROR_KEY):
             user_or_error: UserOrError = get_user_or_error(request)
             setattr(request, USER_OR_ERROR_KEY, user_or_error)
-            if user := user_or_error.authorized_user():
-                login(request, user)  # type: ignore
 
     if asyncio.iscoroutinefunction(get_response):
         async_logic = sync_to_async(logic)
