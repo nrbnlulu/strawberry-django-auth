@@ -164,7 +164,7 @@ def db_verified_user_status(transactional_db, verified_user_status_type) -> User
 
 
 @pytest.fixture()
-def db_archived_user_status(db, verified_user_status_type) -> UserStatusType:
+def db_archived_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
     us = verified_user_status_type
     us.archived = True
     us.create()
@@ -186,12 +186,12 @@ def wrong_pass_unverified_user_status_type(unverified_user_status_type):
 
 
 @pytest.fixture()
-def captcha(db) -> Captcha:
+def captcha(transactional_db) -> Captcha:
     return Captcha.create_captcha()
 
 
 @pytest.fixture()
-def db_apple(db) -> Apple:
+def db_apple(transactional_db) -> Apple:
     a = Apple(color="red", name="smith")
     a.save()
     return a
@@ -269,6 +269,8 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
 @pytest.fixture()
 async def verified_channels_app_communicator(db_verified_user_status):
     from testproject.asgi import application

@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import asyncio
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import TYPE_CHECKING, Callable
 
 from asgiref.sync import sync_to_async
-from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils.decorators import sync_and_async_middleware
@@ -22,11 +23,11 @@ if TYPE_CHECKING:
 class UserOrError:
     __slots__ = ("user", "error")
 
-    def __init__(self, user: USER_UNION = anon_user, error: Optional[Exception] = None):
+    def __init__(self, user: USER_UNION = anon_user, error: Exception | None = None):
         self.user = user
         self.error = error
 
-    def authorized_user(self) -> Optional[USER_UNION]:
+    def authorized_user(self) -> USER_UNION | None:
         if self.user.is_authenticated:  # real django user model always returns true.
             return self.user
         return None
@@ -35,7 +36,12 @@ class UserOrError:
 USER_OR_ERROR_KEY = UserOrError.__name__
 
 
-def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError:
+def foobar(*args, **kwargs):
+    raise Exception("abaz")
+
+
+def get_user_or_error(*args, **kwargs) -> UserOrError:
+    scope_or_request: dict | HttpRequest = args[0]
     user_or_error = UserOrError()
     if token_str := app_settings.JWT_TOKEN_FINDER(scope_or_request):
         try:
@@ -56,16 +62,14 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
 
 
 def channels_jwt_middleware(inner: Callable):
+    from channels.db import database_sync_to_async
 
     if asyncio.iscoroutinefunction(inner):
-        get_user_or_error_async = sync_to_async(get_user_or_error)
+        get_user_or_error_async = database_sync_to_async(get_user_or_error)
 
         async def middleware(scope, receive, send):
             if not scope.get(USER_OR_ERROR_KEY, None):
-                try:
-                    user_or_error: UserOrError = get_user_or_error(scope)
-                except BaseException as exc:
-                    ...
+                user_or_error: UserOrError = await get_user_or_error_async(scope)
                 scope[USER_OR_ERROR_KEY] = user_or_error
             return await inner(scope, receive, send)
 

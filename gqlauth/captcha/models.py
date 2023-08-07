@@ -1,3 +1,4 @@
+import importlib.util
 import io
 import uuid
 
@@ -7,11 +8,11 @@ from django.utils import timezone
 from gqlauth.captcha.captcha_factorty import CaptchaInstanceType, generate_captcha_text
 from gqlauth.core.constants import Messages
 from gqlauth.settings import gqlauth_settings as app_settings
+
 PILLOW_INSTALLED = False
-try:
-    import PIL
+if importlib.util.find_spec("PIL"):
     PILLOW_INSTALLED = True
-except ImportError:...
+
 
 class Captcha(models.Model):
     instance: CaptchaInstanceType
