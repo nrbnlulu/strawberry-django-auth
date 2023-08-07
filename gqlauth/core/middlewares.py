@@ -2,7 +2,6 @@ import asyncio
 from typing import TYPE_CHECKING, Callable, Optional, Union
 
 from asgiref.sync import sync_to_async
-from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils.decorators import sync_and_async_middleware
@@ -56,15 +55,14 @@ def get_user_or_error(scope_or_request: Union[dict, HttpRequest]) -> UserOrError
 
 
 def channels_jwt_middleware(inner: Callable):
-
     if asyncio.iscoroutinefunction(inner):
-        get_user_or_error_async = sync_to_async(get_user_or_error)
+        sync_to_async(get_user_or_error)
 
         async def middleware(scope, receive, send):
             if not scope.get(USER_OR_ERROR_KEY, None):
                 try:
                     user_or_error: UserOrError = get_user_or_error(scope)
-                except BaseException as exc:
+                except BaseException:
                     ...
                 scope[USER_OR_ERROR_KEY] = user_or_error
             return await inner(scope, receive, send)
