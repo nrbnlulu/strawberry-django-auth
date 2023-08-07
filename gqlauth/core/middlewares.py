@@ -27,21 +27,11 @@ class UserOrError:
         self.user = user
         self.error = error
 
-    def authorized_user(self) -> USER_UNION | None:
-        if self.user.is_authenticated:  # real django user model always returns true.
-            return self.user
-        return None
-
 
 USER_OR_ERROR_KEY = UserOrError.__name__
 
 
-def foobar(*args, **kwargs):
-    raise Exception("abaz")
-
-
-def get_user_or_error(*args, **kwargs) -> UserOrError:
-    scope_or_request: dict | HttpRequest = args[0]
+def get_user_or_error(scope_or_request: dict | HttpRequest) -> UserOrError:
     user_or_error = UserOrError()
     if token_str := app_settings.JWT_TOKEN_FINDER(scope_or_request):
         try:
