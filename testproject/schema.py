@@ -69,7 +69,6 @@ class Subscription:
     async def whatsMyName(self, info: Info, target: int = 10) -> AsyncGenerator[str, None]:
         user = get_user(info)
         assert user.is_authenticated
-        assert user.last_login
         for _ in range(target):
             yield get_user(info).username
 

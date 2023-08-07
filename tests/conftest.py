@@ -19,12 +19,14 @@ from strawberry import Schema
 from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
+from testproject.asgi import application
 from testproject.relay_schema import relay_schema
 from testproject.sample.models import Apple
 from testproject.schema import arg_schema
 
 if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.core.utils import UserProto
+
 UserModel = get_user_model()
 WRONG_PASSWORD = "wrong password"
 CC_USERNAME_FIELD = to_camel_case(UserModel.USERNAME_FIELD)
@@ -164,7 +166,7 @@ def db_verified_user_status(transactional_db, verified_user_status_type) -> User
 
 
 @pytest.fixture()
-def db_archived_user_status(db, verified_user_status_type) -> UserStatusType:
+def db_archived_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
     us = verified_user_status_type
     us.archived = True
     us.create()
@@ -186,12 +188,12 @@ def wrong_pass_unverified_user_status_type(unverified_user_status_type):
 
 
 @pytest.fixture()
-def captcha(db) -> Captcha:
+def captcha(transactional_db) -> Captcha:
     return Captcha.create_captcha()
 
 
 @pytest.fixture()
-def db_apple(db) -> Apple:
+def db_apple(transactional_db) -> Apple:
     a = Apple(color="red", name="smith")
     a.save()
     return a
@@ -269,10 +271,12 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
 @pytest.fixture()
-async def verified_channels_app_communicator(db_verified_user_status):
-    from testproject.asgi import application
-
+async def verified_channels_app_communicator(
+    db_verified_user_status,
+) -> GraphQLWebsocketCommunicator:
     async with GraphQLWebsocketCommunicator(
         application,
         path="graphql",
@@ -285,7 +289,5 @@ async def verified_channels_app_communicator(db_verified_user_status):
 async def unverified_channels_app_communicator(
     db_verified_user_status,
 ) -> GraphQLWebsocketCommunicator:
-    from testproject.asgi import application
-
     async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:
         yield comm

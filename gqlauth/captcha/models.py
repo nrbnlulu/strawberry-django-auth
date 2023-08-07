@@ -1,3 +1,4 @@
+import importlib.util
 import io
 import uuid
 
@@ -8,6 +9,10 @@ from gqlauth.captcha.captcha_factorty import CaptchaInstanceType, generate_captc
 from gqlauth.core.constants import Messages
 from gqlauth.settings import gqlauth_settings as app_settings
 
+PILLOW_INSTALLED = False
+if importlib.util.find_spec("PIL"):
+    PILLOW_INSTALLED = True
+
 
 class Captcha(models.Model):
     instance: CaptchaInstanceType
@@ -15,13 +20,14 @@ class Captcha(models.Model):
     text = models.CharField(max_length=50, editable=False)
     insert_time = models.DateTimeField(auto_now_add=True, editable=False)
     tries = models.IntegerField(default=0)
-    image = models.ImageField(
-        blank=False,
-        null=False,
-        upload_to="captcha/%Y/%m/%d/",
-        editable=False,
-        help_text="url for the captcha image",
-    )
+    if PILLOW_INSTALLED:
+        image = models.ImageField(
+            blank=False,
+            null=False,
+            upload_to="captcha/%Y/%m/%d/",
+            editable=False,
+            help_text="url for the captcha image",
+        )
 
     @staticmethod
     def _format(text: str):
