@@ -1,6 +1,17 @@
 CHANGELOG
 =========
 
+0.376.1 - 2023-08-14
+--------------------
+
+This release fixes the way we set the refresh token's field `revoked`.
+Previously we were passing a naive DateTime object but now we pass the timestamp with the timezone info.
+
+fixes #395
+
+Contributed by [kurttsam](https://github.com/kurttsam) via [PR #424](https://github.com/nrbnlulu/strawberry-django-auth/pull/424/)
+
+
 0.376.0 - 2023-08-07
 --------------------
 
