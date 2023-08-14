@@ -179,7 +179,7 @@ class RefreshToken(models.Model):
         return datetime.now(tz=self.created.tzinfo) > self.expires_at_() or bool(self.revoked)
 
     def revoke(self):
-        self.revoked = datetime.now()
+        self.revoked = timezone.now()
         self.save(update_fields=["revoked"])
 
     objects = RefreshTokenQuerySet.as_manager()  # type: ignore
