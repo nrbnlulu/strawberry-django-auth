@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.376.2 - 2023-08-15
+--------------------
+
+This release restores an accidentally deleted django migrations.
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #430](https://github.com/nrbnlulu/strawberry-django-auth/pull/430/)
+
+
 0.376.1 - 2023-08-14
 --------------------
 
