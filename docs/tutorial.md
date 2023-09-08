@@ -93,7 +93,7 @@ python manage.py migrate
 ## Install strawberry-django-auth
 
 ```bash
-pip install gqlauth
+pip install strawberry-django-auth
 ```
 ```python
 # quickstart.settings.py
