@@ -20,20 +20,20 @@ repos:
         args: ["--py38-plus"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.282
+    rev: v0.0.288
     hooks:
       - id: ruff
 
 
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 23.9.1
     hooks:
       - id: black
         args: ["--config", "pyproject.toml", "--target-version", "py310"]
 
 
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.5.0
+    rev: 1.6.0
     hooks:
       - id: poetry-check
 
