@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.376.3 - 2023-11-21
+--------------------
+
+This release adds support for Python3.12
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #459](https://github.com/nrbnlulu/strawberry-django-auth/pull/459/)
+
+
 0.376.2 - 2023-08-15
 --------------------
 
