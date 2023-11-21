@@ -17,14 +17,15 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
 ]
 packages = [
     { include = "gqlauth" }
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<3.13"
 Django = ">=3.2,<4.3"
 PyJWT = ">=2.6.0,<3.0"
 pillow = {version = ">=9.5,<11.0", extras = ["captcha"]}
