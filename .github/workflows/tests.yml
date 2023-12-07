@@ -17,6 +17,12 @@ jobs:
       matrix:
         django-version: ["3.2.0", "4.1.3", "4.2.8", "5.0"]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        exclude:
+          # excludes Python 3.8 and 3.9 for Django 5.0.
+          - django-version: "5.0"
+            python-version: "3.8"
+          - django-version: "5.0"
+            python-version: "3.9"
 
     steps:
       - name: Checkout
