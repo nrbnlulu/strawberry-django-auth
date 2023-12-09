@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.376.4 - 2023-12-09
+--------------------
+
+This release adds support for Django 5.0 (https://docs.djangoproject.com/en/5.0/releases/5.0/).
+
+Contributed by [Babu Somasundaram](https://github.com/babus) via [PR #464](https://github.com/nrbnlulu/strawberry-django-auth/pull/464/)
+
+
 0.376.3 - 2023-11-21
 --------------------
 
