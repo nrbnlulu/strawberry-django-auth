@@ -42,8 +42,9 @@ def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> Optional[str]:
             if k == b"authorization":
                 token = v.decode()
                 break
-    if token:
-        return token.strip(JWT_PREFIX)
+    if token and token.startswith(JWT_PREFIX):
+        prefix_len = len(JWT_PREFIX)
+        return token[prefix_len:]
     return None
 
 
