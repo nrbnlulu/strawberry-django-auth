@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+0.376.5 - 2024-01-27
+--------------------
+
+Fix bug in removal of JWT prefix.
+In the current implementation if a token happens to contain any trailing J, W or T chars they are also removed.
+This fix ensures we're only interested in the prefix as a substring.
+
 0.376.4 - 2023-12-09
 --------------------
 
