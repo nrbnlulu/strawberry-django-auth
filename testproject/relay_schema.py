@@ -1,9 +1,9 @@
 import strawberry
 import strawberry_django
+from gqlauth.core.directives import IsVerified
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.user import relay
 from gqlauth.user.resolvers import Captcha
-from strawberry_django.permissions import IsAuthenticated
 
 from testproject.schema import Query
 
@@ -18,7 +18,7 @@ class AuthMutation:
 
 @strawberry.type
 class Mutation:
-    @strawberry_django.field(directives=[IsAuthenticated])
+    @strawberry_django.field(extensions=[IsVerified()])
     def auth_entry(self) -> AuthMutation:
         return AuthMutation()
 
