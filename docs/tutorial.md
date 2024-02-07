@@ -343,6 +343,22 @@ python -m  manage loaddata users.json
 ```
 
 
+---
+## Add a GraphQL endpoint to urls.py
+ 
+```python
+# quickstart/urls.py
+from strawberry.django.views import GraphQLView
+
+from .schema import schema
+
+# ...
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("graphql/", GraphQLView.as_view(schema=schema)),
+]
+```
 
 ---
 ## Making your first query
