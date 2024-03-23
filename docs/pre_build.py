@@ -22,7 +22,7 @@ if __name__ == "__main__":
     assert docs_path.exists()
 
     # copy files from project root to docs dir
-    files = ["CONTRIBUTORS.md", "RELEASE.md", "CONTRIBUTING.md"]
+    files = ["CONTRIBUTORS.md", "CHANGELOG.md", "CONTRIBUTING.md"]
     dest = ["contributors.md", "changelog.md", "contributing.md"]
     for index, file in enumerate(files):
         shutil.copyfile(root_dir / file, root_dir / "docs" / dest[index])

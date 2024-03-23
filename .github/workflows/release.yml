@@ -6,8 +6,8 @@ on:
       - main
 jobs:
   deploy:
-    name: Deploy
-    environment: Deployment
+    name: deploy
+    #environment: Deployment
     runs-on: ubuntu-latest
     if: ${{ github.ref=='refs/heads/main' && github.event_name!='pull_request' }}
 

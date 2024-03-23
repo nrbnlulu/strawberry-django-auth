@@ -1,4 +1,3 @@
----
 name: Run Tests
 
 on:
@@ -12,18 +11,18 @@ on:
 jobs:
   tests:
     env:
-      HATCH_ENV: test.py${{ matrix.python-version }}.${{ matrix.django-version }}
+      HATCH_ENV: test.py${{ matrix.python-version }}-${{ matrix.django-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
         exclude:
-          # excludes Python 3.8 and 3.9 for Django 5.0.
-          - django-version: "5.0"
+          # excludes Python 3.8 and 3.9 for Django 5.0.3
+          - django-version: "5.0.3"
             python-version: "3.8"
-          - django-version: "5.0"
+          - django-version: "5.0.3"
             python-version: "3.9"
 
     steps:
@@ -38,9 +37,8 @@ jobs:
       - name: Install Hatch
         run: pipx install hatch
 
-      - name: Run tests
-        run: |
-          hatch test
+      - name: Run Tests
+        run: hatch run test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

@@ -29,7 +29,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-  "Django >=4.2,<6.0",
+  "Django >=3.2,<6.0",
   "PyJWT >=2.6.0,<3.0",
   "pillow >=9.5,<11.0",
   "django-stubs[compatible-mypy] ==4.2.0",
@@ -71,8 +71,12 @@ dependencies = [
 ]
 
 [tool.hatch.envs.docs.scripts]
-prebuild = "python docs/pre_build.py"
-build = "mkdocs build"
+#pre-build = "python docs/pre_build.py"
+#build = "mkdocs build"
+build = [
+  "python docs/pre_build.py",
+  "mkdocs build",
+]
 serve = "mkdocs serve"
 deploy = "mkdocs gh-deploy --force"
 
@@ -88,13 +92,16 @@ extra-dependencies = [
   "pytest-django ~=4.5.2",
 ]
 
-[[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11", "3.12"]
-django = ["5.0.3"]
+#python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+#django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-django = ["4.2.11"]
+django = ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+django = ["5.0.3"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml"

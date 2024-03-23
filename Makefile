@@ -13,17 +13,13 @@ test:
 	poetry run pytest --ds=testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
 
 
-serve:
-	python docs/pre_build.py
-	mkdocs serve
+serve-docs:
+	hatch run docs:serve
 
 build-docs:
-	poetry install
-	python docs/pre_build.py
-	mkdocs build
+	hatch run docs:build
 
 # gh only!
 deploy-docs:
-	python -m pip install -r docs/requirements.txt
-	python docs/pre_build.py
-	mkdocs gh-deploy --force
+	hatch run docs:build
+	hatch run docs:deploy

@@ -68,9 +68,10 @@ dev_addr: 127.0.0.1:7000
 nav:
   - Start here: index.md
   - Tutorial: tutorial.md
-  - directives: directives.md
+  #- directives: directives.md
   - Overriding email templates: overriding-email-templates.md
   - Relay: relay.md
+  - Channels: channels.md
   - Captcha: captcha.md
   - Settings: settings.md
   - API: api.md

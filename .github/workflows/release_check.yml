@@ -1,4 +1,4 @@
-name: 🆙 Release file check
+name: 🆙 Release File Check
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   validate:
-    name: Validate
+    name: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
