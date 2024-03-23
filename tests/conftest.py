@@ -271,8 +271,9 @@ def unverified_schema(rf, db_unverified_user_status) -> SchemaHelper:
     return SchemaHelper.create(rf=rf, us_type=db_unverified_user_status)
 
 
-@pytest.mark.asyncio
-@pytest.mark.django_db(transaction=True)
+#https://docs.pytest.org/en/stable/deprecations.html#applying-a-mark-to-a-fixture-function
+#@pytest.mark.asyncio
+#@pytest.mark.django_db(transaction=True)
 @pytest.fixture()
 async def verified_channels_app_communicator(
     db_verified_user_status,
