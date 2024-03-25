@@ -460,8 +460,7 @@ class UpdateAccountMixin(BaseMixin):
 
     @strawberry.input
     @inject_fields(app_settings.UPDATE_MUTATION_FIELDS)
-    class UpdateAccountInput:
-        ...
+    class UpdateAccountInput: ...
 
     form = UpdateAccountForm
     REQUIRE_VERIFICATION = True
