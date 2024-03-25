@@ -40,7 +40,7 @@ captcha = ["pillow"]
 pre-commit = "^3.3.3"
 coverage = "^7.2"
 pytest = "^7.2"
-pytest-cov = "^4.0"
+pytest-cov = ">=4,<6"
 types-cryptography = "^3.3.23"
 django-mock-queries = "^2.1.7"
 types-mock = "^5.0.0"
