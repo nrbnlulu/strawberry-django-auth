@@ -26,7 +26,7 @@ packages = [{ include = "gqlauth" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.13"
-Django = ">=3.2,<=5.0"
+Django = ">=3.2,<5.1"
 PyJWT = ">=2.6.0,<3.0"
 pillow = { version = ">=9.5,<11.0", extras = ["captcha"] }
 django-stubs = { extras = ["compatible-mypy"], version = "^4.2.0" }
