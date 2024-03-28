@@ -55,13 +55,35 @@ dependencies = [
   "setuptools >=67.6.0",
   "channels[daphne] >=4.0.0",
   "captcha >=0.3.0",
+
+  "coverage[toml]>=6.5",
+  "pytest",
+  "pytest-cov >=4,<6",
+  "django-mock-queries >=2.2.0",
+  "Faker >=18.2.0",
+  "pytest-asyncio >=0.21.0",
+  "pytest-django >=4.8.0",
 ]
+
+[tool.hatch.envs.default.scripts]
+migrate = "python -m migrate"
+test-a = "pytest --ds=testproject.settings -m 'not settings_b' {args:tests}"
+test-b = "pytest --ds=testproject.settings_b -m 'not default_user' {args:tests}"
+test = ["migrate", "test-a", "test-b"]
+
+test-cov-a = "coverage run -m pytest --ds=testproject.settings -m 'not settings_b' {args:tests}"
+test-cov-b = "coverage run -m pytest --ds=testproject.settings_b -m 'not default_user' {args:tests}"
+test-cov = ["migrate", "test-cov-a", "test-cov-b"]
+
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
+serve = "./testproject/manage.py runserver"
 
 # Testing
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-django = ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
+django = ["3.2.25", "4.1.13", "4.2.11"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12"]
@@ -70,21 +92,22 @@ django = ["5.0.3"]
 [tool.hatch.envs.test]
 extra-dependencies = [
   "Django=={matrix:django}",
-  "coverage[toml]>=6.5",
-  "pytest",
-  "pytest-cov >=4,<6",
-  "django-mock-queries ~=2.1.7",
-  "Faker >=18.2.0",
-  "pytest-asyncio >=0.21.0",
-  "pytest-django ~=4.5.2",
 ]
 
-[tool.hatch.envs.test.scripts]
-test = "pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = ["- coverage combine", "coverage report"]
-cov = ["test-cov", "cov-report"]
-serve = "./testproject/manage.py runserver"
+# Coverage
+
+[tool.hatch.envs.coverage]
+detached = true
+dependencies = [
+  "coverage[toml]>=6.2",
+  "lxml",
+]
+[tool.hatch.envs.coverage.scripts]
+combine = "coverage combine {args}"
+report-xml = "coverage xml"
+report-uncovered-html = "coverage html --skip-covered --skip-empty"
+
+# Type Checking
 
 [tool.hatch.envs.types]
 dependencies = [
@@ -95,8 +118,6 @@ dependencies = [
   "types-jwt ~=0.1.0",
   "types-pkg-resources ~=0.1.0",
 ]
-
-# Type Checking
 
 [tool.hatch.envs.types.scripts]
 # TODO: Check tests as well

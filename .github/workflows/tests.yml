@@ -2,11 +2,14 @@ name: Run Tests
 
 on:
   push:
-    branches: [master, main]
+    branches: [main]
   pull_request:
-    branches: [master, main]
+    branches: [main]
   release:
     types: [released]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -16,8 +19,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
+        #python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
+        #django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
+        django-version: ["4.2.11", "5.0.3"]
         exclude:
           # excludes Python 3.8 and 3.9 for Django 5.0.3
           - django-version: "5.0.3"
@@ -27,26 +32,81 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up pip cache
         if: runner.os == 'Linux'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
           restore-keys: ${{ runner.os }}-pip-
   
       - name: Install Hatch
-        run: pipx install hatch
+        run: pip install hatch
 
+      - name: Run static analysis
+        run: hatch fmt --check
+  
+      - name: Check types
+        run: hatch run types:check
+  
       - name: Run Tests
-        run: hatch run test
+        run: hatch run test-cov
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Disambiguate coverage filename
+        run: mv .coverage ".coverage.${{ matrix.python-version }}.${{ matrix.django-version }}"
+  
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}.${{ matrix.django-version }}
+          path: .coverage*
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs:
+      - test
+  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Set up pip cache
+        if: runner.os == 'Linux'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      # Install Hatch
+      - run: pip install hatch
+    
+      - name: Download coverage data
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          merge-multiple: true
+
+      - name: Combine coverage data
+        run: hatch run coverage:combine
+
+      - name: Report coverage
+        run: hatch run coverage:report-xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
