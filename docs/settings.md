@@ -106,8 +106,7 @@ class GqlAuthSettings()
 > A hook called by `GqlAuthRootField` to find the token. Accepts the
 > request object (might be channels scope dict or django request object)
 >
->  **remember to strip the "JWT " prefix
-> if you override this.**
+> **remember to strip the "JWT " prefix if you override this.**
 
 ### JWT\_EXPIRATION\_DELTA
 
