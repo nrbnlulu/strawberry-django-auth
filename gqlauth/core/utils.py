@@ -1,7 +1,7 @@
 import contextlib
 import inspect
 import typing
-from typing import Dict, Iterable, TypeAlias
+from typing import Dict, Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:  # pragma: no cover
         status: UserStatus
 
 else:
-    UserProto: TypeAlias = "UserProto"
+    UserProto = "Foobar to allow import me in runtime."
 
 USER_MODEL = get_user_model()
 USER_UNION = typing.Union["UserProto", AnonymousUser, AbstractBaseUser]
