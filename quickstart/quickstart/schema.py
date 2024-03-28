@@ -8,8 +8,7 @@ from strawberry_django.directives import SchemaDirectiveExtension
 
 
 @strawberry.type
-class Query(UserQueries):
-    ...
+class Query(UserQueries): ...
 
 
 @strawberry.type
