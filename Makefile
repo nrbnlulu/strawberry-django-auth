@@ -12,6 +12,8 @@ test:
 	poetry run pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
 	poetry run pytest --ds=testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
 
+serve:
+	hatch run serve
 
 serve-docs:
 	hatch run docs:serve

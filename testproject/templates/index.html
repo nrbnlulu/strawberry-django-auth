@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strawberry Django Auth</title>
+  <style>
+    body {
+      background-color: #333; /* Dark gray background */
+      color: #eee; /* Light, off-white text */
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    nav ul {
+      list-style-type: none; /* Removes default list styling */
+      padding: 0;
+    }
+
+    nav ul li {
+      display: inline; /* Displays list items inline */
+      margin-right: 20px;
+    }
+
+    nav ul li a {
+      color: #eee; /* Light, off-white link text */
+      text-decoration: none; /* Removes underline from links */
+    }
+
+    /* You can add more styling for buttons, navigation, etc. here */
+  </style>
+  <!-- Example of including a static CSS file in a Django template -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <h1>Strawberry Django Auth</h1>
+
+  <nav>
+    <ul>
+      <li><a href="/admin/">Admin</a></li>
+      <li><a href="/arg_schema">GraphQL (arg_schema)</a></li>
+      <li><a href="/relay_schema">GraphQL (relay_schema)</a></li>
+      <li><a href="/arg_schema_async">GraphQL Async (arg_schema)</a></li>
+      <li><a href="/relay_schema_async">GraphQL Async (relay_schema)</a></li>
+    </ul>
+  </nav>
+</body>
+</html>

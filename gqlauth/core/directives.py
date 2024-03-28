@@ -22,7 +22,7 @@ class IsVerified(DjangoPermissionExtension):
     def resolve_for_user(
         self,
         resolver: Callable,
-        user: UserProto,
+        user: UserProto, # type: ignore
         *,
         info: Info,
         source: Any,

@@ -56,7 +56,7 @@ def get_user(info: Info) -> USER_UNION:
     try:
         return info.context.request.user  # type: ignore
     except AttributeError:
-        return info.context["request"].user
+        return info.context.request.user  # type: ignore
 
 
 def cast_to_status_user(user: USER_UNION) -> UserProto:

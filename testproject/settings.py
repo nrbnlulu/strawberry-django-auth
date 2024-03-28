@@ -14,7 +14,9 @@ from pathlib import Path
 
 from gqlauth.settings_type import GqlAuthSettings
 
-BASE_DIR = Path(__file__).parent
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 sys.path.append(str(BASE_DIR / "testproject"))
 
 SECRET_KEY = "FAKE_KEY"

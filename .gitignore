@@ -29,6 +29,8 @@ dist
 htmlcov/
 
 .venv/
+.env
+.envrc
 
 **/*.tmp
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider

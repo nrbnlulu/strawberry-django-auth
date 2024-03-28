@@ -58,7 +58,7 @@ class UserStatus(models.Model):
 
     def get_email_context(self, info: Info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
-        request = info.context.request
+        request = info.context.request # type: ignore
         site = get_current_site(request)
         return {
             "user": self.user,

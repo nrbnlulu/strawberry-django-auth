@@ -32,7 +32,6 @@ dependencies = [
   "Django >=3.2,<6.0",
   "PyJWT >=2.6.0,<3.0",
   "pillow >=9.5,<11.0",
-  "django-stubs[compatible-mypy] ==4.2.0",
   "strawberry-graphql-django >=0.10.5",
 ]
 
@@ -52,48 +51,13 @@ packages = ["gqlauth"]
 
 [tool.hatch.envs.default]
 dependencies = [
-  #"Django ==5.0.3",
   "pre-commit ~=3.3.3",
   "setuptools >=67.6.0",
   "channels[daphne] >=4.0.0",
   "captcha >=0.3.0",
 ]
 
-[tool.hatch.envs.docs]
-dependencies = [
-  "mkdocs >=1.3.0",
-  "mkdocs-markdownextradata-plugin >=0.2.5",
-  "mkdocs-material >=8.5.4",
-  "mkdocs-minify-plugin >=0.5.0",
-  "pymdown-extensions >=9.9",
-  "Markdown >=3.4.1",
-  "pydoc-markdown[novella] >=4.6.4",
-]
-
-[tool.hatch.envs.docs.scripts]
-#pre-build = "python docs/pre_build.py"
-#build = "mkdocs build"
-build = [
-  "python docs/pre_build.py",
-  "mkdocs build",
-]
-serve = "mkdocs serve"
-deploy = "mkdocs gh-deploy --force"
-
-[tool.hatch.envs.test]
-extra-dependencies = [
-  "Django=={matrix:django}",
-  "coverage[toml]>=6.5",
-  "pytest",
-  "pytest-cov ~=4.0",
-  "django-mock-queries ~=2.1.7",
-  "Faker >=18.2.0",
-  "pytest-asyncio >=0.21.0",
-  "pytest-django ~=4.5.2",
-]
-
-#python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-#django-version: ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
+# Testing
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -103,11 +67,64 @@ django = ["3.2.25", "4.1.13", "4.2.11", "5.0.3"]
 python = ["3.10", "3.11", "3.12"]
 django = ["5.0.3"]
 
+[tool.hatch.envs.test]
+extra-dependencies = [
+  "Django=={matrix:django}",
+  "coverage[toml]>=6.5",
+  "pytest",
+  "pytest-cov >=4,<6",
+  "django-mock-queries ~=2.1.7",
+  "Faker >=18.2.0",
+  "pytest-asyncio >=0.21.0",
+  "pytest-django ~=4.5.2",
+]
+
 [tool.hatch.envs.test.scripts]
 test = "pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = ["- coverage combine", "coverage report"]
 cov = ["test-cov", "cov-report"]
+serve = "./testproject/manage.py runserver"
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+  "django-stubs[compatible-mypy] ==4.2.0",
+  "types-cryptography ~=3.3.23",
+  "types-mock ~=5.0.0",
+  "types-jwt ~=0.1.0",
+  "types-pkg-resources ~=0.1.0",
+]
+
+# Type Checking
+
+[tool.hatch.envs.types.scripts]
+# TODO: Check tests as well
+#check = "mypy --install-types --non-interactive {args:gqlauth tests}"
+check = "mypy --install-types --non-interactive {args:gqlauth}"
+
+# Documentation
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs >=1.3.0",
+  "mkdocs-markdownextradata-plugin >=0.2.5",
+  "mkdocs-material >=8.5.4",
+  "mkdocs-minify-plugin >=0.5.0",
+  "pymdown-extensions >=9.9",
+  "Markdown >=3.4.1",
+  # TODO:
+  # WARNING: pydoc-markdown 4.8.2 does not provide the extra 'novella'
+  "pydoc-markdown[novella] >=4.6.4",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = [
+  "python docs/pre_build.py",
+  "mkdocs build",
+]
+serve = "mkdocs serve"
+deploy = "mkdocs gh-deploy --force"
 
 [tool.pytest.ini_options]
 django_find_project = false
@@ -121,26 +138,6 @@ markers = [
   "default_user: uses the default settings, a user with email address and default USERNAME_FIELD",
   "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",
 ]
-
-[tool.hatch.envs.types]
-dependencies = [
-  "mypy>=1.0.0",
-  "types-cryptography ~=3.3.23",
-  "types-mock ~=5.0.0",
-  "types-jwt ~=0.1.0",
-  "types-pkg-resources ~=0.1.0",
-]
-
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:gqlauth tests}"
-
-[tool.hatch.envs.lint]
-detached = true
-dependencies = ["black>=23.1.0", "ruff>=0.0.243"]
-
-[tool.hatch.envs.lint.scripts]
-check = ["ruff check {args:.}", "black --check --diff {args:.}"]
-fmt = ["black {args:.}", "ruff --fix {args:.}", "style"]
 
 [tool.black]
 line-length = 100
@@ -181,7 +178,7 @@ append-github-contributor = true
 
 [tool.ruff]
 line-length = 100
-fix = true
+#fix = true
 src = ["gqlauth", "tests", "testproject"]
 
 [tool.ruff.lint]

@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "qtgql/**"
+      - "gqlauth/**"
       - "tests/**"
       - ".github/workflows/mypy.yml"
 env:
@@ -31,39 +31,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      #----------------------------------------------
-      #        load pip cache if cache exists
-      #----------------------------------------------
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip
-          restore-keys: ${{ runner.os }}-pip
 
-      #----------------------------------------------
-      #  -----  install & configure poetry  -----
-      #----------------------------------------------
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-
-      #----------------------------------------------
-      #       load cached venv if cache exists
-      #----------------------------------------------
-      - name: Load cached venv
-        id: cached-poetry-dependencies
+      - name: Set up pip cache
+        if: runner.os == 'Linux'
         uses: actions/cache@v3
         with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-
 
-      #----------------------------------------------
-      # install dependencies if cache does not exist
-      #----------------------------------------------
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --all-extras
-
+      - name: Install Hatch
+        run: pipx install hatch
 
       - name: mypy checks
-        run: |
-          poetry run mypy ./gqlauth
+        run: hatch run types:check
