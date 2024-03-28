@@ -1,3 +1,3 @@
-Release type: prepatch
+Release type: patch
 
-Dependencies update
+This release fixes mypy errors, updates linters, and added docs about `JwtSchema`.
