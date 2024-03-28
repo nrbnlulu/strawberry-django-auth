@@ -72,7 +72,7 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     needs:
-      - test
+      - tests
   
     steps:
       - name: Checkout

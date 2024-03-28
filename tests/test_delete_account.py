@@ -15,9 +15,7 @@ def _arg_query(user_status: UserStatusType):
         success
       }
     }
-    """ % (
-        user_status.user.password
-    )
+    """ % (user_status.user.password)
 
 
 def test_invalid_password(

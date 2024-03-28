@@ -10,7 +10,7 @@ import testproject.relay_schema
 from . import schema, views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path("", views.index, name="index"),
     path("admin/", admin.site.urls),
     path("arg_schema", csrf_exempt(GraphQLView.as_view(schema=schema.arg_schema))),
     path(

@@ -43,7 +43,7 @@ class ImageCaptcha(_Captcha):
     ImageCaptcha has one built-in font, DroidSansMono, which is licensed under
     Apache License 2. You should always use your own fonts::
 
-        captcha = ImageCaptcha(fonts=['/path/to/A.ttf', '/path/to/B.ttf'])
+        captcha = ImageCaptcha(fonts=["/path/to/A.ttf", "/path/to/B.ttf"])
 
     You can put as many fonts as you like. But be aware of your memory, all of
     the fonts are loaded into your memory, so keep them a lot, but not too

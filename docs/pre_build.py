@@ -55,9 +55,7 @@ if __name__ == "__main__":
 > auto generated using `pydoc_markdown`
 ___
 {}
-""".format(
-                renderer.render_to_string(modules)
-            )
+""".format(renderer.render_to_string(modules))
         )
 
     # ------------------------------- Settings -----------------------------------
@@ -90,7 +88,5 @@ ___
 > auto generated using `pydoc_markdown`
 ___
 {}
-""".format(
-                renderer.render_to_string(modules)
-            )
+""".format(renderer.render_to_string(modules))
         )
