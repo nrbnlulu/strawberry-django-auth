@@ -18,13 +18,31 @@ All kinds of contributions are welcome:
 If you have a specific contribution in mind, be sure to check the [issues](https://github.com/nrbnlulu/strawberry-django-auth/issues) and [projects](https://github.com/nrbnlulu/strawberry-django-auth/projects) in progress - someone could already be working on something similar and you can help out.
 
 ## Project setup
+```bash
+hatch run bootstrap
+```
 
-After cloning this repo, ensure dependencies are installed by running:
+This will migrate the database and create a super user with the following credentials:
+```
+phone_number: 1234567890
+password: 1234567890
+```
+
+## Development
+
+Run the development server
+
+```bash
+hatch run serve
+```
+
+Activate the default environment and run manually
 
 ```bash
 hatch shell
-hatch run migrate
+./manage.py runserver
 ```
+
 
 ## Running tests
 
@@ -52,14 +70,6 @@ Run tests across all versions in the test matrix:
 
 ```bash
 hatch run test:test
-```
-
-For live testing on a django project, you can use the testproject.
- Create a different virtualenv, install the dependencies again and run:
-
-```bash
-cd testproject
-make install-local v=<CURRENT VERSION IN gqlauth.__init__>
 ```
 
 ## Opening Pull Requests

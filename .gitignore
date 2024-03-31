@@ -20,6 +20,7 @@ __pycache__
 .tox/
 .nox/
 .mypy_cache/
+.ruff_cache/
 .coverage*
 
 site
