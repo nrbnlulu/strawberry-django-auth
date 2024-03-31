@@ -9,7 +9,7 @@ description = "Graphql authentication system with Strawberry for Django."
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = []
+keywords = ["graphql", "auth", "django", "strawberry-graphql"]
 authors = [{ name = "Nir.J Benlulu", email = "nrbnlulu@gmail.com" }]
 maintainers = [{ name = "Nir.J Benlulu", email = "nrbnlulu@gmail.com" }]
 classifiers = [
