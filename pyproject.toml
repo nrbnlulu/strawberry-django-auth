@@ -66,6 +66,13 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
+makemigrations = "python -m manage makemigrations"
+migrate = "python -m manage migrate"
+createsuperuser = "python -m manage createsuperuser"
+createsuperuserauto = "python -m manage createsuperuserauto"
+bootstrap = ["migrate", "createsuperuserauto"]
+serve = "python -m manage runserver"
+
 test-a = "pytest --ds=testproject.settings -m 'not settings_b' {args:tests}"
 test-b = "pytest --ds=testproject.settings_b -m 'not default_user' {args:tests}"
 test = ["test-a", "test-b"]
@@ -76,13 +83,6 @@ test-cov = ["test-cov-a", "test-cov-b"]
 
 cov-report = ["- coverage combine", "coverage report"]
 cov = ["test-cov", "cov-report"]
-
-makemigrations = "python -m manage makemigrations"
-migrate = "python -m manage migrate"
-createsuperuser = "python -m manage createsuperuser"
-createsuperuserauto = "python -m manage createsuperuserauto"
-bootstrap = ["migrate", "createsuperuserauto"]
-serve = "python -m manage runserver"
 
 # Testing
 
