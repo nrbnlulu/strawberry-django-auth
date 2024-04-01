@@ -24,6 +24,6 @@ build-docs:
 
 # gh only!
 deploy-docs:
-	python -m pip install -r docs/requirements.txt
-	python docs/pre_build.py
-	mkdocs gh-deploy --force
+	poetry install
+	poetry run python docs/pre_build.py
+	poetry run mkdocs gh-deploy --force

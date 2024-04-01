@@ -182,6 +182,7 @@ class Query(UserQueries):
     import strawberry
     from gqlauth.user.queries import UserQueries, UserType
     from django.contrib.auth import get_user_model
+    from gqlauth.core.middlewares import JwtSchema
 
     @strawberry.django.type(model=get_user_model())
     class MyQueries:
@@ -216,8 +217,9 @@ class Mutation:
     revoke_token = mutations.RevokeToken.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
 
-
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+# This is essentially the same as strawberries schema though it
+# injects the user to `info.context["request"].user`
+schema = JwtSchema(query=Query, mutation=Mutation)
 
 ```
 
@@ -381,7 +383,7 @@ are ready to continue this guide.
 #### Let's try to register a new user:
 !!! failure "Too weak password"
     === "gql"
-        ```pytohn hl_lines="5 6"
+        ```python hl_lines="5 6"
         mutation {
           register(
             email: "new_user@email.com",

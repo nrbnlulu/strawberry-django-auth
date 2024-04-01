@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib.util
 import io
 import uuid
@@ -20,6 +22,9 @@ class Captcha(models.Model):
     text = models.CharField(max_length=50, editable=False)
     insert_time = models.DateTimeField(auto_now_add=True, editable=False)
     tries = models.IntegerField(default=0)
+
+    objects: models.Manager[Captcha]
+
     if PILLOW_INSTALLED:
         image = models.ImageField(
             blank=False,

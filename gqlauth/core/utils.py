@@ -14,6 +14,7 @@ from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.core.exceptions import TokenScopeError
 
+# Without this it would cause django to complain about import ordering.
 if typing.TYPE_CHECKING:  # pragma: no cover
     from gqlauth.models import UserStatus
     from gqlauth.settings_type import GqlAuthSettings
@@ -21,8 +22,8 @@ if typing.TYPE_CHECKING:  # pragma: no cover
     class UserProto(AbstractBaseUser):
         status: UserStatus
 
-
-UserProto: "UserProto" = "UserProto"  # type: ignore  # noqa: F811
+else:
+    UserProto = "Foobar to allow import me in runtime."
 
 USER_MODEL = get_user_model()
 USER_UNION = typing.Union["UserProto", AnonymousUser, AbstractBaseUser]

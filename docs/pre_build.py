@@ -25,7 +25,8 @@ if __name__ == "__main__":
     files = ["CONTRIBUTORS.md", "RELEASE.md", "CONTRIBUTING.md"]
     dest = ["contributors.md", "changelog.md", "contributing.md"]
     for index, file in enumerate(files):
-        shutil.copyfile(root_dir / file, root_dir / "docs" / dest[index])
+        if (to_copy := root_dir / file).exists():
+            shutil.copyfile(to_copy, docs_path / dest[index])
 
     context = Context(directory=str(user_path))
     loader = PythonLoader(
