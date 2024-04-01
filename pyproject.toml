@@ -95,18 +95,13 @@ python = ["3.10", "3.11", "3.12"]
 django = ["5.0.3"]
 
 [tool.hatch.envs.test]
-extra-dependencies = [
-  "Django=={matrix:django}",
-]
+extra-dependencies = ["Django=={matrix:django}"]
 
 # Coverage
 
 [tool.hatch.envs.coverage]
 detached = true
-dependencies = [
-  "coverage[toml]>=6.2",
-  "lxml",
-]
+dependencies = ["coverage[toml]>=6.2", "lxml"]
 [tool.hatch.envs.coverage.scripts]
 combine = "coverage combine {args}"
 report-xml = "coverage xml"
@@ -145,12 +140,10 @@ dependencies = [
 ]
 
 [tool.hatch.envs.docs.scripts]
-build = [
-  "python docs/pre_build.py",
-  "mkdocs build",
-]
-serve = "mkdocs serve"
-deploy = "mkdocs gh-deploy --force"
+prebuild = "python docs/pre_build.py"
+build = ["prebuild", "mkdocs build"]
+serve = ["prebuild", "mkdocs serve"]
+deploy = ["prebuild", "mkdocs gh-deploy --force"]
 
 [tool.pytest.ini_options]
 django_find_project = false
