@@ -169,7 +169,9 @@ class ObtainJSONWebTokenType(OutputInterface):
         try:
             # authenticate against django authentication backends.
             user: Optional["UserProto"]
-            request = info.context["request"] if isinstance(info.context, dict) else info.context.request
+            request = (
+                info.context["request"] if isinstance(info.context, dict) else info.context.request
+            )
             if not (user := authenticate(request, **args)):  # type: ignore
                 return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
 
