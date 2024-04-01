@@ -112,7 +112,7 @@ class JwtSchema(Schema):
         # channels compat
         if isinstance(context, dict):
             request = context["request"]
-            user_or_error: UserOrError = request.scope[USER_OR_ERROR_KEY]
+            user_or_error: UserOrError = request.consumer.scope[USER_OR_ERROR_KEY]
             request.user = user_or_error.user  # type: ignore
         else:
             user_or_error: UserOrError = getattr(context.request, USER_OR_ERROR_KEY)  # type: ignore
