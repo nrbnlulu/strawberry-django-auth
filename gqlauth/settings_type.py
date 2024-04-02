@@ -16,9 +16,9 @@ from typing import (
 )
 
 from django.http.request import HttpRequest
+from strawberry import ID
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
-from strawberry import ID
 
 import jwt
 
@@ -124,9 +124,7 @@ class DjangoSetting(Generic[T]):
         return DjangoSetting(setting="", value=value)
 
 
-id_field = StrawberryField(
-    python_name="id", default=None, type_annotation=StrawberryAnnotation(ID)
-)
+id_field = StrawberryField(python_name="id", default=None, type_annotation=StrawberryAnnotation(ID))
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
 )
