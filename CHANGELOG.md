@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.376.6 - 2024-03-28
+--------------------
+
+This release fixes mypy errors, updates linters, and added docs about `JwtSchema`.
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #500](https://github.com/nrbnlulu/strawberry-django-auth/pull/500/)
+
+
 0.376.5 - 2024-01-27
 --------------------
 

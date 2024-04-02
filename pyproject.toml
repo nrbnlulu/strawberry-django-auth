@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "strawberry-django-auth"
-version = "0.376.5"
+version = "0.376.6"
 description = "Graphql authentication system with Strawberry for Django."
 readme = "README.md"
 requires-python = ">=3.8"

@@ -8,8 +8,7 @@ from gqlauth.user.resolvers import Captcha
 
 
 @strawberry.type
-class Query(UserQueries):
-    ...
+class Query(UserQueries): ...
 
 
 @strawberry.type
