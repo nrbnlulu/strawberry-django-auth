@@ -34,9 +34,7 @@ def _arg_query(user: UserType, captcha: Captcha):
         )
         { success, errors  }
     }
-    """ % (
-        _generate_register_args(user, captcha)
-    )
+    """ % (_generate_register_args(user, captcha))
 
 
 @pytest.mark.default_user  # settings_b has passwordless registration

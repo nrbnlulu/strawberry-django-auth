@@ -9,9 +9,7 @@ def _arg_query(token):
         verifyAccount(token: "%s")
             { success, errors }
         }
-    """ % (
-        token
-    )
+    """ % (token)
 
 
 def test_verify_user(db_unverified_user_status, anonymous_schema):

@@ -64,9 +64,7 @@ def login_query(request):
             }
           }
         }
-           """ % (
-            arguments
-        )
+           """ % (arguments)
 
     return inner
 

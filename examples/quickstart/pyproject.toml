@@ -1,0 +1,94 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quickstart"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "kfields", email = "kurtisfields@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "Django >=3.2,<6.0",
+  "strawberry-graphql-django >=0.36.0",
+  "channels[daphne] >=4.0.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/unknown/quickstart#readme"
+Issues = "https://github.com/unknown/quickstart/issues"
+Source = "https://github.com/unknown/quickstart"
+
+#[tool.hatch.version]
+#path = "src/quickstart/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+makemigrations = "python -m manage makemigrations"
+migrate = "python -m manage migrate"
+createsuperuser = "python -m manage createsuperuser"
+install = "pip install -r dev-requirements.txt"
+loaddata = "python -m manage loaddata users.json"
+bootstrap = ["install", "migrate", "loaddata"]
+serve = "python -m manage runserver"
+aserve = "daphne quickstart.asgi:application"
+
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/quickstart tests}"
+
+[tool.coverage.run]
+source_pkgs = ["quickstart", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/quickstart/__about__.py",
+]
+
+[tool.coverage.paths]
+quickstart = ["src/quickstart", "*/quickstart/src/quickstart"]
+tests = ["tests", "*/quickstart/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

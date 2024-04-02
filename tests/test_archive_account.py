@@ -13,9 +13,7 @@ def make_query(user_status_type: UserStatusType) -> str:
 
               }
           }
-            """ % (
-        user_status_type.user.password
-    )
+            """ % (user_status_type.user.password)
 
 
 def test_not_verified(unverified_schema):

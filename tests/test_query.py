@@ -25,9 +25,7 @@ query MyQuery {
     verified
   }
 }
-        """ % (
-        CC_USERNAME_FIELD
-    )
+        """ % (CC_USERNAME_FIELD)
 
 
 def test_me_authenticated_success(query, db_verified_user_status, verified_schema):

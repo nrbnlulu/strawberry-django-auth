@@ -19,9 +19,7 @@ def _arg_query(token: str, revoke="false"):
         }}
       }}
     }}
-    """.format(
-        token, revoke
-    )
+    """.format(token, revoke)
 
 
 def test_refresh_token(db_verified_user_status, anonymous_schema):

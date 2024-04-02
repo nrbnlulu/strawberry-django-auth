@@ -35,8 +35,7 @@
       "fields": {
           "user": 2,
           "verified": true,
-          "archived": false,
-          "secondary_email": null
+          "archived": false
       }
   },
   {
@@ -60,8 +59,7 @@
       "fields": {
           "user": 3,
           "verified": true,
-          "archived": true,
-          "secondary_email": null
+          "archived": true
       }
   },
   {
@@ -85,8 +83,7 @@
       "fields": {
           "user": 4,
           "verified": true,
-          "archived": false,
-          "secondary_email": "user4_secondary@email.com"
+          "archived": false
       }
   }
 ]

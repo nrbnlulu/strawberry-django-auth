@@ -22,7 +22,7 @@ if __name__ == "__main__":
     assert docs_path.exists()
 
     # copy files from project root to docs dir
-    files = ["CONTRIBUTORS.md", "RELEASE.md", "CONTRIBUTING.md"]
+    files = ["CONTRIBUTORS.md", "CHANGELOG.md", "CONTRIBUTING.md"]
     dest = ["contributors.md", "changelog.md", "contributing.md"]
     for index, file in enumerate(files):
         if (to_copy := root_dir / file).exists():
@@ -56,9 +56,7 @@ if __name__ == "__main__":
 > auto generated using `pydoc_markdown`
 ___
 {}
-""".format(
-                renderer.render_to_string(modules)
-            )
+""".format(renderer.render_to_string(modules))
         )
 
     # ------------------------------- Settings -----------------------------------
@@ -91,7 +89,5 @@ ___
 > auto generated using `pydoc_markdown`
 ___
 {}
-""".format(
-                renderer.render_to_string(modules)
-            )
+""".format(renderer.render_to_string(modules))
         )

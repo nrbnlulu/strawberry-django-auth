@@ -13,9 +13,7 @@ def _arg_query(token: str):
         }
       }
     }
-    """ % (
-        token
-    )
+    """ % (token)
 
 
 def test_revoke_token(db_verified_user_status, anonymous_schema):

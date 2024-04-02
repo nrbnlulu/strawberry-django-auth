@@ -61,7 +61,7 @@ class Mutation:
     password_change = mutations.PasswordChange.field
     swap_emails = mutations.SwapEmails.field
 
-    # these are mutation that does not require authentication.
+    # These are mutations that do not require authentication.
     captcha = Captcha.field
     token_auth = mutations.ObtainJSONWebToken.field
     register = mutations.Register.field
