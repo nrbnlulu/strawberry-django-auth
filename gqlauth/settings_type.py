@@ -16,6 +16,7 @@ from typing import (
 )
 
 from django.http.request import HttpRequest
+from strawberry import ID
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.field import StrawberryField
 
@@ -123,6 +124,7 @@ class DjangoSetting(Generic[T]):
         return DjangoSetting(setting="", value=value)
 
 
+id_field = StrawberryField(python_name="id", default=None, type_annotation=StrawberryAnnotation(ID))
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
 )
@@ -240,7 +242,10 @@ class GqlAuthSettings:
     encode the token."""
     JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
     """Field that will be used to generate the token from a user instance and
-    retrieve user based on the decoded token.
+    retrieve user based on the decoded token. The default value is the username
+    field of the User model. If you want to change it to id, for example, you
+    can use the id_field defined in gqlauth.settings_type and change it like
+    JWT_PAYLOAD_PK=id_field.
 
     *This filed must be unique in the database*
     """

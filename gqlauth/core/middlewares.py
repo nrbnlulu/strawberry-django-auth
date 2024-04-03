@@ -112,7 +112,11 @@ class JwtSchema(Schema):
         # channels compat
         if isinstance(context, dict):
             request = context["request"]
-            user_or_error: UserOrError = request.scope[USER_OR_ERROR_KEY]
+            try:
+                user_or_error: UserOrError = request.consumer.scope[USER_OR_ERROR_KEY]
+            except AttributeError:
+                # FIXME: This is here because the test consumer is not 1:1 as a real client ATM
+                user_or_error = request.scope[USER_OR_ERROR_KEY]
             request.user = user_or_error.user  # type: ignore
         else:
             user_or_error: UserOrError = getattr(context.request, USER_OR_ERROR_KEY)  # type: ignore
