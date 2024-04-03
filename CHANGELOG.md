@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+0.376.7 - 2024-04-03
+--------------------
+
+Fix channels support: Fixing side effects of changing the structure of a context object
+Add gqlauth.settings_type.id_field to use in project settings
+
+Contributed by [Hyun S. Moon](https://github.com/shmoon-kr) via [PR #504](https://github.com/nrbnlulu/strawberry-django-auth/pull/504/)
+
+
 0.376.6 - 2024-03-28
 --------------------
 
