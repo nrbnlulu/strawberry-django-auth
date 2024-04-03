@@ -242,10 +242,10 @@ class GqlAuthSettings:
     encode the token."""
     JWT_PAYLOAD_PK: StrawberryField = field(default_factory=lambda: username_field)
     """Field that will be used to generate the token from a user instance and
-    retrieve user based on the decoded token. The default value is the
-    username field of the User model. If you want to change it to id,
-    for example, you can use the id_field defined in gqlauth.settings_type
-    and change it like JWT_PAYLOAD_PK=id_field.
+    retrieve user based on the decoded token. The default value is the username
+    field of the User model. If you want to change it to id, for example, you
+    can use the id_field defined in gqlauth.settings_type and change it like
+    JWT_PAYLOAD_PK=id_field.
 
     *This filed must be unique in the database*
     """
