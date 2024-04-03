@@ -35,6 +35,6 @@ from gqlauth.core.middlewares import JwtSchema
 
 
 arg_schema = JwtSchema(
-    query=Query, mutation=Mutation, subscription=Subscription]
+    query=Query, mutation=Mutation, subscription=Subscription
 )
 ```

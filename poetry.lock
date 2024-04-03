@@ -581,13 +581,13 @@ tests = ["django", "hypothesis", "pytest", "pytest-asyncio"]
 
 [[package]]
 name = "databind"
-version = "4.5.0"
+version = "4.5.1"
 description = "Databind is a library inspired by jackson-databind to de-/serialize Python dataclasses. The `databind` package will install the full suite of databind packages. Compatible with Python 3.8 and newer."
 optional = false
-python-versions = ">=3.8.0,<4.0.0"
+python-versions = "<4.0.0,>=3.8.0"
 files = [
-    {file = "databind-4.5.0-py3-none-any.whl", hash = "sha256:68afe8df968a05f67fedf914b6a8ea9159c18a44a2d6d4fd716e2edd94d87f67"},
-    {file = "databind-4.5.0.tar.gz", hash = "sha256:75ddfed49f86a95101fee2712b10f17708fc4f60f0ac3a5d0409afce2bd7ecdf"},
+    {file = "databind-4.5.1-py3-none-any.whl", hash = "sha256:e8eae14d2bbf41dfbe598883deda5c8088dfcb3ce55344b216925ea4ad48d5cf"},
+    {file = "databind-4.5.1.tar.gz", hash = "sha256:66f912f100d81acbbe8b9b2c5280a04341bca5d3925669371a551cc354350962"},
 ]
 
 [package.dependencies]
@@ -600,31 +600,31 @@ typing-extensions = ">=3.10.0,<5"
 
 [[package]]
 name = "databind-core"
-version = "4.5.0"
+version = "4.5.1"
 description = "Databind is a library inspired by jackson-databind to de-/serialize Python dataclasses. Compatible with Python 3.8 and newer. Deprecated, use `databind` package."
 optional = false
-python-versions = ">=3.8.0,<4.0.0"
+python-versions = "<4.0.0,>=3.8.0"
 files = [
-    {file = "databind_core-4.5.0-py3-none-any.whl", hash = "sha256:dfd27630e3a9a4fb47705f89b9f53737dba585ddcfb88f4dd7415bb1683dd76f"},
-    {file = "databind_core-4.5.0.tar.gz", hash = "sha256:12121bef338ad8ea1f751b53d06dcb373b52898d435bc97d4d0459d80f06f949"},
+    {file = "databind.core-4.5.1-py3-none-any.whl", hash = "sha256:df782c1bd2e416e268796918c4bdcdc2b9e948e2c263423ae9af1f5c50087973"},
+    {file = "databind.core-4.5.1.tar.gz", hash = "sha256:d938777ab612188bef2070f12150e1cf07d0659459dd858a12edce80bdad64fa"},
 ]
 
 [package.dependencies]
-databind = ">=4.5.0,<5.0.0"
+databind = ">=4.5.1,<5.0.0"
 
 [[package]]
 name = "databind-json"
-version = "4.5.0"
+version = "4.5.1"
 description = "De-/serialize Python dataclasses to or from JSON payloads. Compatible with Python 3.8 and newer. Deprecated, use `databind` module instead."
 optional = false
-python-versions = ">=3.8.0,<4.0.0"
+python-versions = "<4.0.0,>=3.8.0"
 files = [
-    {file = "databind_json-4.5.0-py3-none-any.whl", hash = "sha256:121699bbc921710e0f413f9479c3e1a3163c1b3291d393c371df729119acd1f3"},
-    {file = "databind_json-4.5.0.tar.gz", hash = "sha256:663b0be83781bc4ba312cccb181590566406a3808f26edb52d347c1053f66bf2"},
+    {file = "databind.json-4.5.1-py3-none-any.whl", hash = "sha256:d05854afbc0e398f427b6bd6172560eee41ab36ca4953c3b92fd8aa4c81f7502"},
+    {file = "databind.json-4.5.1.tar.gz", hash = "sha256:40363b1ae4322e877a02e4b7b5dc2c9ca8be4176e2b567a3f9718ee52543c1d1"},
 ]
 
 [package.dependencies]
-databind = ">=4.5.0,<5.0.0"
+databind = ">=4.5.1,<5.0.0"
 
 [[package]]
 name = "deprecated"
@@ -1127,13 +1127,13 @@ pyyaml = "*"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.16"
+version = "9.5.17"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.16-py3-none-any.whl", hash = "sha256:32fce3cd8ecbd5dca6e5887cc0cf5bc78707a36f7d0f6f1bbbe9edaf428b8055"},
-    {file = "mkdocs_material-9.5.16.tar.gz", hash = "sha256:8b89b639592660f24657bb058de4aff0060cd0383148f8f51711201730f17503"},
+    {file = "mkdocs_material-9.5.17-py3-none-any.whl", hash = "sha256:14a2a60119a785e70e765dd033e6211367aca9fc70230e577c1cf6a326949571"},
+    {file = "mkdocs_material-9.5.17.tar.gz", hash = "sha256:06ae1275a72db1989cf6209de9e9ecdfbcfdbc24c58353877b2bb927dbe413e4"},
 ]
 
 [package.dependencies]
@@ -2009,13 +2009,13 @@ starlite = ["starlite (>=1.48.0)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.36.0"
+version = "0.37.0"
 description = "Strawberry GraphQL Django extension"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "strawberry_graphql_django-0.36.0-py3-none-any.whl", hash = "sha256:fdf5cfd78b352b47e7d576669b5db77a7e5067c0f91f1b3c9d01e344d845ebab"},
-    {file = "strawberry_graphql_django-0.36.0.tar.gz", hash = "sha256:37b7875a49b72e405ab275efcd6fe953a45cf9b3e2c45d57bae9113cbe8d18c5"},
+    {file = "strawberry_graphql_django-0.37.0-py3-none-any.whl", hash = "sha256:ff30fcb48ff0148e57c36c9e1aa8103ad3d2bd46a72b129ca16b527b0b55c0d1"},
+    {file = "strawberry_graphql_django-0.37.0.tar.gz", hash = "sha256:c9d33c2212b23c8ff40a9e8d92225e651736dd83746f8826b07d8a1dead5e167"},
 ]
 
 [package.dependencies]
@@ -2496,4 +2496,4 @@ captcha = ["pillow"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.13"
-content-hash = "d45cd1e5aca093ff97d3381d0d5e7774bc563fda5b96cfb487c998e432895326"
+content-hash = "edb447e1e7def0593f8fa70df51f2cf464aeae6de6fe723707812e3f74298f65"
