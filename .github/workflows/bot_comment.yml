@@ -1,0 +1,32 @@
+name: 🫸 Bot comment
+
+on:
+  pull_request_target:
+    types: [synchronize, reopened, opened, ready_for_review]
+    branches:
+    - main
+    paths:
+    - "gqlauth/**"
+    - ".github/workflows/bot_comment.yml"
+    - "RELEASE.md"
+
+jobs:
+  bot_comment:
+    name:  Create or update bot status comment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: setup poetry
+        run: |
+          pip install poetry
+          poetry install
+      - name: upload comment
+        run:
+          cd .github && poetry run python -m workflows.management bot_comment
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
