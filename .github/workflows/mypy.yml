@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "qtgql/**"
+      - "gqlauth/**"
       - "tests/**"
       - ".github/workflows/mypy.yml"
 env:
