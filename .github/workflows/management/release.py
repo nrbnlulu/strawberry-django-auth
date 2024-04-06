@@ -97,7 +97,7 @@ def get_last_commit_contributor(token: str) -> PRContributor:
     )
 
 
-INIT_FILE = PATHS.GQLAUTHCODEGEN_ROOT / "__init__.py"
+INIT_FILE = PATHS.PROJECT_ROOT / "__init__.py"
 
 
 def update_python_versions(version: str) -> None:
