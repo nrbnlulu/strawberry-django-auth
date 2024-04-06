@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.376.10 - 2024-04-06
+--------------------
+try release 2
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #517](https://github.com/nrbnlulu/strawberry-django-auth/pull/517/)
+
 0.376.9 - 2024-04-06
 --------------------
 try release 1
