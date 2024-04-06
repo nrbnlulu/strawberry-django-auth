@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.376.9 - 2024-04-06
+--------------------
+try release 1
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #516](https://github.com/nrbnlulu/strawberry-django-auth/pull/516/)
+
 0.376.8 - 2024-04-06
 --------------------
 This release improves the CD
