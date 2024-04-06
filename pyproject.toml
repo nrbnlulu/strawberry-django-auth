@@ -54,6 +54,7 @@ pydoc-markdown = { extras = ["novella"], version = ">=4.6.4" }
 setuptools = ">=67.6.0"
 channels = { extras = ["daphne"], version = ">=4.0.0" }
 pytest-django = "^4.5.2"
+typer = "^0.12.1"
 
 
 [tool.pytest.ini_options]
