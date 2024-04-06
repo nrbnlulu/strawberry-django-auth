@@ -97,7 +97,7 @@ def get_last_commit_contributor(token: str) -> PRContributor:
     )
 
 
-INIT_FILE = PATHS.PROJECT_ROOT / "__init__.py"
+INIT_FILE = PATHS.PROJECT_SOURCE / "__init__.py"
 
 
 def update_python_versions(version: str) -> None:
@@ -172,7 +172,6 @@ def main() -> None:
     configure_git(git_username, git_email)
     git(
         "add",
-        str(PATHS.ROOT_CMAKE),
         str(INIT_FILE),
         str(PATHS.PYPROJECT_TOML.resolve(True)),
         str(PATHS.CHANGELOG.resolve(True)),
