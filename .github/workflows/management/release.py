@@ -13,7 +13,7 @@ from . import githubref
 from .releasefile import ReleasePreview, parse_release_file
 from .utils import PATHS
 
-REPO_SLUG = "nrbnlulu/gqlauth"
+REPO_SLUG = "nrbnlulu/strawberry-django-auth"
 
 PROJECT_NAME = "gqlauth"
 git_username = "GqlAuthBot"

@@ -10,7 +10,7 @@ def get_github_session(token: str = os.getenv("BOT_TOKEN")) -> Github:
 
 
 def get_repo(g: Github) -> Repository:
-    return g.get_repo("nrbnlulu/gqlauth")
+    return g.get_repo("nrbnlulu/strawberry-django-auth")
 
 
 def get_pr(g: Github, num: int) -> PullRequest:
