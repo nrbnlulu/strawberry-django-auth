@@ -50,7 +50,9 @@ def test_register_invalid_password_validation(verified_user_status_type, anonymo
     assert executed["errors"]
 
 
-async def test_channels_register(verified_user_status_type, captcha, verified_channels_app_communicator):
+async def test_channels_register(
+    verified_user_status_type, captcha, verified_channels_app_communicator
+):
     us = verified_user_status_type
     query = _arg_query(us.user, captcha)
     async for res in verified_channels_app_communicator.subscribe(query):
