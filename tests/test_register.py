@@ -50,6 +50,16 @@ def test_register_invalid_password_validation(verified_user_status_type, anonymo
     assert executed["errors"]
 
 
+async def test_channels_register(verified_user_status_type, async_client, captcha):
+    us = verified_user_status_type
+    res = await async_client.post(
+        path="/arg_schema",
+        data={"query": _arg_query(us.user, captcha)},
+        content_type="application/json",
+    )
+    assert res.json()["data"]["register"]["success"] is True
+
+
 def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
     """Register user, fail to register same user again."""
     signal_received = False
