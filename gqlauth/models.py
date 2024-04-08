@@ -58,35 +58,32 @@ class UserStatus(models.Model):
 
     def get_email_context(self, info: Info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
-        if isinstance(info.context, dict):
-            request = info.context["request"]
-            return {
-                "user": self.user,
-                "request": request,
-                "token": token,
-                "port": request.headers["host"].split(":")[1],
-                "site_name": request.headers["host"].split(":")[0],
-                "domain": request.headers["host"].split(":")[0],
-                "protocol": request.consumer.scope["type"],
-                "path": path,
-                "timestamp": time.time(),
-                **app_settings.EMAIL_TEMPLATE_VARIABLES,
-            }
+        is_channels = isinstance(info.context, dict)
+        if is_channels:
+            request = info.context['request']
+            domain, port = request.headers["host"].split(":")
+            site_name = domain
+            protocol = request.consumer.scope["type"]
         else:
             request = info.context.request
             site = get_current_site(request)
-            return {
-                "user": self.user,
-                "request": request,
-                "token": token,
-                "port": request.get_port(),
-                "site_name": site.name,
-                "domain": site.domain,
-                "protocol": "https" if request.is_secure() else "http",
-                "path": path,
-                "timestamp": time.time(),
-                **app_settings.EMAIL_TEMPLATE_VARIABLES,
-            }
+            port = request.get_port()
+            site_name = site.name
+            domain = site.domain
+            protocol = "https" if request.is_secure() else "http",
+
+        return {
+            "user": self.user,
+            "request": request,
+            "token": token,
+            "port": port,
+            "site_name": site_name,
+            "domain": domain,
+            "protocol": protocol,
+            "path": path,
+            "timestamp": time.time(),
+            **app_settings.EMAIL_TEMPLATE_VARIABLES,
+        }
 
     def send_activation_email(self, info, *args, **kwargs):
         email_context = self.get_email_context(
