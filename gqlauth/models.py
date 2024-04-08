@@ -70,7 +70,7 @@ class UserStatus(models.Model):
             port = request.get_port()
             site_name = site.name
             domain = site.domain
-            protocol = ("https" if request.is_secure() else "http",)
+            protocol = "https" if request.is_secure() else "http"
 
         return {
             "user": self.user,
