@@ -59,7 +59,7 @@ class UserStatus(models.Model):
     def get_email_context(self, info: Info, path, action, **kwargs):
         token = get_token(self.user, action, **kwargs)
         if isinstance(info.context, dict):
-            request = info.context['request']
+            request = info.context["request"]
             return {
                 "user": self.user,
                 "request": request,
