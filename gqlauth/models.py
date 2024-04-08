@@ -60,7 +60,7 @@ class UserStatus(models.Model):
         token = get_token(self.user, action, **kwargs)
         is_channels = isinstance(info.context, dict)
         if is_channels:
-            request = info.context['request']
+            request = info.context["request"]
             domain, port = request.headers["host"].split(":")
             site_name = domain
             protocol = request.consumer.scope["type"]
@@ -70,7 +70,7 @@ class UserStatus(models.Model):
             port = request.get_port()
             site_name = site.name
             domain = site.domain
-            protocol = "https" if request.is_secure() else "http",
+            protocol = ("https" if request.is_secure() else "http",)
 
         return {
             "user": self.user,
