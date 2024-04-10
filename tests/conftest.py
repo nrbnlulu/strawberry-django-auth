@@ -290,4 +290,6 @@ async def unverified_channels_app_communicator(
     db_verified_user_status,
 ) -> GraphQLWebsocketCommunicator:
     async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:
+        # We need this in the register test
+        comm.scope["headers"].append(("host", "localhost:8000"))
         yield comm
