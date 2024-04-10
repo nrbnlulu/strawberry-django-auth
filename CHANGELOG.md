@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.376.11 - 2024-04-10
+--------------------
+Fix register fails on channels requests. #137Do not call get_current_site() from get_email_context()Extract values from channels context.
+
+Contributed by [Hyun S. Moon](https://github.com/shmoon-kr) via [PR #519](https://github.com/nrbnlulu/strawberry-django-auth/pull/519/)
+
 0.376.10 - 2024-04-06
 --------------------
 try release 2
