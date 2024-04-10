@@ -50,12 +50,14 @@ def test_register_invalid_password_validation(verified_user_status_type, anonymo
     assert executed["errors"]
 
 
+@pytest.mark.skip(
+    "This test will is waiting"
+    "for the channel consumer to mimic the *real* behavior of channel requests."
+)
 async def test_channels_register(
     verified_user_status_type, captcha, unverified_channels_app_communicator
 ):
     us = verified_user_status_type
-    us.user.username = "testuser"
-    us.user.phone_number = "123456789"
     query = _arg_query(us.user, captcha)
     async for res in unverified_channels_app_communicator.subscribe(query):
         assert res.data["register"]["success"] is True

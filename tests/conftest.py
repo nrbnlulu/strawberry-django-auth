@@ -290,4 +290,8 @@ async def unverified_channels_app_communicator(
     db_verified_user_status,
 ) -> GraphQLWebsocketCommunicator:
     async with GraphQLWebsocketCommunicator(application, path="graphql") as comm:
+        comm.scope["headers"].append(("host", "localhost:8000"))
+        # A trick because in a real application it is behind the
+        # 'request' object (which I assume provide some abstraction for the scope)
+        comm.consumer = comm
         yield comm
