@@ -526,7 +526,7 @@ class RefreshTokenMixin(BaseMixin):
             success=True,
             token=TokenType.from_user(user),
             user=user,
-            refresh_token=res  # type: ignore
+            refresh_token=res,  # type: ignore
         )
         if input_.revoke_refresh_token:
             res.revoke()
