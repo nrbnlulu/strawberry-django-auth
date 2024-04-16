@@ -7,7 +7,6 @@ import strawberry
 import strawberry_django
 from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
-from django.utils.timezone import localtime
 from strawberry import auto
 from strawberry.types import Info
 
@@ -183,7 +182,7 @@ class ObtainJSONWebTokenType(OutputInterface):
                 UserStatus.unarchive(user)
             if status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.
-                user.last_login = localtime()
+                user.last_login = datetime.now()
                 user.save(update_fields=("last_login",))
                 return ObtainJSONWebTokenType.from_user(user)
             else:
