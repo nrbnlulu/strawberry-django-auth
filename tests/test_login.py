@@ -104,7 +104,7 @@ def test_login_success(verified_schema, unverified_schema, allow_login_not_verif
 
 
 @override_settings(USE_TZ=False)
-def test_login_success(verified_schema, unverified_schema, allow_login_not_verified, login_query):
+def test_login_success_no_timezone(verified_schema, unverified_schema, allow_login_not_verified, login_query):
     res = verified_schema.execute(login_query(verified_schema.us_type))
     default_test(res)
 
