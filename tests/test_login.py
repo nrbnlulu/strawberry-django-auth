@@ -1,9 +1,8 @@
 import pytest
 from django.apps import apps
-from django.test import TestCase
-from django.db.migrations.executor import MigrationExecutor
 from django.db import connection
-from django.test import override_settings
+from django.db.migrations.executor import MigrationExecutor
+from django.test import TestCase, override_settings
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings_type import GqlAuthSettings
@@ -91,8 +90,9 @@ class TestMigrations(TestCase):
     migrate_to = None
 
     def setUp(self):
-        assert self.migrate_from and self.migrate_to, \
-            "TestCase '{}' must define migrate_from and migrate_to     properties".format(type(self).__name__)
+        assert (
+            self.migrate_from and self.migrate_to
+        ), f"TestCase '{type(self).__name__}' must define migrate_from and migrate_to     properties"
         self.migrate_from = [(self.app, self.migrate_from)]
         self.migrate_to = [(self.app, self.migrate_to)]
         executor = MigrationExecutor(connection)
@@ -116,14 +116,14 @@ class TestMigrations(TestCase):
 
 class TagsTestCase(TestMigrations):
 
-    migrate_from = '0001_initial'
-    migrate_to = '0002_alter_userstatus_options'
+    migrate_from = "0001_initial"
+    migrate_to = "0002_alter_userstatus_options"
 
     def setUpBeforeMigration(self, apps):
-        UserModel.objects.create(username='testusername')
+        UserModel.objects.create(username="testusername")
 
     def test_tags_migrated(self):
-        user = UserModel.objects.get(username='testusername')
+        user = UserModel.objects.get(username="testusername")
         self.assertTrue(user.status is not None)
 
 
