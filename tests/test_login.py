@@ -1,4 +1,5 @@
 import pytest
+from django.test import override_settings
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings_type import GqlAuthSettings
@@ -97,6 +98,12 @@ def test_archived_user_becomes_active_on_login(
     default_test(res)
 
 
+def test_login_success(verified_schema, unverified_schema, allow_login_not_verified, login_query):
+    res = verified_schema.execute(login_query(verified_schema.us_type))
+    default_test(res)
+
+
+@override_settings(USE_TZ=False)
 def test_login_success(verified_schema, unverified_schema, allow_login_not_verified, login_query):
     res = verified_schema.execute(login_query(verified_schema.us_type))
     default_test(res)
