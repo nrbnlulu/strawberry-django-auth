@@ -10,7 +10,7 @@ class GqlAuthSettings()
 
 ### ALLOW\_LOGIN\_NOT\_VERIFIED
 
-> 
+>
 
 ### LOGIN\_FIELDS
 
@@ -18,7 +18,7 @@ class GqlAuthSettings()
 > function. This function will call each of our `AUTHENTICATION_BACKENDS`,
 > And will return the user from one of them unless `PermissionDenied` was
 > raised. You can pass any fields that would be accepted by your backends.
-> 
+>
 > **Note that `password field` is mandatory and cannot be removed.**
 
 ### LOGIN\_REQUIRE\_CAPTCHA
@@ -46,7 +46,7 @@ class GqlAuthSettings()
 ### CAPTCHA\_TEXT\_FACTORY
 
 > A callable with no arguments that returns a string.
-> 
+>
 > This will be used to generate the captcha image.
 
 ### CAPTCHA\_TEXT\_VALIDATOR
@@ -101,20 +101,20 @@ class GqlAuthSettings()
 > field of the User model. If you want to change it to id, for example, you
 > can use the id_field defined in gqlauth.settings_type and change it like
 > JWT_PAYLOAD_PK=id_field.
-> 
+>
 > *This filed must be unique in the database*
 
 ### JWT\_TOKEN\_FINDER
 
 > A hook called by `GqlAuthRootField` to find the token. Accepts the
 > request object (might be channels scope dict or django request object)
-> 
+>
 > **remember to strip the "JWT " prefix if you override this.**
 
 ### JWT\_EXPIRATION\_DELTA
 
 > Timedelta added to `utcnow()` to set the expiration time.
-> 
+>
 > When this ends you will have to create a new token by logging in or
 > using the refresh token.
 
@@ -130,5 +130,3 @@ class GqlAuthSettings()
 ### JWT\_REFRESH\_EXPIRATION\_DELTA
 
 > Refresh token expiration time delta.
-
-
