@@ -11,6 +11,7 @@
 - Python: >= 3.8
 - Django: >= 3.2
 - Basic knowledge in [Strawberry](https://strawberry.rocks/)
+
 ---
 
 ## Start a new Django Project
@@ -22,9 +23,10 @@
 ### Create the virtual env
 
 ```bash
+mkdir strawberry-django-auth-tutorial
+cd strawberry-django-auth-tutorial
 python -m venv venv
-cd venv/bin
-source activate.sh
+source venv/bin/activate
 ```
 
 ### Create the Django Project
@@ -35,11 +37,10 @@ First install django:
 python -m pip install django
 ```
 
-Then, create the new project:
+Then, create the new project. Take note of the "." at the end of the command, it will create the project in the current directory.:
 
 ```bash
-django-admin startproject quickstart
-cd quickstart
+django-admin startproject quickstart .
 ```
 
 ### Create the custom user model
@@ -95,8 +96,9 @@ python manage.py migrate
 ```bash
 pip install strawberry-django-auth
 ```
+
 ```python
-# quickstart.settings.py
+# quickstart/settings.py
 from gqlauth.settings_type import GqlAuthSettings
 
 INSTALLED_APPS = [
@@ -118,8 +120,11 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 ```
+
 We will disable captcha validation for now, just for ease of setup.
+
 ```py
+# quickstart/settings.py
 from gqlauth.settings_type import GqlAuthSettings
 
 GQL_AUTH = GqlAuthSettings(
@@ -138,6 +143,7 @@ TEMPLATES = [
     },
 ]
 ```
+
 Run:
 
 ```bash
@@ -145,30 +151,32 @@ python -m manage migrate
 ```
 
 ---
+
 ## Create the schema
 
-Create a file called `schema.py` next to your `settings.py`
+Create a file called `schema.py` next to your `models.py`
 
 Add the following to code:
 
 ```py
-# yourapp/users/schema.py
+# users/schema.py
 
 import strawberry
 from gqlauth.user.queries import UserQueries
+from gqlauth.core.middlewares import JwtSchema
 
 ```
+
 === "Default"
     ```py
     from gqlauth.user import arg_mutations as mutations
     ```
 
 === "Relay"
-
     ```py
     from gqlauth.user import relay as mutations
-
     ```
+
 ```py
 
 @strawberry.type
@@ -176,21 +184,21 @@ class Query(UserQueries):
     # you can add your queries here
     ...
 ```
+
 ??? Note "you can choose what fields to include like this"
 
-    ```python
-    import strawberry
-    from gqlauth.user.queries import UserQueries, UserType
-    from django.contrib.auth import get_user_model
-    from gqlauth.core.middlewares import JwtSchema
+  ```python
+  import strawberry
+  from gqlauth.user.queries import UserQueries, UserType
+  from django.contrib.auth import get_user_model
+  from gqlauth.core.middlewares import JwtSchema
 
-    @strawberry.django.type(model=get_user_model())
-    class MyQueries:
-        me: UserType = UserQueries.me
-        public: UserType = UserQueries.public_user
-        # etc...
-    ```
-
+  @strawberry.django.type(model=get_user_model())
+  class MyQueries:
+      me: UserType = UserQueries.me
+      public: UserType = UserQueries.public_user
+      # etc...
+  ```
 
 ```py
 
@@ -223,8 +231,20 @@ schema = JwtSchema(query=Query, mutation=Mutation)
 
 ```
 
+## Update the urls
 
-___
+```python
+# quickstart/urls.py
+from strawberry.django.views import AsyncGraphQLView
+from users.schema import schema
+
+urlpatterns = [
+  path("admin/", admin.site.urls),
+  path('graphql', AsyncGraphQLView.as_view(schema=schema)),
+]
+```
+
+---
 
 ## Load fixtures
 
@@ -233,16 +253,16 @@ Before starting to query, let's load some users on the database. Create a new fi
 !!! info ""
     Have a look on the fixtures, note that we are creating 4 users and 3 `UserStatus`. When creating a user, we create a relating `UserStatus` by default on `post_save` signal with the following fields:
 
-    ```python
-    verified=False
-    archived=False
-    ```
+  ```python
+  verified=False
+  archived=False
+  ```
 
-    You can access it on any user:
+  You can access it on any user:
 
-    ```bash
-    user.status.[verified | archived]
-    ```
+  ```bash
+  user.status.[verified | archived]
+  ```
 
 ```json
 [
@@ -344,9 +364,8 @@ run:
 python -m  manage loaddata users.json
 ```
 
-
-
 ---
+
 ## Making your first query
 
 Start the dev server:
@@ -361,7 +380,7 @@ Open your browser:
 http://127.0.0.1:8000/graphql
 ```
 
-### First let's log-in:
+### First let's log-in
 
 #### Setup Email Backend
 
@@ -370,7 +389,9 @@ you can set it to `False` on your [settings](settings.md),
 but you still need an Email Backend
 to password reset.
 
-The quickest solution for development is to set up a [Console Email Backend](https://docs.djangoproject.com/en/3.0/topics/email/#console-backend), simply add the following to your ```settings.py```.
+The quickest solution for development is to set up a [Console Email Backend](https://docs.djangoproject.com/en/3.0/topics/email/#console-backend), simply add the following to your
+
+```settings.py```.
 
 ```python
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -506,7 +527,7 @@ Save the token from the url, something like this:
 eyJ1c2VybmFtZSI6Im5ld191c2VyIiwiYWN0aW9uIjoiYWN0aXZhdGlvbiJ9:1isoSr:CDwK_fjBSxWj3adC-X16wqzv-Mw
 ```
 
-####  Verify the new user.
+#### Verify the new user
 
 search your schema for ``verify_account``:
 should look like this:
