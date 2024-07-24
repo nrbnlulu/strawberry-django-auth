@@ -11,8 +11,8 @@ from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
-from strawberry.field import StrawberryField
 from strawberry.types import Info
+from strawberry.types.field import StrawberryField
 
 from gqlauth.core.constants import Messages, TokenAction
 from gqlauth.core.exceptions import (
@@ -135,24 +135,23 @@ class RegisterMixin(BaseMixin):
         try:
             with transaction.atomic():
                 f = cls.form(asdict(input_))  # type: ignore
-                if f.is_valid():
-                    user = f.save()
-                    if email:
-                        send_activation = app_settings.SEND_ACTIVATION_EMAIL is True
-                        send_password_set = (
-                            app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
-                            and app_settings.SEND_PASSWORD_SET_EMAIL is True
-                        )
-                        if send_activation:
-                            user.status.send_activation_email(info)
-
-                        if send_password_set:
-                            user.status.send_password_set_email(info)
-
-                    user_registered.send(sender=cls, user=user)
-                    return MutationNormalOutput(success=True)
-                else:
+                if not f.is_valid():
                     return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+                user = f.save()
+                if email:
+                    send_activation = app_settings.SEND_ACTIVATION_EMAIL is True
+                    send_password_set = (
+                        app_settings.ALLOW_PASSWORDLESS_REGISTRATION is True
+                        and app_settings.SEND_PASSWORD_SET_EMAIL is True
+                    )
+                    if send_activation:
+                        user.status.send_activation_email(info)
+
+                    if send_password_set:
+                        user.status.send_password_set_email(info)
+
+                user_registered.send(sender=cls, user=user)
+                return MutationNormalOutput(success=True)
         except SMTPException:
             return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
 
@@ -368,7 +367,7 @@ class ObtainJSONWebTokenMixin(BaseMixin):
 
     @classmethod
     def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenType:
-        if app_settings.LOGIN_REQUIRE_CAPTCHA:
+        if app_settings.LOGIN_REQUIRE_CAPTCHA and not app_settings.CI_MODE:
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
                 return ObtainJSONWebTokenType(success=False, errors={"captcha": check_res})

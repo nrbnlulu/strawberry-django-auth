@@ -13,15 +13,16 @@ def login_query(request):
     app_settings: GqlAuthSettings = request.getfixturevalue("app_settings")
     captcha: Captcha = request.getfixturevalue("captcha")
 
-    def inner(user_status: UserStatusType) -> str:
+    def inner(user_status: UserStatusType, user_entry: str = "") -> str:
         user = user_status.user
         arguments = (
             f'{to_camel_case(UserModel.USERNAME_FIELD)}: "{user.username_field}",'
             f' password: "{user.password}"'
         )
-
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            arguments += f', identifier: "{captcha.uuid}" ,userEntry: "{captcha.text}"'
+            arguments += (
+                f', identifier: "{captcha.uuid}" ,userEntry: "{user_entry or captcha.text}"'
+            )
 
         return """
            mutation {
@@ -100,6 +101,21 @@ def test_archived_user_becomes_active_on_login(
 def test_login_success(verified_schema, unverified_schema, allow_login_not_verified, login_query):
     res = verified_schema.execute(login_query(verified_schema.us_type))
     default_test(res)
+
+
+def test_login_with_ci_mode_with_invalid_captcha_success(
+    verified_schema,
+    allow_login_not_verified,
+    login_query,
+    override_gqlauth,
+    app_settings: GqlAuthSettings,
+) -> None:
+    if not app_settings.LOGIN_REQUIRE_CAPTCHA:
+        pytest.skip("This tests requires captcha to be enabled")
+    with override_gqlauth(app_settings.CI_MODE, True):
+        query = login_query(verified_schema.us_type, user_entry="invalid")
+        res = verified_schema.execute(query)
+        default_test(res)
 
 
 def test_not_verified_fails(unverified_schema, login_query):

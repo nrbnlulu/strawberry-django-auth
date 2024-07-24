@@ -2,7 +2,7 @@ from typing import Optional
 
 from gqlauth.settings_type import DjangoSetting
 from strawberry.annotation import StrawberryAnnotation
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 
 from .settings import *  # noqa F403
 

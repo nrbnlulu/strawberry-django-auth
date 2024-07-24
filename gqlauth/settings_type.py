@@ -18,7 +18,7 @@ from typing import (
 from django.http.request import HttpRequest
 from strawberry import ID
 from strawberry.annotation import StrawberryAnnotation
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 
 import jwt
 
@@ -168,6 +168,9 @@ class GqlAuthSettings:
     """
     LOGIN_REQUIRE_CAPTCHA: bool = True
     """Whether login will require captcha verification."""
+    CI_MODE: bool = False
+    """Whether to enable CI mode, this will disable captcha validation
+    (although the fields would still be required)."""
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )
@@ -234,7 +237,7 @@ class GqlAuthSettings:
 
     JWT_ALGORITHM: str = "HS256"
     """Algorithm used for signing the token."""
-    JWT_TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S.%f"
+    JWT_TIME_FORMAT: str = "%Y-%m-%d-%H-%M-%S-%z"
     """A valid 'strftime' string that will be used to encode the token
     payload."""
     JWT_PAYLOAD_HANDLER: Callable[["UserProto"], "TokenType"] = create_token_type
