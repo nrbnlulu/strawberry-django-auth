@@ -169,7 +169,8 @@ class GqlAuthSettings:
     LOGIN_REQUIRE_CAPTCHA: bool = True
     """Whether login will require captcha verification."""
     CI_MODE: bool = False
-    """Whether to enable CI mode, this will disable captcha validation (although the fields would still be required)."""
+    """Whether to enable CI mode, this will disable captcha validation
+    (although the fields would still be required)."""
     REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )

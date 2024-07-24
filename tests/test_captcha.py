@@ -49,6 +49,7 @@ def test_login_require_captcha_validation(unverified_schema):
     assert "identifier' of required type 'UUID!' was not provided." in res.errors[0].message
     assert "userEntry' of required type 'String!' was not provided" in res.errors[1].message
 
+
 def test_register_wrong_captcha_validation(captcha, unverified_schema):
     res = unverified_schema.execute(query=register_query(uuid=captcha.uuid), relay=True)
     assert res.data["register"]["errors"]["captcha"] == Messages.CAPTCHA_INVALID

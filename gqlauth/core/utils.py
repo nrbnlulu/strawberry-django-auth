@@ -138,5 +138,6 @@ def inject_arguments(args: Dict[str, type]):
 
     return wrapped
 
+
 def utc_now() -> datetime.datetime:
     return datetime.datetime.now(datetime.timezone.utc)

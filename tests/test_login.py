@@ -20,7 +20,9 @@ def login_query(request):
             f' password: "{user.password}"'
         )
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            arguments += f', identifier: "{captcha.uuid}" ,userEntry: "{user_entry or captcha.text}"'
+            arguments += (
+                f', identifier: "{captcha.uuid}" ,userEntry: "{user_entry or captcha.text}"'
+            )
 
         return """
            mutation {
@@ -101,10 +103,16 @@ def test_login_success(verified_schema, unverified_schema, allow_login_not_verif
     default_test(res)
 
 
-def test_login_with_ci_mode_with_invalid_captcha_successs(verified_schema, allow_login_not_verified, login_query, override_gqlauth ,app_settings: GqlAuthSettings) -> None:
+def test_login_with_ci_mode_with_invalid_captcha_successs(
+    verified_schema,
+    allow_login_not_verified,
+    login_query,
+    override_gqlauth,
+    app_settings: GqlAuthSettings,
+) -> None:
     if not app_settings.LOGIN_REQUIRE_CAPTCHA:
         pytest.skip("This tests requires captcha to be enabled")
-    with override_gqlauth(app_settings.CI_MODE,  True):
+    with override_gqlauth(app_settings.CI_MODE, True):
         query = login_query(verified_schema.us_type, user_entry="invalid")
         res = verified_schema.execute(query)
         default_test(res)
