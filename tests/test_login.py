@@ -103,7 +103,7 @@ def test_login_success(verified_schema, unverified_schema, allow_login_not_verif
     default_test(res)
 
 
-def test_login_with_ci_mode_with_invalid_captcha_successs(
+def test_login_with_ci_mode_with_invalid_captcha_success(
     verified_schema,
     allow_login_not_verified,
     login_query,
