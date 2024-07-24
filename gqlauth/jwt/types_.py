@@ -15,7 +15,7 @@ from gqlauth.core.constants import Messages
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.interfaces import OutputInterface
 from gqlauth.core.scalars import ExpectedErrorType
-from gqlauth.core.utils import USER_MODEL, app_settings, inject_fields
+from gqlauth.core.utils import USER_MODEL, app_settings, inject_fields, utc_now
 from gqlauth.models import RefreshToken
 from gqlauth.user.types_ import UserType
 
@@ -62,7 +62,7 @@ the data that was used to create the token.
 )
 class TokenPayloadType:
     origIat: datetime = strawberry.field(
-        description="when the token was created", default_factory=datetime.utcnow
+        description="when the token was created", default_factory=utc_now
     )
     exp: datetime = strawberry.field(description="when the token will be expired", default=None)
 
@@ -97,7 +97,7 @@ class TokenType:
     token: str = strawberry.field(description="The encoded payload, namely a token.")
 
     def is_expired(self):
-        return self.payload.exp < (datetime.utcnow())
+        return self.payload.exp < utc_now()
 
     @classmethod
     def from_user(cls, user: "UserProto") -> "TokenType":

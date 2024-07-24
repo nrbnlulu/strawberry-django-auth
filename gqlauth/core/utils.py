@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import inspect
 import typing
 from typing import Dict, Iterable
@@ -8,8 +9,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.core import signing
-from strawberry.types.field import StrawberryField
 from strawberry.types import Info
+from strawberry.types.field import StrawberryField
 from strawberry.utils.str_converters import to_camel_case
 
 from gqlauth.core.exceptions import TokenScopeError
@@ -136,3 +137,6 @@ def inject_arguments(args: Dict[str, type]):
         return fn
 
     return wrapped
+
+def utc_now() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
