@@ -11,7 +11,7 @@ from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.core.constants import Messages, TokenAction

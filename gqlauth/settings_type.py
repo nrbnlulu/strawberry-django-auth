@@ -18,7 +18,7 @@ from typing import (
 from django.http.request import HttpRequest
 from strawberry import ID
 from strawberry.annotation import StrawberryAnnotation
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 
 import jwt
 

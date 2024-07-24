@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.core import signing
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
 

@@ -2,7 +2,7 @@ import strawberry_django
 from django.contrib.auth import get_user_model
 from strawberry import auto
 from strawberry.annotation import StrawberryAnnotation
-from strawberry.field import StrawberryField
+from strawberry.types.field import StrawberryField
 from strawberry.types import Info
 
 from gqlauth.core.utils import inject_fields
