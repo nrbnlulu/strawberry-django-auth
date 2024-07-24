@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.377.0 - 2024-07-24
+--------------------
+resolve [#567](https://github.com/nrbnlulu/strawberry-django-auth/issues/567)resolve [#564](https://github.com/nrbnlulu/strawberry-django-auth/issues/564)Add support for CI mode when using captcha on login.this should enable to automate the sign-in process by not validation the captcha fields.
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #569](https://github.com/nrbnlulu/strawberry-django-auth/pull/569/)
+
 0.376.11 - 2024-04-10
 --------------------
 Fix register fails on channels requests. #137Do not call get_current_site() from get_email_context()Extract values from channels context.
