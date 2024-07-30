@@ -97,7 +97,7 @@ class TokenType:
     token: str = strawberry.field(description="The encoded payload, namely a token.")
 
     def is_expired(self):
-        return self.payload.exp.replace(tzinfo=timezone.utc) < utc_now()
+        return self.payload.exp.astimezone(timezone.utc) < utc_now()
 
     @classmethod
     def from_user(cls, user: "UserProto") -> "TokenType":

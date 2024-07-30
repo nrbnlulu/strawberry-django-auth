@@ -1,9 +1,9 @@
 import time
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from gqlauth.core.exceptions import TokenExpired
-from gqlauth.jwt.types_ import TokenType
+from gqlauth.jwt.types_ import TokenType, TokenPayloadType
 from gqlauth.models import RefreshToken
 
 
@@ -26,3 +26,11 @@ def test_token_expired(db_verified_user_status, app_settings, override_gqlauth):
         with pytest.raises(TokenExpired):
             TokenType.from_token(token.token)
     assert app_settings.JWT_EXPIRATION_DELTA
+
+
+def test_token_expired_from_token(db_verified_user_status, app_settings, override_gqlauth):
+    payload: TokenPayloadType = TokenPayloadType(origIat=datetime.now(), exp=datetime.now()+timedelta(seconds=1))
+    token: TokenType = TokenType(payload=payload, token="DUMMYTOKENSTRING")
+    assert not token.is_expired()
+    time.sleep(1)
+    assert token.is_expired()
