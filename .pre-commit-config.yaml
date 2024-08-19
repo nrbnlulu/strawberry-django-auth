@@ -14,19 +14,19 @@ repos:
       - id: codespell
         args: ["--skip=*.json"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.16.0
+    rev: v3.17.0
     hooks:
       - id: pyupgrade
         args: ["--py38-plus"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.4
+    rev: v0.6.1
     hooks:
       - id: ruff
 
 
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 24.8.0
     hooks:
       - id: black
         args: ["--config", "pyproject.toml", "--target-version", "py310"]
