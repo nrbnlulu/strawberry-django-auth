@@ -8,7 +8,7 @@ def get_github_session(token: str) -> Github:
 
 
 def get_repo(g: Github) -> Repository:
-    return g.get_repo("tzevet5/Backend")
+    return g.get_repo("nrbnlulu/strawberry-django-auth")
 
 
 def get_pr(g: Github, num: int) -> PullRequest:
