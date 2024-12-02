@@ -183,6 +183,7 @@ class ObtainJSONWebTokenType(OutputInterface):
                 UserStatus.unarchive(user)
             if status.verified or app_settings.ALLOW_LOGIN_NOT_VERIFIED:
                 # successful login.
+                assert user
                 user.last_login = localtime()
                 user.save(update_fields=("last_login",))
                 return ObtainJSONWebTokenType.from_user(user)

@@ -1,16 +1,14 @@
-import os
-
 from github import Github
 from github.PullRequest import PullRequest
 from github.Repository import Repository
 
 
-def get_github_session(token: str = os.getenv("BOT_TOKEN")) -> Github:
+def get_github_session(token: str) -> Github:
     return Github(token)
 
 
 def get_repo(g: Github) -> Repository:
-    return g.get_repo("nrbnlulu/strawberry-django-auth")
+    return g.get_repo("tzevet5/Backend")
 
 
 def get_pr(g: Github, num: int) -> PullRequest:

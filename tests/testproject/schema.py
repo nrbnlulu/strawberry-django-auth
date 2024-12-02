@@ -10,7 +10,7 @@ from gqlauth.user.queries import UserQueries
 from strawberry.types import Info
 from strawberry_django.permissions import IsAuthenticated
 
-from testproject.sample.models import Apple
+from tests.testproject.sample.models import Apple
 
 
 @strawberry_django.type(model=Apple)

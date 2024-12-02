@@ -34,9 +34,7 @@ def _arg_query(user: UserType, captcha: Captcha):
         )
         { success, errors  }
     }
-    """ % (
-        _generate_register_args(user, captcha)
-    )
+    """ % (_generate_register_args(user, captcha))
 
 
 @pytest.mark.default_user  # settings_b has passwordless registration
@@ -81,8 +79,8 @@ def test_register_twice_fails(verified_user_status_type, anonymous_schema, db):
     executed = anonymous_schema.execute(query=get_query())
     assert not executed.errors
     executed = executed.data["register"]
-    assert executed["success"]
     assert not executed["errors"]
+    assert executed["success"]
     assert signal_received
     # try to register again
     executed = anonymous_schema.execute(query=get_query()).data["register"]

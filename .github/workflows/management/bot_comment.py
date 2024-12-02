@@ -32,8 +32,8 @@ def render(context: BotCommentContext) -> str:
 
 
 def main() -> None:
-    session = githubref.get_github_session()
-    pr = githubref.get_pr(session, int(os.getenv("PR_NUMBER")))
+    session = githubref.get_github_session(os.getenv("BOT_TOKEN", ""))
+    pr = githubref.get_pr(session, int(os.getenv("PR_NUMBER", "")))
     preview = None
     try:
         preview = releasefile.get_release_preview(pr)

@@ -26,7 +26,12 @@ class IsVerified(DjangoPermissionExtension):
 
     @override
     def resolve_for_user(
-        self, resolver: Callable[..., Any], user: UserType | None, *, info: Info, source: Any
+        self,
+        resolver: Callable[..., Any],
+        user: UserType | None,
+        *,
+        info: Info,
+        source: Any,
     ) -> AwaitableOrValue:
         user = cast(UserProto, user)
         if user.is_authenticated and user.status.verified:

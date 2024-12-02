@@ -5,7 +5,7 @@ from gqlauth.user import relay
 from gqlauth.user.resolvers import Captcha
 from strawberry_django.permissions import IsAuthenticated
 
-from testproject.schema import Query
+from .schema import Query
 
 
 @strawberry.type

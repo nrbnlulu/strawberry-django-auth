@@ -23,7 +23,9 @@ USER_FIELDS = {
         type_annotation=StrawberryAnnotation(auto),
     ),
     StrawberryField(
-        python_name=USER_MODEL.EMAIL_FIELD, default=None, type_annotation=StrawberryAnnotation(auto)
+        python_name=USER_MODEL.EMAIL_FIELD,
+        default=None,
+        type_annotation=StrawberryAnnotation(auto),
     ),
 }.union(gqlauth_settings.UPDATE_MUTATION_FIELDS)
 

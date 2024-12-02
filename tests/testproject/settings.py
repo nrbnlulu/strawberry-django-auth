@@ -23,7 +23,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1"]
 
-ROOT_URLCONF = "testproject.urls"
+ROOT_URLCONF = "tests.testproject.urls"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "strawberry_django",
     "gqlauth",
-    "testproject.sample",
+    "tests.testproject.sample",
 ]
 
 

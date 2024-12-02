@@ -24,7 +24,9 @@ def _arg_query(token, new_password1="new_password", new_password2="new_password"
 
 
 @pytest.fixture()
-def reset_token_with_unverified_user(db_unverified_user_status) -> Tuple[UserStatusType, str]:
+def reset_token_with_unverified_user(
+    db_unverified_user_status,
+) -> Tuple[UserStatusType, str]:
     db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
     return (
         db_unverified_user_status,

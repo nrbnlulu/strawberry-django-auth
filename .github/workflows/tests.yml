@@ -15,41 +15,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: ["3.2.0", "4.1.3", "4.2.8", "5.0.7"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        exclude:
-          # excludes Python 3.8 and 3.9 for Django 5.0.7.
-          - django-version: "5.0.7"
-            python-version: "3.8"
-          - django-version: "5.0.7"
-            python-version: "3.9"
+        django-version: ["4.2.16", "5.0.9", "5.1.3"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+      - name: Install deps
+        run: uv sync --all-extras --frozen
 
-      - name: Load cached venv
-        id: cached-poetry
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
       - name: Run tests
         run: |
-          poetry install -E captcha
-          poetry run pip install "Django~=${{ matrix.django-version }}"
-          make test
+          task test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

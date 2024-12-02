@@ -21,7 +21,10 @@ class Migration(migrations.Migration):
                 (
                     "uuid",
                     models.UUIDField(
-                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
                     ),
                 ),
                 ("text", models.CharField(editable=False, max_length=50)),
@@ -43,7 +46,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("verified", models.BooleanField(default=False)),
@@ -62,9 +68,18 @@ class Migration(migrations.Migration):
             name="RefreshToken",
             fields=[
                 ("id", models.BigAutoField(primary_key=True, serialize=False)),
-                ("token", models.CharField(editable=False, max_length=255, verbose_name="token")),
-                ("created", models.DateTimeField(auto_now_add=True, verbose_name="created")),
-                ("revoked", models.DateTimeField(blank=True, null=True, verbose_name="revoked")),
+                (
+                    "token",
+                    models.CharField(editable=False, max_length=255, verbose_name="token"),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(auto_now_add=True, verbose_name="created"),
+                ),
+                (
+                    "revoked",
+                    models.DateTimeField(blank=True, null=True, verbose_name="revoked"),
+                ),
                 (
                     "user",
                     models.ForeignKey(
