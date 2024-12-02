@@ -102,11 +102,7 @@ class Captcha(models.Model):
         return bytes_array.getvalue()
 
     def __str__(self):
-        interval = (
-            self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA
-        ) - timezone.now()
+        interval = (self.insert_time + app_settings.CAPTCHA_EXPIRATION_DELTA) - timezone.now()
         interval = interval.total_seconds()
-        expiery_str = (
-            f" expires in {interval} seconds" if interval > 0 else "already expierd"
-        )
+        expiery_str = f" expires in {interval} seconds" if interval > 0 else "already expierd"
         return "captcha " + expiery_str

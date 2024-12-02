@@ -3,7 +3,6 @@ version: '3'
 tasks:
   lint:
     description: Lint the code
-    dir: '{{.USER_WORKING_DIR}}'
     cmds:
     - uv run ruff format ./gqlauth ./tests
     - uv run ruff check ./gqlauth ./tests  --fix
@@ -19,7 +18,6 @@ tasks:
 
   serve:
     description: Serve the documentation
-    dir: '{{.USER_WORKING_DIR}}'
     cmds:
       - uv run docs/pre_build.py
       - uv run mkdocs serve

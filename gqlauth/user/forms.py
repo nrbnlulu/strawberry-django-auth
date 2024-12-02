@@ -48,12 +48,11 @@ class PasswordLessRegisterForm(forms.ModelForm):
         fields = REGISTER_MUTATION_FIELDS
         field_classes = {"username": CustomUsernameField}
 
-    def clean_username(self): # pragma: no cover
+    def clean_username(self):  # pragma: no cover
         return UserCreationForm.clean_username(self)  # type: ignore
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-  
 
     def save(self, commit=True):
         user = super().save(commit=False)

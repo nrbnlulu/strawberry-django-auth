@@ -15,9 +15,7 @@ def _arg_query(user_status: UserStatusType):
         success
       }
     }
-    """ % (
-        user_status.user.password
-    )
+    """ % (user_status.user.password)
 
 
 def test_invalid_password(
@@ -31,9 +29,7 @@ def test_not_verified_user(
     unverified_schema,
     wrong_pass_unverified_user_status_type,
 ):
-    res = unverified_schema.execute(
-        query=_arg_query(wrong_pass_unverified_user_status_type)
-    )
+    res = unverified_schema.execute(query=_arg_query(wrong_pass_unverified_user_status_type))
     assert res.errors[0].message == GQLAuthErrors.NOT_VERIFIED.value
 
 

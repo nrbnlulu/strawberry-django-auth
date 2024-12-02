@@ -28,9 +28,7 @@ def test_if_no_email_in_REGISTER_MUTATION_FIELDS_send_email_is_false(
     assert not app_settings.SEND_ACTIVATION_EMAIL
 
 
-def test_override_find_jwt_hook(
-    db_verified_user_status, app_settings, override_gqlauth
-):
+def test_override_find_jwt_hook(db_verified_user_status, app_settings, override_gqlauth):
     def hook(info):
         return "invalid value"
 

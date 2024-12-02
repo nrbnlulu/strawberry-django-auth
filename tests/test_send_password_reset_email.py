@@ -15,9 +15,7 @@ def _arg_query(user: UserType):
     sendPasswordResetEmail(email: "%s")
         { success, errors }
     }
-    """ % (
-        user.email
-    )
+    """ % (user.email)
 
 
 def test_send_email_invalid_email(db_verified_user_status, anonymous_schema):
@@ -46,9 +44,7 @@ def test_invalid_form(db_verified_user_status, anonymous_schema):
     assert executed["errors"]["email"]
 
 
-def test_send_email_valid_email_verified_user(
-    db_verified_user_status, anonymous_schema
-):
+def test_send_email_valid_email_verified_user(db_verified_user_status, anonymous_schema):
     query = _arg_query(db_verified_user_status.user)
     executed = anonymous_schema.execute(query=query)
     assert not executed.errors

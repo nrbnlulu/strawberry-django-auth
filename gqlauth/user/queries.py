@@ -22,9 +22,7 @@ class Sample:
 
 @strawberry_django.type(model=USER_MODEL, filters=UserFilter)
 class UserQueries:
-    @strawberry_django.field(
-        description="Returns the current user if he is not anonymous."
-    )
+    @strawberry_django.field(description="Returns the current user if he is not anonymous.")
     def public_user(self, info: Info) -> Optional[UserType]:
         user = get_user(info)
         if not user.is_anonymous:

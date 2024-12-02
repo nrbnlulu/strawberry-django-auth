@@ -55,9 +55,7 @@ class ImageCaptcha(_Captcha):
     :param font_sizes: Random choose a font size from this parameters.
     """
 
-    def __init__(
-        self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None
-    ):
+    def __init__(self, width=160, height=60, fonts=None, heb_fonts=None, font_sizes=None):
         self._width = width
         self._height = height
         self._fonts = fonts
@@ -69,9 +67,7 @@ class ImageCaptcha(_Captcha):
     def truefonts(self):
         if self._truefonts:
             return self._truefonts
-        self._truefonts = tuple(
-            truetype(n, s) for n in self._fonts for s in self._font_sizes
-        )
+        self._truefonts = tuple(truetype(n, s) for n in self._fonts for s in self._font_sizes)
         return self._truefonts
 
     @staticmethod
@@ -115,9 +111,7 @@ class ImageCaptcha(_Captcha):
             if "\u0590" <= c <= "\u05ea" and self.heb_fonts:
                 direction = "rtl"
                 font = random.choice(
-                    tuple(
-                        truetype(n, s) for n in self.heb_fonts for s in self._font_sizes
-                    )
+                    tuple(truetype(n, s) for n in self.heb_fonts for s in self._font_sizes)
                 )
             else:
                 font = random.choice(self.truefonts)

@@ -8,9 +8,7 @@ from gqlauth.models import RefreshToken
 
 
 def test_expired_refresh_token(db_verified_user_status, app_settings, override_gqlauth):
-    with override_gqlauth(
-        name="JWT_REFRESH_EXPIRATION_DELTA", replace=timedelta(seconds=0.1)
-    ):
+    with override_gqlauth(name="JWT_REFRESH_EXPIRATION_DELTA", replace=timedelta(seconds=0.1)):
         rt = RefreshToken.from_user(db_verified_user_status.user.obj)
         assert not rt.is_expired_()
         time.sleep(1)

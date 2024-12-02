@@ -74,9 +74,7 @@ def test_mismatch_passwords(db_verified_user_status, verified_schema):
 def test_passwords_validation(db_verified_user_status, verified_schema):
     """Easy password."""
     simple_password = PasswordChangeForm("123", "123")
-    query = _arg_query(
-        user_status=db_verified_user_status, password_form=simple_password
-    )
+    query = _arg_query(user_status=db_verified_user_status, password_form=simple_password)
     res = verified_schema.execute(query=query)
     assert not res.errors
     data = res.data["passwordChange"]
@@ -85,9 +83,7 @@ def test_passwords_validation(db_verified_user_status, verified_schema):
     assert not data["refreshToken"] or data["token"]
 
 
-def test_revoke_refresh_tokens_on_password_change(
-    db_verified_user_status, verified_schema
-):
+def test_revoke_refresh_tokens_on_password_change(db_verified_user_status, verified_schema):
     user = db_verified_user_status.user.obj
     old_password = user.password
     form = PasswordChangeForm(SECURE_PASSWORD, SECURE_PASSWORD)

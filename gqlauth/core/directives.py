@@ -22,9 +22,7 @@ from gqlauth.core.utils import UserProto
 class IsVerified(DjangoPermissionExtension):
     """Mark a field as only resolvable by authenticated users."""
 
-    message: strawberry.Private[str] = dataclasses.field(
-        default="User is not authenticated."
-    )
+    message: strawberry.Private[str] = dataclasses.field(default="User is not authenticated.")
 
     @override
     def resolve_for_user(

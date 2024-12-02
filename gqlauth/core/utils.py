@@ -33,9 +33,7 @@ app_settings: "GqlAuthSettings" = settings.GQL_AUTH
 
 def hide_args_kwargs(field):
     sig = inspect.signature(field)
-    cleared = tuple(
-        p for p in sig.parameters.values() if p.name not in ("kwargs", "args")
-    )
+    cleared = tuple(p for p in sig.parameters.values() if p.name not in ("kwargs", "args"))
     field.__signature__ = inspect.signature(field).replace(parameters=(cleared))
     return field
 
@@ -131,9 +129,7 @@ def inject_arguments(args: Dict[str, type]):
     def wrapped(fn):
         sig = inspect.signature(fn)
         params = {
-            inspect.Parameter(
-                name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type_
-            )
+            inspect.Parameter(name, inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type_)
             for name, type_ in args.items()
         }
         params.update(sig.parameters.values())

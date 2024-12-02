@@ -24,12 +24,14 @@ repos:
     hooks:
       - id: ruff
 
-
-  - repo: https://github.com/psf/black
-    rev: 24.8.0
+  - repo: local
     hooks:
-      - id: black
-        args: ["--config", "pyproject.toml", "--target-version", "py310"]
+    - id: format
+      name: format
+      entry: uv run ruff format
+      require_serial: true
+      language: system
+      types: [python]
 
   - repo: https://github.com/PyCQA/docformatter
     rev: v1.7.5

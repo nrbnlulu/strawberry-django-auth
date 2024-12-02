@@ -37,9 +37,7 @@ class PRContributor:
 
 def get_last_commit_contributor(token: str) -> PRContributor:
     org, repo = REPO_SLUG.split("/")
-    current_commit = (
-        subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
-    )
+    current_commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
     response = httpx.post(
         "https://api.github.com/graphql",
         json={
@@ -123,9 +121,7 @@ def bump_version(bump_string: str) -> None:
         case "major":
             new_version = semver_to_str(current_version.major + 1, 0, 0)
         case "minor":
-            new_version = semver_to_str(
-                current_version.major, current_version.minor + 1, 0
-            )
+            new_version = semver_to_str(current_version.major, current_version.minor + 1, 0)
         case "patch":
             new_version = semver_to_str(
                 current_version.major, current_version.minor, current_version.micro + 1
@@ -138,9 +134,7 @@ def bump_version(bump_string: str) -> None:
     PATHS.PYPROJECT_TOML.write_text(tomllib.dumps(pyproject), encoding="utf-8")
 
 
-def pprint_release_change_log(
-    release_preview: ReleasePreview, contrib_details: str
-) -> str:
+def pprint_release_change_log(release_preview: ReleasePreview, contrib_details: str) -> str:
     current_changes = release_preview.changelog_no_header
 
     def is_first_or_last_line_empty(s: str) -> bool:

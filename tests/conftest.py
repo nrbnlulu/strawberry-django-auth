@@ -160,18 +160,14 @@ def db_unverified_user_status(db, unverified_user_status_type) -> UserStatusType
 
 
 @pytest.fixture()
-def db_verified_user_status(
-    transactional_db, verified_user_status_type
-) -> UserStatusType:
+def db_verified_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
     us = verified_user_status_type
     us.create()
     return us
 
 
 @pytest.fixture()
-def db_archived_user_status(
-    transactional_db, verified_user_status_type
-) -> UserStatusType:
+def db_archived_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
     us = verified_user_status_type
     us.archived = True
     us.create()
@@ -285,9 +281,7 @@ async def verified_channels_app_communicator(
     async with GraphQLWebsocketCommunicator(
         application,
         path="graphql",
-        headers=[
-            (b"authorization", db_verified_user_status.generate_fresh_token().encode())
-        ],
+        headers=[(b"authorization", db_verified_user_status.generate_fresh_token().encode())],
     ) as comm:
         yield comm
 

@@ -30,9 +30,7 @@ with contextlib.suppress(ImportError):
     from gqlauth.captcha.models import Captcha as CaptchaModel
 
 
-def check_captcha(
-    input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenInput"]
-):
+def check_captcha(input_: Union["RegisterMixin.RegisterInput", "ObtainJSONWebTokenInput"]):
     uuid = input_.identifier
     try:
         obj = CaptchaModel.objects.get(uuid=uuid)

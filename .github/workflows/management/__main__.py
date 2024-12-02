@@ -37,13 +37,9 @@ def test_matrix_command() -> None:
     def default_test_command(*flags: str) -> str:
         return f"uv run pytest {" ".join(list(flags))} --cov=src --cov-report=xml"
 
-    micro_services = [
-        src.parent for src in PATHS.MICROSERVICES.glob("**/pyproject.toml")
-    ]
+    micro_services = [src.parent for src in PATHS.MICROSERVICES.glob("**/pyproject.toml")]
     libs = [
-        src.parent
-        for src in PATHS.LIBS.glob("**/pyproject.toml")
-        if src.parent.name != "devdeps"
+        src.parent for src in PATHS.LIBS.glob("**/pyproject.toml") if src.parent.name != "devdeps"
     ]
     domains: dict[str, TestedNode] = {}
     domains.update(
