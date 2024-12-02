@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pytest
+
 from gqlauth.core.utils import get_token
 
 from .conftest import UserStatusType
@@ -27,7 +28,9 @@ def _arg_query(token, new_password1="new_password", new_password2="new_password"
 def reset_token_with_unverified_user(
     db_unverified_user_status,
 ) -> Tuple[UserStatusType, str]:
-    db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
+    db_unverified_user_status.user.old_password = (
+        db_unverified_user_status.user.obj.password
+    )
     return (
         db_unverified_user_status,
         get_token(db_unverified_user_status.user.obj, "password_reset"),
@@ -48,7 +51,9 @@ def test_reset_password(reset_token_with_unverified_user, unverified_schema):
     assert user_status.user.old_password != user.password
 
 
-def test_reset_password_invalid_form(reset_token_with_unverified_user, unverified_schema):
+def test_reset_password_invalid_form(
+    reset_token_with_unverified_user, unverified_schema
+):
     user_status, token = reset_token_with_unverified_user
     user = user_status.user.obj
     query = _arg_query(token, "wrong_pass")
@@ -61,7 +66,9 @@ def test_reset_password_invalid_form(reset_token_with_unverified_user, unverifie
     assert user_status.user.old_password == user.password
 
 
-def test_reset_password_invalid_token(reset_token_with_unverified_user, unverified_schema):
+def test_reset_password_invalid_token(
+    reset_token_with_unverified_user, unverified_schema
+):
     user_status, _ = reset_token_with_unverified_user
     user = user_status.user.obj
     query = _arg_query("fake_token")

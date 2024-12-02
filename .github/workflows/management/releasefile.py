@@ -55,10 +55,12 @@ def get_release_preview(pr: PullRequest) -> ReleasePreview:
     for f in pr.get_files():
         if f.filename == "RELEASE.md":
             headers = {"authorization": f"token {os.getenv('BOT_TOKEN', '')}"}
-            download_url = requests.get(f.contents_url, timeout=10, headers=headers).json()[
-                "download_url"
-            ]
-            contents = requests.get(download_url, timeout=10, headers=headers).content.decode(
+            download_url = requests.get(
+                f.contents_url, timeout=10, headers=headers
+            ).json()["download_url"]
+            contents = requests.get(
+                download_url, timeout=10, headers=headers
+            ).content.decode(
                 "utf-8",
             )
             return parse_release_file(contents)

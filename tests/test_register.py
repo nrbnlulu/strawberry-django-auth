@@ -4,11 +4,12 @@ from unittest import mock
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from strawberry.utils.str_converters import to_camel_case
+
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import Messages
 from gqlauth.settings_type import GqlAuthSettings
 from gqlauth.user.signals import user_registered
-from strawberry.utils.str_converters import to_camel_case
 
 from .conftest import CC_USERNAME_FIELD, UserType
 
@@ -38,12 +39,16 @@ def _arg_query(user: UserType, captcha: Captcha):
 
 
 @pytest.mark.default_user  # settings_b has passwordless registration
-def test_register_invalid_password_validation(verified_user_status_type, anonymous_schema, captcha):
+def test_register_invalid_password_validation(
+    verified_user_status_type, anonymous_schema, captcha
+):
     """Fail to register same user with bad password."""
     # register
     us = verified_user_status_type
     us.user.password = "123"  # invalid password
-    executed = anonymous_schema.execute(query=_arg_query(us.user, captcha)).data["register"]
+    executed = anonymous_schema.execute(query=_arg_query(us.user, captcha)).data[
+        "register"
+    ]
     assert not executed["success"]
     assert executed["errors"]
 

@@ -2,14 +2,14 @@ from typing import AsyncGenerator
 
 import strawberry
 import strawberry_django
+from strawberry.types import Info
+from strawberry_django.permissions import IsAuthenticated
+
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.core.utils import get_user
 from gqlauth.user import arg_mutations
 from gqlauth.user.arg_mutations import Captcha
 from gqlauth.user.queries import UserQueries
-from strawberry.types import Info
-from strawberry_django.permissions import IsAuthenticated
-
 from tests.testproject.sample.models import Apple
 
 
@@ -66,7 +66,9 @@ class Query(UserQueries):
 @strawberry.type
 class Subscription:
     @strawberry.subscription()
-    async def whatsMyName(self, info: Info, target: int = 10) -> AsyncGenerator[str, None]:
+    async def whatsMyName(
+        self, info: Info, target: int = 10
+    ) -> AsyncGenerator[str, None]:
         user = get_user(info)
         assert user.is_authenticated
         for _ in range(target):

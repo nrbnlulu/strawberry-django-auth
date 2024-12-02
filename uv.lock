@@ -1591,7 +1591,7 @@ wheels = [
 
 [[package]]
 name = "strawberry-django-auth"
-version = "0.377.0"
+version = "0.378.0"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
@@ -1627,6 +1627,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-django" },
     { name = "setuptools" },
+    { name = "toml" },
     { name = "typer" },
     { name = "types-cryptography" },
     { name = "types-jwt" },
@@ -1665,6 +1666,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=4,<6" },
     { name = "pytest-django", specifier = ">=4.5.2" },
     { name = "setuptools", specifier = ">=67.6.0" },
+    { name = "toml", specifier = ">=0.10.2" },
     { name = "typer", specifier = ">=0.12.1" },
     { name = "types-cryptography", specifier = ">=3.3.23" },
     { name = "types-jwt", specifier = ">=0.1.0" },
@@ -1697,6 +1699,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5a/ae/0eb2f3f1d6636bff7566c684f4407e18b41d49e847f6da38d165b6d8b19b/strawberry_graphql_django-0.50.0.tar.gz", hash = "sha256:d17d104c72f63061146d2c03ad52802f58947ac53a8e3495d0a59c66aaa8d547", size = 75888 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/85/d5/d857b34c129f7c691fc961681d793383ae81858a7566eee8772c0e602ceb/strawberry_graphql_django-0.50.0-py3-none-any.whl", hash = "sha256:0487d81c5239bc9cc94d485d9963efb23061ff70ed9080ca931077e94e5ad92a", size = 92347 },
+]
+
+[[package]]
+name = "toml"
+version = "0.10.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f", size = 22253 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/6f/7120676b6d73228c96e17f1f794d8ab046fc910d781c8d151120c3f1569e/toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b", size = 16588 },
 ]
 
 [[package]]

@@ -9,17 +9,17 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.http import HttpRequest
 from faker.providers import BaseProvider
+from strawberry import Schema
+from strawberry.channels.testing import GraphQLWebsocketCommunicator
+from strawberry.types import ExecutionResult
+from strawberry.utils.str_converters import to_camel_case
+
 from gqlauth.captcha.models import Captcha
 from gqlauth.core.constants import JWT_PREFIX
 from gqlauth.core.middlewares import USER_OR_ERROR_KEY, UserOrError, get_user_or_error
 from gqlauth.jwt.types_ import TokenType
 from gqlauth.models import RefreshToken
 from gqlauth.settings_type import GqlAuthSettings
-from strawberry import Schema
-from strawberry.channels.testing import GraphQLWebsocketCommunicator
-from strawberry.types import ExecutionResult
-from strawberry.utils.str_converters import to_camel_case
-
 from tests.testproject.asgi import application
 from tests.testproject.relay_schema import relay_schema
 from tests.testproject.sample.models import Apple
@@ -160,14 +160,18 @@ def db_unverified_user_status(db, unverified_user_status_type) -> UserStatusType
 
 
 @pytest.fixture()
-def db_verified_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
+def db_verified_user_status(
+    transactional_db, verified_user_status_type
+) -> UserStatusType:
     us = verified_user_status_type
     us.create()
     return us
 
 
 @pytest.fixture()
-def db_archived_user_status(transactional_db, verified_user_status_type) -> UserStatusType:
+def db_archived_user_status(
+    transactional_db, verified_user_status_type
+) -> UserStatusType:
     us = verified_user_status_type
     us.archived = True
     us.create()
@@ -281,7 +285,9 @@ async def verified_channels_app_communicator(
     async with GraphQLWebsocketCommunicator(
         application,
         path="graphql",
-        headers=[(b"authorization", db_verified_user_status.generate_fresh_token().encode())],
+        headers=[
+            (b"authorization", db_verified_user_status.generate_fresh_token().encode())
+        ],
     ) as comm:
         yield comm
 
