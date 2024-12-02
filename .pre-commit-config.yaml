@@ -20,18 +20,14 @@ repos:
         args: ["--py38-plus"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.1
+    # Ruff version.
+    rev: v0.8.1
     hooks:
+      # Run the linter.
       - id: ruff
-
-  - repo: local
-    hooks:
-    - id: format
-      name: format
-      entry: uv run ruff format
-      require_serial: true
-      language: system
-      types: [python]
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
 
   - repo: https://github.com/PyCQA/docformatter
     rev: v1.7.5
