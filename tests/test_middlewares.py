@@ -26,7 +26,9 @@ async def test_channel_middleware_authorized_on_query(
 ):
     query = "query { whatsMyUserName }"
     async for res in verified_channels_app_communicator.subscribe(query):
-        assert res.data["whatsMyUserName"] == db_verified_user_status.user.username_field
+        assert (
+            res.data["whatsMyUserName"] == db_verified_user_status.user.username_field
+        )
 
 
 async def test_channels_middleware_no_user_has_anonymous_user(
@@ -37,7 +39,9 @@ async def test_channels_middleware_no_user_has_anonymous_user(
         assert res.data["amIAnonymous"]
 
 
-def test_django_middleware_authorized_user(client, db_verified_user_status, auth_headers):
+def test_django_middleware_authorized_user(
+    client, db_verified_user_status, auth_headers
+):
     res = client.post(
         path="/arg_schema",
         data={"query": "query { whatsMyUserName }"},

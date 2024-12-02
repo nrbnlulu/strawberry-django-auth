@@ -52,7 +52,9 @@ class UserStatus(models.Model):
             from_email=app_settings.EMAIL_FROM.value,
             message=message,
             html_message=html_message,
-            recipient_list=(recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]),
+            recipient_list=(
+                recipient_list or [getattr(self.user, USER_MODEL.EMAIL_FIELD)]
+            ),
             fail_silently=False,
         )
 
@@ -188,7 +190,9 @@ class RefreshToken(models.Model):
         it is up to the database query to filter out tokens without
         revoked date.
         """
-        return datetime.now(tz=self.created.tzinfo) > self.expires_at_() or bool(self.revoked)
+        return datetime.now(tz=self.created.tzinfo) > self.expires_at_() or bool(
+            self.revoked
+        )
 
     def revoke(self):
         self.revoked = timezone.now()

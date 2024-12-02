@@ -7,13 +7,13 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from django.utils.decorators import sync_and_async_middleware
+from jwt import PyJWTError
 from strawberry import Schema
 
 from gqlauth.core.exceptions import TokenExpired
 from gqlauth.core.types_ import GQLAuthError, GQLAuthErrors
 from gqlauth.core.utils import USER_UNION, app_settings
 from gqlauth.jwt.types_ import TokenType
-from jwt import PyJWTError
 
 anon_user = AnonymousUser()
 if TYPE_CHECKING:

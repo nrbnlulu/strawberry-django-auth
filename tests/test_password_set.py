@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pytest
+
 from gqlauth.core.constants import Messages
 from gqlauth.core.utils import get_token
 
@@ -29,7 +30,9 @@ def _arg_query(token, password=None):
 def set_token_with_unverified_user(
     db_unverified_user_status,
 ) -> Tuple[UserStatusType, str]:
-    db_unverified_user_status.user.old_password = db_unverified_user_status.user.obj.password
+    db_unverified_user_status.user.old_password = (
+        db_unverified_user_status.user.obj.password
+    )
     return (
         db_unverified_user_status,
         get_token(db_unverified_user_status.user.obj, "password_set"),

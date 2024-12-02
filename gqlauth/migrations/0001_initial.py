@@ -70,7 +70,9 @@ class Migration(migrations.Migration):
                 ("id", models.BigAutoField(primary_key=True, serialize=False)),
                 (
                     "token",
-                    models.CharField(editable=False, max_length=255, verbose_name="token"),
+                    models.CharField(
+                        editable=False, max_length=255, verbose_name="token"
+                    ),
                 ),
                 (
                     "created",

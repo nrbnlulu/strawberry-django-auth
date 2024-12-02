@@ -15,12 +15,11 @@ from typing import (
     cast,
 )
 
+import jwt
 from django.http.request import HttpRequest
 from strawberry import ID
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.types.field import StrawberryField
-
-import jwt
 
 if TYPE_CHECKING:  # pragma: no cover
     from django.contrib.auth.base_user import AbstractBaseUser
@@ -91,7 +90,8 @@ def default_text_factory():
         [
             str(node)
             for node in [
-                SystemRandom().randint(0, 10) for _ in range(5, SystemRandom().randint(10, 20))
+                SystemRandom().randint(0, 10)
+                for _ in range(5, SystemRandom().randint(10, 20))
             ]
         ]
     )
@@ -124,7 +124,9 @@ class DjangoSetting(Generic[T]):
         return DjangoSetting(setting="", value=value)
 
 
-id_field = StrawberryField(python_name="id", default=None, type_annotation=StrawberryAnnotation(ID))
+id_field = StrawberryField(
+    python_name="id", default=None, type_annotation=StrawberryAnnotation(ID)
+)
 username_field = StrawberryField(
     python_name="username", default=None, type_annotation=StrawberryAnnotation(str)
 )
@@ -254,7 +256,9 @@ class GqlAuthSettings:
     """
     JWT_DECODE_HANDLER: Callable[[str], "TokenType"] = decode_jwt
 
-    JWT_TOKEN_FINDER: Callable[[Union["HttpRequest", dict]], Optional[str]] = token_finder
+    JWT_TOKEN_FINDER: Callable[[Union["HttpRequest", dict]], Optional[str]] = (
+        token_finder
+    )
     """A hook called by `GqlAuthRootField` to find the token. Accepts the
     request object (might be channels scope dict or django request object)
 

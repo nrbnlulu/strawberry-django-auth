@@ -128,7 +128,9 @@ class RegisterMixin(BaseMixin):
             userEntry: str
 
     form = (
-        PasswordLessRegisterForm if app_settings.ALLOW_PASSWORDLESS_REGISTRATION else RegisterForm
+        PasswordLessRegisterForm
+        if app_settings.ALLOW_PASSWORDLESS_REGISTRATION
+        else RegisterForm
     )
 
     @classmethod
@@ -136,13 +138,17 @@ class RegisterMixin(BaseMixin):
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
-                return MutationNormalOutput(success=False, errors={"captcha": check_res})
+                return MutationNormalOutput(
+                    success=False, errors={"captcha": check_res}
+                )
         email = getattr(input_, "email", False)
         try:
             with transaction.atomic():
                 f = cls.form(asdict(input_))  # type: ignore
                 if not f.is_valid():
-                    return MutationNormalOutput(success=False, errors=f.errors.get_json_data())
+                    return MutationNormalOutput(
+                        success=False, errors=f.errors.get_json_data()
+                    )
                 user = f.save()
                 if email:
                     send_activation = app_settings.SEND_ACTIVATION_EMAIL is True
@@ -175,7 +181,9 @@ class VerifyAccountMixin(BaseMixin):
         token: str
 
     @classmethod
-    def resolve_mutation(cls, info: Info, input_: VerifyAccountInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info: Info, input_: VerifyAccountInput
+    ) -> MutationNormalOutput:
         try:
             UserStatus.verify(input_.token)
             return MutationNormalOutput(success=True)
@@ -202,7 +210,9 @@ class ResendActivationEmailMixin(BaseMixin):
         email: str
 
     @classmethod
-    def resolve_mutation(cls, info, input_: ResendActivationEmailInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: ResendActivationEmailInput
+    ) -> MutationNormalOutput:
         try:
             email = input_.email
             f = EmailForm({"email": email})
@@ -216,7 +226,9 @@ class ResendActivationEmailMixin(BaseMixin):
         except SMTPException:
             return MutationNormalOutput(success=False, errors=Messages.EMAIL_FAIL)
         except UserAlreadyVerified:
-            return MutationNormalOutput(success=False, errors={"email": Messages.ALREADY_VERIFIED})
+            return MutationNormalOutput(
+                success=False, errors={"email": Messages.ALREADY_VERIFIED}
+            )
 
 
 class SendPasswordResetEmailMixin(BaseMixin):
@@ -233,7 +245,9 @@ class SendPasswordResetEmailMixin(BaseMixin):
         email: str
 
     @classmethod
-    def resolve_mutation(cls, info, input_: SendPasswordResetEmailInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: SendPasswordResetEmailInput
+    ) -> MutationNormalOutput:
         try:
             email = input_.email
             f = EmailForm({"email": email})
@@ -355,7 +369,9 @@ class PasswordSetMixin(BaseMixin):
         except (BadSignature, TokenScopeError):
             return MutationNormalOutput(success=False, errors=Messages.INVALID_TOKEN)
         except PasswordAlreadySetError:
-            return MutationNormalOutput(success=False, errors=Messages.PASSWORD_ALREADY_SET)
+            return MutationNormalOutput(
+                success=False, errors=Messages.PASSWORD_ALREADY_SET
+            )
 
 
 class ObtainJSONWebTokenMixin(BaseMixin):
@@ -372,11 +388,15 @@ class ObtainJSONWebTokenMixin(BaseMixin):
     """
 
     @classmethod
-    def resolve_mutation(cls, info, input_: ObtainJSONWebTokenInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info, input_: ObtainJSONWebTokenInput
+    ) -> ObtainJSONWebTokenType:
         if app_settings.LOGIN_REQUIRE_CAPTCHA and not app_settings.CI_MODE:
             check_res = check_captcha(input_)
             if check_res != Messages.CAPTCHA_VALID:
-                return ObtainJSONWebTokenType(success=False, errors={"captcha": check_res})
+                return ObtainJSONWebTokenType(
+                    success=False, errors={"captcha": check_res}
+                )
 
         return ObtainJSONWebTokenType.authenticate(info, input_)
 
@@ -389,7 +409,9 @@ class ArchiveOrDeleteMixin(BaseMixin):
     REQUIRE_VERIFICATION = True
 
     @classmethod
-    def resolve_mutation(cls, info, input_: ArchiveOrDeleteMixinInput) -> MutationNormalOutput:
+    def resolve_mutation(
+        cls, info, input_: ArchiveOrDeleteMixinInput
+    ) -> MutationNormalOutput:
         user = get_user(info)
         if error := confirm_password(user, input_):
             return error
@@ -441,7 +463,9 @@ class PasswordChangeMixin(BaseMixin):
     REQUIRE_VERIFICATION = True
 
     @classmethod
-    def resolve_mutation(cls, info: Info, input_: PasswordChangeInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info: Info, input_: PasswordChangeInput
+    ) -> ObtainJSONWebTokenType:
         user = get_user(info)
         if error := confirm_password(user, input_):
             return ObtainJSONWebTokenType(**asdict(error))  # type: ignore
@@ -454,7 +478,9 @@ class PasswordChangeMixin(BaseMixin):
             user_with_status = cast_to_status_user(user)
             return ObtainJSONWebTokenType.from_user(user_with_status)
         else:
-            return ObtainJSONWebTokenType(success=False, errors=f.errors.get_json_data())
+            return ObtainJSONWebTokenType(
+                success=False, errors=f.errors.get_json_data()
+            )
 
 
 class UpdateAccountMixin(BaseMixin):
@@ -518,7 +544,9 @@ class RefreshTokenMixin(BaseMixin):
         )
 
     @classmethod
-    def resolve_mutation(cls, info, input_: RefreshTokenInput) -> ObtainJSONWebTokenType:
+    def resolve_mutation(
+        cls, info, input_: RefreshTokenInput
+    ) -> ObtainJSONWebTokenType:
         try:
             res = RefreshToken.objects.get(token=input_.refresh_token)
         except RefreshToken.DoesNotExist:
@@ -549,7 +577,9 @@ class RevokeTokenMixin(BaseMixin):
         refresh_token: str
 
     @classmethod
-    def resolve_mutation(cls, _: Info, input_: RevokeTokenInput) -> RevokeRefreshTokenType:
+    def resolve_mutation(
+        cls, _: Info, input_: RevokeTokenInput
+    ) -> RevokeRefreshTokenType:
         try:
             refresh_token = RefreshToken.objects.get(
                 token=input_.refresh_token, revoked__isnull=True

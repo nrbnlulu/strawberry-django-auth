@@ -1,7 +1,8 @@
 import pytest
 from django.contrib.auth import get_user_model
-from gqlauth.core.directives import IsVerified
 from strawberry_django.permissions import DjangoNoPermission
+
+from gqlauth.core.directives import IsVerified
 
 USER_MODEL = get_user_model()
 

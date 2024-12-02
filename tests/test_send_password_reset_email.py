@@ -2,6 +2,7 @@ from smtplib import SMTPException
 from unittest import mock
 
 import pytest
+
 from gqlauth.core.constants import Messages
 
 from .conftest import UserType
@@ -44,7 +45,9 @@ def test_invalid_form(db_verified_user_status, anonymous_schema):
     assert executed["errors"]["email"]
 
 
-def test_send_email_valid_email_verified_user(db_verified_user_status, anonymous_schema):
+def test_send_email_valid_email_verified_user(
+    db_verified_user_status, anonymous_schema
+):
     query = _arg_query(db_verified_user_status.user)
     executed = anonymous_schema.execute(query=query)
     assert not executed.errors
