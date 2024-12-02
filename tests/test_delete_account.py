@@ -1,9 +1,9 @@
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
-from gqlauth.core.constants import Messages
-from gqlauth.core.types_ import GQLAuthErrors
 from pytest import mark
 
+from gqlauth.core.constants import Messages
+from gqlauth.core.types_ import GQLAuthErrors
 from tests.conftest import UserStatusType
 
 
@@ -29,7 +29,9 @@ def test_not_verified_user(
     unverified_schema,
     wrong_pass_unverified_user_status_type,
 ):
-    res = unverified_schema.execute(query=_arg_query(wrong_pass_unverified_user_status_type))
+    res = unverified_schema.execute(
+        query=_arg_query(wrong_pass_unverified_user_status_type)
+    )
     assert res.errors[0].message == GQLAuthErrors.NOT_VERIFIED.value
 
 

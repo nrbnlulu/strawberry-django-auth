@@ -27,6 +27,8 @@ class GQLAuthErrors(Enum):
     UNAUTHENTICATED = "Unauthenticated."
     INVALID_TOKEN = "Invalid token."
     EXPIRED_TOKEN = "Expired token."
-    NO_SUFFICIENT_PERMISSIONS = "Permissions found could not satisfy the required permissions."
+    NO_SUFFICIENT_PERMISSIONS = (
+        "Permissions found could not satisfy the required permissions."
+    )
     NOT_VERIFIED = "Please verify your account."
     MISSING_TOKEN = "No JWT found"

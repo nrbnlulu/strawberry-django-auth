@@ -1,9 +1,10 @@
 import strawberry
 import strawberry_django
+from strawberry_django.permissions import IsAuthenticated
+
 from gqlauth.core.middlewares import JwtSchema
 from gqlauth.user import relay
 from gqlauth.user.resolvers import Captcha
-from strawberry_django.permissions import IsAuthenticated
 
 from .schema import Query
 

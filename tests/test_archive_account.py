@@ -1,6 +1,5 @@
 from gqlauth.core.types_ import GQLAuthErrors
 from gqlauth.models import RefreshToken
-
 from tests.conftest import UserStatusType
 
 
@@ -28,7 +27,9 @@ def test_invalid_password(verified_schema, wrong_pass_ver_user_status_type):
     res = verified_schema.execute(make_query(wrong_pass_ver_user_status_type))
     assert res.data["archiveAccount"] == {
         "success": False,
-        "errors": {"password": [{"message": "Invalid password.", "code": "invalid_password"}]},
+        "errors": {
+            "password": [{"message": "Invalid password.", "code": "invalid_password"}]
+        },
     }
 
 

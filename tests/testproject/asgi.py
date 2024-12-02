@@ -1,9 +1,9 @@
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.urls import re_path
-from gqlauth.core.middlewares import channels_jwt_middleware
 from strawberry.channels import GraphQLHTTPConsumer, GraphQLWSConsumer
 
+from gqlauth.core.middlewares import channels_jwt_middleware
 from tests.testproject.schema import arg_schema
 
 websocket_urlpatterns = [

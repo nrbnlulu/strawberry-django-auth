@@ -4,8 +4,6 @@ tasks:
   lint:
     description: Lint the code
     cmds:
-    - uv run ruff format ./gqlauth ./tests
-    - uv run ruff check ./gqlauth ./tests  --fix
     - uv run mypy ./gqlauth
   test:
     description: Run tests

@@ -1,9 +1,9 @@
 from typing import Optional
 
-from gqlauth.settings_type import DjangoSetting
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.types.field import StrawberryField
 
+from gqlauth.settings_type import DjangoSetting
 from tests.testproject.settings import *  # noqa F403
 
 sys.path.append(str(Path(__file__).parent))  # noqa F403
