@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+  lint:
+    description: Lint the code
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+    - uv run ruff format ./gqlauth ./tests
+    - uv run ruff check ./gqlauth ./tests  --fix
+    - uv run mypy ./gqlauth
+  test:
+    description: Run tests
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - uv run python -m migrate
+      - uv run pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
+      - uv run pytest --ds=testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
+
+
+  serve:
+    description: Serve the documentation
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - uv run docs/pre_build.py
+      - uv run mkdocs serve
+
+  deploy_docs:
+    description: Deploy the documentation
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - uv run python docs/pre_build.py
+      - uv run mkdocs build
+      - uv run mkdocs gh-deploy

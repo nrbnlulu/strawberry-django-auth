@@ -10,9 +10,7 @@ mutation MyMutation {
     errors
   }
 }
-    """ % (
-        first_name
-    )
+    """ % (first_name)
 
 
 def test_update_account_unauthenticated(db_verified_user_status, anonymous_schema):

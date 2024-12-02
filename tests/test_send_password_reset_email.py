@@ -15,9 +15,7 @@ def _arg_query(user: UserType):
     sendPasswordResetEmail(email: "%s")
         { success, errors }
     }
-    """ % (
-        user.email
-    )
+    """ % (user.email)
 
 
 def test_send_email_invalid_email(db_verified_user_status, anonymous_schema):

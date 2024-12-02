@@ -108,7 +108,7 @@ class ImageCaptcha(_Captcha):
         def _draw_character(c):
             # if hebrew
             direction = "ltr"
-            if "\u0590" <= c <= "\u05EA" and self.heb_fonts:
+            if "\u0590" <= c <= "\u05ea" and self.heb_fonts:
                 direction = "rtl"
                 font = random.choice(
                     tuple(truetype(n, s) for n in self.heb_fonts for s in self._font_sizes)

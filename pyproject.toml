@@ -1,62 +1,69 @@
-[tool.poetry]
+[project]
 name = "strawberry-django-auth"
-version = "0.377.0"
-description = "Graphql authentication system with Strawberry for Django."
-license = "MIT"
-authors = ["Nir.J Benlulu <nrbnlulu@gmail.com>"]
-maintainers = ["Nir.J Benlulu <nrbnlulu@gmail.com>"]
-readme = "README.md"
+urls = { "Documentation" = "https://nrbnlulu.github.io/strawberry-django-auth/", "Homepage" = "https://github.com/nrbnlulu/strawberry-django-auth" }
 classifiers = [
     'Environment :: Web Environment',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Framework :: Django',
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-packages = [{ include = "gqlauth" }]
+authors = [{ name = "Nir Benlulu", email = "nrbnlulu@gmail.com" }]
+maintainers = [{ name = "Nir Benlulu", email = "nrbnlulu@gmail.com" }]
+description = "Graphql authentication system with Strawberry for Django."
+version = "0.377.0"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.13"
-Django = ">=3.2,<5.1"
-PyJWT = ">=2.6.0,<3.0"
-pillow = { version = ">=9.5,<11.0", extras = ["captcha"] }
-django-stubs = { extras = ["compatible-mypy"], version = "^4.2.0" }
-strawberry-graphql-django = ">=0.47.0"
-
-[tool.poetry.extras]
-captcha = ["pillow"]
+dependencies = [
+    "django>=5.1.3",
+    "Django>=4.2,<5.3",
+    "PyJWT>=2.6.0,<3.0",
+    "strawberry-graphql-django>=0.47.0",
+    "django-stubs[compatible-mypy]>=4.2.0",
+]
 
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.3.3"
-coverage = "^7.2"
-pytest = "^7.2"
-pytest-cov = ">=4,<6"
-types-cryptography = "^3.3.23"
-django-mock-queries = "^2.1.7"
-types-mock = "^5.0.0"
-types-jwt = "^0.1.0"
-types-pkg-resources = "^0.1.0"
-mkdocs = ">=1.3.0"
-mkdocs-markdownextradata-plugin = ">=0.2.5"
-mkdocs-material = ">=8.5.4"
-mkdocs-minify-plugin = ">=0.5.0"
-pymdown-extensions = ">=9.9"
-Markdown = ">=3.4.1"
-Faker = ">=18.2.0"
-pytest-asyncio = ">=0.21.0"
-pydoc-markdown = { extras = ["novella"], version = ">=4.6.4" }
-setuptools = ">=67.6.0"
-channels = { extras = ["daphne"], version = ">=4.0.0" }
-pytest-django = "^4.5.2"
-typer = "^0.12.1"
-pygithub = "^2.3.0"
-httpx = "^0.27.0"
+[tool.mypy]
+plugins = ["mypy_django_plugin.main", "strawberry.ext.mypy_plugin"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "testproject.settings"
+
+
+[project.optional-dependencies]
+captcha = ["pillow>=11.0.0"]
+
+[tool.uv]
+dev-dependencies = [
+    "pre-commit>=4.0.1",
+    "coverage>=7.2",
+    "pytest>=7.2",
+    "pytest-cov>=4,<6",
+    "types-cryptography>=3.3.23",
+    "django-mock-queries>=2.1.7",
+    "types-mock>=5.0.0",
+    "types-jwt>=0.1.0",
+    "mkdocs>=1.3.0",
+    "mkdocs-markdownextradata-plugin>=0.2.5",
+    "mkdocs-material>=8.5.4",
+    "mkdocs-minify-plugin>=0.5.0",
+    "pymdown-extensions>=9.9",
+    "Markdown>=3.4.1",
+    "Faker>=18.2.0",
+    "pytest-asyncio>=0.21.0",
+    "pydoc-markdown[novella]>=4.6.4",
+    "setuptools>=67.6.0",
+    "channels[daphne]>=4.0.0",
+    "pytest-django>=4.5.2",
+    "typer>=0.12.1",
+    "pygithub>=2.3.0",
+    "httpx>=0.27.0",
+]
 
 
 [tool.pytest.ini_options]
@@ -72,50 +79,6 @@ markers = [
     "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",
 ]
 
-[tool.poetry.urls]
-"Homepage" = "https://github.com/nrbnlulu/strawberry-django-auth"
-"Documentation" = "https://nrbnlulu.github.io/strawberry-django-auth/"
-
-[tool.black]
-line-length = 100
-target-version = ['py38', 'py39', 'py310']
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | __pycached__
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-force_sort_within_sections = true
-
-[tool.mypy]
-plugins = ["mypy_django_plugin.main", "strawberry.ext.mypy_plugin"]
-ignore_missing_imports = "True"
-
-[tool.django-stubs]
-django_settings_module = "testproject.settings"
-
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
-[tool.autopub]
-git-username = "gqlauth-bot"
-git-email = "bot@no.reply"
-project-name = "gqlauth"
-append-github-contributor = true
 
 [tool.ruff]
 line-length = 100
