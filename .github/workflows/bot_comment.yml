@@ -4,29 +4,27 @@ on:
   pull_request:
     types: [synchronize, reopened, opened, ready_for_review]
     branches:
-    - main
+      - main
     paths:
-    - "gqlauth/**"
-    - ".github/workflows/bot_comment.yml"
-    - "RELEASE.md"
+      - "gqlauth/**"
+      - ".github/workflows/bot_comment.yml"
+      - "RELEASE.md"
 
 jobs:
   bot_comment:
-    name:  Create or update bot status comment
+    name: Create or update bot status comment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: 3.11
-      - name: setup poetry
-        run: |
-          pip install poetry
-          poetry install
+          python-version: "3.12"
+      - name: Install deps
+        run: uv sync --all-extras --frozen
+
       - name: upload comment
-        run:
-          cd .github && poetry run python -m workflows.management bot_comment
+        run: cd .github && uv run python -m workflows.management bot_comment
         env:
           PR_NUMBER: ${{ github.event.number }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
