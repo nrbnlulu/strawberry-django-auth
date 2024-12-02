@@ -1,5 +1,12 @@
 CHANGELOG
 =========
+0.378.3 - 2024-12-02
+--------------------
+Release to PyPI for #586
+See https://github.com/nrbnlulu/strawberry-django-auth/releases/tag/0.378.0
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #592](https://github.com/nrbnlulu/strawberry-django-auth/pull/592/)
+
 0.378.2 - 2024-12-02
 --------------------
 Release to PyPI for #586
