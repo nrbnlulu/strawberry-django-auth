@@ -197,7 +197,7 @@ def main() -> None:
         message=pretty_changes,
     )
     # publish python to GitHub
-    subprocess.run(["rye", "build"], check=False)
+    subprocess.run(["uv", "build"], check=False)
     for file in PATHS.PROJECT_ROOT.glob("dist/*"):
         release.upload_asset(path=str(file))
 
