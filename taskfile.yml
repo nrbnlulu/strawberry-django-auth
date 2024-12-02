@@ -22,8 +22,7 @@ tasks:
 
   deploy_docs:
     description: Deploy the documentation
-    dir: '{{.USER_WORKING_DIR}}'
     cmds:
-      - uv run python docs/pre_build.py
+      - uv run docs/pre_build.py
       - uv run mkdocs build
       - uv run mkdocs gh-deploy
