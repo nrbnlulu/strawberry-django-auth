@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.378.1 - 2024-12-02
+--------------------
+Release for #586
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #590](https://github.com/nrbnlulu/strawberry-django-auth/pull/590/)
+
 0.378.0 - 2024-12-02
 --------------------
 - Add support for django 5.1
