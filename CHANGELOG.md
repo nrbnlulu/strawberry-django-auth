@@ -7,6 +7,15 @@ CHANGELOG
 - Migrate from poetry to uv
 - use taskfile instead of Makefile
 
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #589](https://github.com/nrbnlulu/strawberry-django-auth/pull/589/)
+
+0.378.0 - 2024-12-02
+--------------------
+- Add support for django 5.1
+- Drop support for django 3.2 and python >=3.9
+- Migrate from poetry to uv
+- use taskfile instead of Makefile
+
 Contributed by [ניר](https://github.com/nrbnlulu) via [PR #588](https://github.com/nrbnlulu/strawberry-django-auth/pull/588/)
 
 0.377.0 - 2024-07-24
