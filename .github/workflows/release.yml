@@ -31,5 +31,6 @@ jobs:
         run: |
           git remote set-url origin https://${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
           cd .github && uv run python -m workflows.management release
+          cd ..
           uv build
           uv publish --token ${{ secrets.PYPI_TOKEN }}
