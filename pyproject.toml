@@ -16,7 +16,7 @@ maintainers = [{ name = "Nir Benlulu", email = "nrbnlulu@gmail.com" }]
 description = "Graphql authentication system with Strawberry for Django."
 version = "0.377.0"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 
 dependencies = [
     "django>=5.1.3",
