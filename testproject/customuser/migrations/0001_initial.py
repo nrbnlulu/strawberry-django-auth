@@ -20,13 +20,18 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.BigAutoField(
-                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
                     ),
                 ),
                 ("password", models.CharField(max_length=128, verbose_name="password")),
                 (
                     "last_login",
-                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
                 ),
                 (
                     "is_superuser",
@@ -36,7 +41,10 @@ class Migration(migrations.Migration):
                         verbose_name="superuser status",
                     ),
                 ),
-                ("phone_number", models.CharField(default=False, max_length=255, unique=True)),
+                (
+                    "phone_number",
+                    models.CharField(default=False, max_length=255, unique=True),
+                ),
                 ("is_registered", models.BooleanField(default=False)),
                 ("first_name", models.CharField(blank=True, max_length=255)),
                 ("last_name", models.CharField(blank=True, max_length=255)),

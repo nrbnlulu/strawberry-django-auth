@@ -64,7 +64,9 @@ class TokenPayloadType:
     origIat: datetime = strawberry.field(
         description="when the token was created", default_factory=utc_now
     )
-    exp: datetime = strawberry.field(description="when the token will be expired", default=None)
+    exp: datetime = strawberry.field(
+        description="when the token will be expired", default=None
+    )
 
     def __post_init__(self):
         if not self.exp:
@@ -83,7 +85,9 @@ class TokenPayloadType:
         for field in dataclasses.fields(cls):  # type: ignore
             value = data[field.name]
             if isinstance(value, str) and field.type is datetime:
-                data[field.name] = datetime.strptime(value, app_settings.JWT_TIME_FORMAT)
+                data[field.name] = datetime.strptime(
+                    value, app_settings.JWT_TIME_FORMAT
+                )
         return cls(**data)
 
 
@@ -156,7 +160,9 @@ class ObtainJSONWebTokenType(OutputInterface):
         return ret
 
     @classmethod
-    def authenticate(cls, info: Info, input_: ObtainJSONWebTokenInput) -> "ObtainJSONWebTokenType":
+    def authenticate(
+        cls, info: Info, input_: ObtainJSONWebTokenInput
+    ) -> "ObtainJSONWebTokenType":
         """Return `ObtainJSONWebTokenType`. authenticates against django
         authentication backends.
 
@@ -170,10 +176,14 @@ class ObtainJSONWebTokenType(OutputInterface):
             # authenticate against django authentication backends.
             user: Optional["UserProto"]
             request = (
-                info.context["request"] if isinstance(info.context, dict) else info.context.request
+                info.context["request"]
+                if isinstance(info.context, dict)
+                else info.context.request
             )
             if not (user := authenticate(request, **args)):  # type: ignore
-                return ObtainJSONWebTokenType(success=False, errors=Messages.INVALID_CREDENTIALS)
+                return ObtainJSONWebTokenType(
+                    success=False, errors=Messages.INVALID_CREDENTIALS
+                )
 
             from gqlauth.models import UserStatus
 
@@ -188,11 +198,15 @@ class ObtainJSONWebTokenType(OutputInterface):
                 user.save(update_fields=("last_login",))
                 return ObtainJSONWebTokenType.from_user(user)
             else:
-                return ObtainJSONWebTokenType(success=False, errors=Messages.NOT_VERIFIED)
+                return ObtainJSONWebTokenType(
+                    success=False, errors=Messages.NOT_VERIFIED
+                )
 
         except PermissionDenied:
             # one of the authentication backends rejected the user.
-            return ObtainJSONWebTokenType(success=False, errors=Messages.UNAUTHENTICATED)
+            return ObtainJSONWebTokenType(
+                success=False, errors=Messages.UNAUTHENTICATED
+            )
 
         except TokenExpired:
             return ObtainJSONWebTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
@@ -221,7 +235,9 @@ class VerifyTokenType(OutputInterface):
             return VerifyTokenType(success=False, errors=Messages.EXPIRED_TOKEN)
 
         else:
-            return VerifyTokenType(token=token_type, user=cast(UserType, user), success=True)
+            return VerifyTokenType(
+                token=token_type, user=cast(UserType, user), success=True
+            )
 
 
 @strawberry.type

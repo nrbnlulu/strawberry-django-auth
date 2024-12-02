@@ -7,11 +7,17 @@ class Messages:
     UNAUTHENTICATED = [{"message": _("Unauthenticated."), "code": "unauthenticated"}]
     INVALID_TOKEN = [{"message": _("Invalid token."), "code": "invalid_token"}]
     EXPIRED_TOKEN = [{"message": _("Expired token."), "code": "expired_token"}]
-    NO_SUFFICIENT_PERMISSIONS = [{"message": _("Expired token."), "code": "expired_token"}]
+    NO_SUFFICIENT_PERMISSIONS = [
+        {"message": _("Expired token."), "code": "expired_token"}
+    ]
 
     # captcha messages
-    CAPTCHA_VALID = [{"message": _("Captcha successfully validated!"), "code": "valid_captcha"}]
-    CAPTCHA_INVALID = [{"message": _("Captcha wrong, try again."), "code": "invalid_captcha"}]
+    CAPTCHA_VALID = [
+        {"message": _("Captcha successfully validated!"), "code": "valid_captcha"}
+    ]
+    CAPTCHA_INVALID = [
+        {"message": _("Captcha wrong, try again."), "code": "invalid_captcha"}
+    ]
     CAPTCHA_MAX_RETRIES = [
         {
             "message": _("Maximum tries exceeded, please refresh the captcha."),
@@ -25,7 +31,9 @@ class Messages:
         }
     ]
 
-    ALREADY_VERIFIED = [{"message": _("Account already verified."), "code": "already_verified"}]
+    ALREADY_VERIFIED = [
+        {"message": _("Account already verified."), "code": "already_verified"}
+    ]
     EMAIL_FAIL = [{"message": _("Failed to send email."), "code": "email_fail"}]
     INVALID_CREDENTIALS = [
         {
@@ -33,7 +41,9 @@ class Messages:
             "code": "invalid_credentials",
         }
     ]
-    NOT_VERIFIED = [{"message": _("Please verify your account."), "code": "not_verified"}]
+    NOT_VERIFIED = [
+        {"message": _("Please verify your account."), "code": "not_verified"}
+    ]
     NOT_VERIFIED_PASSWORD_RESET = [
         {
             "message": _("Verify your account. A new verification email was sent."),

@@ -11,7 +11,8 @@ from gqlauth.user.signals import user_registered
 from PIL import Image
 
 pytestmark = pytest.mark.skipif(
-    not gqlauth_settings.LOGIN_REQUIRE_CAPTCHA or not gqlauth_settings.REGISTER_REQUIRE_CAPTCHA,
+    not gqlauth_settings.LOGIN_REQUIRE_CAPTCHA
+    or not gqlauth_settings.REGISTER_REQUIRE_CAPTCHA,
     reason="This test requires captcha mutation fields to be initialized",
 )
 
@@ -38,16 +39,28 @@ def test_register_user_require_captcha_validation(unverified_schema):
     res = unverified_schema.execute(
         query=register_query_without_cap_fields(username="fdsafsdfgv"), relay=True
     )
-    assert "identifier' of required type 'UUID!' was not provided." in res.errors[0].message
-    assert "userEntry' of required type 'String!' was not provided" in res.errors[1].message
+    assert (
+        "identifier' of required type 'UUID!' was not provided."
+        in res.errors[0].message
+    )
+    assert (
+        "userEntry' of required type 'String!' was not provided"
+        in res.errors[1].message
+    )
 
 
 def test_login_require_captcha_validation(unverified_schema):
     res = unverified_schema.execute(
         query=login_query_without_cap_fields(username="fake"), relay=True
     )
-    assert "identifier' of required type 'UUID!' was not provided." in res.errors[0].message
-    assert "userEntry' of required type 'String!' was not provided" in res.errors[1].message
+    assert (
+        "identifier' of required type 'UUID!' was not provided."
+        in res.errors[0].message
+    )
+    assert (
+        "userEntry' of required type 'String!' was not provided"
+        in res.errors[1].message
+    )
 
 
 def test_register_wrong_captcha_validation(captcha, unverified_schema):
@@ -60,7 +73,9 @@ def test_register_wrong_uuid(captcha, unverified_schema):
     assert res.data["register"]["errors"]["captcha"] == Messages.CAPTCHA_EXPIRED
 
 
-def test_register_correct_captcha_create_user(captcha, unverified_schema, username="test_captcha"):
+def test_register_correct_captcha_create_user(
+    captcha, unverified_schema, username="test_captcha"
+):
     handler = MagicMock()
     user_registered.connect(handler)
     unverified_schema.execute(

@@ -20,9 +20,7 @@ def login_query(request):
             f' password: "{user.password}"'
         )
         if app_settings.LOGIN_REQUIRE_CAPTCHA:
-            arguments += (
-                f', identifier: "{captcha.uuid}" ,userEntry: "{user_entry or captcha.text}"'
-            )
+            arguments += f', identifier: "{captcha.uuid}" ,userEntry: "{user_entry or captcha.text}"'
 
         return """
            mutation {
@@ -65,7 +63,9 @@ def login_query(request):
             }
           }
         }
-           """ % (arguments)
+           """ % (
+            arguments
+        )
 
     return inner
 
@@ -96,7 +96,9 @@ def test_archived_user_becomes_active_on_login(
     default_test(res)
 
 
-def test_login_success(verified_schema, unverified_schema, allow_login_not_verified, login_query):
+def test_login_success(
+    verified_schema, unverified_schema, allow_login_not_verified, login_query
+):
     res = verified_schema.execute(login_query(verified_schema.us_type))
     default_test(res)
 
@@ -125,7 +127,9 @@ def test_not_verified_fails(unverified_schema, login_query):
     assert not res["refreshToken"]
 
 
-def test_login_unverified_success(allow_login_not_verified, unverified_schema, login_query):
+def test_login_unverified_success(
+    allow_login_not_verified, unverified_schema, login_query
+):
     res = unverified_schema.execute(login_query(unverified_schema.us_type))
     default_test(res)
 

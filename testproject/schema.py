@@ -66,7 +66,9 @@ class Query(UserQueries):
 @strawberry.type
 class Subscription:
     @strawberry.subscription()
-    async def whatsMyName(self, info: Info, target: int = 10) -> AsyncGenerator[str, None]:
+    async def whatsMyName(
+        self, info: Info, target: int = 10
+    ) -> AsyncGenerator[str, None]:
         user = get_user(info)
         assert user.is_authenticated
         for _ in range(target):

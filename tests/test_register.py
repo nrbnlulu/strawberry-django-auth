@@ -34,16 +34,22 @@ def _arg_query(user: UserType, captcha: Captcha):
         )
         { success, errors  }
     }
-    """ % (_generate_register_args(user, captcha))
+    """ % (
+        _generate_register_args(user, captcha)
+    )
 
 
 @pytest.mark.default_user  # settings_b has passwordless registration
-def test_register_invalid_password_validation(verified_user_status_type, anonymous_schema, captcha):
+def test_register_invalid_password_validation(
+    verified_user_status_type, anonymous_schema, captcha
+):
     """Fail to register same user with bad password."""
     # register
     us = verified_user_status_type
     us.user.password = "123"  # invalid password
-    executed = anonymous_schema.execute(query=_arg_query(us.user, captcha)).data["register"]
+    executed = anonymous_schema.execute(query=_arg_query(us.user, captcha)).data[
+        "register"
+    ]
     assert not executed["success"]
     assert executed["errors"]
 

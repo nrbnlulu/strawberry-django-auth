@@ -32,4 +32,6 @@ class Mutation:
     revoke_token = mutations.RevokeToken.field
 
 
-schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=[SchemaDirectiveExtension])
+schema = strawberry.Schema(
+    query=Query, mutation=Mutation, extensions=[SchemaDirectiveExtension]
+)

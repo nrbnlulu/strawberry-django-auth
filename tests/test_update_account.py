@@ -10,7 +10,9 @@ mutation MyMutation {
     errors
   }
 }
-    """ % (first_name)
+    """ % (
+        first_name
+    )
 
 
 def test_update_account_unauthenticated(db_verified_user_status, anonymous_schema):
@@ -38,7 +40,9 @@ def test_invalid_form(db_verified_user_status, verified_schema):
     user_obj = user_status.user.obj
     user_obj.first_name = user_status.user.username_field
     user_obj.save()
-    super_long_string = "10" * 150  # django.auth first_name field is 150 characters or fewer.
+    super_long_string = (
+        "10" * 150
+    )  # django.auth first_name field is 150 characters or fewer.
     executed = verified_schema.execute(_arg_query(first_name=super_long_string)).data[
         "updateAccount"
     ]

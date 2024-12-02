@@ -13,7 +13,9 @@ def make_query(user_status_type: UserStatusType) -> str:
 
               }
           }
-            """ % (user_status_type.user.password)
+            """ % (
+        user_status_type.user.password
+    )
 
 
 def test_not_verified(unverified_schema):
@@ -28,7 +30,9 @@ def test_invalid_password(verified_schema, wrong_pass_ver_user_status_type):
     res = verified_schema.execute(make_query(wrong_pass_ver_user_status_type))
     assert res.data["archiveAccount"] == {
         "success": False,
-        "errors": {"password": [{"message": "Invalid password.", "code": "invalid_password"}]},
+        "errors": {
+            "password": [{"message": "Invalid password.", "code": "invalid_password"}]
+        },
     }
 
 
