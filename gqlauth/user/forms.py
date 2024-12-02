@@ -40,17 +40,20 @@ class UpdateAccountForm(UserChangeForm):
         field_classes = {"username": CustomUsernameField}
 
 
-class PasswordLessRegisterForm(UserCreationForm):
+class PasswordLessRegisterForm(forms.ModelForm):
     """A RegisterForm with optional password inputs."""
 
     class Meta:
         model = get_user_model()
         fields = REGISTER_MUTATION_FIELDS
+        field_classes = {"username": CustomUsernameField}
 
+    def clean_username(self): # pragma: no cover
+        return UserCreationForm.clean_username(self)  # type: ignore
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["password1"].required = False
-        self.fields["password2"].required = False
+  
 
     def save(self, commit=True):
         user = super().save(commit=False)
