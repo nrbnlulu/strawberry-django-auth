@@ -4,7 +4,7 @@ from gqlauth.settings_type import DjangoSetting
 from strawberry.annotation import StrawberryAnnotation
 from strawberry.types.field import StrawberryField
 
-from .settings import *  # noqa F403
+from tests.testproject.settings import *  # noqa F403
 
 sys.path.append(str(Path(__file__).parent))  # noqa F403
 phone_number_field = StrawberryField(

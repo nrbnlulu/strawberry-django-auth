@@ -10,11 +10,11 @@ tasks:
     - uv run mypy ./gqlauth
   test:
     description: Run tests
-    dir: '{{.USER_WORKING_DIR}}'
+    dir: "./tests"
     cmds:
       - uv run python -m migrate
-      - uv run pytest --ds=testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
-      - uv run pytest --ds=testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
+      - uv run pytest --ds=tests.testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
+      - uv run pytest --ds=tests.testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
 
 
   serve:

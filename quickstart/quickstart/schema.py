@@ -4,7 +4,6 @@ import strawberry
 from gqlauth.user import arg_mutations as mutations
 from gqlauth.user.queries import UserQueries
 from gqlauth.user.resolvers import Captcha
-from strawberry_django.directives import SchemaDirectiveExtension
 
 
 @strawberry.type
@@ -32,6 +31,4 @@ class Mutation:
     revoke_token = mutations.RevokeToken.field
 
 
-schema = strawberry.Schema(
-    query=Query, mutation=Mutation, extensions=[SchemaDirectiveExtension]
-)
+schema = strawberry.Schema(query=Query, mutation=Mutation)

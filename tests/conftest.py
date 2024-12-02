@@ -19,10 +19,11 @@ from strawberry import Schema
 from strawberry.channels.testing import GraphQLWebsocketCommunicator
 from strawberry.types import ExecutionResult
 from strawberry.utils.str_converters import to_camel_case
-from testproject.asgi import application
-from testproject.relay_schema import relay_schema
-from testproject.sample.models import Apple
-from testproject.schema import arg_schema
+
+from tests.testproject.asgi import application
+from tests.testproject.relay_schema import relay_schema
+from tests.testproject.sample.models import Apple
+from tests.testproject.schema import arg_schema
 
 if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.core.utils import UserProto

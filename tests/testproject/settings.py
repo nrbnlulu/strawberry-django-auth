@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "strawberry_django",
     "gqlauth",
-    "testproject.sample",
+    "tests.testproject.sample",
 ]
 
 

@@ -32,7 +32,7 @@ plugins = ["mypy_django_plugin.main", "strawberry.ext.mypy_plugin"]
 ignore_missing_imports = true
 
 [tool.django-stubs]
-django_settings_module = "testproject.settings"
+django_settings_module = "tests.testproject.settings"
 
 
 [project.optional-dependencies]
@@ -72,7 +72,7 @@ django_find_project = false
 minversion = "6.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
-DJANGO_SETTINGS_MODULE = "testproject.settings"
+DJANGO_SETTINGS_MODULE = "tests.testproject.settings"
 python_files = "tests.py test_*.py *_tests.py"
 asyncio_mode = "auto"
 markers = [
@@ -83,11 +83,11 @@ markers = [
 
 [tool.ruff]
 line-length = 100
-select = ["E", "F", "ERA", "I"]
-ignore = [
+lint.select = ["E", "F", "ERA", "I"]
+lint.ignore = [
     "TID252",
     "E501",   # line too long, handled by black
 ]
 fix = true
 
-src = ["gqlauth", "tests", "testproject"]
+src = ["gqlauth", "tests"]

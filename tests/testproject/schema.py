@@ -10,7 +10,7 @@ from gqlauth.user.queries import UserQueries
 from strawberry.types import Info
 from strawberry_django.permissions import IsAuthenticated
 
-from testproject.sample.models import Apple
+from tests.testproject.sample.models import Apple
 
 
 @strawberry_django.type(model=Apple)
@@ -66,9 +66,7 @@ class Query(UserQueries):
 @strawberry.type
 class Subscription:
     @strawberry.subscription()
-    async def whatsMyName(
-        self, info: Info, target: int = 10
-    ) -> AsyncGenerator[str, None]:
+    async def whatsMyName(self, info: Info, target: int = 10) -> AsyncGenerator[str, None]:
         user = get_user(info)
         assert user.is_authenticated
         for _ in range(target):
