@@ -23,7 +23,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1"]
 
-ROOT_URLCONF = "testproject.urls"
+ROOT_URLCONF = "tests.testproject.urls"
 
 INSTALLED_APPS = [
     "django.contrib.admin",

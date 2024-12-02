@@ -12,7 +12,7 @@ tasks:
     description: Run tests
     dir: "./tests"
     cmds:
-      - uv run python -m migrate
+      - cd testproject && uv run python -m migrate
       - uv run pytest --ds=tests.testproject.settings -m 'not settings_b' --cov=gqlauth --cov-report=xml
       - uv run pytest --ds=tests.testproject.settings_b -m "not default_user" --cov=gqlauth --cov-report=xml --cov-append
 
