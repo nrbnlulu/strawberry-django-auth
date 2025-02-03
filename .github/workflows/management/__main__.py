@@ -35,7 +35,7 @@ def test_matrix_command() -> None:
     from mainserver.tools.constants import PATHS  # noqa: PLC0415
 
     def default_test_command(*flags: str) -> str:
-        return f"uv run pytest {" ".join(list(flags))} --cov=src --cov-report=xml"
+        return f"uv run pytest {' '.join(list(flags))} --cov=src --cov-report=xml"
 
     micro_services = [
         src.parent for src in PATHS.MICROSERVICES.glob("**/pyproject.toml")
