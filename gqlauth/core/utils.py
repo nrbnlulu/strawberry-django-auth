@@ -2,7 +2,7 @@ import contextlib
 import datetime
 import inspect
 import typing
-from typing import Dict, Iterable
+from collections.abc import Iterable
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -122,7 +122,7 @@ def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=Fal
     return wrapped
 
 
-def inject_arguments(args: Dict[str, type]):
+def inject_arguments(args: dict[str, type]):
     """Injects arguments to the decorated resolver.
 
     :param args:`dict[name, type]` of arguments to be injected.,

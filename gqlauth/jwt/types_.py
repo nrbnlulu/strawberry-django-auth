@@ -139,11 +139,11 @@ class ObtainJSONWebTokenInput:
 )
 class ObtainJSONWebTokenType(OutputInterface):
     success: bool
-    user: Optional[UserType] = None
-    token: Optional[TokenType] = None
+    user: UserType | None = None
+    token: TokenType | None = None
     if app_settings.JWT_LONG_RUNNING_REFRESH_TOKEN:
-        refresh_token: Optional[RefreshTokenType] = None
-    errors: Optional[ExpectedErrorType] = None
+        refresh_token: RefreshTokenType | None = None
+    errors: ExpectedErrorType | None = None
 
     @classmethod
     def from_user(cls, user: "UserProto") -> "ObtainJSONWebTokenType":
@@ -220,9 +220,9 @@ class VerifyTokenInput:
 @strawberry.type
 class VerifyTokenType(OutputInterface):
     success: bool
-    token: Optional[TokenType] = None
-    user: Optional[UserType] = None
-    errors: Optional[ExpectedErrorType] = None
+    token: TokenType | None = None
+    user: UserType | None = None
+    errors: ExpectedErrorType | None = None
 
     @classmethod
     def from_token(cls, token_input: VerifyTokenInput) -> "VerifyTokenType":
@@ -243,5 +243,5 @@ class VerifyTokenType(OutputInterface):
 @strawberry.type
 class RevokeRefreshTokenType:
     success: bool
-    refresh_token: Optional[RefreshTokenType] = None
-    errors: Optional[ExpectedErrorType] = None
+    refresh_token: RefreshTokenType | None = None
+    errors: ExpectedErrorType | None = None

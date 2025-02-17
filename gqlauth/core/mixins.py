@@ -1,5 +1,4 @@
 from abc import ABC
-from typing import Type
 
 import strawberry_django
 from django.contrib.auth import get_user_model
@@ -12,7 +11,7 @@ UserModel = get_user_model()
 
 
 class ArgMixin(BaseMixin, ABC):
-    def __init_subclass__(cls: Type[BaseMixin], **kwargs):
+    def __init_subclass__(cls: type[BaseMixin], **kwargs):
         input_type = cls.resolve_mutation.__annotations__["input_"]
         return_type = cls.resolve_mutation.__annotations__["return"]
 
@@ -27,7 +26,7 @@ class ArgMixin(BaseMixin, ABC):
 
 
 class RelayMixin(BaseMixin, ABC):
-    def __init_subclass__(cls: Type[BaseMixin], **kwargs):
+    def __init_subclass__(cls: type[BaseMixin], **kwargs):
         input_type = cls.resolve_mutation.__annotations__["input_"]
         return_type = cls.resolve_mutation.__annotations__["return"]
 
