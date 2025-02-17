@@ -106,10 +106,6 @@ def fields_names(strawberry_fields: Iterable[StrawberryField]):
 
 def inject_fields(fields: typing.Iterable[StrawberryField], annotations_only=False):
     def wrapped(cls: type):
-        # python 3.8 compat:
-        if not hasattr(cls, "__annotations__"):  # pragma: no cover
-            cls.__annotations__ = {}
-
         for field in fields:
             if not field.name:
                 continue
