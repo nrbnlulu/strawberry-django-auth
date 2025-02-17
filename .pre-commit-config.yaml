@@ -13,11 +13,18 @@ repos:
     hooks:
       - id: codespell
         args: ["--skip=*.json"]
+
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: ["--py310-plus"]
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.23.1
+    hooks:
+      - id: django-upgrade
+        args: ["--target-version", "4.2"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
