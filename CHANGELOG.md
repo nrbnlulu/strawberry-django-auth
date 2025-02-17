@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.378.4 - 2025-02-17
+--------------------
+Remove duplicate Django dependency and reintroduce Django>=4.2,<5.3 support
+
+Contributed by [Ülgen Sarıkavak](https://github.com/ulgens) via [PR #597](https://github.com/nrbnlulu/strawberry-django-auth/pull/597/)
+
 0.378.3 - 2024-12-02
 --------------------
 Release to PyPI for #586
