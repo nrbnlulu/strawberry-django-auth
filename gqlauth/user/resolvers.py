@@ -1,7 +1,8 @@
 import contextlib
+from collections.abc import Callable
 from dataclasses import asdict
 from smtplib import SMTPException
-from typing import Callable, cast
+from typing import cast
 from uuid import UUID
 
 import strawberry

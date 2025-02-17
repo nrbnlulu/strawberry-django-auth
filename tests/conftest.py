@@ -1,7 +1,8 @@
 import dataclasses
+from collections.abc import Iterable
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any, Iterable, NamedTuple, Union
+from typing import TYPE_CHECKING, Any, NamedTuple, Union
 
 import faker
 import pytest
@@ -100,7 +101,7 @@ class UserType:
 class UserStatusType:
     verified: bool
     archived: bool = False
-    user: Union[UserModel, UserType] = None
+    user: UserModel | UserType = None
 
     def create(self):
         """This will create a new user with user status from the
@@ -236,7 +237,7 @@ def override_gqlauth(app_settings):
 
 @dataclasses.dataclass
 class FakeContext:
-    request: Union[HttpRequest, dict]
+    request: HttpRequest | dict
 
 
 class SchemaHelper(NamedTuple):

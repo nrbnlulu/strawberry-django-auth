@@ -1,15 +1,12 @@
 import json
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
 from random import SystemRandom
 from typing import (
     TYPE_CHECKING,
-    Callable,
     Generic,
-    List,
     Optional,
-    Set,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -28,16 +25,16 @@ if TYPE_CHECKING:  # pragma: no cover
     from gqlauth.jwt.types_ import TokenType
 
 
-def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> Optional[str]:
+def token_finder(request_or_scope: Union[dict, "HttpRequest"]) -> str | None:
     from gqlauth.core.constants import JWT_PREFIX
 
-    token: Optional[str] = None
+    token: str | None = None
     if isinstance(request_or_scope, HttpRequest):  # django
         headers = request_or_scope.headers
         token = headers.get("authorization", None) or headers.get("Authorization", None)
     else:  # channels
         request_or_scope = cast(dict, request_or_scope)
-        raw_headers: List[Tuple[bytes, bytes]] = request_or_scope["headers"]
+        raw_headers: list[tuple[bytes, bytes]] = request_or_scope["headers"]
         for k, v in raw_headers:
             if k == b"authorization":
                 token = v.decode()
@@ -103,9 +100,9 @@ T = TypeVar("T")
 class DjangoSetting(Generic[T]):
     __slots__ = ("setting", "cached")
 
-    def __init__(self, setting: str, value: Optional[T] = None):
+    def __init__(self, setting: str, value: T | None = None):
         self.setting = setting
-        self.cached: Optional[T] = value
+        self.cached: T | None = value
 
     @property
     def value(self) -> T:
@@ -156,7 +153,7 @@ def default_captcha_text_validator(original: str, received: str) -> bool:
 class GqlAuthSettings:
     ALLOW_LOGIN_NOT_VERIFIED: bool = False
     """"""
-    LOGIN_FIELDS: Set[StrawberryField] = field(
+    LOGIN_FIELDS: set[StrawberryField] = field(
         default_factory=lambda: {
             username_field,
         }
@@ -173,7 +170,7 @@ class GqlAuthSettings:
     CI_MODE: bool = False
     """Whether to enable CI mode, this will disable captcha validation
     (although the fields would still be required)."""
-    REGISTER_MUTATION_FIELDS: Set[StrawberryField] = field(
+    REGISTER_MUTATION_FIELDS: set[StrawberryField] = field(
         default_factory=lambda: {email_field, username_field}
     )
     """Fields on register, plus password1 and password2, can be a dict like
@@ -200,7 +197,7 @@ class GqlAuthSettings:
     """If True, an png representation of the captcha will be saved under
     MEDIA_ROOT/captcha/<datetime>/<uuid>.png."""
     # optional fields on update account, can be list of fields
-    UPDATE_MUTATION_FIELDS: Set[StrawberryField] = field(
+    UPDATE_MUTATION_FIELDS: set[StrawberryField] = field(
         default_factory=lambda: {first_name_field, last_name_field}
     )
     """Fields on update account mutation."""
@@ -256,9 +253,7 @@ class GqlAuthSettings:
     """
     JWT_DECODE_HANDLER: Callable[[str], "TokenType"] = decode_jwt
 
-    JWT_TOKEN_FINDER: Callable[[Union["HttpRequest", dict]], Optional[str]] = (
-        token_finder
-    )
+    JWT_TOKEN_FINDER: Callable[[Union["HttpRequest", dict]], str | None] = token_finder
     """A hook called by `GqlAuthRootField` to find the token. Accepts the
     request object (might be channels scope dict or django request object)
 

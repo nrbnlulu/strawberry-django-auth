@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 import strawberry
 
@@ -10,4 +10,4 @@ T = TypeVar("T")
 @strawberry.interface
 class OutputInterface:
     success: bool
-    errors: Optional[ExpectedErrorType]
+    errors: ExpectedErrorType | None

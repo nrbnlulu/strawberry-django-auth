@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Callable, cast, final
+from collections.abc import Callable
+from typing import Any, cast, final
 
 import strawberry
 from graphql.pyutils import AwaitableOrValue

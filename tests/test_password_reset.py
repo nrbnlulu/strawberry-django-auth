@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pytest
 
 from gqlauth.core.utils import get_token
@@ -27,7 +25,7 @@ def _arg_query(token, new_password1="new_password", new_password2="new_password"
 @pytest.fixture()
 def reset_token_with_unverified_user(
     db_unverified_user_status,
-) -> Tuple[UserStatusType, str]:
+) -> tuple[UserStatusType, str]:
     db_unverified_user_status.user.old_password = (
         db_unverified_user_status.user.obj.password
     )

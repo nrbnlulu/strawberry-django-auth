@@ -1,5 +1,3 @@
-from typing import Optional
-
 import strawberry
 import strawberry_django
 from django.contrib.auth import get_user_model
@@ -25,7 +23,7 @@ class UserQueries:
     @strawberry_django.field(
         description="Returns the current user if he is not anonymous."
     )
-    def public_user(self, info: Info) -> Optional[UserType]:
+    def public_user(self, info: Info) -> UserType | None:
         user = get_user(info)
         if not user.is_anonymous:
             return user  # type: ignore

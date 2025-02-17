@@ -1,5 +1,5 @@
 import contextlib
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from django.contrib.auth import get_user_model
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:  # pragma: no cover
 USER_MODEL = get_user_model()
 
 
-def confirm_password(user: USER_UNION, input_) -> Optional[MutationNormalOutput]:
+def confirm_password(user: USER_UNION, input_) -> MutationNormalOutput | None:
     if password := getattr(input_, "password", False):
         password_arg = "password"
     else:
