@@ -21,14 +21,14 @@ repos:
         args: ["--py310-plus"]
 
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.23.1
+    rev: 1.24.0
     hooks:
       - id: django-upgrade
         args: ["--target-version", "4.2"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.11.2
+    rev: v0.11.8
     hooks:
       # Run the linter.
       - id: ruff
