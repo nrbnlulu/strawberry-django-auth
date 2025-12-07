@@ -1,53 +1,95 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [ "hatchling" ]
+
 [project]
 name = "strawberry-django-auth"
-classifiers = [ "Environment :: Web Environment", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent", "Framework :: Django", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12",]
-description = "Graphql authentication system with Strawberry for Django."
 version = "0.378.4"
+description = "Graphql authentication system with Strawberry for Django."
 readme = "README.md"
+maintainers.email = "nrbnlulu@gmail.com"
+maintainers.name = "Nir Benlulu"
+authors.email = "nrbnlulu@gmail.com"
+authors.name = "Nir Benlulu"
 requires-python = ">=3.10,<3.14"
-dependencies = [ "Django>=4.2,<5.3", "PyJWT>=2.6.0,<3.0", "strawberry-graphql-django>=0.47.0", "django-stubs[compatible-mypy]>=4.2.0",]
-[[project.authors]]
-name = "Nir Benlulu"
-email = "nrbnlulu@gmail.com"
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 
-[[project.maintainers]]
-name = "Nir Benlulu"
-email = "nrbnlulu@gmail.com"
+dependencies = [
+    "django>=4.2,<5.3",
+    "django-stubs[compatible-mypy]>=4.2.0",
+    "pyjwt>=2.6.0,<3.0",
+    "strawberry-graphql-django>=0.47.0",
+]
+optional-dependencies.captcha = [ "pillow>=11.0.0" ]
+urls.Documentation = "https://nrbnlulu.github.io/strawberry-django-auth/"
+urls.Homepage = "https://github.com/nrbnlulu/strawberry-django-auth"
 
-[build-system]
-requires = [ "hatchling",]
-build-backend = "hatchling.build"
-
-[project.urls]
-Documentation = "https://nrbnlulu.github.io/strawberry-django-auth/"
-Homepage = "https://github.com/nrbnlulu/strawberry-django-auth"
-
-[project.optional-dependencies]
-captcha = [ "pillow>=11.0.0",]
-
-[tool.mypy]
-plugins = [ "mypy_django_plugin.main", "strawberry.ext.mypy_plugin",]
-ignore_missing_imports = true
-
-[tool.django-stubs]
-django_settings_module = "tests.testproject.settings"
+[tool.hatch.build.targets.wheel]
+packages = [ "gqlauth" ]
 
 [tool.uv]
-dev-dependencies = [ "pre-commit>=4.0.1", "coverage>=7.2", "pytest>=7.2", "pytest-cov>=4,<6", "types-cryptography>=3.3.23", "django-mock-queries>=2.1.7", "types-mock>=5.0.0", "types-jwt>=0.1.0", "mkdocs>=1.3.0", "mkdocs-markdownextradata-plugin>=0.2.5", "mkdocs-material>=8.5.4", "mkdocs-minify-plugin>=0.5.0", "pymdown-extensions>=9.9", "Markdown>=3.4.1", "Faker>=18.2.0", "pytest-asyncio>=0.21.0", "pydoc-markdown[novella]>=4.6.4", "setuptools>=67.6.0", "channels[daphne]>=4.0.0", "pytest-django>=4.5.2", "typer>=0.12.1", "pygithub>=2.3.0", "httpx>=0.27.0", "jinja2>=3.1.4", "toml>=0.10.2",]
+dev-dependencies = [
+    "pre-commit>=4.0.1",
+    "coverage>=7.2",
+    "pytest>=7.2",
+    "pytest-cov>=4,<6",
+    "types-cryptography>=3.3.23",
+    "django-mock-queries>=2.1.7",
+    "types-mock>=5.0.0",
+    "types-jwt>=0.1.0",
+    "mkdocs>=1.3.0",
+    "mkdocs-markdownextradata-plugin>=0.2.5",
+    "mkdocs-material>=8.5.4",
+    "mkdocs-minify-plugin>=0.5.0",
+    "pymdown-extensions>=9.9",
+    "Markdown>=3.4.1",
+    "Faker>=18.2.0",
+    "pytest-asyncio>=0.21.0",
+    "pydoc-markdown[novella]>=4.6.4",
+    "setuptools>=67.6.0",
+    "channels[daphne]>=4.0.0",
+    "pytest-django>=4.5.2",
+    "typer>=0.12.1",
+    "pygithub>=2.3.0",
+    "httpx>=0.27.0",
+    "jinja2>=3.1.4",
+    "toml>=0.10.2",
+]
+
+[tool.ruff]
+lint.select = [ "E", "ERA", "F", "I" ]
+lint.ignore = [ "E501", "TID252" ]
 
 [tool.pytest.ini_options]
 django_find_project = false
 minversion = "6.0"
 addopts = "-ra -q"
-testpaths = [ "tests",]
+testpaths = [ "tests" ]
 DJANGO_SETTINGS_MODULE = "tests.testproject.settings_b"
 python_files = "tests.py test_*.py *_tests.py"
 asyncio_mode = "auto"
-markers = [ "default_user: uses the default settings, a user with email address and default USERNAME_FIELD", "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",]
+markers = [
+    "default_user: uses the default settings, a user with email address and default USERNAME_FIELD",
+    "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",
+]
 
-[tool.ruff.lint]
-select = [ "E", "F", "ERA", "I",]
-ignore = [ "TID252", "E501",]
+[tool.mypy]
+plugins = [
+    "mypy_django_plugin.main",
+    "strawberry.ext.mypy_plugin",
+]
+ignore_missing_imports = true
 
-[tool.hatch.build.targets.wheel]
-packages = [ "gqlauth",]
+[tool.django-stubs]
+django_settings_module = "tests.testproject.settings"
