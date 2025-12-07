@@ -15,20 +15,20 @@ repos:
         args: ["--skip=*.json"]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.20.0
+    rev: v3.21.2
     hooks:
       - id: pyupgrade
         args: ["--py310-plus"]
 
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.27.0
+    rev: 1.29.1
     hooks:
       - id: django-upgrade
         args: ["--target-version", "4.2"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.12.12
+    rev: v0.14.7
     hooks:
       # Run the linter.
       - id: ruff
