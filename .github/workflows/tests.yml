@@ -31,13 +31,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install deps
-        run: uv sync --all-extras --frozen
+      - name: Install deps & Django ${{ matrix.django-version }}
+        run: |
+          uv sync --all-extras --frozen
+          uv pip install "Django~=${{ matrix.django-version }}"
 
       - name: Install Task
         uses: go-task/setup-task@v1
 
       - name: Run tests
+        env:
+          UV_NO_SYNC: 1
         run: |
           uv run python -c "import django; print(django.get_version())"
           task test
