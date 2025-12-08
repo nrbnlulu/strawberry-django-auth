@@ -32,10 +32,16 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install deps
-        run: uv sync --all-extras --frozen
+        run: uv sync --all-extras
 
       - name: Install Django ${{ matrix.django-version }}
-        run: uv pip install "Django~=${{ matrix.django-version }}"
+        run: uv pip install "Django~=${{ matrix.django-version }}" --upgrade
+
+      - name: Show Django version
+        run: uv run --no-sync python -c "import django; print(django.get_version())" >> $GITHUB_STEP_SUMMARY
+
+      - name: Export Django version
+        run: echo "DJANGO_VERSION=${{ matrix.django-version }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Install Task
         uses: go-task/setup-task@v1
