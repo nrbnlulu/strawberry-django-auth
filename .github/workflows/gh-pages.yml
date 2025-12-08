@@ -15,7 +15,7 @@ jobs:
       - name: Install deps
         run: uv sync --all-extras --frozen
       - name: Install Task
-        uses: arduino/setup-task@v2
+        uses: go-task/setup-task@v1
       - name: Deploy docs
         run: |
           task deploy_docs

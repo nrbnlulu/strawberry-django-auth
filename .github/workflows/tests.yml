@@ -30,7 +30,7 @@ jobs:
         run: uv sync --all-extras --frozen
 
       - name: Install Task
-        uses: arduino/setup-task@v2
+        uses: go-task/setup-task@v1
 
       - name: Run tests
         run: |
