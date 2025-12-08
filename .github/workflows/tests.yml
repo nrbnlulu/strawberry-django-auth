@@ -39,6 +39,7 @@ jobs:
 
       - name: Run tests
         run: |
+          uv run python -c "import django; print(django.get_version())"
           task test
 
       - name: Upload coverage to Codecov
