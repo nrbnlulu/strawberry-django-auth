@@ -17,6 +17,11 @@ repos:
           "--keep-full-version",
         ]
 
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.24.1
+    hooks:
+      - id: validate-pyproject
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
