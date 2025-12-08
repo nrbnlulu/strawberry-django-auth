@@ -7,10 +7,12 @@ name = "strawberry-django-auth"
 version = "0.378.4"
 description = "Graphql authentication system with Strawberry for Django."
 readme = "README.md"
-maintainers.email = "nrbnlulu@gmail.com"
-maintainers.name = "Nir Benlulu"
-authors.email = "nrbnlulu@gmail.com"
-authors.name = "Nir Benlulu"
+maintainers = [
+    { name = "Nir Benlulu", email = "nrbnlulu@gmail.com" },
+]
+authors = [
+    { name = "Nir Benlulu", email = "nrbnlulu@gmail.com" },
+]
 requires-python = ">=3.10,<3.14"
 classifiers = [
     "Environment :: Web Environment",
