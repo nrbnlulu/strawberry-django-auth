@@ -40,8 +40,8 @@ urls.Homepage = "https://github.com/nrbnlulu/strawberry-django-auth"
 [tool.hatch.build.targets.wheel]
 packages = [ "gqlauth" ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pre-commit>=4.0.1",
     "coverage>=7.2",
     "pytest>=7.2",
