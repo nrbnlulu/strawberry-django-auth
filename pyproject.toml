@@ -29,7 +29,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-
 dependencies = [
     "django>=4.2,<5.3,!=5.0.*",
     "django-stubs[compatible-mypy]>=4.2.0",
@@ -69,22 +68,22 @@ dev = [
     "types-mock>=5.0.0",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = [ "gqlauth" ]
+[tool.hatch]
+build.targets.wheel.packages = [ "gqlauth" ]
 
 [tool.ruff]
 lint.select = [ "E", "ERA", "F", "I" ]
 lint.ignore = [ "E501", "TID252" ]
 
-[tool.pytest.ini_options]
-django_find_project = false
-minversion = "6.0"
-addopts = "-ra -q"
-testpaths = [ "tests" ]
-DJANGO_SETTINGS_MODULE = "tests.testproject.settings_b"
-python_files = "tests.py test_*.py *_tests.py"
-asyncio_mode = "auto"
-markers = [
+[tool.pytest]
+ini_options.django_find_project = false
+ini_options.minversion = "6.0"
+ini_options.addopts = "-ra -q"
+ini_options.testpaths = [ "tests" ]
+ini_options.DJANGO_SETTINGS_MODULE = "tests.testproject.settings_b"
+ini_options.python_files = "tests.py test_*.py *_tests.py"
+ini_options.asyncio_mode = "auto"
+ini_options.markers = [
     "default_user: uses the default settings, a user with email address and default USERNAME_FIELD",
     "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",
 ]
