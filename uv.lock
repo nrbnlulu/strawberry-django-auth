@@ -1666,7 +1666,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=4.2,!=5.0.*,!=5.1.*,<5.3" },
+    { name = "django", specifier = ">=4.2,!=5.0.*,!=5.1.*,<6.1" },
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=4.2.0" },
     { name = "pillow", marker = "extra == 'captcha'", specifier = ">=12.0.0" },
     { name = "pyjwt", specifier = ">=2.6.0,<3.0" },
