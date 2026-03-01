@@ -1,7 +1,7 @@
-from typing import Any, TYPE_CHECKING
 import contextlib
 import typing
 from base64 import b64decode, b64encode
+from typing import TYPE_CHECKING, Any
 
 import strawberry
 
