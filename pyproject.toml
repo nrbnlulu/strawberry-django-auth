@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "strawberry-django-auth"
-version = "0.378.4"
+version = "0.379.0"
 description = "Graphql authentication system with Strawberry for Django."
 readme = "README.md"
 maintainers = [
