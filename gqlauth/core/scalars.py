@@ -25,30 +25,30 @@ else:
     ExpectedErrorType = strawberry.scalar(
         typing.NewType("ExpectedError", dict),
         description="""
-	     Errors messages and codes mapped to
-	    fields or non fields errors.
-	    Example:
-	    {
-	        field_name: [
-	            {
-	                "message": "error message",
-	                "code": "error_code"
-	            }
-	        ],
-	        other_field: [
-	            {
-	                "message": "error message",
-	                "code": "error_code"
-	            }
-	        ],
-	        nonFieldErrors: [
-	            {
-	                "message": "error message",
-	                "code": "error_code"
-	            }
-	        ]
-	    }
-	    """,
+		Errors messages and codes mapped to
+		fields or non fields errors.
+		Example:
+		{
+			field_name: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			],
+			other_field: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			],
+			nonFieldErrors: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			]
+		}
+		""",
         serialize=lambda value: serialize_excpected_error(value),
         parse_value=lambda value: value,
     )
