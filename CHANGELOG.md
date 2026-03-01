@@ -1,5 +1,11 @@
 CHANGELOG
 =========
+0.379.1 - 2026-03-01
+--------------------
+add django 6 support
+
+Contributed by [ניר](https://github.com/nrbnlulu) via [PR #651](https://github.com/nrbnlulu/strawberry-django-auth/pull/651/)
+
 0.378.4 - 2025-02-17
 --------------------
 Remove duplicate Django dependency and reintroduce Django>=4.2,<5.3 support
