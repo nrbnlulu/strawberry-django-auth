@@ -25,6 +25,11 @@ class GqlAuthSettings()
 
 > Whether login will require captcha verification.
 
+### CI\_MODE
+
+> Whether to enable CI mode, this will disable captcha validation
+> (although the fields would still be required).
+
 ### REGISTER\_MUTATION\_FIELDS
 
 > Fields on register, plus password1 and password2, can be a dict like

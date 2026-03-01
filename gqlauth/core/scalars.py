@@ -1,6 +1,7 @@
 import contextlib
 import typing
 from base64 import b64decode, b64encode
+from typing import TYPE_CHECKING, Any
 
 import strawberry
 
@@ -18,36 +19,39 @@ def serialize_excpected_error(errors):
     raise WrongUsage("`errors` must be list or dict!")
 
 
-ExpectedErrorType = strawberry.scalar(
-    typing.NewType("ExpectedError", dict),
-    description="""
-     Errors messages and codes mapped to
-    fields or non fields errors.
-    Example:
-    {
-        field_name: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ],
-        other_field: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ],
-        nonFieldErrors: [
-            {
-                "message": "error message",
-                "code": "error_code"
-            }
-        ]
-    }
-    """,
-    serialize=lambda value: serialize_excpected_error(value),
-    parse_value=lambda value: value,
-)
+if TYPE_CHECKING:
+    ExpectedErrorType = dict[Any, Any] | list[dict[Any, Any]]
+else:
+    ExpectedErrorType = strawberry.scalar(
+        typing.NewType("ExpectedError", dict),
+        description="""
+		Errors messages and codes mapped to
+		fields or non fields errors.
+		Example:
+		{
+			field_name: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			],
+			other_field: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			],
+			nonFieldErrors: [
+				{
+					"message": "error message",
+					"code": "error_code"
+				}
+			]
+		}
+		""",
+        serialize=lambda value: serialize_excpected_error(value),
+        parse_value=lambda value: value,
+    )
 
 with contextlib.suppress(ImportError):
     from PIL.Image import Image
