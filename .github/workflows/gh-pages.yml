@@ -15,7 +15,7 @@ jobs:
       - name: Install deps
         run: uv sync --all-extras --frozen
       - name: Install Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
       - name: Deploy docs
         run: |
           task deploy_docs
