@@ -86,6 +86,16 @@ lint.ignore = [
     "TID252",
 ]
 
+[tool.mypy]
+plugins = [
+    "mypy_django_plugin.main",
+    "strawberry.ext.mypy_plugin",
+]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "tests.testproject.settings"
+
 [tool.pytest]
 ini_options.django_find_project = false
 ini_options.minversion = "6.0"
@@ -100,13 +110,3 @@ ini_options.markers = [
     "default_user: uses the default settings, a user with email address and default USERNAME_FIELD",
     "settings_b: uses a custom user model, not captcha validation as well as some other non-default settings",
 ]
-
-[tool.mypy]
-plugins = [
-    "mypy_django_plugin.main",
-    "strawberry.ext.mypy_plugin",
-]
-ignore_missing_imports = true
-
-[tool.django-stubs]
-django_settings_module = "tests.testproject.settings"
