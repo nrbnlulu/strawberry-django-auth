@@ -9,7 +9,7 @@ repos:
         args: ["--maxkb=1024"]
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.20.0
+    rev: v2.21.1
     hooks:
       - id: pyproject-fmt
         args: [
@@ -41,13 +41,13 @@ repos:
         args: ["--target-version", "4.2"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.7
+    rev: v0.15.12
     hooks:
       - id: ruff-check
         args: [ --fix ]
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.10.12
+    rev: 0.11.7
     hooks:
       - id: uv-lock
