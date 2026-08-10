@@ -15,11 +15,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        django-version: ["4.2", "5.2", "6.0"]
+        django-version: ["4.2.*", "5.2.*", "6.0.*"]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         exclude:
-          - django-version: "4.2"
+          - django-version: "4.2.*"
             python-version: "3.14"
+          # Django>=6.0 requires Python>=3.12
+          - django-version: "6.0.*"
+            python-version: "3.10"
+          - django-version: "6.0.*"
+            python-version: "3.11"
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,10 +37,17 @@ jobs:
       - name: Install deps
         run: uv sync --all-extras --frozen
 
+      - name: Install matrix deps
+        env:
+          DJANGO_VERSION: ${{ matrix.django-version }}
+        run: uv pip install "django==${DJANGO_VERSION}"
+
       - name: Install Task
         uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
 
       - name: Run tests
+        env:
+          UV_NO_SYNC: 1
         run: |
           task test
 
