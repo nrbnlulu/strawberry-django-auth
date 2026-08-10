@@ -15,7 +15,6 @@ requires-python = ">=3.10,<3.15"
 classifiers = [
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
     "Intended Audience :: Developers",
@@ -29,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "django>=4.2,<6.1,!=5.0.*,!=5.1.*",
+    "django>=5.2,<6.1",
     "django-stubs[compatible-mypy]>=4.2.0",
     "pyjwt>=2.6.0,<3.0",
     "strawberry-graphql-django>=0.66.0",
