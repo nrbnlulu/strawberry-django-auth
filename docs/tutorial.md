@@ -9,7 +9,7 @@
 ## Requirements
 
 - Python: >= 3.10
-- Django: >= 5.2
+- Django: >=5.2, <6.2
 - Basic knowledge in [Strawberry](https://strawberry.rocks/)
 
 ---
