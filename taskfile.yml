@@ -25,4 +25,4 @@ tasks:
     cmds:
       - uv run docs/pre_build.py
       - uv run mkdocs build
-      - uv run mkdocs gh-deploy
+      - uv run mkdocs gh-deploy --force
