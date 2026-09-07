@@ -50,8 +50,6 @@ your implementation*.
 ### Full schema features
 
 ```python
-
-
 @strawberry.type
 class Mutation:
     verify_token = mutations.VerifyToken.field
@@ -76,7 +74,6 @@ class Mutation:
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
-
 ```
 
 ## Contributing

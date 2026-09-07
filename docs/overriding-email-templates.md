@@ -9,9 +9,10 @@ The default email templates are just examples, you probably want to customize it
 ```python
 # settings.py
 import os
+
 TEMPLATES = [
     {
-        #...
+        # ...
         "DIRS": [os.path.join(BASE_DIR, "templates")],
         # ...
     },
