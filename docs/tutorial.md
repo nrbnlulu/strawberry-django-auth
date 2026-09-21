@@ -58,12 +58,12 @@ Then, create the custom user model:
 
 from django.contrib.auth.models import AbstractUser
 
-class CustomUser(AbstractUser):
 
+class CustomUser(AbstractUser):
     email = models.EmailField(blank=False, max_length=254, verbose_name="email address")
 
-    USERNAME_FIELD = "username"   # e.g: "username", "email"
-    EMAIL_FIELD = "email"         # e.g: "email", "primary_email"
+    USERNAME_FIELD = "username"  # e.g: "username", "email"
+    EMAIL_FIELD = "email"  # e.g: "email", "primary_email"
 ```
 
 Add it to the settings:
@@ -73,10 +73,10 @@ Add it to the settings:
 
 INSTALLED_APPS = [
     # ...
-    'users'
+    "users"
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = "users.CustomUser"
 ```
 
 Finally, migrate:
@@ -103,16 +103,15 @@ from gqlauth.settings_type import GqlAuthSettings
 
 INSTALLED_APPS = [
     # ...
-    'django.contrib.staticfiles',  # Required for GraphiQL
+    "django.contrib.staticfiles",  # Required for GraphiQL
     "strawberry_django",
     "gqlauth",
-
 ]
 
 MIDDLEWARE = [
     # ...
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'gqlauth.core.middlewares.django_jwt_middleware'
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "gqlauth.core.middlewares.django_jwt_middleware",
     # ...
 ]
 
@@ -139,7 +138,7 @@ And make sure your templates configuration has the following:
 TEMPLATES = [
     {
         # ...
-        'APP_DIRS': True,
+        "APP_DIRS": True,
     },
 ]
 ```
@@ -164,7 +163,6 @@ Add the following to code:
 import strawberry
 from gqlauth.user.queries import UserQueries
 from gqlauth.core.middlewares import JwtSchema
-
 ```
 
 === "Default"
@@ -178,7 +176,6 @@ from gqlauth.core.middlewares import JwtSchema
     ```
 
 ```py
-
 @strawberry.type
 class Query(UserQueries):
     # you can add your queries here
@@ -193,6 +190,7 @@ class Query(UserQueries):
   from django.contrib.auth import get_user_model
   from gqlauth.core.middlewares import JwtSchema
 
+
   @strawberry.django.type(model=get_user_model())
   class MyQueries:
       me: UserType = UserQueries.me
@@ -201,11 +199,8 @@ class Query(UserQueries):
   ```
 
 ```py
-
-
 @strawberry.type
 class Mutation:
-
     # include what-ever mutations you want.
     verify_token = mutations.VerifyToken.field
     update_account = mutations.UpdateAccount.field
@@ -225,10 +220,10 @@ class Mutation:
     revoke_token = mutations.RevokeToken.field
     verify_secondary_email = mutations.VerifySecondaryEmail.field
 
+
 # This is essentially the same as strawberries schema though it
 # injects the user to `info.context["request"].user`
 schema = JwtSchema(query=Query, mutation=Mutation)
-
 ```
 
 ## Update the urls
@@ -239,8 +234,8 @@ from strawberry.django.views import AsyncGraphQLView
 from users.schema import schema
 
 urlpatterns = [
-  path("admin/", admin.site.urls),
-  path('graphql', AsyncGraphQLView.as_view(schema=schema)),
+    path("admin/", admin.site.urls),
+    path("graphql", AsyncGraphQLView.as_view(schema=schema)),
 ]
 ```
 
@@ -254,8 +249,8 @@ Before starting to query, let's load some users on the database. Create a new fi
     Have a look on the fixtures, note that we are creating 4 users and 3 `UserStatus`. When creating a user, we create a relating `UserStatus` by default on `post_save` signal with the following fields:
 
   ```python
-  verified=False
-  archived=False
+  verified = False
+  archived = False
   ```
 
   You can access it on any user:
