@@ -11,7 +11,10 @@ from gqlauth.core.middlewares import channels_jwt_middleware
 ...
 
 websocket_urlpatterns = [
-    re_path("^graphql", channels_jwt_middleware(GraphQLWSConsumer.as_asgi(schema=arg_schema))),
+    re_path(
+        "^graphql",
+        channels_jwt_middleware(GraphQLWSConsumer.as_asgi(schema=arg_schema)),
+    ),
 ]
 gql_http_consumer = AuthMiddlewareStack(
     channels_jwt_middleware(GraphQLHTTPConsumer.as_asgi(schema=arg_schema))
@@ -34,7 +37,5 @@ _**schema.py**_
 from gqlauth.core.middlewares import JwtSchema
 
 
-arg_schema = JwtSchema(
-    query=Query, mutation=Mutation, subscription=Subscription
-)
+arg_schema = JwtSchema(query=Query, mutation=Mutation, subscription=Subscription)
 ```
