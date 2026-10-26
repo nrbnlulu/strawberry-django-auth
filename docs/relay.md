@@ -8,9 +8,10 @@ Import mutations from the ``relay`` module:
 import strawberry
 from gqlauth.user import relay
 
+
 @strawberry.type
 class AuthMutation:
-   register = relay.Register.field
+    register = relay.Register.field
 ```
 ___
 
